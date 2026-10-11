@@ -1,13 +1,13 @@
 /*
  * IPTV Subscription Card — Home Assistant Lovelace card for Xtream Codes subscriptions.
- * Shows status, expiration date, days left, number of live channels and connections.
+ * Shows status, expiration date, days left, number of live channels, movies, series and connections.
  *
  * The Xtream API is queried server-side through shell_command.iptv_xtream (see README)
  * to avoid CORS / mixed-content (http) blocking in the browser.
  *
  * https://github.com/juju35/ha-iptv-card
  */
-var IPTV_CARD_VERSION = '1.0.0';
+var IPTV_CARD_VERSION = '1.1.0';
 
 // ── i18n ──────────────────────────────────────────────────────────────────────
 var IptvCardI18n = {
@@ -31,6 +31,8 @@ var IptvCardI18n = {
     day_left: '{n} day left',
     days_left: '{n} days left',
     channels: 'channels',
+    movies: 'movies',
+    series: 'series',
     connections: 'connections',
     ed_title: 'Title',
     ed_url: 'Xtream URL (e.g. http://server:port)',
@@ -60,6 +62,8 @@ var IptvCardI18n = {
     day_left: '{n} jour restant',
     days_left: '{n} jours restants',
     channels: 'chaînes',
+    movies: 'films',
+    series: 'séries',
     connections: 'connexions',
     ed_title: 'Titre',
     ed_url: 'URL Xtream (ex : http://serveur:port)',
@@ -236,6 +240,11 @@ class IptvCard extends HTMLElement {
       var cons =
         v.d.max_connections != null ? (v.d.active_cons || 0) + ' / ' + v.d.max_connections : '—';
       var icon = v.state === 'ok' ? 'mdi:check-circle' : v.state === 'warning' ? 'mdi:alert' : 'mdi:close-circle';
+      var stat = (icon, n, key) => `
+          <div class="stat">
+            <ha-icon icon="${icon}"></ha-icon>
+            <div><div class="num">${n != null ? nf.format(n) : '—'}</div><div class="lbl">${this._t(key)}</div></div>
+          </div>`;
       var isTrial = v.d.is_trial === '1' || v.d.is_trial === 1;
       body = `
         <div class="status ${v.state}">
@@ -252,10 +261,9 @@ class IptvCard extends HTMLElement {
           ${v.pct !== null ? `<div class="bar"><div class="fill ${v.state}" style="width:${v.pct.toFixed(1)}%"></div></div>` : ''}
         </div>
         <div class="stats">
-          <div class="stat">
-            <ha-icon icon="mdi:television-classic"></ha-icon>
-            <div><div class="num">${v.d.channels != null ? nf.format(v.d.channels) : '—'}</div><div class="lbl">${this._t('channels')}</div></div>
-          </div>
+          ${stat('mdi:television-classic', v.d.channels, 'channels')}
+          ${stat('mdi:movie-open', v.d.movies, 'movies')}
+          ${stat('mdi:filmstrip-box-multiple', v.d.series, 'series')}
           <div class="stat">
             <ha-icon icon="mdi:account-multiple"></ha-icon>
             <div><div class="num">${esc(cons)}</div><div class="lbl">${this._t('connections')}</div></div>
@@ -354,7 +362,7 @@ window.customCards = window.customCards || [];
 window.customCards.push({
   type: 'iptv-card',
   name: 'IPTV Subscription Card',
-  description: 'Status, expiration date and channel count of an Xtream Codes IPTV subscription.',
+  description: 'Status, expiration date, channel, movie and series counts of an Xtream Codes IPTV subscription.',
   preview: false,
   documentationURL: 'https://github.com/juju35/ha-iptv-card',
 });
