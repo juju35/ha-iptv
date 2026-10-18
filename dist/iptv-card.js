@@ -7,7 +7,7 @@
  *
  * https://github.com/juju35/ha-iptv-card
  */
-var IPTV_CARD_VERSION = '1.1.0';
+var IPTV_CARD_VERSION = '1.1.1';
 
 // ── i18n ──────────────────────────────────────────────────────────────────────
 var IptvCardI18n = {
@@ -98,23 +98,50 @@ class IptvCard extends HTMLElement {
     return { url: 'http://', username: '', password: '' };
   }
 
-  static getConfigElement() {
-    return document.createElement('iptv-card-editor');
+  // Visual editor: native Home Assistant form (rendered by HA itself)
+  static getConfigForm() {
+    var ha = document.querySelector('home-assistant');
+    var lang = iptvLang(null, ha && ha.hass);
+    return {
+      schema: [
+        { name: 'title', selector: { text: {} } },
+        { name: 'url', required: true, selector: { text: { type: 'url' } } },
+        { name: 'username', required: true, selector: { text: {} } },
+        { name: 'password', required: true, selector: { text: { type: 'password' } } },
+        {
+          type: 'grid',
+          name: '',
+          schema: [
+            { name: 'refresh_interval', selector: { number: { min: 5, max: 1440, unit_of_measurement: 'min', mode: 'box' } } },
+            { name: 'warning_days', selector: { number: { min: 1, max: 60, mode: 'box' } } },
+          ],
+        },
+        { name: 'language', selector: { select: { mode: 'dropdown', options: [
+          { value: 'en', label: 'English' },
+          { value: 'fr', label: 'Français' },
+        ] } } },
+      ],
+      computeLabel: (schema) => iptvT(lang, 'ed_' + schema.name),
+    };
   }
 
   setConfig(config) {
-    if (!config.url || !config.username || !config.password) {
-      throw new Error(iptvT(iptvLang(config, this._hass), 'required'));
-    }
     this._config = {
       refresh_interval: 60, // minutes
       warning_days: 7,
       service: 'shell_command.iptv_xtream',
       ...config,
     };
-    this._key = this._config.url + '|' + this._config.username;
+    this._missing = !config.url || !config.username || !config.password;
+    var key = [this._config.url, this._config.username, this._config.password].join('|');
+    if (key !== this._key) {
+      this._data = null;
+      this._error = null;
+    }
+    this._key = key;
     if (!this.shadowRoot) this.attachShadow({ mode: 'open' });
     this._render();
+    if (this._hass) this._load(false);
   }
 
   set hass(hass) {
@@ -144,7 +171,7 @@ class IptvCard extends HTMLElement {
   }
 
   async _load(force) {
-    if (!this._hass || !this._config || this._loading) return;
+    if (!this._hass || !this._config || this._loading || this._missing) return;
     var ttl = (Number(this._config.refresh_interval) || 60) * 60000;
     var cached = IPTV_CACHE.get(this._key);
     if (!force && cached && Date.now() - cached.at < ttl) {
@@ -226,7 +253,9 @@ class IptvCard extends HTMLElement {
     var title = this._config.title || this._t('default_title');
 
     var body;
-    if (this._error && !v) {
+    if (this._missing) {
+      body = '<div class="msg">' + this._t('required') + '</div>';
+    } else if (this._error && !v) {
       body = '<div class="msg err">' + esc(this._error) + '</div>';
     } else if (!v) {
       body = '<div class="msg">' + this._t('loading') + '</div>';
@@ -317,46 +346,7 @@ class IptvCard extends HTMLElement {
   }
 }
 
-// ── visual editor ─────────────────────────────────────────────────────────────
-class IptvCardEditor extends HTMLElement {
-  setConfig(config) {
-    this._config = config;
-    this._render();
-  }
-
-  set hass(hass) {
-    this._hass = hass;
-    if (this._form) this._form.hass = hass;
-  }
-
-  _render() {
-    if (!this._form) {
-      this._form = document.createElement('ha-form');
-      this._form.schema = [
-        { name: 'title', selector: { text: {} } },
-        { name: 'url', required: true, selector: { text: { type: 'url' } } },
-        { name: 'username', required: true, selector: { text: {} } },
-        { name: 'password', required: true, selector: { text: { type: 'password' } } },
-        { name: 'refresh_interval', selector: { number: { min: 5, max: 1440, unit_of_measurement: 'min', mode: 'box' } } },
-        { name: 'warning_days', selector: { number: { min: 1, max: 60, mode: 'box' } } },
-        { name: 'language', selector: { select: { mode: 'dropdown', options: [
-          { value: 'en', label: 'English' },
-          { value: 'fr', label: 'Français' },
-        ] } } },
-      ];
-      this._form.computeLabel = (s) => iptvT(iptvLang(null, this._hass), 'ed_' + s.name);
-      this._form.addEventListener('value-changed', (ev) => {
-        this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: ev.detail.value }, bubbles: true, composed: true }));
-      });
-      this.appendChild(this._form);
-    }
-    this._form.hass = this._hass;
-    this._form.data = this._config;
-  }
-}
-
 customElements.define('iptv-card', IptvCard);
-customElements.define('iptv-card-editor', IptvCardEditor);
 
 window.customCards = window.customCards || [];
 window.customCards.push({
