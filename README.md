@@ -1,7 +1,10 @@
-# ha-iptv
+<img src="custom_components/iptv_xtream/brand/icon.png" alt="" width="96" align="right">
+
+# IPTV Xtream for Home Assistant
 
 [![HACS Badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
-[![HACS Validation](https://github.com/juju35/ha-iptv/actions/workflows/validate.yml/badge.svg)](https://github.com/juju35/ha-iptv/actions/workflows/validate.yml)
+[![Validate](https://github.com/juju35/ha-iptv/actions/workflows/validate.yml/badge.svg)](https://github.com/juju35/ha-iptv/actions/workflows/validate.yml)
+[![Release](https://img.shields.io/github/v/release/juju35/ha-iptv)](https://github.com/juju35/ha-iptv/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 Home Assistant integration and Lovelace card that track an **IPTV subscription** using the **Xtream Codes API**: status, expiration date, days left, number of live channels, movies and series, and connections.
@@ -26,6 +29,8 @@ Home Assistant integration and Lovelace card that track an **IPTV subscription**
 Home Assistant queries the Xtream server itself, so it works even when the server is plain `http://` without CORS headers or is only reachable from your network. Only a small summary is stored: the full channel, movie and series lists never reach the browser.
 
 ## Installation
+
+Requires Home Assistant 2025.2 or newer.
 
 ### Via HACS (recommended)
 
@@ -60,7 +65,7 @@ The credentials are checked before the account is added. Add the integration onc
 
 ## Entities
 
-Each account is a device with these entities (names follow your Home Assistant language):
+Each account is a device named `<username> @ <server>`, with these entities. `<account>` below is that name as an entity id, e.g. `sensor.john_myserver_com_status` for `john @ myserver.com`; entity names follow your Home Assistant language.
 
 | Entity | Description |
 |---|---|
@@ -109,10 +114,10 @@ The ⟳ button asks the integration to query the server right away.
 
 ## Upgrading from 1.x (shell_command)
 
-Version 2.0 replaces the `shell_command` with a real integration:
+Version 2.0 replaces the `shell_command` with a real integration, and the repository was renamed from `ha-iptv-card` to `ha-iptv`:
 
-1. In HACS, remove the old **IPTV Subscription Card** (Frontend / Dashboard), and the `/hacsfiles/ha-iptv-card/iptv-card.js` or `/local/iptv-card.js` resource if it is still listed in **Settings → Dashboards → Resources**
-2. Install the **IPTV Xtream** integration as above, restart and add your account
+1. In HACS, remove the old **IPTV Subscription Card** (Dashboard), then the old `https://github.com/juju35/ha-iptv-card` custom repository, and the `/hacsfiles/ha-iptv-card/iptv-card.js` or `/local/iptv-card.js` resource if it is still listed in **Settings → Dashboards → Resources**
+2. Add `https://github.com/juju35/ha-iptv` as an **Integration** custom repository, install **IPTV Xtream**, restart and add your account
 3. Remove `iptv_xtream:` from `shell_command:` in `configuration.yaml`
 4. In your cards, remove `url`, `username`, `password`, `refresh_interval` and `service`: the card now reads the integration entities
 
@@ -120,9 +125,14 @@ Version 2.0 replaces the `shell_command` with a real integration:
 
 The integration polls the Xtream Codes `player_api.php` endpoint for the account info (`user_info`) and the live, VOD and series lists (`get_live_streams`, `get_vod_streams`, `get_series`, fetched in parallel) and keeps only their sizes. The card is served by the integration at `/iptv_xtream/iptv-card.js` and loaded on every dashboard.
 
+## Removal
+
+Delete the account in **Settings → Devices & services → IPTV Xtream**, then remove the integration in HACS and restart. Remove the cards from your dashboards first, or they will show a "no subscription found" message.
+
 ## Security notes
 
 - The credentials are stored in Home Assistant's config entries, not in the dashboard configuration: people who can edit a dashboard no longer see the password.
+- They are only sent to the Xtream server you configured, as `player_api.php` query parameters (that is how the Xtream API works, so prefer an `https://` URL when your provider offers one).
 
 ## Translations
 
