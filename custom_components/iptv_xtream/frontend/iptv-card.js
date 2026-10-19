@@ -5,7 +5,7 @@
  * Bundled with the iptv_xtream integration, which polls the Xtream API server-side:
  * the card only reads the entities of one subscription device.
  *
- * https://github.com/juju35/ha-iptv-card
+ * https://github.com/juju35/ha-iptv
  */
 var IPTV_CARD_VERSION = '2.0.0';
 var IPTV_DOMAIN = 'iptv_xtream';
@@ -329,7 +329,7 @@ if (!customElements.get('iptv-card')) {
     name: 'IPTV Subscription Card',
     description: 'Status, expiration date, channel, movie and series counts of an Xtream Codes IPTV subscription.',
     preview: false,
-    documentationURL: 'https://github.com/juju35/ha-iptv-card',
+    documentationURL: 'https://github.com/juju35/ha-iptv',
   });
 
   console.info(

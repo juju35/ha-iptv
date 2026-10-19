@@ -1,14 +1,14 @@
-# ha-iptv-card
+# ha-iptv
 
 [![HACS Badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
-[![HACS Validation](https://github.com/juju35/ha-iptv-card/actions/workflows/validate.yml/badge.svg)](https://github.com/juju35/ha-iptv-card/actions/workflows/validate.yml)
+[![HACS Validation](https://github.com/juju35/ha-iptv/actions/workflows/validate.yml/badge.svg)](https://github.com/juju35/ha-iptv/actions/workflows/validate.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 Home Assistant integration and Lovelace card that track an **IPTV subscription** using the **Xtream Codes API**: status, expiration date, days left, number of live channels, movies and series, and connections.
 
-[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=juju35&repository=ha-iptv-card&category=integration)
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=juju35&repository=ha-iptv&category=integration)
 
-![iptv-card](https://raw.githubusercontent.com/juju35/ha-iptv-card/main/screenshots/card.png)
+![iptv-card](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/card.png)
 
 ## Features
 
@@ -29,18 +29,18 @@ Home Assistant queries the Xtream server itself, so it works even when the serve
 
 ### Via HACS (recommended)
 
-[![Add to HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=juju35&repository=ha-iptv-card&category=integration)
+[![Add to HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=juju35&repository=ha-iptv&category=integration)
 
 Or manually:
 
 1. Open HACS → **⋮** → **Custom repositories**
-2. Add `https://github.com/juju35/ha-iptv-card` — Type: **Integration**
+2. Add `https://github.com/juju35/ha-iptv` — Type: **Integration**
 3. Search for **IPTV Xtream** and download it
 4. Restart Home Assistant
 
 ### Manual
 
-1. Download `iptv_xtream.zip` from the [latest release](https://github.com/juju35/ha-iptv-card/releases/latest)
+1. Download `iptv_xtream.zip` from the [latest release](https://github.com/juju35/ha-iptv/releases/latest)
 2. Unzip it into `/config/custom_components/iptv_xtream/`
 3. Restart Home Assistant
 
