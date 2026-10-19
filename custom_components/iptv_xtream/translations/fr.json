@@ -1,0 +1,89 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Abonnement IPTV Xtream",
+        "description": "Home Assistant interroge l'API Xtream Codes de ton fournisseur.",
+        "data": {
+          "url": "URL du serveur Xtream",
+          "username": "Identifiant",
+          "password": "Mot de passe"
+        },
+        "data_description": {
+          "url": "Port compris, ex : http://serveur:8080"
+        }
+      },
+      "reconfigure": {
+        "title": "Abonnement IPTV Xtream",
+        "data": {
+          "url": "URL du serveur Xtream",
+          "username": "Identifiant",
+          "password": "Mot de passe"
+        },
+        "data_description": {
+          "url": "Port compris, ex : http://serveur:8080"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Serveur Xtream injoignable",
+      "invalid_auth": "Identifiants refusés par le serveur"
+    },
+    "abort": {
+      "already_configured": "Ce compte est déjà configuré",
+      "reconfigure_successful": "Reconfiguration réussie"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Intervalle d'actualisation"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "status": {
+        "name": "Statut",
+        "state": {
+          "active": "Actif",
+          "expired": "Expiré",
+          "banned": "Banni",
+          "disabled": "Désactivé",
+          "invalid_auth": "Identifiants refusés"
+        }
+      },
+      "expiration": {
+        "name": "Expiration"
+      },
+      "days_left": {
+        "name": "Jours restants"
+      },
+      "created": {
+        "name": "Création"
+      },
+      "active_connections": {
+        "name": "Connexions actives"
+      },
+      "max_connections": {
+        "name": "Connexions max"
+      },
+      "channels": {
+        "name": "Chaînes"
+      },
+      "movies": {
+        "name": "Films"
+      },
+      "series": {
+        "name": "Séries"
+      }
+    },
+    "binary_sensor": {
+      "trial": {
+        "name": "Essai"
+      }
+    }
+  }
+}

@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Report a bug with the IPTV Subscription Card
+about: Report a bug with the IPTV Xtream integration or card
 title: "[Bug] "
 labels: bug
 assignees: ""
@@ -26,14 +26,13 @@ If applicable, add screenshots to help explain your problem.
 - Browser:
 - HACS version:
 - Card version:
-- Output of the shell_command (Developer tools → Actions → shell_command.iptv_xtream, password redacted):
+- Integration version:
+- States of the IPTV Xtream entities (Developer tools → States):
 
 **Card configuration:**
 ```yaml
 type: custom:iptv-card
-url: ...
-username: ...
-password: "***"  # do not paste your real password
+device: ...
 ```
 
 **Additional context**
