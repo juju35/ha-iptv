@@ -1,6 +1,8 @@
 name: Release
 
 on:
+  push:
+    tags: ["v*"]
   release:
     types: [published]
 
@@ -17,7 +19,9 @@ jobs:
       - name: Zip the integration
         run: cd custom_components/iptv_xtream && zip -r ../../iptv_xtream.zip .
 
+      # Creates the release when a tag is pushed, or adds the zip to a release published from the UI
       - name: Upload release assets
         uses: softprops/action-gh-release@v2
         with:
           files: iptv_xtream.zip
+          generate_release_notes: true
