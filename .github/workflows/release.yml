@@ -5,6 +5,11 @@ on:
     tags: ["v*"]
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Version tag to create, e.g. v2.0.0"
+        required: true
 
 permissions:
   contents: write
@@ -19,9 +24,12 @@ jobs:
       - name: Zip the integration
         run: cd custom_components/iptv_xtream && zip -r ../../iptv_xtream.zip .
 
-      # Creates the release when a tag is pushed, or adds the zip to a release published from the UI
+      # Creates the release when a tag is pushed or the workflow is run by hand, or adds the zip to a release published from the UI
       - name: Upload release assets
         uses: softprops/action-gh-release@v2
         with:
           files: iptv_xtream.zip
+          tag_name: ${{ inputs.tag || github.ref_name }}
+          target_commitish: ${{ github.sha }}
+          make_latest: true
           generate_release_notes: true
