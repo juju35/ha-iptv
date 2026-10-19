@@ -24,6 +24,11 @@ jobs:
       - name: Zip the integration
         run: cd custom_components/iptv_xtream && zip -r ../../iptv_xtream.zip .
 
+      - name: Release notes from CHANGELOG.md
+        env:
+          TAG: ${{ inputs.tag || github.ref_name }}
+        run: awk -v h="## $TAG" '$0==h{f=1;next} /^## /{f=0} f' CHANGELOG.md > notes.md
+
       # Creates the release when a tag is pushed or the workflow is run by hand, or adds the zip to a release published from the UI
       - name: Upload release assets
         uses: softprops/action-gh-release@v2
@@ -32,4 +37,5 @@ jobs:
           tag_name: ${{ inputs.tag || github.ref_name }}
           target_commitish: ${{ github.sha }}
           make_latest: true
-          generate_release_notes: true
+          name: ${{ inputs.tag || github.ref_name }}
+          body_path: notes.md
