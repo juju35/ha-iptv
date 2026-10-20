@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.0.1
+
+### 🐛 Fixes
+
+- Clicking an item of the card (status, expiration, channels, movies, series, connections) now opens the details of the matching entity, with its history.
+
 ## v2.0.0
 
 **IPTV Xtream is now a real Home Assistant integration.** The `shell_command` is gone: Home Assistant queries your Xtream server itself, and the card is installed with the integration.

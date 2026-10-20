@@ -7,7 +7,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_CARD_VERSION = '2.0.0';
+var IPTV_CARD_VERSION = '2.0.1';
 var IPTV_DOMAIN = 'iptv_xtream';
 
 // ── i18n ──────────────────────────────────────────────────────────────────────
@@ -247,17 +247,17 @@ class IptvCard extends HTMLElement {
         v.d.max_connections != null ? (v.d.active_cons || 0) + ' / ' + v.d.max_connections : '—';
       var icon = v.state === 'ok' ? 'mdi:check-circle' : v.state === 'warning' ? 'mdi:alert' : 'mdi:close-circle';
       var stat = (icon, n, key) => `
-          <div class="stat">
+          <div class="stat" data-entity="${key}">
             <ha-icon icon="${icon}"></ha-icon>
             <div><div class="num">${n != null ? nf.format(n) : '—'}</div><div class="lbl">${this._t(key)}</div></div>
           </div>`;
       body = `
-        <div class="status ${v.state}">
+        <div class="status ${v.state}" data-entity="status">
           <ha-icon icon="${icon}"></ha-icon>
           <span>${esc(v.statusLabel)}</span>
           ${v.d.is_trial ? '<span class="tag">' + this._t('trial') + '</span>' : ''}
         </div>
-        <div class="exp">
+        <div class="exp" data-entity="expiration">
           <div class="row">
             <span class="lbl">${this._t('expiration')}</span>
             <span class="val">${v.exp ? fmtDate(v.exp) : this._t('never')}</span>
@@ -269,7 +269,7 @@ class IptvCard extends HTMLElement {
           ${stat('mdi:television-classic', v.d.channels, 'channels')}
           ${stat('mdi:movie-open', v.d.movies, 'movies')}
           ${stat('mdi:filmstrip-box-multiple', v.d.series, 'series')}
-          <div class="stat">
+          <div class="stat" data-entity="active_connections">
             <ha-icon icon="mdi:account-multiple"></ha-icon>
             <div><div class="num">${esc(cons)}</div><div class="lbl">${this._t('connections')}</div></div>
           </div>
@@ -308,6 +308,8 @@ class IptvCard extends HTMLElement {
         .num { font-size:1.25em; font-weight:600; line-height:1.2; }
         .msg { color: var(--secondary-text-color); padding:8px 0; }
         .msg.err { color: var(--error-color, #c62828); }
+        [data-entity] { cursor:pointer; }
+        .stat:hover { filter: brightness(0.95); }
       </style>
       <ha-card>
         <div class="head">
@@ -317,6 +319,16 @@ class IptvCard extends HTMLElement {
         ${body}
       </ha-card>`;
     this.shadowRoot.querySelector('button').addEventListener('click', () => this._refresh());
+    var ids = this._entities();
+    this.shadowRoot.querySelectorAll('[data-entity]').forEach((el) => {
+      var entityId = ids[el.dataset.entity];
+      if (entityId) el.addEventListener('click', () => this._moreInfo(entityId));
+    });
+  }
+
+  // Open the Home Assistant entity dialog
+  _moreInfo(entityId) {
+    this.dispatchEvent(new CustomEvent('hass-more-info', { detail: { entityId: entityId }, bubbles: true, composed: true }));
   }
 }
 
