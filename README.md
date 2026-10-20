@@ -17,7 +17,7 @@ Home Assistant integration and Lovelace card that track an **IPTV subscription**
 ## Features
 
 - **Home Assistant integration** (UI setup, no YAML): one device per Xtream account with sensors you can use in automations
-- **Lovelace card bundled with the integration**, loaded automatically (no resource to add)
+- **Lovelace card bundled with the integration**, added automatically to the dashboard resources (nothing to add by hand)
 - Subscription status (Active, Expired, Banned, Disabled, invalid credentials) with color coding
 - Expiration date, days left and a progress bar since the subscription started
 - Number of live channels, movies (VOD) and series
@@ -124,11 +124,11 @@ Version 2.0 replaces the `shell_command` with a real integration, and the reposi
 
 ## How it works
 
-The integration polls the Xtream Codes `player_api.php` endpoint for the account info (`user_info`) and the live, VOD and series lists (`get_live_streams`, `get_vod_streams`, `get_series`, fetched in parallel) and keeps only their sizes. The card is served by the integration at `/iptv_xtream/iptv-card.js` and loaded on every dashboard.
+The integration polls the Xtream Codes `player_api.php` endpoint for the account info (`user_info`) and the live, VOD and series lists (`get_live_streams`, `get_vod_streams`, `get_series`, fetched in parallel) and keeps only their sizes. The card is served by the integration at `/iptv_xtream/iptv-card.js` and registered in **Settings → Dashboards → Resources** when the integration starts (with YAML-managed resources, it is loaded on every page instead).
 
 ## Removal
 
-Delete the account in **Settings → Devices & services → IPTV Xtream**, then remove the integration in HACS and restart. Remove the cards from your dashboards first, or they will show a "no subscription found" message.
+Delete the account in **Settings → Devices & services → IPTV Xtream**, then remove the integration in HACS and restart. Deleting the last account also removes the card resource. Remove the cards from your dashboards first, or they will show a "no subscription found" message.
 
 ## Security notes
 

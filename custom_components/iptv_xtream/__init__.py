@@ -2,17 +2,21 @@
 
 from __future__ import annotations
 
+import logging
 from pathlib import Path
+from typing import Any
 
 from homeassistant.components.frontend import add_extra_js_url
 from homeassistant.components.http import StaticPathConfig
-from homeassistant.const import Platform
-from homeassistant.core import HomeAssistant
+from homeassistant.const import EVENT_HOMEASSISTANT_STARTED, Platform
+from homeassistant.core import CoreState, Event, HomeAssistant
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.typing import ConfigType
 
 from .const import CARD_URL, DOMAIN, VERSION
 from .coordinator import IptvConfigEntry, IptvCoordinator
+
+_LOGGER = logging.getLogger(__name__)
 
 PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR]
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
@@ -27,7 +31,52 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             )
         ]
     )
-    add_extra_js_url(hass, f"{CARD_URL}?v={VERSION}")
+
+    async def _register(_: Event | None = None) -> None:
+        if not await _async_register_resource(hass):
+            # Dashboard resources in YAML mode: load the card on every page instead
+            add_extra_js_url(hass, f"{CARD_URL}?v={VERSION}")
+
+    if hass.state is CoreState.running:
+        await _register()
+    else:
+        hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STARTED, _register)
+    return True
+
+
+def _storage_resources(hass: HomeAssistant) -> Any | None:
+    """Return the dashboard resources collection when it is editable from the UI."""
+    lovelace = hass.data.get("lovelace")
+    if getattr(lovelace, "resource_mode", None) != "storage":
+        return None
+    return getattr(lovelace, "resources", None)
+
+
+async def _async_register_resource(hass: HomeAssistant) -> bool:
+    """Add or update the card in Settings → Dashboards → Resources."""
+    resources = _storage_resources(hass)
+    if resources is None:
+        return False
+    url = f"{CARD_URL}?v={VERSION}"
+    try:
+        await resources.async_get_info()  # loads the collection from storage
+        existing = [
+            item
+            for item in resources.async_items()
+            if item.get("url", "").split("?")[0] == CARD_URL
+        ]
+        if not existing:
+            await resources.async_create_item({"res_type": "module", "url": url})
+            return True
+        if existing[0]["url"] != url:
+            await resources.async_update_item(
+                existing[0]["id"], {"res_type": "module", "url": url}
+            )
+        for duplicate in existing[1:]:
+            await resources.async_delete_item(duplicate["id"])
+    except Exception:  # noqa: BLE001 - never block the integration on the card
+        _LOGGER.exception("Could not register the IPTV card as a dashboard resource")
+        return False
     return True
 
 
@@ -44,6 +93,17 @@ async def async_setup_entry(hass: HomeAssistant, entry: IptvConfigEntry) -> bool
 async def async_unload_entry(hass: HomeAssistant, entry: IptvConfigEntry) -> bool:
     """Unload a config entry."""
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+
+
+async def async_remove_entry(hass: HomeAssistant, entry: IptvConfigEntry) -> None:
+    """Remove the card resource with the last account."""
+    if hass.config_entries.async_entries(DOMAIN):
+        return
+    if (resources := _storage_resources(hass)) is None:
+        return
+    for item in list(resources.async_items()):
+        if item.get("url", "").split("?")[0] == CARD_URL:
+            await resources.async_delete_item(item["id"])
 
 
 async def _async_reload(hass: HomeAssistant, entry: IptvConfigEntry) -> None:
