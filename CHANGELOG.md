@@ -1,25 +1,39 @@
 # Changelog
 
-## v2.0.3
+## 2.1.0
+
+### ✨ Card
+
+- Header shared with the other cards: 40 px icon tinted by the subscription status, 18 px name, status and trial as pills under the name.
+- Colours follow the theme (`success`, `warning`, `error`) with Home Assistant's defaults as fallback, tints with `color-mix`.
+- Tiles, labels and numbers use the same sizes as the other cards; sections view support (`getGridOptions`).
+
+### 🧹 Maintenance
+
+- Pushing a new version to `main` publishes the release with `iptv_xtream.zip`; release notes can be rewritten with the **Update release notes** workflow.
+- Merged branches are deleted by the **Clean up branches** workflow.
+- README follows the same plan as the other repositories.
+
+## 2.0.3
 
 ### 🧹 Maintenance
 
 - Python bytecode (`__pycache__`) is no longer shipped with the integration.
 - `python scripts/screenshots.py` renders the README screenshot with a mock subscription.
 
-## v2.0.2
+## 2.0.2
 
 ### 🐛 Fixes
 
 - The card is now added to **Settings → Dashboards → Resources** when the integration is set up (and kept up to date on upgrades), so it shows up in the card picker without adding anything by hand. It is removed with the last account. Dashboards whose resources are managed in YAML still get the card loaded on every page.
 
-## v2.0.1
+## 2.0.1
 
 ### 🐛 Fixes
 
 - Clicking an item of the card (status, expiration, channels, movies, series, connections) now opens the details of the matching entity, with its history.
 
-## v2.0.0
+## 2.0.0
 
 **IPTV Xtream is now a real Home Assistant integration.** The `shell_command` is gone: Home Assistant queries your Xtream server itself, and the card is installed with the integration.
 
@@ -49,10 +63,10 @@
 
 Requires Home Assistant 2025.2 or newer.
 
-## v1.1.0
+## 1.1.0
 
 - Movie (VOD) and series counts next to live channels.
 
-## v1.0.0
+## 1.0.0
 
 - First release: Lovelace card showing the status, expiration and live channel count of an Xtream Codes subscription, through `shell_command.iptv_xtream`.
