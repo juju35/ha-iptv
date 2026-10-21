@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.0.3
+
+### 🧹 Maintenance
+
+- Python bytecode (`__pycache__`) is no longer shipped with the integration.
+- `python scripts/screenshots.py` renders the README screenshot with a mock subscription.
+
 ## v2.0.2
 
 ### 🐛 Fixes
