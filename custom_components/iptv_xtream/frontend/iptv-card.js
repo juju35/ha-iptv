@@ -7,7 +7,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_CARD_VERSION = '2.0.3';
+var IPTV_CARD_VERSION = '2.1.0';
 var IPTV_DOMAIN = 'iptv_xtream';
 
 // ── i18n ──────────────────────────────────────────────────────────────────────
@@ -127,6 +127,10 @@ class IptvCard extends HTMLElement {
     this._render();
   }
 
+  getGridOptions() {
+    return { columns: 6, min_columns: 4 };
+  }
+
   getCardSize() {
     return 3;
   }
@@ -230,6 +234,8 @@ class IptvCard extends HTMLElement {
     var title = this._config.title || this._t('default_title');
 
     var body;
+    var status = '';
+    var level = v ? v.state : 'idle';
     if (!this._hass) {
       body = '<div class="msg">' + this._t('loading') + '</div>';
     } else if (!data) {
@@ -251,12 +257,12 @@ class IptvCard extends HTMLElement {
             <ha-icon icon="${icon}"></ha-icon>
             <div><div class="num">${n != null ? nf.format(n) : '—'}</div><div class="lbl">${this._t(key)}</div></div>
           </div>`;
+      status = `
+        <div class="chips">
+          <span class="chip ${v.state}" data-entity="status"><ha-icon icon="${icon}"></ha-icon>${esc(v.statusLabel)}</span>
+          ${v.d.is_trial ? '<span class="chip idle">' + this._t('trial') + '</span>' : ''}
+        </div>`;
       body = `
-        <div class="status ${v.state}" data-entity="status">
-          <ha-icon icon="${icon}"></ha-icon>
-          <span>${esc(v.statusLabel)}</span>
-          ${v.d.is_trial ? '<span class="tag">' + this._t('trial') + '</span>' : ''}
-        </div>
         <div class="exp" data-entity="expiration">
           <div class="row">
             <span class="lbl">${this._t('expiration')}</span>
@@ -278,42 +284,45 @@ class IptvCard extends HTMLElement {
 
     this.shadowRoot.innerHTML = `
       <style>
-        ha-card { padding: 16px; }
-        .head { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
-        .title { display:flex; align-items:center; gap:8px; font-size:1.15em; font-weight:500; }
-        .title ha-icon { color: var(--state-icon-color, var(--primary-color)); }
-        button { background:none; border:none; cursor:pointer; color:var(--secondary-text-color); padding:4px; border-radius:50%; }
+        :host { --iptv-ok: var(--success-color, #43a047); --iptv-warn: var(--warning-color, #ffa600); --iptv-crit: var(--error-color, #db4437); }
+        ha-card { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+        .ok { --c: var(--iptv-ok); } .warning { --c: var(--iptv-warn); } .error { --c: var(--iptv-crit); } .idle { --c: var(--secondary-text-color); }
+        .header { display: flex; align-items: center; gap: 12px; }
+        .hicon { width: 40px; height: 40px; border-radius: 50%; flex: none; display: flex; align-items: center; justify-content: center;
+                 color: var(--c, var(--primary-color)); background: color-mix(in srgb, var(--c, var(--primary-color)) 15%, transparent); --mdc-icon-size: 24px; }
+        .hicon.idle { --c: var(--primary-color); }
+        .titles { flex: 1; min-width: 0; }
+        .name { font-size: 18px; font-weight: 500; line-height: 1.25; color: var(--primary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+        .chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px 2px 6px; border-radius: 12px; font-size: 12px; font-weight: 500;
+                color: var(--c); background: color-mix(in srgb, var(--c) 15%, transparent); --mdc-icon-size: 14px; }
+        .chip.idle { padding-left: 10px; }
+        button { background:none; border:none; cursor:pointer; color:var(--secondary-text-color); padding:8px; border-radius:50%; align-self: flex-start; display: flex; }
         button:hover { background: var(--secondary-background-color); }
         button.spin ha-icon { animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .status { display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:16px; font-weight:500; font-size:.95em; margin-bottom:14px; }
-        .status ha-icon { --mdc-icon-size:18px; }
-        .status.ok { color: var(--success-color, #2e7d32); background: rgba(76,175,80,.15); }
-        .status.warning { color: var(--warning-color, #ef6c00); background: rgba(255,152,0,.15); }
-        .status.error { color: var(--error-color, #c62828); background: rgba(244,67,54,.15); }
-        .tag { font-size:.75em; padding:1px 6px; border-radius:8px; background: var(--secondary-background-color); color: var(--secondary-text-color); }
-        .row { display:flex; justify-content:space-between; align-items:baseline; }
-        .lbl { color: var(--secondary-text-color); font-size:.9em; }
+        .row { display:flex; justify-content:space-between; align-items:baseline; gap: 8px; }
+        .lbl { color: var(--secondary-text-color); font-size: 12px; }
+        .exp .lbl { font-size: 13px; }
         .val { font-weight:500; }
-        .sub { font-size:.85em; margin-top:2px; text-align:right; color: var(--secondary-text-color); }
-        .sub.warning { color: var(--warning-color, #ef6c00); }
-        .sub.error { color: var(--error-color, #c62828); }
-        .bar { height:6px; border-radius:3px; background: var(--secondary-background-color); margin-top:8px; overflow:hidden; }
-        .fill { height:100%; border-radius:3px; background: var(--success-color, #4caf50); }
-        .fill.warning { background: var(--warning-color, #ff9800); }
-        .fill.error { background: var(--error-color, #f44336); }
-        .stats { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px; }
-        .stat { display:flex; align-items:center; gap:10px; padding:10px; border-radius:12px; background: var(--secondary-background-color); }
-        .stat ha-icon { color: var(--primary-color); }
-        .num { font-size:1.25em; font-weight:600; line-height:1.2; }
+        .sub { font-size: 12px; margin-top:2px; text-align:right; color: var(--secondary-text-color); }
+        .sub.warning, .sub.error { color: var(--c); }
+        .bar { height:6px; border-radius:3px; background: var(--divider-color, rgba(127,127,127,.25)); margin-top:8px; overflow:hidden; }
+        .fill { height:100%; border-radius:3px; background: var(--c, var(--iptv-ok)); transition: width .6s ease; }
+        .stats { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+        .stat { display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:10px; min-width: 0;
+                background: var(--secondary-background-color, rgba(127,127,127,.08)); }
+        .stat ha-icon { color: var(--primary-color); --mdc-icon-size: 20px; flex: none; }
+        .num { font-size: 15px; font-weight: 500; line-height: 1.2; }
         .msg { color: var(--secondary-text-color); padding:8px 0; }
-        .msg.err { color: var(--error-color, #c62828); }
+        .msg.err { color: var(--iptv-crit); }
         [data-entity] { cursor:pointer; }
         .stat:hover { filter: brightness(0.95); }
       </style>
       <ha-card>
-        <div class="head">
-          <div class="title"><ha-icon icon="mdi:television-play"></ha-icon>${esc(title)}</div>
+        <div class="header">
+          <div class="hicon ${level}"><ha-icon icon="mdi:television-play"></ha-icon></div>
+          <div class="titles"><div class="name">${esc(title)}</div>${status}</div>
           <button class="${this._loading ? 'spin' : ''}" title="${this._t('refresh')}"><ha-icon icon="mdi:refresh"></ha-icon></button>
         </div>
         ${body}

@@ -1,6 +1,6 @@
 <img src="custom_components/iptv_xtream/brand/icon.png" alt="" width="96" align="right">
 
-# IPTV Xtream for Home Assistant
+# ha-iptv
 
 [![HACS](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 [![HACS Validation](https://github.com/juju35/ha-iptv/actions/workflows/hacs.yml/badge.svg)](https://github.com/juju35/ha-iptv/actions/workflows/hacs.yml)
@@ -11,8 +11,6 @@
 Home Assistant integration and Lovelace card that track an **IPTV subscription** using the **Xtream Codes API**: status, expiration date, days left, number of live channels, movies and series, and connections.
 
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=juju35&repository=ha-iptv&category=integration)
-
-![iptv-card](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/card.png)
 
 ## Features
 
@@ -29,9 +27,12 @@ Home Assistant integration and Lovelace card that track an **IPTV subscription**
 
 Home Assistant queries the Xtream server itself, so it works even when the server is plain `http://` without CORS headers or is only reachable from your network. Only a small summary is stored: the full channel, movie and series lists never reach the browser.
 
-## Installation
+## Prerequisites
 
-Requires Home Assistant 2025.2 or newer.
+- Home Assistant 2025.2 or newer
+- An IPTV subscription with Xtream Codes API access (server URL, username and password)
+
+## Installation
 
 ### Via HACS (recommended)
 
@@ -50,7 +51,20 @@ Or manually:
 2. Unzip it into `/config/custom_components/iptv_xtream/`
 3. Restart Home Assistant
 
-## Setup
+### Upgrading from 1.x (shell_command)
+
+Version 2.0 replaces the `shell_command` with a real integration, and the repository was renamed from `ha-iptv-card` to `ha-iptv`:
+
+1. In HACS, remove the old **IPTV Subscription Card** (Dashboard), then the old `https://github.com/juju35/ha-iptv-card` custom repository, and the `/hacsfiles/ha-iptv-card/iptv-card.js` or `/local/iptv-card.js` resource if it is still listed in **Settings → Dashboards → Resources**
+2. Add `https://github.com/juju35/ha-iptv` as an **Integration** custom repository, install **IPTV Xtream**, restart and add your account
+3. Remove `iptv_xtream:` from `shell_command:` in `configuration.yaml`
+4. In your cards, remove `url`, `username`, `password`, `refresh_interval` and `service`: the card now reads the integration entities
+
+### Removal
+
+Delete the account in **Settings → Devices & services → IPTV Xtream**, then remove the integration in HACS and restart. Deleting the last account also removes the card resource. Remove the cards from your dashboards first, or they will show a "no subscription found" message.
+
+## Configuration
 
 [![Add the integration](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=iptv_xtream)
 
@@ -64,7 +78,7 @@ Or manually:
 
 The credentials are checked before the account is added. Add the integration once per account. The URL and credentials can be changed later with **⋮ → Reconfigure**, and the refresh interval (default 60 minutes, minimum 5) with **Configure**.
 
-## Entities
+### Entities
 
 Each account is a device named `<username> @ <server>`, with these entities. `<account>` below is that name as an entity id, e.g. `sensor.john_myserver_com_status` for `john @ myserver.com`; entity names follow your Home Assistant language.
 
@@ -94,7 +108,7 @@ actions:
       message: "IPTV subscription expires in {{ states('sensor.my_account_days_left') }} days"
 ```
 
-## Card
+### Card
 
 The card is available in the card picker as **IPTV Subscription Card**, with a visual editor. With a single account no option is needed:
 
@@ -102,7 +116,7 @@ The card is available in the card picker as **IPTV Subscription Card**, with a v
 type: custom:iptv-card
 ```
 
-### Options reference
+#### Options reference
 
 | Option | Required | Default | Description |
 |---|---|---|---|
@@ -113,27 +127,33 @@ type: custom:iptv-card
 
 The ⟳ button asks the integration to query the server right away.
 
-## Upgrading from 1.x (shell_command)
+## Screenshots
 
-Version 2.0 replaces the `shell_command` with a real integration, and the repository was renamed from `ha-iptv-card` to `ha-iptv`:
-
-1. In HACS, remove the old **IPTV Subscription Card** (Dashboard), then the old `https://github.com/juju35/ha-iptv-card` custom repository, and the `/hacsfiles/ha-iptv-card/iptv-card.js` or `/local/iptv-card.js` resource if it is still listed in **Settings → Dashboards → Resources**
-2. Add `https://github.com/juju35/ha-iptv` as an **Integration** custom repository, install **IPTV Xtream**, restart and add your account
-3. Remove `iptv_xtream:` from `shell_command:` in `configuration.yaml`
-4. In your cards, remove `url`, `username`, `password`, `refresh_interval` and `service`: the card now reads the integration entities
+![iptv-card](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/card.png)
 
 ## How it works
 
 The integration polls the Xtream Codes `player_api.php` endpoint for the account info (`user_info`) and the live, VOD and series lists (`get_live_streams`, `get_vod_streams`, `get_series`, fetched in parallel) and keeps only their sizes. The card is served by the integration at `/iptv_xtream/iptv-card.js` and registered in **Settings → Dashboards → Resources** when the integration starts (with YAML-managed resources, it is loaded on every page instead).
 
-## Removal
-
-Delete the account in **Settings → Devices & services → IPTV Xtream**, then remove the integration in HACS and restart. Deleting the last account also removes the card resource. Remove the cards from your dashboards first, or they will show a "no subscription found" message.
-
-## Security notes
+### Security notes
 
 - The credentials are stored in Home Assistant's config entries, not in the dashboard configuration: people who can edit a dashboard no longer see the password.
 - They are only sent to the Xtream server you configured, as `player_api.php` query parameters (that is how the Xtream API works, so prefer an `https://` URL when your provider offers one).
+
+## Development
+
+```bash
+pip install playwright && playwright install chromium
+python scripts/screenshots.py   # renders screenshots/card.png with a mock subscription
+```
+
+The card is plain JavaScript (`custom_components/iptv_xtream/frontend/iptv-card.js`), served by the integration: no build step.
+
+### Releasing
+
+1. Bump the version in `custom_components/iptv_xtream/manifest.json`, `VERSION` in `const.py` and `IPTV_CARD_VERSION` in `frontend/iptv-card.js`
+2. Add a `## <version>` section at the top of [CHANGELOG.md](CHANGELOG.md)
+3. Push to `main`: the **Release** workflow creates the tag and the GitHub release with `iptv_xtream.zip` and the changelog section as notes
 
 ## Translations
 
