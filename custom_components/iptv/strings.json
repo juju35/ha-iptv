@@ -15,10 +15,12 @@
         "data": {
           "url": "Xtream server URL",
           "username": "Username",
-          "password": "Password"
+          "password": "Password",
+          "notify_service": "Send the connection details to"
         },
         "data_description": {
-          "url": "Including the port, e.g. http://server:8080"
+          "url": "Including the port, e.g. http://server:8080",
+          "notify_service": "Optional: notify service (e.g. notify.mobile_app_phone) that receives the server, credentials and expiration once the account is added"
         }
       },
       "stalker": {
@@ -26,11 +28,13 @@
         "description": "Home Assistant queries the Stalker/Ministra portal of your provider with a MAC address.",
         "data": {
           "url": "Portal URL",
-          "mac": "MAC address"
+          "mac": "MAC address",
+          "notify_service": "Send the connection details to"
         },
         "data_description": {
           "url": "Including the port, e.g. http://portal:80",
-          "mac": "Format AA:BB:CC:DD:EE:FF"
+          "mac": "Format AA:BB:CC:DD:EE:FF",
+          "notify_service": "Optional: notify service (e.g. notify.mobile_app_phone) that receives the server, credentials and expiration once the account is added"
         }
       },
       "reconfigure": {

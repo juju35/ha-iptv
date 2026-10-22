@@ -1,7 +1,7 @@
 """Constants for the IPTV integration."""
 
 DOMAIN = "iptv"
-VERSION = "3.3.0"
+VERSION = "3.4.0"
 
 CONF_SCAN_INTERVAL = "scan_interval"
 DEFAULT_SCAN_INTERVAL = 60  # minutes
@@ -24,6 +24,8 @@ HEALTH_STATES = [HEALTH_OK, HEALTH_DEGRADED, HEALTH_AUTH_FAILED, HEALTH_UNREACHA
 # Provider type and its credentials
 CONF_PROVIDER = "provider"
 CONF_MAC = "mac"
+# Add form only, not stored: notify service that receives the connection details
+CONF_NOTIFY_SERVICE = "notify_service"
 PROVIDER_XTREAM = "xtream"
 PROVIDER_STALKER = "stalker"
 PROVIDERS = [PROVIDER_XTREAM, PROVIDER_STALKER]

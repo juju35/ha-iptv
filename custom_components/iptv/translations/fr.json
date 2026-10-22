@@ -15,10 +15,12 @@
         "data": {
           "url": "URL du serveur Xtream",
           "username": "Identifiant",
-          "password": "Mot de passe"
+          "password": "Mot de passe",
+          "notify_service": "Envoyer les infos de connexion à"
         },
         "data_description": {
-          "url": "Port compris, ex : http://serveur:8080"
+          "url": "Port compris, ex : http://serveur:8080",
+          "notify_service": "Facultatif : service de notification (ex. notify.mobile_app_telephone) qui reçoit le serveur, les identifiants et l’expiration une fois le compte ajouté"
         }
       },
       "stalker": {
@@ -26,11 +28,13 @@
         "description": "Home Assistant interroge le portail Stalker/Ministra de ton fournisseur avec une adresse MAC.",
         "data": {
           "url": "URL du portail",
-          "mac": "Adresse MAC"
+          "mac": "Adresse MAC",
+          "notify_service": "Envoyer les infos de connexion à"
         },
         "data_description": {
           "url": "Port compris, ex : http://portail:80",
-          "mac": "Format AA:BB:CC:DD:EE:FF"
+          "mac": "Format AA:BB:CC:DD:EE:FF",
+          "notify_service": "Facultatif : service de notification (ex. notify.mobile_app_telephone) qui reçoit le serveur, les identifiants et l’expiration une fois le compte ajouté"
         }
       },
       "reconfigure": {
