@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.1.0
+
+### What's new
+- Adding an account on a server that is already configured (same host and port) no longer creates a second account: once the new credentials are checked, they replace those of the existing account if the new one is valid longer (later expiration, unlimited, or the existing one no longer works). Same device and entities; a renamed title is kept. Otherwise nothing changes.
+
 ## 3.0.0
 
 ### Breaking changes

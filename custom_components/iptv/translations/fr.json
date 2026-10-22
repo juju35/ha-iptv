@@ -55,7 +55,9 @@
     "abort": {
       "already_configured": "Ce compte est déjà configuré",
       "reconfigure_successful": "Reconfiguration réussie",
-      "migrated": "{count} compte(s) de l’ancienne intégration IPTV Xtream déplacé(s) vers IPTV, avec les mêmes entités. Supprime l’ancien dossier custom_components/iptv_xtream s’il est encore là et redémarre Home Assistant."
+      "migrated": "{count} compte(s) de l’ancienne intégration IPTV Xtream déplacé(s) vers IPTV, avec les mêmes entités. Supprime l’ancien dossier custom_components/iptv_xtream s’il est encore là et redémarre Home Assistant.",
+      "account_updated": "{title} est sur le même serveur : le nouveau compte est valide plus longtemps ({new} au lieu de {current}), {title} utilise maintenant les nouveaux identifiants.",
+      "existing_longer": "{title} est sur le même serveur et est valide aussi longtemps ou plus ({current}, nouveau compte : {new}) : rien n’a changé."
     }
   },
   "options": {

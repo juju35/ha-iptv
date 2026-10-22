@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
+import math
 from typing import Any
 from urllib.parse import urlparse
 
@@ -15,6 +17,7 @@ from homeassistant.config_entries import (
 )
 from homeassistant.const import CONF_PASSWORD, CONF_URL, CONF_USERNAME
 from homeassistant.core import callback
+from homeassistant.util import dt as dt_util
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.selector import (
     NumberSelector,
@@ -26,12 +29,15 @@ from homeassistant.helpers.selector import (
 )
 
 from .api import (
-    StalkerClient,
     IptvAuthError,
-    XtreamClient,
     IptvError,
+    StalkerClient,
+    XtreamClient,
     normalize_mac,
     normalize_url,
+    server_key,
+    stalker_expiry,
+    stalker_status,
     valid_mac,
 )
 from .const import (
@@ -69,6 +75,39 @@ def _host(url: str) -> str:
     return urlparse(url).hostname or url
 
 
+def _auto_title(data: dict[str, Any]) -> str:
+    """Title given to a new account: ``<username or mac> @ <host>``."""
+    login = data.get(CONF_MAC) if data.get(CONF_PROVIDER) == PROVIDER_STALKER else data.get(CONF_USERNAME)
+    return f"{login} @ {_host(data[CONF_URL])}"
+
+
+def _validity(status: Any, exp: Any) -> float:
+    """Comparable account validity: expiration epoch, inf if unlimited, -inf if unusable."""
+    if str(status or "").lower() != "active":
+        return -math.inf
+    try:
+        return float(int(exp)) if exp else math.inf
+    except (TypeError, ValueError):
+        return math.inf
+
+
+def _entry_validity(entry: ConfigEntry) -> float:
+    """Validity of a configured account, from its last refresh (-inf if it does not work)."""
+    coordinator = getattr(entry, "runtime_data", None)
+    data = getattr(coordinator, "data", None) or {}
+    if not data.get("auth"):
+        return -math.inf
+    return _validity(data.get("status"), data.get("exp_date"))
+
+
+def _fmt(validity: float) -> str:
+    if validity == math.inf:
+        return "∞"
+    if validity == -math.inf:
+        return "—"
+    return dt_util.as_local(datetime.fromtimestamp(validity, tz=timezone.utc)).date().isoformat()
+
+
 class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
     """Pick a provider, ask for its credentials, and check them."""
 
@@ -93,12 +132,48 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def _check(self, client: XtreamClient | StalkerClient) -> dict[str, str]:
         try:
-            await client.async_get_user_info()
+            info = await client.async_get_user_info()
         except IptvAuthError:
             return {"base": "invalid_auth"}
         except IptvError:
             return {"base": "cannot_connect"}
+        if isinstance(client, StalkerClient):
+            exp = stalker_expiry(info)
+            now = int(dt_util.utcnow().timestamp())
+            self._validity = _validity(stalker_status(info, exp, now), exp)
+        else:
+            self._validity = _validity(info.get("status"), info.get("exp_date"))
         return {}
+
+    def _create_or_replace(self, data: dict[str, Any]) -> ConfigFlowResult:
+        """New account, unless the same server is already configured.
+
+        On a known server the account with the shortest validity gets the new
+        credentials when the new account is valid longer; otherwise nothing changes.
+        """
+        title = _auto_title(data)
+        server = server_key(data[CONF_URL])
+        same = [
+            e for e in self._async_current_entries(include_ignore=False)
+            if CONF_URL in e.data and server_key(e.data[CONF_URL]) == server
+        ]
+        if not same:
+            return self.async_create_entry(title=title, data=data)
+        existing = min(same, key=_entry_validity)
+        current = _entry_validity(existing)
+        new = getattr(self, "_validity", -math.inf)
+        placeholders = {"title": existing.title, "current": _fmt(current), "new": _fmt(new)}
+        if new <= current:
+            return self.async_abort(reason="existing_longer", description_placeholders=placeholders)
+        self.hass.config_entries.async_update_entry(
+            existing,
+            unique_id=self.unique_id,
+            # Keep a title the user chose; refresh the generated one
+            title=title if existing.title == _auto_title(dict(existing.data)) else existing.title,
+            data=data,
+        )
+        self.hass.config_entries.async_schedule_reload(existing.entry_id)
+        return self.async_abort(reason="account_updated", description_placeholders=placeholders)
 
     # ── migration from the former iptv_xtream domain ──
 
@@ -139,10 +214,7 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
             self._abort_if_unique_id_configured()
             errors = await self._check_xtream(user_input)
             if not errors:
-                return self.async_create_entry(
-                    title=f"{user_input[CONF_USERNAME]} @ {_host(user_input[CONF_URL])}",
-                    data=user_input,
-                )
+                return self._create_or_replace(user_input)
         return self.async_show_form(
             step_id="xtream",
             data_schema=self.add_suggested_values_to_schema(XTREAM_SCHEMA, user_input),
@@ -166,10 +238,7 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
                 self._abort_if_unique_id_configured()
                 errors = await self._check_stalker(user_input)
                 if not errors:
-                    return self.async_create_entry(
-                        title=f"{user_input[CONF_MAC]} @ {_host(user_input[CONF_URL])}",
-                        data=user_input,
-                    )
+                    return self._create_or_replace(user_input)
         return self.async_show_form(
             step_id="stalker",
             data_schema=self.add_suggested_values_to_schema(STALKER_SCHEMA, user_input),
