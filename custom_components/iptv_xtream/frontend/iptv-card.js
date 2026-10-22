@@ -7,7 +7,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_CARD_VERSION = '2.1.1';
+var IPTV_CARD_VERSION = '2.2.0';
 var IPTV_DOMAIN = 'iptv_xtream';
 
 // ── i18n ──────────────────────────────────────────────────────────────────────
@@ -285,16 +285,16 @@ class IptvCard extends HTMLElement {
     this.shadowRoot.innerHTML = `
       <style>
         :host { --iptv-ok: var(--success-color, #43a047); --iptv-warn: var(--warning-color, #ffa600); --iptv-crit: var(--error-color, #db4437); }
-        ha-card { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+        ha-card { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
         .ok { --c: var(--iptv-ok); } .warning { --c: var(--iptv-warn); } .error { --c: var(--iptv-crit); } .idle { --c: var(--secondary-text-color); }
-        .header { display: flex; align-items: center; gap: 12px; }
-        .hicon { width: 40px; height: 40px; border-radius: 50%; flex: none; display: flex; align-items: center; justify-content: center;
+        .header { display: flex; align-items: center; gap: 10px; }
+        .hicon { width: 36px; height: 36px; border-radius: 50%; flex: none; display: flex; align-items: center; justify-content: center;
                  color: var(--c, var(--primary-color)); background: color-mix(in srgb, var(--c, var(--primary-color)) 15%, transparent); --mdc-icon-size: 24px; }
         .hicon.idle { --c: var(--primary-color); }
         .titles { flex: 1; min-width: 0; }
-        .name { font-size: 18px; font-weight: 500; line-height: 1.25; color: var(--primary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
-        .chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px 2px 6px; border-radius: 12px; font-size: 12px; font-weight: 500;
+        .name { font-size: 16px; font-weight: 500; line-height: 1.25; color: var(--primary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+        .chip { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px 1px 5px; border-radius: 12px; font-size: 11px; font-weight: 500;
                 color: var(--c); background: color-mix(in srgb, var(--c) 15%, transparent); --mdc-icon-size: 14px; }
         .chip.idle { padding-left: 10px; }
         button { background:none; border:none; cursor:pointer; color:var(--secondary-text-color); padding:8px; border-radius:50%; align-self: flex-start; display: flex; }
@@ -302,18 +302,20 @@ class IptvCard extends HTMLElement {
         button.spin ha-icon { animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .row { display:flex; justify-content:space-between; align-items:baseline; gap: 8px; }
-        .lbl { color: var(--secondary-text-color); font-size: 12px; }
-        .exp .lbl { font-size: 13px; }
-        .val { font-weight:500; }
+        .lbl { color: var(--secondary-text-color); font-size: 11px; }
+        .exp .lbl { font-size: 12px; }
+        .val { font-weight:500; font-size: 15px; }
         .sub { font-size: 12px; margin-top:2px; text-align:right; color: var(--secondary-text-color); }
         .sub.warning, .sub.error { color: var(--c); }
-        .bar { height:6px; border-radius:3px; background: var(--divider-color, rgba(127,127,127,.25)); margin-top:8px; overflow:hidden; }
+        .bar { height:4px; border-radius:3px; background: var(--divider-color, rgba(127,127,127,.25)); margin-top:6px; overflow:hidden; }
         .fill { height:100%; border-radius:3px; background: var(--c, var(--iptv-ok)); transition: width .6s ease; }
-        .stats { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-        .stat { display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:10px; min-width: 0;
-                background: var(--secondary-background-color, rgba(127,127,127,.08)); }
-        .stat ha-icon { color: var(--primary-color); --mdc-icon-size: 20px; flex: none; }
-        .num { font-size: 15px; font-weight: 500; line-height: 1.2; }
+        .stats { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:6px; }
+        .stat { display:grid; align-items:center; gap:10px; padding:6px 8px; border-radius:10px; min-width: 0;
+                background: var(--secondary-background-color, rgba(127,127,127,.08)); grid-template-columns: auto minmax(0, 1fr); column-gap: 6px; }
+        .stat .lbl { grid-column: 1 / -1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .stat > div { display: contents; }
+        .stat ha-icon { color: var(--primary-color); --mdc-icon-size: 16px; flex: none; }
+        .num { font-size: 14px; font-weight: 500; line-height: 1.2; }
         .msg { color: var(--secondary-text-color); padding:8px 0; }
         .msg.err { color: var(--iptv-crit); }
         [data-entity] { cursor:pointer; }

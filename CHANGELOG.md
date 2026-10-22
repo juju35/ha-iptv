@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.2.0
+
+### Changes
+- More compact layout with the same information, like the other ha-* cards: 12 px card padding, 36 px header icon, 16 px name and 12 px subtitle, 11 px pills, tighter tiles and sections.
+- The four tiles (channels, movies, series, connections) on one row instead of two, figure next to the icon and label underneath; 4 px expiration bar.
+
 ## 2.1.1
 
 ### Maintenance
