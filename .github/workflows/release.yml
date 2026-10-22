@@ -37,6 +37,7 @@ jobs:
         run: |
           (cd custom_components/iptv_xtream && zip -r ../../iptv_xtream.zip . -x "__pycache__/*")
           .github/scripts/release-notes.sh "${{ steps.version.outputs.version }}" > notes.md
+          test -s notes.md
 
       - name: Publish release
         if: steps.version.outputs.exists == 'false'
