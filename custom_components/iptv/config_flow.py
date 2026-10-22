@@ -5,7 +5,6 @@ from __future__ import annotations
 from datetime import datetime, timezone
 import math
 from typing import Any
-from urllib.parse import urlparse
 
 import voluptuous as vol
 
@@ -59,6 +58,7 @@ from .const import (
     PROVIDER_XTREAM,
 )
 from .migrate import async_migrate_legacy
+from .naming import auto_title, is_auto_generated
 from .notify_add import async_send, notify_services
 
 XTREAM_SCHEMA = vol.Schema(
@@ -76,16 +76,6 @@ STALKER_SCHEMA = vol.Schema(
         vol.Required(CONF_MAC): TextSelector(),
     }
 )
-
-
-def _host(url: str) -> str:
-    return urlparse(url).hostname or url
-
-
-def _auto_title(data: dict[str, Any]) -> str:
-    """Title given to a new account: ``<username or mac> @ <host>``."""
-    login = data.get(CONF_MAC) if data.get(CONF_PROVIDER) == PROVIDER_STALKER else data.get(CONF_USERNAME)
-    return f"{login} @ {_host(data[CONF_URL])}"
 
 
 def _validity(status: Any, exp: Any) -> float:
@@ -168,7 +158,7 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
         On a known server the account with the shortest validity gets the new
         credentials when the new account is valid longer; otherwise nothing changes.
         """
-        title = _auto_title(data)
+        title = auto_title(data)
         server = server_key(data[CONF_URL])
         same = [
             e for e in self._async_current_entries(include_ignore=False)
@@ -187,7 +177,7 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
             existing,
             unique_id=self.unique_id,
             # Keep a title the user chose; refresh the generated one
-            title=title if existing.title == _auto_title(dict(existing.data)) else existing.title,
+            title=title if is_auto_generated(existing.title, dict(existing.data)) else existing.title,
             data=data,
         )
         self.hass.config_entries.async_schedule_reload(existing.entry_id)

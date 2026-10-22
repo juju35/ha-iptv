@@ -18,6 +18,7 @@ from .const import CARD_URL, DOMAIN, LOGO_URL, VERSION
 from .coordinator import IptvConfigEntry, IptvCoordinator
 from .health import HealthMonitor
 from .migrate import LEGACY_DOMAIN, async_migrate_legacy, async_restore_snapshot
+from .naming import auto_title, is_auto_generated
 from .notify_expiry import ExpiryNotifier, notification_id
 
 _LOGGER = logging.getLogger(__name__)
@@ -92,6 +93,13 @@ async def _async_register_resource(hass: HomeAssistant) -> bool:
 
 async def async_setup_entry(hass: HomeAssistant, entry: IptvConfigEntry) -> bool:
     """Set up one IPTV account."""
+    # The account title is the server name; rename accounts created before 3.5
+    # unless the user renamed them (done before the update listener is added, so
+    # it does not trigger a reload)
+    data = dict(entry.data)
+    if is_auto_generated(entry.title, data) and entry.title != auto_title(data):
+        hass.config_entries.async_update_entry(entry, title=auto_title(data))
+
     coordinator = IptvCoordinator(hass, entry)
     await coordinator.async_config_entry_first_refresh()
     entry.runtime_data = coordinator
