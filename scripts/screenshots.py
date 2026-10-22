@@ -91,7 +91,7 @@ SUBSCRIPTIONS = {
         "channels": ("sensor", "9831"),
         "movies": ("sensor", "54089"),
         "series": ("sensor", "20571"),
-        "health": ("sensor", "ok", {"response_time_ms": 182}),
+        "health": ("sensor", "ok", {"response_time_ms": 182, "last_check": "2026-10-10T08:57:00+02:00"}),
         "french_lists": ("binary_sensor", "on"),
     }),
     # A Stalker (MAC) account: no connection counts and no start date (the bar is estimated).
@@ -105,7 +105,7 @@ SUBSCRIPTIONS = {
         "channels": ("sensor", "4210"),
         "movies": ("sensor", "18342"),
         "series": ("sensor", "6125"),
-        "health": ("sensor", "degraded", {"response_time_ms": 3420}),
+        "health": ("sensor", "degraded", {"response_time_ms": 3420, "last_check": "2026-10-10T08:55:00+02:00"}),
         "french_lists": ("binary_sensor", "off"),
     }),
 }

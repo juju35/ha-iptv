@@ -43,12 +43,14 @@ from .api import (
     valid_mac,
 )
 from .const import (
+    CONF_ADDED_AT,
     CONF_HEALTH_INTERVAL,
     CONF_MAC,
     CONF_NOTIFY_SERVICE,
     CONF_PROVIDER,
     CONF_NOTIFY_DAYS,
     CONF_SCAN_INTERVAL,
+    CONF_UPDATED_AT,
     DEFAULT_HEALTH_INTERVAL,
     DEFAULT_NOTIFY_DAYS,
     DEFAULT_SCAN_INTERVAL,
@@ -164,7 +166,9 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
             e for e in self._async_current_entries(include_ignore=False)
             if CONF_URL in e.data and server_key(e.data[CONF_URL]) == server
         ]
+        now = dt_util.utcnow().replace(microsecond=0).isoformat()
         if not same:
+            data = {**data, CONF_ADDED_AT: now}
             self._notify(title, data, updated=False)
             return self.async_create_entry(title=title, data=data)
         existing = min(same, key=_entry_validity)
@@ -173,6 +177,11 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
         placeholders = {"title": existing.title, "current": _fmt(current), "new": _fmt(new)}
         if new <= current:
             return self.async_abort(reason="existing_longer", description_placeholders=placeholders)
+        data = {
+            **data,
+            CONF_ADDED_AT: existing.data.get(CONF_ADDED_AT, now),
+            CONF_UPDATED_AT: now,
+        }
         self.hass.config_entries.async_update_entry(
             existing,
             unique_id=self.unique_id,
@@ -321,6 +330,8 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
             else:
                 errors = await self._check_xtream(user_input)
             if not errors:
+                user_input[CONF_ADDED_AT] = entry.data.get(CONF_ADDED_AT)
+                user_input[CONF_UPDATED_AT] = dt_util.utcnow().replace(microsecond=0).isoformat()
                 return self.async_update_reload_and_abort(entry, data=user_input)
         return self.async_show_form(
             step_id="reconfigure",

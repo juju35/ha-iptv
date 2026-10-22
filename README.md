@@ -140,6 +140,9 @@ Each account is a device named after its **server** (the host of the URL, e.g. `
 | `binary_sensor.<account>_french_lists` | On when the provider has French categories (live, VOD or series); attributes `live`, `vod`, `series` (French category counts) and `examples` |
 | `sensor.<account>_health` | Health check: `ok`, `degraded` (answer slower than 3 s), `auth_failed` or `unreachable`; attributes `response_time_ms`, `last_check`, `error` |
 | `sensor.<account>_response_time` | Response time of the last health check, in ms (diagnostic) |
+| `sensor.<account>_last_check` | Moment of the last health check (timestamp, diagnostic) |
+| `sensor.<account>_added` | When the account was added (timestamp, diagnostic) |
+| `sensor.<account>_updated` | When the account's credentials were last changed (timestamp, diagnostic) |
 
 Example automation, a reminder 7 days before expiration:
 
@@ -181,7 +184,7 @@ devices:
 | `warning_days` | ❌ | `7` | Turns orange when fewer days than this are left |
 | `language` | ❌ | Auto | Force language: `en` or `fr` (auto-detects from HA settings) |
 
-Each subscription shows a French flag pill (**FR** in green when French lists were found, **No FR** in red otherwise) and a health pill next to its status: **Online** with the response time (green), **Slow** above 3 s (orange), **Unreachable** (red). The ⟳ button asks the integration to query every shown server and run a health check right away.
+Each subscription shows a French flag pill (**FR** in green when French lists were found, **No FR** in red otherwise), a health pill next to its status, and the moment of its last health check: **Online** with the response time (green), **Slow** above 3 s (orange), **Unreachable** (red). The ⟳ button asks the integration to query every shown server and run a health check right away.
 
 ## Screenshots
 

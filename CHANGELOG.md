@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.6.0
+
+### What's new
+- The date and time of the action are stored when an account is added (`added_at`) and each time its credentials change — same-server update or reconfigure (`updated_at`). Two diagnostic timestamp sensors expose them: `sensor.<account>_added` and `sensor.<account>_updated`.
+- New `sensor.<account>_last_check` (timestamp) with the moment of the last health check, also shown on the card under each subscription.
+
 ## 3.5.0
 
 ### Changes
