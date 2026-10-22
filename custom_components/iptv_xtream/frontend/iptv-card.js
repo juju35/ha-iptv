@@ -8,7 +8,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_CARD_VERSION = '2.4.0';
+var IPTV_CARD_VERSION = '2.4.1';
 var IPTV_DOMAIN = 'iptv_xtream';
 var IPTV_LOGO_URL = '/' + IPTV_DOMAIN + '/logo.png?v=' + IPTV_CARD_VERSION;
 
@@ -241,6 +241,14 @@ class IptvCard extends HTMLElement {
     var pct = null;
     if (exp && created && exp > created) {
       pct = Math.min(100, Math.max(0, ((exp - now) / (exp - created)) * 100));
+    } else if (exp && exp > now) {
+      // No start date (Stalker portals): assume the shortest usual subscription
+      // length (1, 3, 6 or 12 months, then whole years) that covers the time left
+      var day = 86400000;
+      var left = exp - now;
+      var period = [30, 91, 182, 365].map((n) => n * day).find((p) => p >= left) ||
+        Math.ceil(left / (365 * day)) * 365 * day;
+      pct = Math.min(100, (left / period) * 100);
     }
     return { exp: exp, daysLeft: daysLeft, state: state, statusLabel: statusLabel, pct: pct, d: d };
   }

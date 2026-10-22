@@ -89,7 +89,7 @@ SUBSCRIPTIONS = {
         "movies": ("sensor", "54089"),
         "series": ("sensor", "20571"),
     }),
-    # A Stalker (MAC) account: no connection counts, no start date, so no bar.
+    # A Stalker (MAC) account: no connection counts and no start date (the bar is estimated).
     "iptv2": ("Provider B", {
         "status": ("sensor", "active"),
         "expiration": ("sensor", "2026-10-29T00:00:00+00:00"),
