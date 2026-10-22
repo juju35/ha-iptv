@@ -46,3 +46,10 @@ add_account:
     mac:
       selector:
         text:
+get_credentials:
+  fields:
+    device_id:
+      required: true
+      selector:
+        device:
+          integration: iptv

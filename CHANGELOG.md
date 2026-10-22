@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.13.0
+
+### What's new
+- Adding or editing an account also checks that the channel / movie / series counts look like a real catalogue; an empty provider is refused (`empty_catalogue`).
+- New 👁 button on each subscription: a popup shows the server URL and username / password (or MAC) with a copy-to-clipboard button for each value. Backed by the `iptv.get_credentials` service.
+
+### Changes
+- More space between the view / edit / delete buttons on each subscription.
+
 ## 3.12.0
 
 ### What's new

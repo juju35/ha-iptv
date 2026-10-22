@@ -103,7 +103,7 @@ Delete the account in **Settings → Devices & services → IPTV**, then remove 
 | Portal URL | Including the port, e.g. `http://your-portal:80` (the portal path like `/c/` or `/portal.php` is found automatically) |
 | MAC address | The MAC registered with the provider, format `AA:BB:CC:DD:EE:FF` |
 
-The credentials are checked before the account is added, the **video stream** of a test channel must play (it is opened briefly — this uses a connection slot), and so are the **French lists**: a provider whose live, VOD and series categories contain nothing French is refused. A category counts as French with a marker (`FR`, `FRA`, `FRANCE`, `FRENCH`, `FRANÇAIS`, `VF`, `VOSTFR`, 🇫🇷, as whole words) or when it is a category well known in French lists (TF1, M6, Canal+, Ciné+, Arte, BFM, RMC, OCS, Gulli, Ligue 1…, or French-only words such as Séries, Cinéma, Dessins animés, Documentaires, Jeunesse).
+The credentials are checked before the account is added, the **video stream** of a test channel must play (it is opened briefly — this uses a connection slot), the **channel / movie / series counts** must look like a real catalogue (not empty), and so are the **French lists**: a provider whose live, VOD and series categories contain nothing French is refused. A category counts as French with a marker (`FR`, `FRA`, `FRANCE`, `FRENCH`, `FRANÇAIS`, `VF`, `VOSTFR`, 🇫🇷, as whole words) or when it is a category well known in French lists (TF1, M6, Canal+, Ciné+, Arte, BFM, RMC, OCS, Gulli, Ligue 1…, or French-only words such as Séries, Cinéma, Dessins animés, Documentaires, Jeunesse).
 
 The credentials are stored in the config entry together with the server URL (username / password, or MAC address).
 
@@ -187,7 +187,7 @@ devices:
 | `warning_days` | ❌ | `7` | Turns orange when fewer days than this are left |
 | `language` | ❌ | Auto | Force language: `en` or `fr` (auto-detects from HA settings) |
 
-Each subscription shows a French flag pill (**FR** in green when French lists were found, **No FR** in red otherwise), a health pill next to its status, and the moment of its last health check: **Online** with the response time (green), **Slow** above 3 s (orange), **Unreachable** (red). The **+** button (card header) opens a popup to add a new account, the ✎ button on each subscription edits that account's server URL and username / password (or MAC address), and the 🗑 button removes it (with confirmation). Adding or editing runs the same checks as the UI (credentials, French lists and video stream). The edit form is also available from **Settings → Devices & services → IPTV → ⋮ → Reconfigure**. The ⟳ button queries every shown server and runs a health check right away.
+Each subscription shows a French flag pill (**FR** in green when French lists were found, **No FR** in red otherwise), a health pill next to its status, and the moment of its last health check: **Online** with the response time (green), **Slow** above 3 s (orange), **Unreachable** (red). The **+** button (card header) opens a popup to add a new account, the 👁 button on each subscription shows its server URL and credentials with a copy button for each, the ✎ button edits them, and the 🗑 button removes the account (with confirmation). Adding or editing runs the same checks as the UI (credentials, French lists and video stream). The edit form is also available from **Settings → Devices & services → IPTV → ⋮ → Reconfigure**. The ⟳ button queries every shown server and runs a health check right away.
 
 ## Screenshots
 

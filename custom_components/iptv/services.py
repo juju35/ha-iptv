@@ -25,6 +25,7 @@ from .api import (
     IptvError,
     StalkerClient,
     XtreamClient,
+    counts_ok,
     normalize_mac,
     normalize_url,
     valid_mac,
@@ -41,6 +42,7 @@ from .const import (
 SERVICE_EDIT_ACCOUNT = "edit_account"
 SERVICE_REMOVE_ACCOUNT = "remove_account"
 SERVICE_ADD_ACCOUNT = "add_account"
+SERVICE_GET_CREDENTIALS = "get_credentials"
 
 EDIT_SCHEMA = vol.Schema(
     {
@@ -53,6 +55,7 @@ EDIT_SCHEMA = vol.Schema(
 )
 
 REMOVE_SCHEMA = vol.Schema({vol.Required("device_id"): cv.string})
+CREDENTIALS_SCHEMA = vol.Schema({vol.Required("device_id"): cv.string})
 
 ADD_SCHEMA = vol.Schema(
     {
@@ -100,6 +103,8 @@ async def _validate(hass: HomeAssistant, provider: str, data: dict[str, Any]) ->
     stream = await client.async_test_stream()
     if stream.get("ok") is False:
         return "stream_ko"
+    if not counts_ok(await client.async_get_counts()):
+        return "empty_catalogue"
     return None
 
 
@@ -158,6 +163,21 @@ async def _async_remove_account(call: ServiceCall) -> ServiceResponse:
     return {"ok": True}
 
 
+async def _async_get_credentials(call: ServiceCall) -> ServiceResponse:
+    """Return the full credentials of an account (password included) for viewing."""
+    entry = _entry_for_device(call.hass, call.data["device_id"])
+    if entry is None:
+        return {"ok": False, "error": "not_found"}
+    return {
+        "ok": True,
+        "provider": entry.data.get(CONF_PROVIDER, "xtream"),
+        CONF_URL: entry.data.get(CONF_URL, ""),
+        CONF_USERNAME: entry.data.get(CONF_USERNAME, ""),
+        CONF_PASSWORD: entry.data.get(CONF_PASSWORD, ""),
+        CONF_MAC: entry.data.get(CONF_MAC, ""),
+    }
+
+
 async def _async_add_account(call: ServiceCall) -> ServiceResponse:
     hass = call.hass
     result = await hass.config_entries.flow.async_init(
@@ -195,4 +215,11 @@ def async_register_services(hass: HomeAssistant) -> None:
         _async_add_account,
         schema=ADD_SCHEMA,
         supports_response=SupportsResponse.OPTIONAL,
+    )
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_GET_CREDENTIALS,
+        _async_get_credentials,
+        schema=CREDENTIALS_SCHEMA,
+        supports_response=SupportsResponse.ONLY,
     )

@@ -36,6 +36,7 @@ from .api import (
     IptvError,
     StalkerClient,
     XtreamClient,
+    counts_ok,
     normalize_mac,
     normalize_url,
     server_key,
@@ -158,6 +159,8 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
             stream = await client.async_test_stream()
             if stream.get("ok") is False:
                 return {"base": "stream_ko"}
+            if not counts_ok(await client.async_get_counts()):
+                return {"base": "empty_catalogue"}
         return {}
 
     def _create_or_replace(self, data: dict[str, Any]) -> ConfigFlowResult:

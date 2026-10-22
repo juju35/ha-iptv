@@ -57,7 +57,8 @@
       "invalid_mac": "Adresse MAC invalide (format AA:BB:CC:DD:EE:FF)",
       "no_french_lists": "Aucune liste française trouvée chez ce fournisseur (catégories live, VOD ou séries) : le compte n’est pas ajouté.",
       "french_unknown": "Impossible de lire les catégories de ce fournisseur pour vérifier les listes françaises.",
-      "stream_ko": "Le flux vidéo de la chaîne de test ne se lit pas : le compte n'est pas ajouté."
+      "stream_ko": "Le flux vidéo de la chaîne de test ne se lit pas : le compte n'est pas ajouté.",
+      "empty_catalogue": "Le fournisseur n'a pas de catalogue chaînes / films / séries exploitable : le compte n'est pas ajouté."
     },
     "abort": {
       "already_configured": "Ce compte est déjà configuré",
@@ -211,6 +212,16 @@
         },
         "mac": {
           "name": "Adresse MAC",
+          "description": ""
+        }
+      }
+    },
+    "get_credentials": {
+      "name": "Voir les identifiants",
+      "description": "Renvoie l'URL du serveur et les identifiants d'un compte pour affichage.",
+      "fields": {
+        "device_id": {
+          "name": "Compte",
           "description": ""
         }
       }
