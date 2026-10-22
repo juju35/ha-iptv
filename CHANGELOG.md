@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.3.0
+
+### What's new
+- French lists check: on each refresh the live, VOD and series categories are read and those that look French are counted, by marker (`FR`, `FRANCE`, `VF`, `VOSTFR`, 🇫🇷…) or as a category well known in French lists (TF1, M6, Canal+, Ciné+, Arte, BFM, Ligue 1…, Séries, Cinéma, Dessins animés…). New `binary_sensor.<account>_french_lists` with the counts per kind and a few examples.
+- Adding an account is refused when the provider has no French list, or when its categories cannot be read.
+- The card shows a French flag pill per subscription: **FR** (green) or **No FR** (red).
+
 ## 3.2.0
 
 ### What's new

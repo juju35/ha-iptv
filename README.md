@@ -24,6 +24,7 @@ Home Assistant integration and Lovelace card that track one or several **IPTV su
 - Several providers in one card, one section per subscription
 - Orange warning when the subscription expires soon (configurable)
 - Health check per account (reachability and response time), shown as a pill on the card
+- French lists check: accounts without French categories are refused, and the card shows a French flag pill
 - Persistent notification a configurable number of days before expiration (7 by default)
 - Visual editor, refresh button
 - Fully compatible with Home Assistant dark mode
@@ -101,7 +102,9 @@ Delete the account in **Settings → Devices & services → IPTV**, then remove 
 | Portal URL | Including the port, e.g. `http://your-portal:80` (the portal path like `/c/` or `/portal.php` is found automatically) |
 | MAC address | The MAC registered with the provider, format `AA:BB:CC:DD:EE:FF` |
 
-The credentials are checked before the account is added, and stored in the config entry together with the server URL (username / password, or MAC address).
+The credentials are checked before the account is added, and so are the **French lists**: a provider whose live, VOD and series categories contain nothing French is refused. A category counts as French with a marker (`FR`, `FRA`, `FRANCE`, `FRENCH`, `FRANÇAIS`, `VF`, `VOSTFR`, 🇫🇷, as whole words) or when it is a category well known in French lists (TF1, M6, Canal+, Ciné+, Arte, BFM, RMC, OCS, Gulli, Ligue 1…, or French-only words such as Séries, Cinéma, Dessins animés, Documentaires, Jeunesse).
+
+The credentials are stored in the config entry together with the server URL (username / password, or MAC address).
 
 **Same server already configured** (same host and port): the new credentials are checked, then compared with the account already on that server. When the new account is valid longer (later expiration, unlimited, or the existing one no longer works), the existing account takes the new username / password or MAC address and is reloaded: same device, same entities, and its title is kept if you renamed it. Otherwise nothing changes and the flow says which account is valid longer. With several accounts on the server, the one valid the shortest is the one compared. Add the integration once per account; both provider types can live side by side and share the same card. The URL and credentials can be changed later with **⋮ → Reconfigure**, and with **Configure**:
 
@@ -131,6 +134,7 @@ Each account is a device named `<username> @ <server>` (Xtream) or `<mac> @ <por
 | `sensor.<account>_max_connections` | Maximum simultaneous connections (diagnostic) |
 | `sensor.<account>_created` | Subscription start date (diagnostic) |
 | `binary_sensor.<account>_trial` | On for a trial account (diagnostic) |
+| `binary_sensor.<account>_french_lists` | On when the provider has French categories (live, VOD or series); attributes `live`, `vod`, `series` (French category counts) and `examples` |
 | `sensor.<account>_health` | Health check: `ok`, `degraded` (answer slower than 3 s), `auth_failed` or `unreachable`; attributes `response_time_ms`, `last_check`, `error` |
 | `sensor.<account>_response_time` | Response time of the last health check, in ms (diagnostic) |
 
@@ -174,7 +178,7 @@ devices:
 | `warning_days` | ❌ | `7` | Turns orange when fewer days than this are left |
 | `language` | ❌ | Auto | Force language: `en` or `fr` (auto-detects from HA settings) |
 
-Each subscription shows a health pill next to its status: **Online** with the response time (green), **Slow** above 3 s (orange), **Unreachable** (red). The ⟳ button asks the integration to query every shown server and run a health check right away.
+Each subscription shows a French flag pill (**FR** in green when French lists were found, **No FR** in red otherwise) and a health pill next to its status: **Online** with the response time (green), **Slow** above 3 s (orange), **Unreachable** (red). The ⟳ button asks the integration to query every shown server and run a health check right away.
 
 ## Screenshots
 

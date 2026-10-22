@@ -50,6 +50,57 @@ def normalize_url(url: str) -> str:
     return url
 
 
+# ── French lists ────────────────────────────────────────────────────────────
+
+# Whole-word markers of a French category ("FR | TF1", "[VOSTFR] Séries",
+# "FRANCE 4K", "🇫🇷 Sport"); "AFRICA" or "FREE" do not match.
+_FRENCH_RE = re.compile(
+    r"(?<![A-Z0-9])(FR|FRA|FRANCE|FRENCH|FRAN[CÇ]AISE?S?|VF|VFF|VOSTFR)(?![A-Z0-9])"
+)
+# Categories well known in French lists, even without an FR marker: French
+# channels and bouquets, and French-only category words (accented, so that
+# English "CINEMA" or "SERIES" do not match).
+_KNOWN_FRENCH_RE = re.compile(
+    r"(?<![A-Z0-9])("
+    r"TF1|M6|W9|TMC|TFX|TF1 SERIES FILMS|C8|CSTAR|NRJ ?12|GULLI|ARTE|LCI|LCP|BFM ?TV|BFM|CNEWS|"
+    r"RMC|RMC STORY|RMC SPORT|CANAL ?\+|CANAL PLUS|CANALSAT|CINE ?\+|CINÉ ?\+|OCS|PARIS PREMIERE|"
+    r"PARIS PREMIÈRE|TV5 ?MONDE|FRANCE ?TV|FRANCE ?INFO|MOLOTOV|SALTO|TELETOON|TÉLÉTOON|PIWI|"
+    r"TIJI|CANAL J|LIGUE ?1|TOP 14|"
+    r"SÉRIES?|CINÉMA|DESSINS? ANIMÉS?|DOCUMENTAIRES?|JEUNESSE|ENFANTS|ÉMISSIONS?|TÉLÉRÉALITÉ|"
+    r"TÉLÉ-RÉALITÉ|ACTUALITÉS?|CHAÎNES?"
+    r")(?![A-Z0-9])"
+)
+FRENCH_FLAG = "\U0001F1EB\U0001F1F7"
+FRENCH_KINDS = ("live", "vod", "series")
+
+
+def is_french(name: Any) -> bool:
+    """True for a category name that looks French (marker or known French category)."""
+    text = str(name or "")
+    upper = text.upper()
+    return (
+        FRENCH_FLAG in text
+        or bool(_FRENCH_RE.search(upper))
+        or bool(_KNOWN_FRENCH_RE.search(upper))
+    )
+
+
+def french_summary(categories: dict[str, list[str] | None]) -> dict[str, Any] | None:
+    """Count the French categories per kind; None when no list could be read."""
+    if all(names is None for names in categories.values()):
+        return None
+    summary: dict[str, Any] = {}
+    examples: list[str] = []
+    for kind in FRENCH_KINDS:
+        names = categories.get(kind)
+        french = [n for n in names or [] if is_french(n)]
+        summary[kind] = None if names is None else len(french)
+        examples += french[:3]
+    summary["total"] = sum(v for k in FRENCH_KINDS if (v := summary[k]))
+    summary["examples"] = examples[:6]
+    return summary
+
+
 def server_key(url: str) -> str:
     """``host:port`` of a server URL, to spot two accounts on the same server."""
     parsed = urlparse(normalize_url(url))
@@ -90,6 +141,24 @@ class XtreamClient:
             return None
         return len(result) if isinstance(result, list) else None
 
+    async def _categories(self, action: str) -> list[str] | None:
+        try:
+            result = await self._get(action)
+        except IptvError:
+            return None
+        if not isinstance(result, list):
+            return None
+        return [str(c.get("category_name", "")) for c in result if isinstance(c, dict)]
+
+    async def async_get_french(self) -> dict[str, Any] | None:
+        """French categories among the live, VOD and series categories."""
+        live, vod, series = await asyncio.gather(
+            self._categories("get_live_categories"),
+            self._categories("get_vod_categories"),
+            self._categories("get_series_categories"),
+        )
+        return french_summary({"live": live, "vod": vod, "series": series})
+
     async def async_get_user_info(self) -> dict[str, Any]:
         """Return user_info, raise IptvAuthError if credentials are refused."""
         data = await self._get()
@@ -104,10 +173,11 @@ class XtreamClient:
             info = await self.async_get_user_info()
         except IptvAuthError:
             return {"auth": False}
-        channels, movies, series = await asyncio.gather(
+        channels, movies, series, french = await asyncio.gather(
             self._count("get_live_streams"),
             self._count("get_vod_streams"),
             self._count("get_series"),
+            self.async_get_french(),
         )
         return {
             "auth": True,
@@ -120,6 +190,7 @@ class XtreamClient:
             "channels": channels,
             "movies": movies,
             "series": series,
+            "french": french,
         }
 
 
@@ -305,6 +376,25 @@ class StalkerClient:
             raise IptvAuthError
         return info
 
+    async def _categories(self, kind: str) -> list[str] | None:
+        action = "get_genres" if kind == "itv" else "get_categories"
+        try:
+            js = await self._get({"type": kind, "action": action})
+        except IptvError:
+            return None
+        if not isinstance(js, list):
+            return None
+        return [str(c.get("title", "")) for c in js if isinstance(c, dict)]
+
+    async def async_get_french(self) -> dict[str, Any] | None:
+        """French genres / categories among live, VOD and series."""
+        if not self._token:
+            await self._handshake()
+        live, vod, series = await asyncio.gather(
+            self._categories("itv"), self._categories("vod"), self._categories("series")
+        )
+        return french_summary({"live": live, "vod": vod, "series": series})
+
     async def _count(self, kind: str) -> int | None:
         params = {"type": kind, "action": "get_ordered_list", "p": "1"}
         params["genre" if kind == "itv" else "category"] = "*"
@@ -319,8 +409,8 @@ class StalkerClient:
             info = await self.async_get_user_info()
         except IptvAuthError:
             return {"auth": False}
-        channels, movies, series = await asyncio.gather(
-            self._count("itv"), self._count("vod"), self._count("series")
+        channels, movies, series, french = await asyncio.gather(
+            self._count("itv"), self._count("vod"), self._count("series"), self.async_get_french()
         )
         exp_date = stalker_expiry(info)
         now = int(datetime.now(timezone.utc).timestamp())
@@ -335,4 +425,5 @@ class StalkerClient:
             "channels": channels,
             "movies": movies,
             "series": series,
+            "french": french,
         }
