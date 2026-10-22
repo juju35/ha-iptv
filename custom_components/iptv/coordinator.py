@@ -32,6 +32,7 @@ class IptvCoordinator(DataUpdateCoordinator[dict[str, Any]]):
     """Poll the IPTV server for one account."""
 
     config_entry: IptvConfigEntry
+    health: Any  # HealthMonitor, set in async_setup_entry
 
     def __init__(self, hass: HomeAssistant, entry: IptvConfigEntry) -> None:
         minutes = max(

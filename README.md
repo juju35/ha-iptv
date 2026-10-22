@@ -23,6 +23,7 @@ Home Assistant integration and Lovelace card that track one or several **IPTV su
 - Active / maximum connections, trial badge
 - Several providers in one card, one section per subscription
 - Orange warning when the subscription expires soon (configurable)
+- Health check per account (reachability and response time), shown as a pill on the card
 - Persistent notification a configurable number of days before expiration (7 by default)
 - Visual editor, refresh button
 - Fully compatible with Home Assistant dark mode
@@ -108,6 +109,7 @@ The credentials are checked before the account is added, and stored in the confi
 |---|---|---|
 | Refresh interval | `60` min | How often the server is queried (minimum 5) |
 | Notify before expiration | `7` days | Persistent notification when the subscription expires within this many days, `0` to disable |
+| Health check interval | `5` min | How often the server is checked with a light request (account info only) |
 
 The notification names the account and its expiration date, is refreshed once a day while the account is in that window (dismissing it silences it until the next day), also reports an expired account, and disappears once the subscription is renewed.
 
@@ -129,6 +131,8 @@ Each account is a device named `<username> @ <server>` (Xtream) or `<mac> @ <por
 | `sensor.<account>_max_connections` | Maximum simultaneous connections (diagnostic) |
 | `sensor.<account>_created` | Subscription start date (diagnostic) |
 | `binary_sensor.<account>_trial` | On for a trial account (diagnostic) |
+| `sensor.<account>_health` | Health check: `ok`, `degraded` (answer slower than 3 s), `auth_failed` or `unreachable`; attributes `response_time_ms`, `last_check`, `error` |
+| `sensor.<account>_response_time` | Response time of the last health check, in ms (diagnostic) |
 
 Example automation, a reminder 7 days before expiration:
 
@@ -170,7 +174,7 @@ devices:
 | `warning_days` | ❌ | `7` | Turns orange when fewer days than this are left |
 | `language` | ❌ | Auto | Force language: `en` or `fr` (auto-detects from HA settings) |
 
-The ⟳ button asks the integration to query every shown server right away.
+Each subscription shows a health pill next to its status: **Online** with the response time (green), **Slow** above 3 s (orange), **Unreachable** (red). The ⟳ button asks the integration to query every shown server and run a health check right away.
 
 ## Screenshots
 

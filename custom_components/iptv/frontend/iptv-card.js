@@ -8,7 +8,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_CARD_VERSION = '3.1.0';
+var IPTV_CARD_VERSION = '3.2.0';
 var IPTV_DOMAIN = 'iptv';
 var IPTV_LOGO_URL = '/' + IPTV_DOMAIN + '/logo.png?v=' + IPTV_CARD_VERSION;
 
@@ -37,6 +37,10 @@ var IptvCardI18n = {
     movies: 'movies',
     series: 'series',
     connections: 'connections',
+    health_ok: 'Online',
+    health_degraded: 'Slow',
+    health_unreachable: 'Unreachable',
+    health_auth_failed: 'Credentials refused',
     ed_title: 'Title',
     ed_devices: 'Subscriptions (all if empty)',
     ed_warning_days: 'Warn before expiration',
@@ -65,6 +69,10 @@ var IptvCardI18n = {
     movies: 'films',
     series: 'séries',
     connections: 'connexions',
+    health_ok: 'En ligne',
+    health_degraded: 'Lent',
+    health_unreachable: 'Injoignable',
+    health_auth_failed: 'Identifiants refusés',
     ed_title: 'Titre',
     ed_devices: 'Abonnements (tous si vide)',
     ed_warning_days: 'Alerte avant expiration',
@@ -179,7 +187,9 @@ class IptvCard extends HTMLElement {
   }
 
   async _refresh() {
-    var ids = this._subs().map((sub) => sub.ids.status).filter(Boolean);
+    var ids = [];
+    this._subs().forEach((sub) => ids.push(sub.ids.status, sub.ids.health));
+    ids = ids.filter(Boolean);
     if (!ids.length || this._loading) return;
     this._loading = true;
     this._render();
@@ -219,6 +229,14 @@ class IptvCard extends HTMLElement {
       movies: num('movies'),
       series: num('series'),
     };
+  }
+
+  // Last health check of one subscription: { status, ms } or null
+  _health(ids) {
+    var st = ids.health && this._hass.states[ids.health];
+    if (!st || st.state === 'unknown' || st.state === 'unavailable') return null;
+    var ms = st.attributes && st.attributes.response_time_ms;
+    return { status: st.state, ms: ms == null ? null : Number(ms) };
   }
 
   _view(d) {
@@ -266,13 +284,28 @@ class IptvCard extends HTMLElement {
     var multi = subs.length > 1;
     var title = this._config.title || this._t(multi ? 'default_title_multi' : 'default_title');
 
-    // Status and trial pills of one subscription
-    var chips = (v) => {
-      var icon = v.state === 'ok' ? 'mdi:check-circle' : v.state === 'warning' ? 'mdi:alert' : 'mdi:close-circle';
+    var fmtMs = (ms) => (ms < 1000 ? nf.format(ms) + ' ms' : new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(ms / 1000) + ' s');
+
+    // Health pill: server reachability and response time
+    var healthChip = (h, v) => {
+      if (!h) return '';
+      // Refused credentials are already shown by the status pill
+      if (h.status === 'auth_failed' && v && !v.d.auth) return '';
+      var cls = { ok: 'ok', degraded: 'warning' }[h.status] || 'error';
+      var icon = { ok: 'mdi:lan-connect', degraded: 'mdi:speedometer-slow' }[h.status] || 'mdi:lan-disconnect';
+      var label = this._t('health_' + h.status) + (h.ms != null && h.status !== 'unreachable' ? ' · ' + fmtMs(h.ms) : '');
+      return `<span class="chip ${cls}" data-entity="health"><ha-icon icon="${icon}"></ha-icon>${esc(label)}</span>`;
+    };
+
+    // Status, trial and health pills of one subscription
+    var chips = (v, h) => {
+      if (!v && !h) return '';
+      var icon = v ? (v.state === 'ok' ? 'mdi:check-circle' : v.state === 'warning' ? 'mdi:alert' : 'mdi:close-circle') : '';
       return `
         <div class="chips">
-          <span class="chip ${v.state}" data-entity="status"><ha-icon icon="${icon}"></ha-icon>${esc(v.statusLabel)}</span>
-          ${v.d.is_trial ? '<span class="chip idle">' + this._t('trial') + '</span>' : ''}
+          ${v ? `<span class="chip ${v.state}" data-entity="status"><ha-icon icon="${icon}"></ha-icon>${esc(v.statusLabel)}</span>` : ''}
+          ${v && v.d.is_trial ? '<span class="chip idle">' + this._t('trial') + '</span>' : ''}
+          ${healthChip(h, v)}
         </div>`;
     };
 
@@ -320,7 +353,7 @@ class IptvCard extends HTMLElement {
     } else if (!multi) {
       // One subscription: pills under the card title, as before
       var v = this._view(this._data(subs[0].ids));
-      if (v) status = chips(v);
+      status = chips(v, this._health(subs[0].ids));
       body = '<div class="sect" data-sub="0">' +
         (v ? details(v) : '<div class="msg err">' + this._t('unavailable') + '</div>') + '</div>';
     } else {
@@ -331,7 +364,7 @@ class IptvCard extends HTMLElement {
           <div class="sect multi" data-sub="${i}">
             <div class="sect-head">
               <div class="sect-name">${esc(sub.name)}</div>
-              ${v ? chips(v) : ''}
+              ${chips(v, this._health(sub.ids))}
             </div>
             ${v ? details(v) : '<div class="msg err">' + this._t('unavailable') + '</div>'}
           </div>`;
@@ -354,7 +387,7 @@ class IptvCard extends HTMLElement {
         .sect { display: flex; flex-direction: column; gap: 10px; }
         .sect.multi + .sect.multi { border-top: 1px solid var(--divider-color, rgba(127,127,127,.25)); padding-top: 10px; }
         .sect-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-        .sect-head .chips { margin-top: 0; flex: none; }
+        .sect-head .chips { margin-top: 0; flex: none; justify-content: flex-end; }
         .sect-name { font-size: 14px; font-weight: 500; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         button { background:none; border:none; cursor:pointer; color:var(--secondary-text-color); padding:8px; border-radius:50%; align-self: flex-start; display: flex; }
         button:hover { background: var(--secondary-background-color); }

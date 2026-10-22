@@ -65,10 +65,12 @@
       "init": {
         "data": {
           "scan_interval": "Intervalle d'actualisation",
-          "notify_days": "Notifier avant expiration"
+          "notify_days": "Notifier avant expiration",
+          "health_interval": "Intervalle du health check"
         },
         "data_description": {
-          "notify_days": "Notification persistante ce nombre de jours avant l’expiration de l’abonnement (0 pour désactiver)"
+          "notify_days": "Notification persistante ce nombre de jours avant l’expiration de l’abonnement (0 pour désactiver)",
+          "health_interval": "Fréquence de la vérification légère du serveur (infos du compte uniquement)"
         }
       }
     }
@@ -108,6 +110,18 @@
       },
       "series": {
         "name": "Séries"
+      },
+      "health": {
+        "name": "Santé",
+        "state": {
+          "ok": "OK",
+          "degraded": "Lent",
+          "auth_failed": "Identifiants refusés",
+          "unreachable": "Injoignable"
+        }
+      },
+      "response_time": {
+        "name": "Temps de réponse"
       }
     },
     "binary_sensor": {

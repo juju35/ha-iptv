@@ -41,10 +41,12 @@ from .api import (
     valid_mac,
 )
 from .const import (
+    CONF_HEALTH_INTERVAL,
     CONF_MAC,
     CONF_PROVIDER,
     CONF_NOTIFY_DAYS,
     CONF_SCAN_INTERVAL,
+    DEFAULT_HEALTH_INTERVAL,
     DEFAULT_NOTIFY_DAYS,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
@@ -280,7 +282,7 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
 
 
 class IptvOptionsFlow(OptionsFlow):
-    """Polling interval and expiration notification."""
+    """Polling and health check intervals, expiration notification."""
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
@@ -316,6 +318,20 @@ class IptvOptionsFlow(OptionsFlow):
                             max=60,
                             step=1,
                             unit_of_measurement="d",
+                            mode=NumberSelectorMode.BOX,
+                        )
+                    ),
+                    vol.Required(
+                        CONF_HEALTH_INTERVAL,
+                        default=self.config_entry.options.get(
+                            CONF_HEALTH_INTERVAL, DEFAULT_HEALTH_INTERVAL
+                        ),
+                    ): NumberSelector(
+                        NumberSelectorConfig(
+                            min=1,
+                            max=60,
+                            step=1,
+                            unit_of_measurement="min",
                             mode=NumberSelectorMode.BOX,
                         )
                     ),

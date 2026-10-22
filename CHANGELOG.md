@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.2.0
+
+### What's new
+- Health check per account: every 5 minutes (**Configure → Health check interval**), only the account info is requested and its response time measured. New `sensor.<account>_health` (`ok`, `degraded` above 3 s, `auth_failed`, `unreachable`) with `response_time_ms`, `last_check` and `error` attributes, and `sensor.<account>_response_time` (diagnostic).
+- The health sensor stays available when the server is down, and a check that finds the server back refreshes the account data right away.
+- The card shows a health pill next to the status (Online · response time, Slow, Unreachable); ⟳ also runs a health check.
+
 ## 3.1.0
 
 ### What's new
