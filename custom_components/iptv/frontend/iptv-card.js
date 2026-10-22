@@ -8,7 +8,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_CARD_VERSION = '3.13.0';
+var IPTV_CARD_VERSION = '3.13.1';
 var IPTV_DOMAIN = 'iptv';
 var IPTV_LOGO_URL = '/' + IPTV_DOMAIN + '/logo.png?v=' + IPTV_CARD_VERSION;
 
@@ -438,10 +438,12 @@ class IptvCard extends HTMLElement {
           ${stat('mdi:television-classic', v.d.channels, 'channels')}
           ${stat('mdi:movie-open', v.d.movies, 'movies')}
           ${stat('mdi:filmstrip-box-multiple', v.d.series, 'series')}
-          <div class="stat" data-entity="active_connections" title="${esc(this._t('connections'))}">
+          ${v.d.max_connections != null
+            ? `<div class="stat" data-entity="active_connections" title="${esc(this._t('connections'))}">
             <ha-icon icon="mdi:account-multiple"></ha-icon>
             <div class="num">${esc(cons)}</div>
-          </div>
+          </div>`
+            : ''}
         </div>`;
     };
 
