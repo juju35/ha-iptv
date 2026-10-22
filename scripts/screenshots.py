@@ -76,8 +76,9 @@ customElements.define("ha-icon", class extends HTMLElement {
 });"""
 
 # Subscription devices: { device_id: (name, { translation_key: (domain, state) }) }.
+# Fully anonymised mock data; no real provider, account or MAC appears here.
 SUBSCRIPTIONS = {
-    "iptv": ("john @ myserver.com", {
+    "iptv": ("Provider A", {
         "status": ("sensor", "active"),
         "expiration": ("sensor", "2027-03-07T00:00:00+00:00"),
         "created": ("sensor", "2026-03-07T00:00:00+00:00"),
@@ -88,13 +89,14 @@ SUBSCRIPTIONS = {
         "movies": ("sensor", "54089"),
         "series": ("sensor", "20571"),
     }),
-    "iptv2": ("jane @ otherprovider.tv", {
+    # A Stalker (MAC) account: no connection counts, no start date, so no bar.
+    "iptv2": ("Provider B", {
         "status": ("sensor", "active"),
-        "expiration": ("sensor", "2026-10-15T00:00:00+00:00"),
-        "created": ("sensor", "2026-09-15T00:00:00+00:00"),
-        "trial": ("binary_sensor", "on"),
-        "active_connections": ("sensor", "0"),
-        "max_connections": ("sensor", "2"),
+        "expiration": ("sensor", "2026-10-29T00:00:00+00:00"),
+        "created": ("sensor", "unknown"),
+        "trial": ("binary_sensor", "off"),
+        "active_connections": ("sensor", "unknown"),
+        "max_connections": ("sensor", "unknown"),
         "channels": ("sensor", "4210"),
         "movies": ("sensor", "18342"),
         "series": ("sensor", "6125"),

@@ -8,13 +8,14 @@
 [![Release](https://img.shields.io/github/v/release/juju35/ha-iptv)](https://github.com/juju35/ha-iptv/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Home Assistant integration and Lovelace card that track one or several **IPTV subscriptions** using the **Xtream Codes API**: status, expiration date, days left, number of live channels, movies and series, and connections.
+Home Assistant integration and Lovelace card that track one or several **IPTV subscriptions** using the **Xtream Codes API** or a **Stalker / Ministra portal** (MAC address): status, expiration date, days left, number of live channels, movies and series, and connections.
 
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=juju35&repository=ha-iptv&category=integration)
 
 ## Features
 
-- **Home Assistant integration** (UI setup, no YAML): one device per Xtream account with sensors you can use in automations
+- **Two provider types**: Xtream Codes (username / password) and Stalker / Ministra portal (MAC address)
+- **Home Assistant integration** (UI setup, no YAML): one device per account with sensors you can use in automations
 - **Lovelace card bundled with the integration**, added automatically to the dashboard resources (nothing to add by hand)
 - Subscription status (Active, Expired, Banned, Disabled, invalid credentials) with color coding
 - Expiration date, days left and a progress bar since the subscription started
@@ -31,7 +32,7 @@ Home Assistant queries the Xtream server itself, so it works even when the serve
 ## Prerequisites
 
 - Home Assistant 2025.2 or newer
-- An IPTV subscription with Xtream Codes API access (server URL, username and password)
+- An IPTV subscription with **Xtream Codes API** access (server URL, username and password), **or** a **Stalker / Ministra portal** (portal URL and a registered MAC address)
 
 ## Installation
 
@@ -69,7 +70,9 @@ Delete the account in **Settings → Devices & services → IPTV Xtream**, then 
 
 [![Add the integration](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=iptv_xtream)
 
-**Settings → Devices & services → Add integration → IPTV Xtream**, then enter:
+**Settings → Devices & services → Add integration → IPTV Xtream**, then choose the provider type.
+
+**Xtream Codes** (username / password):
 
 | Field | Description |
 |---|---|
@@ -77,11 +80,20 @@ Delete the account in **Settings → Devices & services → IPTV Xtream**, then 
 | Username | Xtream username |
 | Password | Xtream password |
 
-The credentials are checked before the account is added. Add the integration once per account. The URL and credentials can be changed later with **⋮ → Reconfigure**, and the refresh interval (default 60 minutes, minimum 5) with **Configure**.
+**Stalker / Ministra** (MAC address):
+
+| Field | Description |
+|---|---|
+| Portal URL | Including the port, e.g. `http://your-portal:80` (the portal path like `/c/` or `/portal.php` is found automatically) |
+| MAC address | The MAC registered with the provider, format `AA:BB:CC:DD:EE:FF` |
+
+The credentials are checked before the account is added. Add the integration once per account; both provider types can live side by side and share the same card. The URL and credentials can be changed later with **⋮ → Reconfigure**, and the refresh interval (default 60 minutes, minimum 5) with **Configure**.
+
+> **Stalker portals** do not expose a start date, the connection counts or the trial flag, so those are shown as `—` (the expiration progress bar needs the start date and is hidden). Expiration and the live / VOD / series counts are read from the portal's `account_info` and `get_ordered_list` endpoints.
 
 ### Entities
 
-Each account is a device named `<username> @ <server>`, with these entities. `<account>` below is that name as an entity id, e.g. `sensor.john_myserver_com_status` for `john @ myserver.com`; entity names follow your Home Assistant language.
+Each account is a device named `<username> @ <server>` (Xtream) or `<mac> @ <portal>` (Stalker), with these entities. On a Stalker portal the start date, connection and trial entities stay `unknown`. `<account>` below is that name as an entity id, e.g. `sensor.john_myserver_com_status` for `john @ myserver.com`; entity names follow your Home Assistant language.
 
 | Entity | Description |
 |---|---|
@@ -146,7 +158,11 @@ The ⟳ button asks the integration to query every shown server right away.
 
 ## How it works
 
-The integration polls the Xtream Codes `player_api.php` endpoint for the account info (`user_info`) and the live, VOD and series lists (`get_live_streams`, `get_vod_streams`, `get_series`, fetched in parallel) and keeps only their sizes. The card is served by the integration at `/iptv_xtream/iptv-card.js` and registered in **Settings → Dashboards → Resources** when the integration starts (with YAML-managed resources, it is loaded on every page instead).
+For **Xtream Codes**, the integration polls the `player_api.php` endpoint for the account info (`user_info`) and the live, VOD and series lists (`get_live_streams`, `get_vod_streams`, `get_series`, fetched in parallel) and keeps only their sizes.
+
+For a **Stalker / Ministra portal**, it performs the STB handshake with the MAC to get a session token, then reads `account_info/get_main_info` for the expiration and `itv` / `vod` / `series` `get_ordered_list` for the catalogue sizes. Only the summary is kept, never the channel lists.
+
+The card is served by the integration at `/iptv_xtream/iptv-card.js` and registered in **Settings → Dashboards → Resources** when the integration starts (with YAML-managed resources, it is loaded on every page instead).
 
 ### Security notes
 

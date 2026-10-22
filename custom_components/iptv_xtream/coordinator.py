@@ -12,8 +12,16 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .api import XtreamClient, XtreamError
-from .const import CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL, DOMAIN, MIN_SCAN_INTERVAL
+from .api import StalkerClient, XtreamClient, XtreamError
+from .const import (
+    CONF_MAC,
+    CONF_PROVIDER,
+    CONF_SCAN_INTERVAL,
+    DEFAULT_SCAN_INTERVAL,
+    DOMAIN,
+    MIN_SCAN_INTERVAL,
+    PROVIDER_STALKER,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -37,15 +45,19 @@ class IptvCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             name=DOMAIN,
             update_interval=timedelta(minutes=minutes),
         )
-        self.client = XtreamClient(
-            async_get_clientsession(hass),
-            entry.data[CONF_URL],
-            entry.data[CONF_USERNAME],
-            entry.data[CONF_PASSWORD],
-        )
+        session = async_get_clientsession(hass)
+        if entry.data.get(CONF_PROVIDER) == PROVIDER_STALKER:
+            self.client = StalkerClient(session, entry.data[CONF_URL], entry.data[CONF_MAC])
+        else:
+            self.client = XtreamClient(
+                session,
+                entry.data[CONF_URL],
+                entry.data[CONF_USERNAME],
+                entry.data[CONF_PASSWORD],
+            )
 
     async def _async_update_data(self) -> dict[str, Any]:
         try:
             return await self.client.async_get_data()
         except XtreamError as err:
-            raise UpdateFailed(f"Xtream server unreachable: {err}") from err
+            raise UpdateFailed(f"IPTV server unreachable: {err}") from err

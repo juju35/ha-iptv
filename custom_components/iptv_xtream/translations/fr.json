@@ -2,7 +2,15 @@
   "config": {
     "step": {
       "user": {
-        "title": "Abonnement IPTV Xtream",
+        "title": "Abonnement IPTV",
+        "description": "Choisis le type de fournisseur.",
+        "menu_options": {
+          "xtream": "Xtream Codes (identifiant / mot de passe)",
+          "stalker": "Stalker / Ministra (adresse MAC)"
+        }
+      },
+      "xtream": {
+        "title": "IPTV Xtream Codes",
         "description": "Home Assistant interroge l'API Xtream Codes de ton fournisseur.",
         "data": {
           "url": "URL du serveur Xtream",
@@ -13,21 +21,36 @@
           "url": "Port compris, ex : http://serveur:8080"
         }
       },
+      "stalker": {
+        "title": "IPTV Stalker (adresse MAC)",
+        "description": "Home Assistant interroge le portail Stalker/Ministra de ton fournisseur avec une adresse MAC.",
+        "data": {
+          "url": "URL du portail",
+          "mac": "Adresse MAC"
+        },
+        "data_description": {
+          "url": "Port compris, ex : http://portail:80",
+          "mac": "Format AA:BB:CC:DD:EE:FF"
+        }
+      },
       "reconfigure": {
-        "title": "Abonnement IPTV Xtream",
+        "title": "Abonnement IPTV",
         "data": {
           "url": "URL du serveur Xtream",
           "username": "Identifiant",
-          "password": "Mot de passe"
+          "password": "Mot de passe",
+          "mac": "Adresse MAC"
         },
         "data_description": {
-          "url": "Port compris, ex : http://serveur:8080"
+          "url": "Port compris, ex : http://serveur:8080",
+          "mac": "Format AA:BB:CC:DD:EE:FF"
         }
       }
     },
     "error": {
-      "cannot_connect": "Serveur Xtream injoignable",
-      "invalid_auth": "Identifiants refusés par le serveur"
+      "cannot_connect": "Serveur IPTV injoignable",
+      "invalid_auth": "Identifiants refusés par le serveur",
+      "invalid_mac": "Adresse MAC invalide (format AA:BB:CC:DD:EE:FF)"
     },
     "abort": {
       "already_configured": "Ce compte est déjà configuré",
