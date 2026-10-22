@@ -192,6 +192,8 @@ class IptvHealthSensor(_IptvHealthEntity):
             "response_time_ms": self._health.latency_ms,
             "last_check": self._health.checked_at.isoformat() if self._health.checked_at else None,
             "error": self._health.error,
+            "stream_ok": self._health.stream_ok,
+            "stream_channel": self._health.stream_channel,
         }
 
 

@@ -19,6 +19,7 @@ from homeassistant.core import callback
 from homeassistant.util import dt as dt_util
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.selector import (
+    BooleanSelector,
     NumberSelector,
     NumberSelectorConfig,
     NumberSelectorMode,
@@ -50,10 +51,12 @@ from .const import (
     CONF_PROVIDER,
     CONF_NOTIFY_DAYS,
     CONF_SCAN_INTERVAL,
+    CONF_STREAM_CHECK,
     CONF_UPDATED_AT,
     DEFAULT_HEALTH_INTERVAL,
     DEFAULT_NOTIFY_DAYS,
     DEFAULT_SCAN_INTERVAL,
+    DEFAULT_STREAM_CHECK,
     DOMAIN,
     MIN_SCAN_INTERVAL,
     PROVIDER_STALKER,
@@ -152,6 +155,9 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
                 return {"base": "french_unknown"}
             if not summary["total"]:
                 return {"base": "no_french_lists"}
+            stream = await client.async_test_stream()
+            if stream.get("ok") is False:
+                return {"base": "stream_ko"}
         return {}
 
     def _create_or_replace(self, data: dict[str, Any]) -> ConfigFlowResult:
@@ -399,6 +405,12 @@ class IptvOptionsFlow(OptionsFlow):
                             mode=NumberSelectorMode.BOX,
                         )
                     ),
+                    vol.Required(
+                        CONF_STREAM_CHECK,
+                        default=self.config_entry.options.get(
+                            CONF_STREAM_CHECK, DEFAULT_STREAM_CHECK
+                        ),
+                    ): BooleanSelector(),
                 }
             ),
         )

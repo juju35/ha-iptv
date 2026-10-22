@@ -20,12 +20,15 @@ from homeassistant.util import dt as dt_util
 from .api import IptvAuthError, IptvError
 from .const import (
     CONF_HEALTH_INTERVAL,
+    CONF_STREAM_CHECK,
     DEFAULT_HEALTH_INTERVAL,
+    DEFAULT_STREAM_CHECK,
     DOMAIN,
     HEALTH_AUTH_FAILED,
     HEALTH_DEGRADED,
     HEALTH_OK,
     HEALTH_SLOW_MS,
+    HEALTH_STREAM_KO,
     HEALTH_UNREACHABLE,
 )
 
@@ -48,10 +51,13 @@ class HealthMonitor:
         self._interval = timedelta(
             minutes=max(1, int(entry.options.get(CONF_HEALTH_INTERVAL, DEFAULT_HEALTH_INTERVAL)))
         )
+        self._stream_check = bool(entry.options.get(CONF_STREAM_CHECK, DEFAULT_STREAM_CHECK))
         self.status: str | None = None
         self.latency_ms: int | None = None
         self.checked_at: datetime | None = None
         self.error: str | None = None
+        self.stream_ok: bool | None = None
+        self.stream_channel: str | None = None
         self._unsubs: list[CALLBACK_TYPE] = []
 
     @callback
@@ -87,8 +93,20 @@ class HealthMonitor:
             self._set(HEALTH_UNREACHABLE, None, str(err) or type(err).__name__)
         else:
             latency = self._elapsed(start)
-            self._set(HEALTH_DEGRADED if latency > HEALTH_SLOW_MS else HEALTH_OK, latency, None)
-            if not self._coordinator.last_update_success:
+            status = HEALTH_DEGRADED if latency > HEALTH_SLOW_MS else HEALTH_OK
+            error = None
+            if self._stream_check:
+                stream = await self._coordinator.client.async_test_stream()
+                self.stream_ok = stream.get("ok")
+                self.stream_channel = stream.get("channel")
+                if self.stream_ok is False:
+                    status = HEALTH_STREAM_KO
+                    error = "stream: " + (stream.get("error") or "unavailable")
+            else:
+                self.stream_ok = None
+                self.stream_channel = None
+            self._set(status, latency, error)
+            if status != HEALTH_STREAM_KO and not self._coordinator.last_update_success:
                 # Back online: refresh the account data right away
                 await self._coordinator.async_request_refresh()
 

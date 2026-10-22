@@ -1,7 +1,7 @@
 """Constants for the IPTV integration."""
 
 DOMAIN = "iptv"
-VERSION = "3.9.0"
+VERSION = "3.10.0"
 
 CONF_SCAN_INTERVAL = "scan_interval"
 DEFAULT_SCAN_INTERVAL = 60  # minutes
@@ -19,7 +19,12 @@ HEALTH_OK = "ok"
 HEALTH_DEGRADED = "degraded"
 HEALTH_AUTH_FAILED = "auth_failed"
 HEALTH_UNREACHABLE = "unreachable"
-HEALTH_STATES = [HEALTH_OK, HEALTH_DEGRADED, HEALTH_AUTH_FAILED, HEALTH_UNREACHABLE]
+HEALTH_STREAM_KO = "stream_ko"
+HEALTH_STATES = [HEALTH_OK, HEALTH_DEGRADED, HEALTH_AUTH_FAILED, HEALTH_UNREACHABLE, HEALTH_STREAM_KO]
+
+# Probe a channel's video stream during the health check (uses a connection slot)
+CONF_STREAM_CHECK = "stream_check"
+DEFAULT_STREAM_CHECK = True
 
 # Provider type and its credentials
 CONF_PROVIDER = "provider"
