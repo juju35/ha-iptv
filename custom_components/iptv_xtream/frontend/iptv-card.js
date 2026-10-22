@@ -1,13 +1,14 @@
 /*
  * IPTV Subscription Card — Home Assistant Lovelace card for Xtream Codes subscriptions.
- * Shows status, expiration date, days left, number of live channels, movies, series and connections.
+ * Shows status, expiration date, days left, number of live channels, movies, series and connections
+ * of one or several subscriptions (one section per provider).
  *
  * Bundled with the iptv_xtream integration, which polls the Xtream API server-side:
- * the card only reads the entities of one subscription device.
+ * the card only reads the entities of the subscription devices.
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_CARD_VERSION = '2.2.1';
+var IPTV_CARD_VERSION = '2.3.0';
 var IPTV_DOMAIN = 'iptv_xtream';
 var IPTV_LOGO_URL = '/' + IPTV_DOMAIN + '/logo.png?v=' + IPTV_CARD_VERSION;
 
@@ -15,6 +16,7 @@ var IPTV_LOGO_URL = '/' + IPTV_DOMAIN + '/logo.png?v=' + IPTV_CARD_VERSION;
 var IptvCardI18n = {
   en: {
     default_title: 'IPTV subscription',
+    default_title_multi: 'IPTV subscriptions',
     loading: 'Loading…',
     no_device: 'No IPTV Xtream subscription found: add the IPTV Xtream integration in Settings → Devices & services.',
     unavailable: 'Xtream server unreachable',
@@ -36,12 +38,13 @@ var IptvCardI18n = {
     series: 'series',
     connections: 'connections',
     ed_title: 'Title',
-    ed_device: 'Subscription',
+    ed_devices: 'Subscriptions (all if empty)',
     ed_warning_days: 'Warn before expiration',
     ed_language: 'Language',
   },
   fr: {
     default_title: 'Abonnement IPTV',
+    default_title_multi: 'Abonnements IPTV',
     loading: 'Chargement…',
     no_device: 'Aucun abonnement IPTV Xtream : ajoute l’intégration IPTV Xtream dans Paramètres → Appareils et services.',
     unavailable: 'Serveur Xtream injoignable',
@@ -63,7 +66,7 @@ var IptvCardI18n = {
     series: 'séries',
     connections: 'connexions',
     ed_title: 'Titre',
-    ed_device: 'Abonnement',
+    ed_devices: 'Abonnements (tous si vide)',
     ed_warning_days: 'Alerte avant expiration',
     ed_language: 'Langue',
   },
@@ -96,7 +99,7 @@ class IptvCard extends HTMLElement {
     return {
       schema: [
         { name: 'title', selector: { text: {} } },
-        { name: 'device', selector: { device: { integration: IPTV_DOMAIN } } },
+        { name: 'devices', selector: { device: { integration: IPTV_DOMAIN, multiple: true } } },
         { name: 'warning_days', selector: { number: { min: 1, max: 60, mode: 'box' } } },
         { name: 'language', selector: { select: { mode: 'dropdown', options: [
           { value: 'en', label: 'English' },
@@ -116,12 +119,16 @@ class IptvCard extends HTMLElement {
 
   set hass(hass) {
     this._hass = hass;
-    // Re-render only when one of our entities (or the language) changed
-    var ids = this._entities();
-    var sig = [hass.language].concat(Object.keys(ids).map(function (k) {
-      var st = hass.states[ids[k]];
-      return k + '=' + (st ? st.state + '@' + st.last_updated : '');
-    })).join('|');
+    // Re-render only when one of our entities, a device name or the language changed
+    var parts = [hass.language];
+    this._subs().forEach(function (sub) {
+      parts.push(sub.device + ':' + sub.name);
+      Object.keys(sub.ids).forEach(function (k) {
+        var st = hass.states[sub.ids[k]];
+        parts.push(k + '=' + (st ? st.state + '@' + st.last_updated : ''));
+      });
+    });
+    var sig = parts.join('|');
     if (sig === this._sig) return;
     this._sig = sig;
     this._loading = false;
@@ -129,37 +136,55 @@ class IptvCard extends HTMLElement {
   }
 
   getGridOptions() {
-    return { columns: 6, min_columns: 4 };
+    var n = Math.max(1, this._hass ? this._subs().length : 1);
+    return { columns: 6, min_columns: 4, rows: n > 1 ? 1 + 3 * n : 'auto' };
   }
 
   getCardSize() {
-    return 3;
+    var n = Math.max(1, this._hass ? this._subs().length : 1);
+    return n > 1 ? 1 + 3 * n : 3;
   }
 
   _t(key, vars) {
     return iptvT(iptvLang(this._config, this._hass), key, vars);
   }
 
-  // { translation_key: entity_id } of the configured device, or of the first one found
-  _entities() {
-    var out = {};
-    if (!this._hass || !this._hass.entities) return out;
-    var device = this._config && this._config.device;
+  // Devices to show: `devices` (list), the legacy `device`, or every IPTV Xtream device
+  _wanted() {
+    var c = this._config || {};
+    var list = [].concat(c.devices || []).filter(Boolean);
+    if (!list.length && c.device) list = [c.device];
+    return list;
+  }
+
+  // [{ device, name, ids: { translation_key: entity_id } }] in the configured order,
+  // or sorted by name when every subscription is shown
+  _subs() {
+    if (!this._hass || !this._hass.entities) return [];
+    var wanted = this._wanted();
+    var byDevice = {};
     Object.values(this._hass.entities).forEach(function (e) {
       if (e.platform !== IPTV_DOMAIN || !e.translation_key || !e.device_id) return;
-      if (!device) device = e.device_id;
-      if (e.device_id === device) out[e.translation_key] = e.entity_id;
+      if (wanted.length && wanted.indexOf(e.device_id) < 0) return;
+      (byDevice[e.device_id] = byDevice[e.device_id] || {})[e.translation_key] = e.entity_id;
     });
-    return out;
+    var devices = this._hass.devices || {};
+    var subs = Object.keys(byDevice).map(function (id) {
+      var dev = devices[id];
+      return { device: id, name: (dev && (dev.name_by_user || dev.name)) || '', ids: byDevice[id] };
+    });
+    if (wanted.length) subs.sort((a, b) => wanted.indexOf(a.device) - wanted.indexOf(b.device));
+    else subs.sort((a, b) => a.name.localeCompare(b.name));
+    return subs;
   }
 
   async _refresh() {
-    var ids = this._entities();
-    if (!ids.status || this._loading) return;
+    var ids = this._subs().map((sub) => sub.ids.status).filter(Boolean);
+    if (!ids.length || this._loading) return;
     this._loading = true;
     this._render();
     try {
-      await this._hass.callService('homeassistant', 'update_entity', { entity_id: ids.status });
+      await this._hass.callService('homeassistant', 'update_entity', { entity_id: ids });
     } finally {
       // A state change re-renders; stop the spinner anyway if nothing changed
       setTimeout(() => {
@@ -170,9 +195,8 @@ class IptvCard extends HTMLElement {
     }
   }
 
-  // Rebuild the Xtream account summary from the entity states
-  _data() {
-    var ids = this._entities();
+  // Rebuild the Xtream account summary of one subscription from its entity states
+  _data(ids) {
     if (!ids.status) return null;
     var states = this._hass.states;
     var status = states[ids.status];
@@ -225,24 +249,27 @@ class IptvCard extends HTMLElement {
     if (!this.shadowRoot || !this._config) return;
     var lang = iptvLang(this._config, this._hass);
     var locale = (this._hass && this._hass.locale && this._hass.locale.language) || lang;
-    var data = this._hass ? this._data() : null;
-    var v = this._view(data);
     var fmtDate = (ms) =>
       new Date(ms).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' });
     var nf = new Intl.NumberFormat(locale);
     var esc = (s) =>
       String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
-    var title = this._config.title || this._t('default_title');
+    var subs = this._hass ? this._subs() : [];
+    var multi = subs.length > 1;
+    var title = this._config.title || this._t(multi ? 'default_title_multi' : 'default_title');
 
-    var body;
-    var status = '';
-    if (!this._hass) {
-      body = '<div class="msg">' + this._t('loading') + '</div>';
-    } else if (!data) {
-      body = '<div class="msg">' + this._t('no_device') + '</div>';
-    } else if (!v) {
-      body = '<div class="msg err">' + this._t('unavailable') + '</div>';
-    } else {
+    // Status and trial pills of one subscription
+    var chips = (v) => {
+      var icon = v.state === 'ok' ? 'mdi:check-circle' : v.state === 'warning' ? 'mdi:alert' : 'mdi:close-circle';
+      return `
+        <div class="chips">
+          <span class="chip ${v.state}" data-entity="status"><ha-icon icon="${icon}"></ha-icon>${esc(v.statusLabel)}</span>
+          ${v.d.is_trial ? '<span class="chip idle">' + this._t('trial') + '</span>' : ''}
+        </div>`;
+    };
+
+    // Expiration and tiles of one subscription
+    var details = (v) => {
       var remaining =
         v.daysLeft === null
           ? this._t('unlimited')
@@ -251,18 +278,12 @@ class IptvCard extends HTMLElement {
             : this._t('status_expired');
       var cons =
         v.d.max_connections != null ? (v.d.active_cons || 0) + ' / ' + v.d.max_connections : '—';
-      var icon = v.state === 'ok' ? 'mdi:check-circle' : v.state === 'warning' ? 'mdi:alert' : 'mdi:close-circle';
       var stat = (icon, n, key) => `
           <div class="stat" data-entity="${key}">
             <ha-icon icon="${icon}"></ha-icon>
             <div><div class="num">${n != null ? nf.format(n) : '—'}</div><div class="lbl">${this._t(key)}</div></div>
           </div>`;
-      status = `
-        <div class="chips">
-          <span class="chip ${v.state}" data-entity="status"><ha-icon icon="${icon}"></ha-icon>${esc(v.statusLabel)}</span>
-          ${v.d.is_trial ? '<span class="chip idle">' + this._t('trial') + '</span>' : ''}
-        </div>`;
-      body = `
+      return `
         <div class="exp" data-entity="expiration">
           <div class="row">
             <span class="lbl">${this._t('expiration')}</span>
@@ -280,6 +301,33 @@ class IptvCard extends HTMLElement {
             <div><div class="num">${esc(cons)}</div><div class="lbl">${this._t('connections')}</div></div>
           </div>
         </div>`;
+    };
+
+    var body;
+    var status = '';
+    if (!this._hass) {
+      body = '<div class="msg">' + this._t('loading') + '</div>';
+    } else if (!subs.length) {
+      body = '<div class="msg">' + this._t('no_device') + '</div>';
+    } else if (!multi) {
+      // One subscription: pills under the card title, as before
+      var v = this._view(this._data(subs[0].ids));
+      if (v) status = chips(v);
+      body = '<div class="sect" data-sub="0">' +
+        (v ? details(v) : '<div class="msg err">' + this._t('unavailable') + '</div>') + '</div>';
+    } else {
+      // Several subscriptions: one section each, named after its device
+      body = subs.map((sub, i) => {
+        var v = this._view(this._data(sub.ids));
+        return `
+          <div class="sect multi" data-sub="${i}">
+            <div class="sect-head">
+              <div class="sect-name">${esc(sub.name)}</div>
+              ${v ? chips(v) : ''}
+            </div>
+            ${v ? details(v) : '<div class="msg err">' + this._t('unavailable') + '</div>'}
+          </div>`;
+      }).join('');
     }
 
     this.shadowRoot.innerHTML = `
@@ -295,6 +343,11 @@ class IptvCard extends HTMLElement {
         .chip { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px 1px 5px; border-radius: 12px; font-size: 11px; font-weight: 500;
                 color: var(--c); background: color-mix(in srgb, var(--c) 15%, transparent); --mdc-icon-size: 14px; }
         .chip.idle { padding-left: 10px; }
+        .sect { display: flex; flex-direction: column; gap: 10px; }
+        .sect.multi + .sect.multi { border-top: 1px solid var(--divider-color, rgba(127,127,127,.25)); padding-top: 10px; }
+        .sect-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .sect-head .chips { margin-top: 0; flex: none; }
+        .sect-name { font-size: 14px; font-weight: 500; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         button { background:none; border:none; cursor:pointer; color:var(--secondary-text-color); padding:8px; border-radius:50%; align-self: flex-start; display: flex; }
         button:hover { background: var(--secondary-background-color); }
         button.spin ha-icon { animation: spin 1s linear infinite; }
@@ -328,9 +381,11 @@ class IptvCard extends HTMLElement {
         ${body}
       </ha-card>`;
     this.shadowRoot.querySelector('button').addEventListener('click', () => this._refresh());
-    var ids = this._entities();
+    // Header pills (single subscription) belong to the first subscription
     this.shadowRoot.querySelectorAll('[data-entity]').forEach((el) => {
-      var entityId = ids[el.dataset.entity];
+      var sect = el.closest('[data-sub]');
+      var sub = subs[sect ? Number(sect.dataset.sub) : 0];
+      var entityId = sub && sub.ids[el.dataset.entity];
       if (entityId) el.addEventListener('click', () => this._moreInfo(entityId));
     });
   }
@@ -348,7 +403,7 @@ if (!customElements.get('iptv-card')) {
   window.customCards.push({
     type: 'iptv-card',
     name: 'IPTV Subscription Card',
-    description: 'Status, expiration date, channel, movie and series counts of an Xtream Codes IPTV subscription.',
+    description: 'Status, expiration date, channel, movie and series counts of one or several Xtream Codes IPTV subscriptions.',
     preview: false,
     documentationURL: 'https://github.com/juju35/ha-iptv',
   });

@@ -1,4 +1,4 @@
-"""Render the IPTV card with a mock subscription and save the README screenshots.
+"""Render the IPTV card with mock subscriptions and save the README screenshots.
 
 Usage: python scripts/screenshots.py  (needs `pip install playwright` and `playwright install chromium`)
 The clock is frozen so the days left stay the same.
@@ -75,26 +75,42 @@ customElements.define("ha-icon", class extends HTMLElement {
   }
 });"""
 
-# One subscription device: { translation_key: state }.
-SUBSCRIPTION = {
-    "status": ("sensor", "active"),
-    "expiration": ("sensor", "2027-03-07T00:00:00+00:00"),
-    "created": ("sensor", "2026-03-07T00:00:00+00:00"),
-    "trial": ("binary_sensor", "off"),
-    "active_connections": ("sensor", "1"),
-    "max_connections": ("sensor", "1"),
-    "channels": ("sensor", "9831"),
-    "movies": ("sensor", "54089"),
-    "series": ("sensor", "20571"),
+# Subscription devices: { device_id: (name, { translation_key: (domain, state) }) }.
+SUBSCRIPTIONS = {
+    "iptv": ("john @ myserver.com", {
+        "status": ("sensor", "active"),
+        "expiration": ("sensor", "2027-03-07T00:00:00+00:00"),
+        "created": ("sensor", "2026-03-07T00:00:00+00:00"),
+        "trial": ("binary_sensor", "off"),
+        "active_connections": ("sensor", "1"),
+        "max_connections": ("sensor", "1"),
+        "channels": ("sensor", "9831"),
+        "movies": ("sensor", "54089"),
+        "series": ("sensor", "20571"),
+    }),
+    "iptv2": ("jane @ otherprovider.tv", {
+        "status": ("sensor", "active"),
+        "expiration": ("sensor", "2026-10-15T00:00:00+00:00"),
+        "created": ("sensor", "2026-09-15T00:00:00+00:00"),
+        "trial": ("binary_sensor", "on"),
+        "active_connections": ("sensor", "0"),
+        "max_connections": ("sensor", "2"),
+        "channels": ("sensor", "4210"),
+        "movies": ("sensor", "18342"),
+        "series": ("sensor", "6125"),
+    }),
 }
-STATES, ENTITIES = {}, {}
-for key, (domain, value) in SUBSCRIPTION.items():
-    entity_id = f"{domain}.iptv_{key}"
-    STATES[entity_id] = {"entity_id": entity_id, "state": value, "attributes": {}}
-    ENTITIES[entity_id] = {"entity_id": entity_id, "device_id": "iptv", "platform": "iptv_xtream", "translation_key": key}
+STATES, ENTITIES, DEVICES = {}, {}, {}
+for device_id, (name, entities) in SUBSCRIPTIONS.items():
+    DEVICES[device_id] = {"id": device_id, "name": name, "name_by_user": None}
+    for key, (domain, value) in entities.items():
+        entity_id = f"{domain}.{device_id}_{key}"
+        STATES[entity_id] = {"entity_id": entity_id, "state": value, "attributes": {}}
+        ENTITIES[entity_id] = {"entity_id": entity_id, "device_id": device_id, "platform": "iptv_xtream", "translation_key": key}
 
 SHOTS = [
-    {"file": "card", "theme": "light", "lang": "en"},
+    {"file": "card", "theme": "light", "lang": "en", "config": {"devices": ["iptv"]}},
+    {"file": "card-multi", "theme": "light", "lang": "en", "config": {}},
 ]
 
 
@@ -126,13 +142,13 @@ def main():
             page.add_script_tag(content=HA_ELEMENTS)
             page.add_script_tag(content=CARD_JS)
             page.evaluate(
-                """({states, entities, lang}) => {
+                """({states, entities, devices, lang, config}) => {
                   const el = document.createElement("iptv-card");
-                  el.setConfig({type: "custom:iptv-card"});
-                  el.hass = {states, entities, devices: {}, language: lang, locale: {language: lang}, callService: () => Promise.resolve()};
+                  el.setConfig({type: "custom:iptv-card", ...config});
+                  el.hass = {states, entities, devices, language: lang, locale: {language: lang}, callService: () => Promise.resolve()};
                   document.getElementById("root").appendChild(el);
                 }""",
-                {"states": STATES, "entities": ENTITIES, "lang": shot["lang"]},
+                {"states": STATES, "entities": ENTITIES, "devices": DEVICES, "lang": shot["lang"], "config": shot["config"]},
             )
             page.wait_for_timeout(300)
             page.locator("iptv-card").screenshot(path=str(out_dir / f'{shot["file"]}.png'), animations="disabled")

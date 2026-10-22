@@ -8,7 +8,7 @@
 [![Release](https://img.shields.io/github/v/release/juju35/ha-iptv)](https://github.com/juju35/ha-iptv/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Home Assistant integration and Lovelace card that track an **IPTV subscription** using the **Xtream Codes API**: status, expiration date, days left, number of live channels, movies and series, and connections.
+Home Assistant integration and Lovelace card that track one or several **IPTV subscriptions** using the **Xtream Codes API**: status, expiration date, days left, number of live channels, movies and series, and connections.
 
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=juju35&repository=ha-iptv&category=integration)
 
@@ -20,6 +20,7 @@ Home Assistant integration and Lovelace card that track an **IPTV subscription**
 - Expiration date, days left and a progress bar since the subscription started
 - Number of live channels, movies (VOD) and series
 - Active / maximum connections, trial badge
+- Several providers in one card, one section per subscription
 - Orange warning when the subscription expires soon (configurable)
 - Visual editor, refresh button
 - Fully compatible with Home Assistant dark mode
@@ -110,26 +111,38 @@ actions:
 
 ### Card
 
-The card is available in the card picker as **IPTV Subscription Card**, with a visual editor. With a single account no option is needed:
+The card is available in the card picker as **IPTV Subscription Card**, with a visual editor. With no option it shows every IPTV Xtream subscription, one section per provider named after its device (rename the device to change it):
 
 ```yaml
 type: custom:iptv-card
+```
+
+To show only some subscriptions, in a given order, list their devices (pick them in the visual editor):
+
+```yaml
+type: custom:iptv-card
+devices:
+  - 0123456789abcdef0123456789abcdef
+  - fedcba9876543210fedcba9876543210
 ```
 
 #### Options reference
 
 | Option | Required | Default | Description |
 |---|---|---|---|
-| `device` | ❌ | First IPTV Xtream device | Device of the account to show (pick it in the visual editor) |
+| `devices` | ❌ | All IPTV Xtream devices | Devices of the accounts to show, in this order (pick them in the visual editor) |
+| `device` | ❌ | — | Legacy single-device option, still read when `devices` is not set |
 | `title` | ❌ | Auto (i18n) | Card title |
 | `warning_days` | ❌ | `7` | Turns orange when fewer days than this are left |
 | `language` | ❌ | Auto | Force language: `en` or `fr` (auto-detects from HA settings) |
 
-The ⟳ button asks the integration to query the server right away.
+The ⟳ button asks the integration to query every shown server right away.
 
 ## Screenshots
 
 ![iptv-card](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/card.png)
+
+![iptv-card with two providers](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/card-multi.png)
 
 ## How it works
 
@@ -144,7 +157,7 @@ The integration polls the Xtream Codes `player_api.php` endpoint for the account
 
 ```bash
 pip install playwright && playwright install chromium
-python scripts/screenshots.py   # renders screenshots/card.png with a mock subscription
+python scripts/screenshots.py   # renders screenshots/card.png and card-multi.png with mock subscriptions
 ```
 
 The card is plain JavaScript (`custom_components/iptv_xtream/frontend/iptv-card.js`), served by the integration: no build step.
