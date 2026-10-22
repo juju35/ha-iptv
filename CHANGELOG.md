@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.13.1
+
+### Fixes
+- When a provider has no connection limit, the connections tile is hidden instead of showing "—"; the grid keeps its fourth column empty so the tiles stay aligned with the other subscriptions.
+
 ## 3.13.0
 
 ### What's new
