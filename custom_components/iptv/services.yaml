@@ -18,3 +18,31 @@ edit_account:
     mac:
       selector:
         text:
+remove_account:
+  fields:
+    device_id:
+      required: true
+      selector:
+        device:
+          integration: iptv
+add_account:
+  fields:
+    provider:
+      required: true
+      selector:
+        select:
+          options: [xtream, stalker]
+    url:
+      required: true
+      selector:
+        text:
+    username:
+      selector:
+        text:
+    password:
+      selector:
+        text:
+          type: password
+    mac:
+      selector:
+        text:

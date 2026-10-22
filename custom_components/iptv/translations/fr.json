@@ -178,6 +178,42 @@
           "description": ""
         }
       }
+    },
+    "remove_account": {
+      "name": "Supprimer le compte",
+      "description": "Supprime un compte IPTV et ses entités.",
+      "fields": {
+        "device_id": {
+          "name": "Compte",
+          "description": "Le compte IPTV à supprimer."
+        }
+      }
+    },
+    "add_account": {
+      "name": "Ajouter un compte",
+      "description": "Ajoute un nouveau compte IPTV avec les mêmes contrôles que l'interface.",
+      "fields": {
+        "provider": {
+          "name": "Type de fournisseur",
+          "description": "xtream ou stalker"
+        },
+        "url": {
+          "name": "URL du serveur",
+          "description": ""
+        },
+        "username": {
+          "name": "Identifiant",
+          "description": ""
+        },
+        "password": {
+          "name": "Mot de passe",
+          "description": ""
+        },
+        "mac": {
+          "name": "Adresse MAC",
+          "description": ""
+        }
+      }
     }
   }
 }

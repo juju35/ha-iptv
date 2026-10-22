@@ -8,7 +8,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_CARD_VERSION = '3.11.0';
+var IPTV_CARD_VERSION = '3.12.0';
 var IPTV_DOMAIN = 'iptv';
 var IPTV_LOGO_URL = '/' + IPTV_DOMAIN + '/logo.png?v=' + IPTV_CARD_VERSION;
 
@@ -40,6 +40,17 @@ var IptvCardI18n = {
     err_already_configured: 'Another account already uses these credentials',
     err_not_found: 'Account not found',
     err_generic: 'Update failed',
+    del_btn: 'Remove account',
+    del_title: 'Remove account',
+    del_confirm: 'The account and its entities will be removed.',
+    del_delete: 'Delete',
+    add_btn: 'Add account',
+    add_title: 'Add account',
+    add_provider: 'Provider type',
+    add_xtream: 'Xtream Codes',
+    add_stalker: 'Stalker / Ministra',
+    add_create: 'Add',
+    err_existing_longer: 'An account valid longer is already on this server',
     status_active: 'Active',
     status_expired: 'Expired',
     status_banned: 'Banned',
@@ -96,6 +107,17 @@ var IptvCardI18n = {
     err_already_configured: 'Un autre compte utilise déjà ces identifiants',
     err_not_found: 'Compte introuvable',
     err_generic: 'Échec de la mise à jour',
+    del_btn: 'Supprimer le compte',
+    del_title: 'Supprimer le compte',
+    del_confirm: 'Le compte et ses entités seront supprimés.',
+    del_delete: 'Supprimer',
+    add_btn: 'Ajouter un compte',
+    add_title: 'Ajouter un compte',
+    add_provider: 'Type de fournisseur',
+    add_xtream: 'Xtream Codes',
+    add_stalker: 'Stalker / Ministra',
+    add_create: 'Ajouter',
+    err_existing_longer: 'Un compte valide plus longtemps existe déjà sur ce serveur',
     status_active: 'Actif',
     status_expired: 'Expiré',
     status_banned: 'Banni',
@@ -428,7 +450,10 @@ class IptvCard extends HTMLElement {
           ${h && h.at
             ? `<div class="checked" data-entity="last_check"><ha-icon icon="mdi:clock-outline"></ha-icon>${esc(this._t('last_check'))} · ${esc(fmtCheck(h.at))}</div>`
             : '<span></span>'}
-          <button class="edit" data-sub="${i}" title="${esc(this._t('edit_btn'))}"><ha-icon icon="mdi:pencil"></ha-icon></button>
+          <div class="foot-actions">
+            <button class="del" data-sub="${i}" title="${esc(this._t('del_btn'))}"><ha-icon icon="mdi:trash-can-outline"></ha-icon></button>
+            <button class="edit" data-sub="${i}" title="${esc(this._t('edit_btn'))}"><ha-icon icon="mdi:pencil"></ha-icon></button>
+          </div>
         </div>`;
 
     var body;
@@ -508,33 +533,42 @@ class IptvCard extends HTMLElement {
         [data-entity] { cursor:pointer; }
         .stat:hover { filter: brightness(0.95); }
         .foot { display:flex; align-items:center; justify-content:space-between; gap:8px; min-height:20px; }
-        button.edit { padding:3px; margin:0; align-self:center; --mdc-icon-size:16px; }
+        .foot-actions { display:flex; align-items:center; gap:2px; }
+        button.edit, button.del { padding:3px; margin:0; align-self:center; --mdc-icon-size:16px; }
+        button.del:hover { color:var(--iptv-crit); background:color-mix(in srgb, var(--iptv-crit) 12%, transparent); }
         .backdrop { position:absolute; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; z-index:9; border-radius:inherit; }
         .modal { background:var(--card-background-color, #1c1c1c); color:var(--primary-text-color); width:min(92%, 340px); border-radius:14px; padding:16px; box-shadow:0 8px 30px rgba(0,0,0,.4); display:flex; flex-direction:column; gap:10px; }
         .modal h3 { margin:0; font-size:16px; font-weight:600; }
         .field { display:flex; flex-direction:column; gap:3px; }
         .field label { font-size:11px; color:var(--secondary-text-color); }
-        .field input { font:inherit; font-size:14px; padding:8px 10px; border-radius:8px; border:1px solid var(--divider-color, rgba(127,127,127,.3)); background:var(--secondary-background-color, rgba(127,127,127,.08)); color:var(--primary-text-color); }
+        .field input, .field select { font:inherit; font-size:14px; padding:8px 10px; border-radius:8px; border:1px solid var(--divider-color, rgba(127,127,127,.3)); background:var(--secondary-background-color, rgba(127,127,127,.08)); color:var(--primary-text-color); }
         .field .hint { font-size:10px; color:var(--secondary-text-color); }
         .modal .err { color:var(--iptv-crit); font-size:12px; min-height:14px; }
         .modal-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:2px; }
         .modal button.act { border-radius:8px; padding:8px 14px; font:inherit; font-size:13px; font-weight:500; width:auto; height:auto; }
         .modal button.cancel { background:var(--secondary-background-color, rgba(127,127,127,.12)); color:var(--primary-text-color); }
         .modal button.primary { background:var(--primary-color, #03a9f4); color:#fff; }
-        .modal button.primary[disabled] { opacity:.6; cursor:default; }
+        .modal button.primary[disabled], .modal button.danger[disabled] { opacity:.6; cursor:default; }
+        .modal button.danger { background:var(--iptv-crit); color:#fff; }
       </style>
       <ha-card>
         <div class="header">
           <img class="logo" src="${IPTV_LOGO_URL}" alt="">
           <div class="titles"><div class="name">${esc(title)}</div>${status}</div>
+          <button class="add" title="${this._t('add_btn')}"><ha-icon icon="mdi:plus"></ha-icon></button>
           <button class="refresh ${this._loading ? 'spin' : ''}" title="${this._t('refresh')}"><ha-icon icon="mdi:refresh"></ha-icon></button>
         </div>
         ${body}
       </ha-card>`;
     this._root.querySelector('button.refresh').addEventListener('click', () => this._refresh());
+    this._root.querySelector('button.add').addEventListener('click', () => this._openAdd());
     this._root.querySelectorAll('button.edit').forEach((el) => {
       var sub = subs[Number(el.dataset.sub)];
       if (sub) el.addEventListener('click', () => this._openEditor(sub));
+    });
+    this._root.querySelectorAll('button.del').forEach((el) => {
+      var sub = subs[Number(el.dataset.sub)];
+      if (sub) el.addEventListener('click', () => this._confirmDelete(sub));
     });
     // Header pills (single subscription) belong to the first subscription
     this._root.querySelectorAll('[data-entity]').forEach((el) => {
@@ -600,6 +634,133 @@ class IptvCard extends HTMLElement {
 
   _closeEditor() {
     if (this._modal) { this._modal.remove(); this._modal = null; }
+  }
+
+  _confirmDelete(sub) {
+    this._closeEditor();
+    var esc = (x) =>
+      String(x == null ? '' : x).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+    var modal = document.createElement('div');
+    modal.className = 'backdrop';
+    modal.innerHTML = `
+      <div class="modal">
+        <h3>${esc(this._t('del_title'))}</h3>
+        <div class="hint">${esc(sub.name)} — ${esc(this._t('del_confirm'))}</div>
+        <div class="err"></div>
+        <div class="modal-actions">
+          <button class="act cancel">${esc(this._t('edit_cancel'))}</button>
+          <button class="act danger">${esc(this._t('del_delete'))}</button>
+        </div>
+      </div>`;
+    modal.addEventListener('click', (e) => { if (e.target === modal) this._closeEditor(); });
+    this.shadowRoot.appendChild(modal);
+    this._modal = modal;
+    this._delDevice = sub.device;
+    modal.querySelector('.cancel').addEventListener('click', () => this._closeEditor());
+    modal.querySelector('.danger').addEventListener('click', () => this._deleteAccount());
+  }
+
+  async _deleteAccount() {
+    var modal = this._modal;
+    if (!modal) return;
+    var btn = modal.querySelector('.danger');
+    var errEl = modal.querySelector('.err');
+    errEl.textContent = '';
+    btn.setAttribute('disabled', '');
+    btn.textContent = this._t('edit_saving');
+    var out = {};
+    try {
+      var res = await this._hass.callService('iptv', 'remove_account', { device_id: this._delDevice }, undefined, false, true);
+      out = (res && res.response) || {};
+    } catch (e) { out = { ok: false, error: 'generic' }; }
+    if (this._modal !== modal) return;
+    if (out.ok) {
+      this._closeEditor();
+      this._sig = null;
+      return;
+    }
+    btn.removeAttribute('disabled');
+    btn.textContent = this._t('del_delete');
+    errEl.textContent = this._t('err_' + (out.error || 'generic'));
+  }
+
+  // ── Add account popup ─────────────────────────────────────────────────────
+  _openAdd() {
+    this._closeEditor();
+    var esc = (x) =>
+      String(x == null ? '' : x).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+    var modal = document.createElement('div');
+    modal.className = 'backdrop';
+    modal.innerHTML = `
+      <div class="modal">
+        <h3>${esc(this._t('add_title'))}</h3>
+        <div class="field">
+          <label>${esc(this._t('add_provider'))}</label>
+          <select class="prov">
+            <option value="xtream">${esc(this._t('add_xtream'))}</option>
+            <option value="stalker">${esc(this._t('add_stalker'))}</option>
+          </select>
+        </div>
+        <div class="addfields"></div>
+        <div class="err"></div>
+        <div class="modal-actions">
+          <button class="act cancel">${esc(this._t('edit_cancel'))}</button>
+          <button class="act primary">${esc(this._t('add_create'))}</button>
+        </div>
+      </div>`;
+    modal.addEventListener('click', (e) => { if (e.target === modal) this._closeEditor(); });
+    this.shadowRoot.appendChild(modal);
+    this._modal = modal;
+    var sel = modal.querySelector('.prov');
+    var renderFields = () => {
+      var field = (key, type) => `
+        <div class="field">
+          <label>${esc(this._t('edit_' + key))}</label>
+          <input data-k="${key}" type="${type}" autocomplete="off" autocapitalize="off" spellcheck="false">
+        </div>`;
+      modal.querySelector('.addfields').innerHTML =
+        sel.value === 'stalker'
+          ? field('url', 'text') + field('mac', 'text')
+          : field('url', 'text') + field('username', 'text') + field('password', 'password');
+    };
+    sel.addEventListener('change', renderFields);
+    renderFields();
+    modal.querySelector('.cancel').addEventListener('click', () => this._closeEditor());
+    modal.querySelector('.primary').addEventListener('click', () => this._submitAdd());
+  }
+
+  async _submitAdd() {
+    var modal = this._modal;
+    if (!modal) return;
+    var provider = modal.querySelector('.prov').value;
+    var vals = {};
+    modal.querySelectorAll('input[data-k]').forEach((el) => { vals[el.dataset.k] = el.value; });
+    var payload = { provider: provider, url: (vals.url || '').trim() };
+    if (provider === 'stalker') {
+      payload.mac = (vals.mac || '').trim();
+    } else {
+      payload.username = (vals.username || '').trim();
+      payload.password = vals.password || '';
+    }
+    var errEl = modal.querySelector('.err');
+    var btn = modal.querySelector('.primary');
+    errEl.textContent = '';
+    btn.setAttribute('disabled', '');
+    btn.textContent = this._t('edit_saving');
+    var out = {};
+    try {
+      var res = await this._hass.callService('iptv', 'add_account', payload, undefined, false, true);
+      out = (res && res.response) || {};
+    } catch (e) { out = { ok: false, error: 'generic' }; }
+    if (this._modal !== modal) return;
+    if (out.ok) {
+      this._closeEditor();
+      this._sig = null;
+      return;
+    }
+    btn.removeAttribute('disabled');
+    btn.textContent = this._t('add_create');
+    errEl.textContent = this._t('err_' + (out.error || 'generic'));
   }
 
   async _submitEditor() {
