@@ -10,7 +10,7 @@
         }
       },
       "xtream": {
-        "title": "IPTV Xtream Codes",
+        "title": "IPTV Codes",
         "description": "Home Assistant interroge l'API Xtream Codes de ton fournisseur.",
         "data": {
           "url": "URL du serveur Xtream",
@@ -54,7 +54,8 @@
     },
     "abort": {
       "already_configured": "Ce compte est déjà configuré",
-      "reconfigure_successful": "Reconfiguration réussie"
+      "reconfigure_successful": "Reconfiguration réussie",
+      "migrated": "{count} compte(s) de l’ancienne intégration IPTV Xtream déplacé(s) vers IPTV, avec les mêmes entités. Supprime l’ancien dossier custom_components/iptv_xtream s’il est encore là et redémarre Home Assistant."
     }
   },
   "options": {

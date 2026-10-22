@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest an idea for the IPTV Xtream integration or card
+about: Suggest an idea for the IPTV integration or card
 title: "[Feature] "
 labels: enhancement
 assignees: ""

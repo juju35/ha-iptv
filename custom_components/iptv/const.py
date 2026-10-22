@@ -1,7 +1,7 @@
 """Constants for the IPTV integration."""
 
-DOMAIN = "iptv_xtream"
-VERSION = "2.5.0"
+DOMAIN = "iptv"
+VERSION = "3.0.0"
 
 CONF_SCAN_INTERVAL = "scan_interval"
 DEFAULT_SCAN_INTERVAL = 60  # minutes

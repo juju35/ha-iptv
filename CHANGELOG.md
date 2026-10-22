@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.0.0
+
+### Breaking changes
+- The integration is renamed from **IPTV Xtream** (`iptv_xtream`) to **IPTV** (`iptv`): it handles Xtream Codes and Stalker portals. The card is now served at `/iptv/iptv-card.js` and the release asset is `iptv.zip`.
+
+### What's new
+- Migration from `iptv_xtream`: **Add integration → IPTV** moves the existing accounts (data, options, title) and keeps their entity ids, entity names and icons, device name and area. Old device ids are replaced by the new ones in UI-managed dashboards, and the old card resource and notifications are removed.
+- Stalker devices show "Stalker portal" as manufacturer instead of "Xtream Codes".
+
 ## 2.5.0
 
 ### What's new

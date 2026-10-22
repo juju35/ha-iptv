@@ -1,4 +1,4 @@
-"""Data update coordinator for IPTV Xtream."""
+"""Data update coordinator for IPTV."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .api import StalkerClient, XtreamClient, XtreamError
+from .api import StalkerClient, XtreamClient, IptvError
 from .const import (
     CONF_MAC,
     CONF_PROVIDER,
@@ -29,7 +29,7 @@ type IptvConfigEntry = ConfigEntry[IptvCoordinator]
 
 
 class IptvCoordinator(DataUpdateCoordinator[dict[str, Any]]):
-    """Poll the Xtream server for one account."""
+    """Poll the IPTV server for one account."""
 
     config_entry: IptvConfigEntry
 
@@ -59,5 +59,5 @@ class IptvCoordinator(DataUpdateCoordinator[dict[str, Any]]):
     async def _async_update_data(self) -> dict[str, Any]:
         try:
             return await self.client.async_get_data()
-        except XtreamError as err:
+        except IptvError as err:
             raise UpdateFailed(f"IPTV server unreachable: {err}") from err
