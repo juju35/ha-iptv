@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.12.0
+
+### What's new
+- Manage accounts straight from the card: the **+** button in the header adds a new account (provider type, then credentials or MAC), the 🗑 button on each subscription removes it after a confirmation. Adding runs the same checks as the UI (credentials, French lists, video stream).
+- New `iptv.add_account` and `iptv.remove_account` services behind these buttons (alongside `iptv.edit_account`).
+
 ## 3.11.0
 
 ### What's new

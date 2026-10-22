@@ -15,6 +15,7 @@ import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_PASSWORD, CONF_URL, CONF_USERNAME
 from homeassistant.core import HomeAssistant, ServiceCall, ServiceResponse, SupportsResponse
+from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.helpers import config_validation as cv, device_registry as dr
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.util import dt as dt_util
@@ -38,11 +39,25 @@ from .const import (
 )
 
 SERVICE_EDIT_ACCOUNT = "edit_account"
+SERVICE_REMOVE_ACCOUNT = "remove_account"
+SERVICE_ADD_ACCOUNT = "add_account"
 
 EDIT_SCHEMA = vol.Schema(
     {
         vol.Required("device_id"): cv.string,
         vol.Optional(CONF_URL): cv.string,
+        vol.Optional(CONF_USERNAME): cv.string,
+        vol.Optional(CONF_PASSWORD): cv.string,
+        vol.Optional(CONF_MAC): cv.string,
+    }
+)
+
+REMOVE_SCHEMA = vol.Schema({vol.Required("device_id"): cv.string})
+
+ADD_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_PROVIDER): cv.string,
+        vol.Required(CONF_URL): cv.string,
         vol.Optional(CONF_USERNAME): cv.string,
         vol.Optional(CONF_PASSWORD): cv.string,
         vol.Optional(CONF_MAC): cv.string,
@@ -134,14 +149,50 @@ async def _async_edit_account(call: ServiceCall) -> ServiceResponse:
     return {"ok": True}
 
 
+async def _async_remove_account(call: ServiceCall) -> ServiceResponse:
+    hass = call.hass
+    entry = _entry_for_device(hass, call.data["device_id"])
+    if entry is None:
+        return {"ok": False, "error": "not_found"}
+    await hass.config_entries.async_remove(entry.entry_id)
+    return {"ok": True}
+
+
+async def _async_add_account(call: ServiceCall) -> ServiceResponse:
+    hass = call.hass
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": "card_add"}, data=dict(call.data)
+    )
+    if result["type"] == FlowResultType.CREATE_ENTRY:
+        return {"ok": True}
+    if result["type"] == FlowResultType.ABORT:
+        reason = result.get("reason") or "generic"
+        return {"ok": True} if reason == "account_updated" else {"ok": False, "error": reason}
+    return {"ok": False, "error": "generic"}
+
+
 def async_register_services(hass: HomeAssistant) -> None:
     """Register the integration services (once)."""
-    if hass.services.has_service(DOMAIN, SERVICE_EDIT_ACCOUNT):
+    if hass.services.has_service(DOMAIN, SERVICE_ADD_ACCOUNT):
         return
     hass.services.async_register(
         DOMAIN,
         SERVICE_EDIT_ACCOUNT,
         _async_edit_account,
         schema=EDIT_SCHEMA,
+        supports_response=SupportsResponse.OPTIONAL,
+    )
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_REMOVE_ACCOUNT,
+        _async_remove_account,
+        schema=REMOVE_SCHEMA,
+        supports_response=SupportsResponse.OPTIONAL,
+    )
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_ADD_ACCOUNT,
+        _async_add_account,
+        schema=ADD_SCHEMA,
         supports_response=SupportsResponse.OPTIONAL,
     )

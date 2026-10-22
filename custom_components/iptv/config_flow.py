@@ -251,6 +251,36 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
             options=import_data["options"],
         )
 
+    # ── add from the card (service-driven, no form) ──
+
+    async def async_step_card_add(self, data: dict[str, Any]) -> ConfigFlowResult:
+        """Create an account from the card's add popup, with the add checks."""
+        provider = data.get(CONF_PROVIDER, PROVIDER_XTREAM)
+        user_input: dict[str, Any] = {
+            CONF_URL: normalize_url(data[CONF_URL]),
+            CONF_PROVIDER: provider,
+        }
+        if provider == PROVIDER_STALKER:
+            user_input[CONF_MAC] = normalize_mac(data.get(CONF_MAC, ""))
+            if not valid_mac(user_input[CONF_MAC]):
+                return self.async_abort(reason="invalid_mac")
+            await self.async_set_unique_id(
+                f"{user_input[CONF_URL]}|{user_input[CONF_MAC]}".lower()
+            )
+            self._abort_if_unique_id_configured()
+            errors = await self._check_stalker(user_input, french=True)
+        else:
+            user_input[CONF_USERNAME] = data.get(CONF_USERNAME, "")
+            user_input[CONF_PASSWORD] = data.get(CONF_PASSWORD, "")
+            await self.async_set_unique_id(
+                f"{user_input[CONF_URL]}|{user_input[CONF_USERNAME]}".lower()
+            )
+            self._abort_if_unique_id_configured()
+            errors = await self._check_xtream(user_input, french=True)
+        if errors:
+            return self.async_abort(reason=errors["base"])
+        return self._create_or_replace(user_input)
+
     # ── new entry ──
 
     async def async_step_user(
