@@ -15,13 +15,15 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.const import EntityCategory, UnitOfTime
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.util import dt as dt_util
 
-from .const import STATUSES
+from .const import HEALTH_STATES, STATUSES
 from .coordinator import IptvConfigEntry
 from .entity import IptvEntity
+from .health import health_signal
 
 
 def _int(value: Any) -> int | None:
@@ -116,7 +118,11 @@ async def async_setup_entry(
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     """Create the sensors of one account."""
-    async_add_entities(IptvSensor(entry.runtime_data, desc) for desc in SENSORS)
+    coordinator = entry.runtime_data
+    async_add_entities(
+        [IptvSensor(coordinator, desc) for desc in SENSORS]
+        + [IptvHealthSensor(coordinator), IptvResponseTimeSensor(coordinator)]
+    )
 
 
 class IptvSensor(IptvEntity, SensorEntity):
@@ -131,3 +137,73 @@ class IptvSensor(IptvEntity, SensorEntity):
     @property
     def native_value(self) -> Any:
         return self.entity_description.value_fn(self.coordinator.data)
+
+
+class _IptvHealthEntity(IptvEntity, SensorEntity):
+    """Reads the health monitor; stays available when the server is down."""
+
+    def __init__(self, coordinator, key: str) -> None:
+        super().__init__(coordinator, key)
+        self._health = coordinator.health
+
+    async def async_added_to_hass(self) -> None:
+        await super().async_added_to_hass()
+        self.async_on_remove(
+            async_dispatcher_connect(
+                self.hass, health_signal(self.coordinator.config_entry.entry_id), self._on_health
+            )
+        )
+
+    @callback
+    def _on_health(self) -> None:
+        self.async_write_ha_state()
+
+    async def async_update(self) -> None:
+        """homeassistant.update_entity runs a health check now."""
+        await self._health.async_check_now()
+
+
+class IptvHealthSensor(_IptvHealthEntity):
+    """ok, degraded (slow), auth_failed or unreachable."""
+
+    _attr_device_class = SensorDeviceClass.ENUM
+    _attr_options = HEALTH_STATES
+
+    def __init__(self, coordinator) -> None:
+        super().__init__(coordinator, "health")
+
+    @property
+    def available(self) -> bool:
+        return self._health.status is not None
+
+    @property
+    def native_value(self) -> str | None:
+        return self._health.status
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        return {
+            "response_time_ms": self._health.latency_ms,
+            "last_check": self._health.checked_at.isoformat() if self._health.checked_at else None,
+            "error": self._health.error,
+        }
+
+
+class IptvResponseTimeSensor(_IptvHealthEntity):
+    """Response time of the last health check."""
+
+    _attr_device_class = SensorDeviceClass.DURATION
+    _attr_native_unit_of_measurement = UnitOfTime.MILLISECONDS
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(self, coordinator) -> None:
+        super().__init__(coordinator, "response_time")
+
+    @property
+    def available(self) -> bool:
+        return self._health.latency_ms is not None
+
+    @property
+    def native_value(self) -> int | None:
+        return self._health.latency_ms

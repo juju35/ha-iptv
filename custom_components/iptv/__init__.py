@@ -16,6 +16,7 @@ from homeassistant.helpers.typing import ConfigType
 
 from .const import CARD_URL, DOMAIN, LOGO_URL, VERSION
 from .coordinator import IptvConfigEntry, IptvCoordinator
+from .health import HealthMonitor
 from .migrate import LEGACY_DOMAIN, async_migrate_legacy, async_restore_snapshot
 from .notify_expiry import ExpiryNotifier, notification_id
 
@@ -95,6 +96,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: IptvConfigEntry) -> bool
     await coordinator.async_config_entry_first_refresh()
     entry.runtime_data = coordinator
 
+    coordinator.health = HealthMonitor(hass, coordinator)
+    entry.async_on_unload(coordinator.health.async_start())
+
     notifier = ExpiryNotifier(hass, entry.entry_id, entry.title, dict(entry.options))
     notifier.update(coordinator.data)
     entry.async_on_unload(
@@ -102,6 +106,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: IptvConfigEntry) -> bool
     )
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     await async_restore_snapshot(hass, entry)
+    entry.async_create_background_task(
+        hass, coordinator.health.async_check_now(), f"{DOMAIN} first health check"
+    )
     entry.async_on_unload(entry.add_update_listener(_async_reload))
     return True
 

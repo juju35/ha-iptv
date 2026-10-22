@@ -65,10 +65,12 @@
       "init": {
         "data": {
           "scan_interval": "Refresh interval",
-          "notify_days": "Notify before expiration"
+          "notify_days": "Notify before expiration",
+          "health_interval": "Health check interval"
         },
         "data_description": {
-          "notify_days": "Persistent notification this many days before the subscription expires (0 to disable)"
+          "notify_days": "Persistent notification this many days before the subscription expires (0 to disable)",
+          "health_interval": "How often the server is checked with a light request (account info only)"
         }
       }
     }
@@ -108,6 +110,18 @@
       },
       "series": {
         "name": "Series"
+      },
+      "health": {
+        "name": "Health",
+        "state": {
+          "ok": "OK",
+          "degraded": "Slow",
+          "auth_failed": "Credentials refused",
+          "unreachable": "Unreachable"
+        }
+      },
+      "response_time": {
+        "name": "Response time"
       }
     },
     "binary_sensor": {
