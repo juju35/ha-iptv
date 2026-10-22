@@ -8,7 +8,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_CARD_VERSION = '3.10.0';
+var IPTV_CARD_VERSION = '3.11.0';
 var IPTV_DOMAIN = 'iptv';
 var IPTV_LOGO_URL = '/' + IPTV_DOMAIN + '/logo.png?v=' + IPTV_CARD_VERSION;
 
@@ -21,6 +21,25 @@ var IptvCardI18n = {
     no_device: 'No IPTV subscription found: add the IPTV integration in Settings → Devices & services.',
     unavailable: 'IPTV server unreachable',
     refresh: 'Refresh',
+    edit_btn: 'Edit credentials',
+    edit_title: 'Edit account',
+    edit_url: 'Server URL',
+    edit_username: 'Username',
+    edit_password: 'Password',
+    edit_password_keep: 'Leave blank to keep',
+    edit_mac: 'MAC address',
+    edit_save: 'Save',
+    edit_cancel: 'Cancel',
+    edit_saving: 'Checking…',
+    err_invalid_auth: 'Credentials refused',
+    err_cannot_connect: 'Cannot reach the server',
+    err_invalid_mac: 'Invalid MAC address',
+    err_no_french_lists: 'No French list on this provider',
+    err_french_unknown: 'Could not read the categories',
+    err_stream_ko: 'The test channel does not play',
+    err_already_configured: 'Another account already uses these credentials',
+    err_not_found: 'Account not found',
+    err_generic: 'Update failed',
     status_active: 'Active',
     status_expired: 'Expired',
     status_banned: 'Banned',
@@ -58,6 +77,25 @@ var IptvCardI18n = {
     no_device: 'Aucun abonnement IPTV : ajoute l’intégration IPTV dans Paramètres → Appareils et services.',
     unavailable: 'Serveur IPTV injoignable',
     refresh: 'Actualiser',
+    edit_btn: 'Modifier les identifiants',
+    edit_title: 'Modifier le compte',
+    edit_url: 'URL du serveur',
+    edit_username: 'Identifiant',
+    edit_password: 'Mot de passe',
+    edit_password_keep: 'Laisser vide pour conserver',
+    edit_mac: 'Adresse MAC',
+    edit_save: 'Enregistrer',
+    edit_cancel: 'Annuler',
+    edit_saving: 'Vérification…',
+    err_invalid_auth: 'Identifiants refusés',
+    err_cannot_connect: 'Serveur injoignable',
+    err_invalid_mac: 'Adresse MAC invalide',
+    err_no_french_lists: 'Aucune liste française chez ce fournisseur',
+    err_french_unknown: 'Impossible de lire les catégories',
+    err_stream_ko: 'La chaîne de test ne se lit pas',
+    err_already_configured: 'Un autre compte utilise déjà ces identifiants',
+    err_not_found: 'Compte introuvable',
+    err_generic: 'Échec de la mise à jour',
     status_active: 'Actif',
     status_expired: 'Expiré',
     status_banned: 'Banni',
@@ -385,10 +423,13 @@ class IptvCard extends HTMLElement {
         ? when.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })
         : when.toLocaleString(locale, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
     };
-    var checkedLine = (h) =>
-      h && h.at
-        ? `<div class="checked" data-entity="last_check"><ha-icon icon="mdi:clock-outline"></ha-icon>${esc(this._t('last_check'))} · ${esc(fmtCheck(h.at))}</div>`
-        : '';
+    var footer = (h, i) => `
+        <div class="foot">
+          ${h && h.at
+            ? `<div class="checked" data-entity="last_check"><ha-icon icon="mdi:clock-outline"></ha-icon>${esc(this._t('last_check'))} · ${esc(fmtCheck(h.at))}</div>`
+            : '<span></span>'}
+          <button class="edit" data-sub="${i}" title="${esc(this._t('edit_btn'))}"><ha-icon icon="mdi:pencil"></ha-icon></button>
+        </div>`;
 
     var body;
     var status = '';
@@ -403,7 +444,7 @@ class IptvCard extends HTMLElement {
       status = chips(v, h0, this._french(subs[0].ids));
       body = '<div class="sect" data-sub="0">' +
         (v ? details(v) : '<div class="msg err">' + this._t('unavailable') + '</div>') +
-        checkedLine(h0) + '</div>';
+        footer(h0, 0) + '</div>';
     } else {
       // Several subscriptions: one section each, named after its device
       body = subs.map((sub, i) => {
@@ -416,12 +457,13 @@ class IptvCard extends HTMLElement {
               ${chips(v, h, this._french(sub.ids))}
             </div>
             ${v ? details(v) : '<div class="msg err">' + this._t('unavailable') + '</div>'}
-            ${checkedLine(h)}
+            ${footer(h, i)}
           </div>`;
       }).join('');
     }
 
-    this.shadowRoot.innerHTML = `
+    if (!this._root) { this._root = document.createElement('div'); this.shadowRoot.appendChild(this._root); }
+    this._root.innerHTML = `
       <style>
         :host { --iptv-ok: var(--success-color, #43a047); --iptv-warn: var(--warning-color, #ffa600); --iptv-crit: var(--error-color, #db4437); }
         ha-card { padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; }
@@ -465,18 +507,37 @@ class IptvCard extends HTMLElement {
         .msg.err { color: var(--iptv-crit); }
         [data-entity] { cursor:pointer; }
         .stat:hover { filter: brightness(0.95); }
+        .foot { display:flex; align-items:center; justify-content:space-between; gap:8px; min-height:20px; }
+        button.edit { padding:3px; margin:0; align-self:center; --mdc-icon-size:16px; }
+        .backdrop { position:absolute; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; z-index:9; border-radius:inherit; }
+        .modal { background:var(--card-background-color, #1c1c1c); color:var(--primary-text-color); width:min(92%, 340px); border-radius:14px; padding:16px; box-shadow:0 8px 30px rgba(0,0,0,.4); display:flex; flex-direction:column; gap:10px; }
+        .modal h3 { margin:0; font-size:16px; font-weight:600; }
+        .field { display:flex; flex-direction:column; gap:3px; }
+        .field label { font-size:11px; color:var(--secondary-text-color); }
+        .field input { font:inherit; font-size:14px; padding:8px 10px; border-radius:8px; border:1px solid var(--divider-color, rgba(127,127,127,.3)); background:var(--secondary-background-color, rgba(127,127,127,.08)); color:var(--primary-text-color); }
+        .field .hint { font-size:10px; color:var(--secondary-text-color); }
+        .modal .err { color:var(--iptv-crit); font-size:12px; min-height:14px; }
+        .modal-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:2px; }
+        .modal button.act { border-radius:8px; padding:8px 14px; font:inherit; font-size:13px; font-weight:500; width:auto; height:auto; }
+        .modal button.cancel { background:var(--secondary-background-color, rgba(127,127,127,.12)); color:var(--primary-text-color); }
+        .modal button.primary { background:var(--primary-color, #03a9f4); color:#fff; }
+        .modal button.primary[disabled] { opacity:.6; cursor:default; }
       </style>
       <ha-card>
         <div class="header">
           <img class="logo" src="${IPTV_LOGO_URL}" alt="">
           <div class="titles"><div class="name">${esc(title)}</div>${status}</div>
-          <button class="${this._loading ? 'spin' : ''}" title="${this._t('refresh')}"><ha-icon icon="mdi:refresh"></ha-icon></button>
+          <button class="refresh ${this._loading ? 'spin' : ''}" title="${this._t('refresh')}"><ha-icon icon="mdi:refresh"></ha-icon></button>
         </div>
         ${body}
       </ha-card>`;
-    this.shadowRoot.querySelector('button').addEventListener('click', () => this._refresh());
+    this._root.querySelector('button.refresh').addEventListener('click', () => this._refresh());
+    this._root.querySelectorAll('button.edit').forEach((el) => {
+      var sub = subs[Number(el.dataset.sub)];
+      if (sub) el.addEventListener('click', () => this._openEditor(sub));
+    });
     // Header pills (single subscription) belong to the first subscription
-    this.shadowRoot.querySelectorAll('[data-entity]').forEach((el) => {
+    this._root.querySelectorAll('[data-entity]').forEach((el) => {
       var sect = el.closest('[data-sub]');
       var sub = subs[sect ? Number(sect.dataset.sub) : 0];
       var entityId = sub && sub.ids[el.dataset.entity];
@@ -487,6 +548,91 @@ class IptvCard extends HTMLElement {
   // Open the Home Assistant entity dialog
   _moreInfo(entityId) {
     this.dispatchEvent(new CustomEvent('hass-more-info', { detail: { entityId: entityId }, bubbles: true, composed: true }));
+  }
+
+  // ── Edit credentials popup ────────────────────────────────────────────────
+  async _openEditor(sub) {
+    this._closeEditor();
+    var esc = (x) =>
+      String(x == null ? '' : x).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+    var modal = document.createElement('div');
+    modal.className = 'backdrop';
+    modal.innerHTML = `<div class="modal"><h3>${esc(this._t('edit_title'))}</h3><div class="hint">${esc(this._t('edit_saving'))}</div></div>`;
+    modal.addEventListener('click', (e) => { if (e.target === modal) this._closeEditor(); });
+    this.shadowRoot.appendChild(modal);
+    this._modal = modal;
+    this._editDevice = sub.device;
+
+    var prefill = {};
+    try {
+      var res = await this._hass.callService('iptv', 'edit_account', { device_id: sub.device }, undefined, false, true);
+      prefill = (res && res.response) || {};
+    } catch (e) { prefill = {}; }
+    if (this._modal !== modal) return;
+
+    var provider = prefill.provider === 'stalker' ? 'stalker' : 'xtream';
+    this._editProvider = provider;
+    var field = (key, type, value) => `
+      <div class="field">
+        <label>${esc(this._t('edit_' + key))}</label>
+        <input data-k="${key}" type="${type}" value="${esc(value)}" autocomplete="off" autocapitalize="off" spellcheck="false"
+               ${type === 'password' ? `placeholder="${esc(this._t('edit_password_keep'))}"` : ''}>
+      </div>`;
+    var fields =
+      provider === 'stalker'
+        ? field('url', 'text', prefill.url) + field('mac', 'text', prefill.mac)
+        : field('url', 'text', prefill.url) + field('username', 'text', prefill.username) + field('password', 'password', '');
+    modal.querySelector('.modal').innerHTML = `
+      <h3>${esc(this._t('edit_title'))}</h3>
+      ${fields}
+      <div class="err"></div>
+      <div class="modal-actions">
+        <button class="act cancel">${esc(this._t('edit_cancel'))}</button>
+        <button class="act primary">${esc(this._t('edit_save'))}</button>
+      </div>`;
+    modal.querySelector('.cancel').addEventListener('click', () => this._closeEditor());
+    modal.querySelector('.primary').addEventListener('click', () => this._submitEditor());
+    modal.querySelectorAll('input').forEach((el) =>
+      el.addEventListener('keydown', (e) => { if (e.key === 'Enter') this._submitEditor(); }));
+    var firstInput = modal.querySelector('input');
+    if (firstInput) firstInput.focus();
+  }
+
+  _closeEditor() {
+    if (this._modal) { this._modal.remove(); this._modal = null; }
+  }
+
+  async _submitEditor() {
+    var modal = this._modal;
+    if (!modal) return;
+    var vals = {};
+    modal.querySelectorAll('input[data-k]').forEach((el) => { vals[el.dataset.k] = el.value; });
+    var payload = { device_id: this._editDevice, url: (vals.url || '').trim() };
+    if (this._editProvider === 'stalker') {
+      payload.mac = (vals.mac || '').trim();
+    } else {
+      payload.username = (vals.username || '').trim();
+      if (vals.password) payload.password = vals.password; // blank keeps the current password
+    }
+    var errEl = modal.querySelector('.err');
+    var primary = modal.querySelector('.primary');
+    errEl.textContent = '';
+    primary.setAttribute('disabled', '');
+    primary.textContent = this._t('edit_saving');
+    var out = {};
+    try {
+      var res = await this._hass.callService('iptv', 'edit_account', payload, undefined, false, true);
+      out = (res && res.response) || {};
+    } catch (e) { out = { ok: false, error: 'generic' }; }
+    if (this._modal !== modal) return;
+    if (out.ok) {
+      this._closeEditor();
+      this._sig = null; // the entry reloaded; re-render on the next state
+      return;
+    }
+    primary.removeAttribute('disabled');
+    primary.textContent = this._t('edit_save');
+    errEl.textContent = this._t('err_' + (out.error || 'generic'));
   }
 }
 

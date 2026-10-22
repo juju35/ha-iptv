@@ -1,0 +1,20 @@
+edit_account:
+  fields:
+    device_id:
+      required: true
+      selector:
+        device:
+          integration: iptv
+    url:
+      selector:
+        text:
+    username:
+      selector:
+        text:
+    password:
+      selector:
+        text:
+          type: password
+    mac:
+      selector:
+        text:

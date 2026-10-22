@@ -20,6 +20,7 @@ from .health import HealthMonitor
 from .migrate import LEGACY_DOMAIN, async_migrate_legacy, async_restore_snapshot
 from .naming import auto_title, is_auto_generated
 from .notify_expiry import ExpiryNotifier, notification_id
+from .services import async_register_services
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -46,6 +47,8 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         await _register()
     else:
         hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STARTED, _register)
+
+    async_register_services(hass)
 
     # Accounts created before 3.0 under the former iptv_xtream domain
     await async_migrate_legacy(hass)

@@ -151,5 +151,33 @@
         "name": "French lists"
       }
     }
+  },
+  "services": {
+    "edit_account": {
+      "name": "Edit account",
+      "description": "Change an account's credentials or MAC address after running the same checks as adding one.",
+      "fields": {
+        "device_id": {
+          "name": "Account",
+          "description": "The IPTV account to edit."
+        },
+        "url": {
+          "name": "Server URL",
+          "description": ""
+        },
+        "username": {
+          "name": "Username",
+          "description": ""
+        },
+        "password": {
+          "name": "Password",
+          "description": ""
+        },
+        "mac": {
+          "name": "MAC address",
+          "description": ""
+        }
+      }
+    }
   }
 }

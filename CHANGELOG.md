@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.11.0
+
+### What's new
+- Edit an account's credentials or MAC address from the card: the ✎ button on each subscription opens a popup with the server URL and username / password (or MAC) pre-filled (never the password). Saving runs the same checks as adding an account — credentials, French lists and video stream — and refuses the change if any fails. New `iptv.edit_account` service backs it.
+- The native **Reconfigure** flow (Settings → Devices & services) now runs those same checks too.
+
 ## 3.10.0
 
 ### What's new
