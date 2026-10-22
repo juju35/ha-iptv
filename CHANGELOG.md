@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.7.0
+
+### Fixes
+- The card no longer ends up empty when its configured `device` / `devices` no longer exist (e.g. after removing and re-adding an account, which changes the device id): it falls back to showing every subscription. A configuration that still matches at least one subscription is left untouched.
+
 ## 3.6.0
 
 ### What's new

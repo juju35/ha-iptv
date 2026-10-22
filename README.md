@@ -165,6 +165,8 @@ The card is available in the card picker as **IPTV Subscription Card**, with a v
 type: custom:iptv-card
 ```
 
+If a configured device no longer exists (for example after removing and re-adding an account, which gives it a new id), the card falls back to showing every subscription rather than an empty card.
+
 To show only some subscriptions, in a given order, list their devices (pick them in the visual editor):
 
 ```yaml
