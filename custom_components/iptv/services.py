@@ -11,12 +11,12 @@ from __future__ import annotations
 from typing import Any
 
 import voluptuous as vol
-
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_PASSWORD, CONF_URL, CONF_USERNAME
 from homeassistant.core import HomeAssistant, ServiceCall, ServiceResponse, SupportsResponse
 from homeassistant.data_entry_flow import FlowResultType
-from homeassistant.helpers import config_validation as cv, device_registry as dr
+from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.util import dt as dt_util
 
@@ -86,7 +86,9 @@ async def _validate(hass: HomeAssistant, provider: str, data: dict[str, Any]) ->
     if provider == PROVIDER_STALKER:
         if not valid_mac(data.get(CONF_MAC, "")):
             return "invalid_mac"
-        client: XtreamClient | StalkerClient = StalkerClient(session, url, normalize_mac(data[CONF_MAC]))
+        client: XtreamClient | StalkerClient = StalkerClient(
+            session, url, normalize_mac(data[CONF_MAC])
+        )
     else:
         client = XtreamClient(session, url, data[CONF_USERNAME], data[CONF_PASSWORD])
     try:

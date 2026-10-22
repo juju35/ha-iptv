@@ -22,7 +22,11 @@ def auto_title(data: dict[str, Any]) -> str:
 
 def _legacy_title(data: dict[str, Any]) -> str:
     """Title format used before 3.5 (``<username or mac> @ <host>``)."""
-    login = data.get(CONF_MAC) if data.get(CONF_PROVIDER) == PROVIDER_STALKER else data.get(CONF_USERNAME)
+    login = (
+        data.get(CONF_MAC)
+        if data.get(CONF_PROVIDER) == PROVIDER_STALKER
+        else data.get(CONF_USERNAME)
+    )
     return f"{login} @ {server_name(data[CONF_URL])}"
 
 

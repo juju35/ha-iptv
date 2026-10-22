@@ -7,9 +7,9 @@ account info is requested (``user_info`` for Xtream, the handshake and
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta
 import logging
 import time
+from datetime import datetime, timedelta
 from typing import Any
 
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback

@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+import math
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import datetime, timezone
-import math
+from datetime import UTC, datetime
 from typing import Any
 
 from homeassistant.components.sensor import (
@@ -37,7 +37,7 @@ def _timestamp(value: Any) -> datetime | None:
     seconds = _int(value)
     if not seconds:
         return None
-    return datetime.fromtimestamp(seconds, tz=timezone.utc)
+    return datetime.fromtimestamp(seconds, tz=UTC)
 
 
 def _status(data: dict[str, Any]) -> str | None:

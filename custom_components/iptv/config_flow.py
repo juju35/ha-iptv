@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 import math
+from datetime import UTC, datetime
 from typing import Any
 
 import voluptuous as vol
-
 from homeassistant.config_entries import (
     ConfigEntry,
     ConfigFlow,
@@ -16,7 +15,6 @@ from homeassistant.config_entries import (
 )
 from homeassistant.const import CONF_PASSWORD, CONF_URL, CONF_USERNAME
 from homeassistant.core import callback
-from homeassistant.util import dt as dt_util
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.selector import (
     BooleanSelector,
@@ -30,6 +28,7 @@ from homeassistant.helpers.selector import (
     TextSelectorConfig,
     TextSelectorType,
 )
+from homeassistant.util import dt as dt_util
 
 from .api import (
     IptvAuthError,
@@ -48,9 +47,9 @@ from .const import (
     CONF_ADDED_AT,
     CONF_HEALTH_INTERVAL,
     CONF_MAC,
+    CONF_NOTIFY_DAYS,
     CONF_NOTIFY_SERVICE,
     CONF_PROVIDER,
-    CONF_NOTIFY_DAYS,
     CONF_SCAN_INTERVAL,
     CONF_STREAM_CHECK,
     CONF_UPDATED_AT,
@@ -108,7 +107,7 @@ def _fmt(validity: float) -> str:
         return "∞"
     if validity == -math.inf:
         return "—"
-    return dt_util.as_local(datetime.fromtimestamp(validity, tz=timezone.utc)).date().isoformat()
+    return dt_util.as_local(datetime.fromtimestamp(validity, tz=UTC)).date().isoformat()
 
 
 class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
@@ -128,9 +127,7 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
         return await self._check(client, french)
 
     async def _check_stalker(self, data: dict[str, Any], french: bool = False) -> dict[str, str]:
-        client = StalkerClient(
-            async_get_clientsession(self.hass), data[CONF_URL], data[CONF_MAC]
-        )
+        client = StalkerClient(async_get_clientsession(self.hass), data[CONF_URL], data[CONF_MAC])
         return await self._check(client, french)
 
     async def _check(
@@ -164,7 +161,8 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
         title = auto_title(data)
         server = server_key(data[CONF_URL])
         same = [
-            e for e in self._async_current_entries(include_ignore=False)
+            e
+            for e in self._async_current_entries(include_ignore=False)
             if CONF_URL in e.data and server_key(e.data[CONF_URL]) == server
         ]
         now = dt_util.utcnow().replace(microsecond=0).isoformat()
@@ -187,7 +185,9 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
             existing,
             unique_id=self.unique_id,
             # Keep a title the user chose; refresh the generated one
-            title=title if is_auto_generated(existing.title, dict(existing.data)) else existing.title,
+            title=title
+            if is_auto_generated(existing.title, dict(existing.data))
+            else existing.title,
             data=data,
         )
         self.hass.config_entries.async_schedule_reload(existing.entry_id)
@@ -259,9 +259,7 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
             user_input[CONF_MAC] = normalize_mac(data.get(CONF_MAC, ""))
             if not valid_mac(user_input[CONF_MAC]):
                 return self.async_abort(reason="invalid_mac")
-            await self.async_set_unique_id(
-                f"{user_input[CONF_URL]}|{user_input[CONF_MAC]}".lower()
-            )
+            await self.async_set_unique_id(f"{user_input[CONF_URL]}|{user_input[CONF_MAC]}".lower())
             self._abort_if_unique_id_configured()
             errors = await self._check_stalker(user_input, french=True)
         else:
@@ -278,9 +276,7 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
 
     # ── new entry ──
 
-    async def async_step_user(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
+    async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         # Upgrading from iptv_xtream (< 3.0): move the existing accounts instead
         if count := await async_migrate_legacy(self.hass):
             return self.async_abort(
@@ -290,9 +286,7 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
             step_id="user", menu_options=[PROVIDER_XTREAM, PROVIDER_STALKER]
         )
 
-    async def async_step_xtream(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
+    async def async_step_xtream(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         errors: dict[str, str] = {}
         if user_input is not None:
             self._notify_service = user_input.pop(CONF_NOTIFY_SERVICE, None)
@@ -379,9 +373,7 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
 class IptvOptionsFlow(OptionsFlow):
     """Polling and health check intervals, expiration notification."""
 
-    async def async_step_init(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
+    async def async_step_init(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         if user_input is not None:
             return self.async_create_entry(data=user_input)
         return self.async_show_form(

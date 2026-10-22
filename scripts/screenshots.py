@@ -59,11 +59,15 @@ ICONS = {
     "eye-outline": "M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9M12,4.5C17,4.5 21.27,7.61 23,12C21.27,16.39 17,19.5 12,19.5C7,19.5 2.73,16.39 1,12C2.73,7.61 7,4.5 12,4.5M3.18,12C4.83,15.36 8.24,17.5 12,17.5C15.76,17.5 19.17,15.36 20.82,12C19.17,8.64 15.76,6.5 12,6.5C8.24,6.5 4.83,8.64 3.18,12Z",
     "pencil": "M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z",
     "clock-outline": "M12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12.5,7H11V13L16.25,16.15L17,14.92L12.5,12.25V7Z",
-    "account-multiple": "M16 17V19H2V17S2 13 9 13 16 17 16 17M12.5 7.5A3.5 3.5 0 1 0 9 11A3.5 3.5 0 0 0 12.5 7.5M15.94 13A5.32 5.32 0 0 1 18 17V19H22V17S22 13.37 15.94 13M15 4A3.39 3.39 0 0 0 13.07 4.59A5 5 0 0 1 13.07 10.41A3.39 3.39 0 0 0 15 11A3.5 3.5 0 0 0 15 4Z"
+    "account-multiple": "M16 17V19H2V17S2 13 9 13 16 17 16 17M12.5 7.5A3.5 3.5 0 1 0 9 11A3.5 3.5 0 0 0 12.5 7.5M15.94 13A5.32 5.32 0 0 1 18 17V19H22V17S22 13.37 15.94 13M15 4A3.39 3.39 0 0 0 13.07 4.59A5 5 0 0 1 13.07 10.41A3.39 3.39 0 0 0 15 11A3.5 3.5 0 0 0 15 4Z",
 }
 
 # Minimal stand-ins for Home Assistant's <ha-card> and <ha-icon>.
-HA_ELEMENTS = "const ICONS = " + __import__("json").dumps(ICONS) + ";" + """
+HA_ELEMENTS = (
+    "const ICONS = "
+    + __import__("json").dumps(ICONS)
+    + ";"
+    + """
 customElements.define("ha-card", class extends HTMLElement {
   constructor() {
     super();
@@ -82,45 +86,69 @@ customElements.define("ha-icon", class extends HTMLElement {
     this.innerHTML = '<svg viewBox="0 0 24 24" style="width:var(--mdc-icon-size,24px);height:var(--mdc-icon-size,24px);fill:currentColor"><path d="' + path + '"/></svg>';
   }
 });"""
+)
 
 # Subscription devices: { device_id: (name, { translation_key: (domain, state) }) }.
 # Fully anonymised mock data; no real provider, account or MAC appears here.
 SUBSCRIPTIONS = {
-    "iptv": ("Provider A", {
-        "status": ("sensor", "active"),
-        "expiration": ("sensor", "2027-03-07T00:00:00+00:00"),
-        "created": ("sensor", "2026-03-07T00:00:00+00:00"),
-        "trial": ("binary_sensor", "off"),
-        "active_connections": ("sensor", "1"),
-        "max_connections": ("sensor", "1"),
-        "channels": ("sensor", "9831"),
-        "movies": ("sensor", "54089"),
-        "series": ("sensor", "20571"),
-        "health": ("sensor", "ok", {"response_time_ms": 182, "last_check": "2026-10-10T08:57:00+02:00"}),
-        "french_lists": ("binary_sensor", "on"),
-    }),
+    "iptv": (
+        "Provider A",
+        {
+            "status": ("sensor", "active"),
+            "expiration": ("sensor", "2027-03-07T00:00:00+00:00"),
+            "created": ("sensor", "2026-03-07T00:00:00+00:00"),
+            "trial": ("binary_sensor", "off"),
+            "active_connections": ("sensor", "1"),
+            "max_connections": ("sensor", "1"),
+            "channels": ("sensor", "9831"),
+            "movies": ("sensor", "54089"),
+            "series": ("sensor", "20571"),
+            "health": (
+                "sensor",
+                "ok",
+                {"response_time_ms": 182, "last_check": "2026-10-10T08:57:00+02:00"},
+            ),
+            "french_lists": ("binary_sensor", "on"),
+        },
+    ),
     # A Stalker (MAC) account: no connection counts and no start date (the bar is estimated).
-    "iptv2": ("Provider B", {
-        "status": ("sensor", "active"),
-        "expiration": ("sensor", "2026-10-29T00:00:00+00:00"),
-        "created": ("sensor", "unknown"),
-        "trial": ("binary_sensor", "off"),
-        "active_connections": ("sensor", "unknown"),
-        "max_connections": ("sensor", "unknown"),
-        "channels": ("sensor", "4210"),
-        "movies": ("sensor", "18342"),
-        "series": ("sensor", "6125"),
-        "health": ("sensor", "degraded", {"response_time_ms": 3420, "last_check": "2026-10-10T08:55:00+02:00"}),
-        "french_lists": ("binary_sensor", "off"),
-    }),
+    "iptv2": (
+        "Provider B",
+        {
+            "status": ("sensor", "active"),
+            "expiration": ("sensor", "2026-10-29T00:00:00+00:00"),
+            "created": ("sensor", "unknown"),
+            "trial": ("binary_sensor", "off"),
+            "active_connections": ("sensor", "unknown"),
+            "max_connections": ("sensor", "unknown"),
+            "channels": ("sensor", "4210"),
+            "movies": ("sensor", "18342"),
+            "series": ("sensor", "6125"),
+            "health": (
+                "sensor",
+                "degraded",
+                {"response_time_ms": 3420, "last_check": "2026-10-10T08:55:00+02:00"},
+            ),
+            "french_lists": ("binary_sensor", "off"),
+        },
+    ),
 }
 STATES, ENTITIES, DEVICES = {}, {}, {}
 for device_id, (name, entities) in SUBSCRIPTIONS.items():
     DEVICES[device_id] = {"id": device_id, "name": name, "name_by_user": None}
     for key, (domain, value, *attrs) in entities.items():
         entity_id = f"{domain}.{device_id}_{key}"
-        STATES[entity_id] = {"entity_id": entity_id, "state": value, "attributes": attrs[0] if attrs else {}}
-        ENTITIES[entity_id] = {"entity_id": entity_id, "device_id": device_id, "platform": "iptv", "translation_key": key}
+        STATES[entity_id] = {
+            "entity_id": entity_id,
+            "state": value,
+            "attributes": attrs[0] if attrs else {},
+        }
+        ENTITIES[entity_id] = {
+            "entity_id": entity_id,
+            "device_id": device_id,
+            "platform": "iptv",
+            "translation_key": key,
+        }
 
 SHOTS = [
     {"file": "card", "theme": "light", "lang": "en", "config": {"devices": ["iptv"]}},
@@ -143,13 +171,21 @@ def main():
     with sync_playwright() as p:
         path = os.environ.get("CHROMIUM_PATH")
         browser = p.chromium.launch(executable_path=path) if path else p.chromium.launch()
-        context = browser.new_context(device_scale_factor=2, viewport={"width": 1000, "height": 1200}, timezone_id="Europe/Paris")
+        context = browser.new_context(
+            device_scale_factor=2,
+            viewport={"width": 1000, "height": 1200},
+            timezone_id="Europe/Paris",
+        )
         page = context.new_page()
         page.clock.set_fixed_time(NOW)
         # The card loads its logo from /iptv/logo.png, served by the integration:
         # open a page on an http origin so the relative URL resolves
-        page.route("**/iptv/logo.png*", lambda route: route.fulfill(body=LOGO, content_type="image/png"))
-        page.route(BASE_URL, lambda route: route.fulfill(body="<!doctype html>", content_type="text/html"))
+        page.route(
+            "**/iptv/logo.png*", lambda route: route.fulfill(body=LOGO, content_type="image/png")
+        )
+        page.route(
+            BASE_URL, lambda route: route.fulfill(body="<!doctype html>", content_type="text/html")
+        )
         page.goto(BASE_URL)
         for shot in SHOTS:
             page.set_content(page_html(shot["theme"]))
@@ -162,11 +198,19 @@ def main():
                   el.hass = {states, entities, devices, language: lang, locale: {language: lang}, callService: () => Promise.resolve()};
                   document.getElementById("root").appendChild(el);
                 }""",
-                {"states": STATES, "entities": ENTITIES, "devices": DEVICES, "lang": shot["lang"], "config": shot["config"]},
+                {
+                    "states": STATES,
+                    "entities": ENTITIES,
+                    "devices": DEVICES,
+                    "lang": shot["lang"],
+                    "config": shot["config"],
+                },
             )
             page.wait_for_timeout(300)
-            page.locator("iptv-card").screenshot(path=str(out_dir / f'{shot["file"]}.png'), animations="disabled")
-            print(f'screenshots/{shot["file"]}.png')
+            page.locator("iptv-card").screenshot(
+                path=str(out_dir / f"{shot['file']}.png"), animations="disabled"
+            )
+            print(f"screenshots/{shot['file']}.png")
         browser.close()
 
 

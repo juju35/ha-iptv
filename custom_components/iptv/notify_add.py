@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 import logging
 import math
+from datetime import UTC, datetime
 from typing import Any
 
 from homeassistant.const import CONF_PASSWORD, CONF_URL, CONF_USERNAME
@@ -72,9 +72,9 @@ def build_message(
         if validity == math.inf:
             expiration = t["unlimited"]
         else:
-            expiration = dt_util.as_local(
-                datetime.fromtimestamp(validity, tz=timezone.utc)
-            ).strftime("%d/%m/%Y" if lang.startswith("fr") else "%Y-%m-%d")
+            expiration = dt_util.as_local(datetime.fromtimestamp(validity, tz=UTC)).strftime(
+                "%d/%m/%Y" if lang.startswith("fr") else "%Y-%m-%d"
+            )
         lines.append(f"{t['expiration']}{sep}{expiration}")
     if french:
         counts = ", ".join(

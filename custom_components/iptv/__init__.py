@@ -83,9 +83,7 @@ async def _async_register_resource(hass: HomeAssistant) -> bool:
             await resources.async_create_item({"res_type": "module", "url": url})
             return True
         if existing[0]["url"] != url:
-            await resources.async_update_item(
-                existing[0]["id"], {"res_type": "module", "url": url}
-            )
+            await resources.async_update_item(existing[0]["id"], {"res_type": "module", "url": url})
         for duplicate in existing[1:]:
             await resources.async_delete_item(duplicate["id"])
     except Exception:  # noqa: BLE001 - never block the integration on the card
@@ -112,9 +110,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: IptvConfigEntry) -> bool
 
     notifier = ExpiryNotifier(hass, entry.entry_id, entry.title, dict(entry.options))
     notifier.update(coordinator.data)
-    entry.async_on_unload(
-        coordinator.async_add_listener(lambda: notifier.update(coordinator.data))
-    )
+    entry.async_on_unload(coordinator.async_add_listener(lambda: notifier.update(coordinator.data)))
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     await async_restore_snapshot(hass, entry)
     entry.async_create_background_task(

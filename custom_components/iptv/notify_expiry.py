@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 import math
+from datetime import UTC, datetime
 from typing import Any
 
 from homeassistant.components import persistent_notification
@@ -41,7 +41,9 @@ class ExpiryNotifier:
     the warning window, so dismissing it silences it until the next day.
     """
 
-    def __init__(self, hass: HomeAssistant, entry_id: str, name: str, options: dict[str, Any]) -> None:
+    def __init__(
+        self, hass: HomeAssistant, entry_id: str, name: str, options: dict[str, Any]
+    ) -> None:
         self._hass = hass
         self._id = notification_id(entry_id)
         self._name = name
@@ -58,7 +60,7 @@ class ExpiryNotifier:
         if not self._threshold or not exp or not (data or {}).get("auth"):
             self.dismiss()
             return
-        expiration = datetime.fromtimestamp(exp, tz=timezone.utc)
+        expiration = datetime.fromtimestamp(exp, tz=UTC)
         days = math.ceil((expiration - dt_util.utcnow()).total_seconds() / 86400)
         if days > self._threshold:
             self.dismiss()
@@ -74,7 +76,10 @@ class ExpiryNotifier:
             name=self._name, date=date, days=days
         )
         persistent_notification.async_create(
-            self._hass, message, title=text["title"].format(name=self._name), notification_id=self._id
+            self._hass,
+            message,
+            title=text["title"].format(name=self._name),
+            notification_id=self._id,
         )
 
     @callback
