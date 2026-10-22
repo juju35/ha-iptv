@@ -20,7 +20,7 @@ from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.util import dt as dt_util
 
-from .const import HEALTH_STATES, STATUSES
+from .const import CONF_ADDED_AT, CONF_UPDATED_AT, HEALTH_STATES, STATUSES
 from .coordinator import IptvConfigEntry
 from .entity import IptvEntity
 from .health import health_signal
@@ -121,7 +121,13 @@ async def async_setup_entry(
     coordinator = entry.runtime_data
     async_add_entities(
         [IptvSensor(coordinator, desc) for desc in SENSORS]
-        + [IptvHealthSensor(coordinator), IptvResponseTimeSensor(coordinator)]
+        + [
+            IptvHealthSensor(coordinator),
+            IptvResponseTimeSensor(coordinator),
+            IptvLastCheckSensor(coordinator),
+            IptvConfigTimeSensor(coordinator, "added", CONF_ADDED_AT),
+            IptvConfigTimeSensor(coordinator, "updated", CONF_UPDATED_AT),
+        ]
     )
 
 
@@ -207,3 +213,37 @@ class IptvResponseTimeSensor(_IptvHealthEntity):
     @property
     def native_value(self) -> int | None:
         return self._health.latency_ms
+
+
+class IptvLastCheckSensor(_IptvHealthEntity):
+    """Moment of the last health check."""
+
+    _attr_device_class = SensorDeviceClass.TIMESTAMP
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(self, coordinator) -> None:
+        super().__init__(coordinator, "last_check")
+
+    @property
+    def available(self) -> bool:
+        return self._health.checked_at is not None
+
+    @property
+    def native_value(self) -> datetime | None:
+        return self._health.checked_at
+
+
+class IptvConfigTimeSensor(IptvEntity, SensorEntity):
+    """When the account was added or last updated (from the config entry)."""
+
+    _attr_device_class = SensorDeviceClass.TIMESTAMP
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(self, coordinator, key: str, data_key: str) -> None:
+        super().__init__(coordinator, key)
+        self._data_key = data_key
+
+    @property
+    def native_value(self) -> datetime | None:
+        raw = self.coordinator.config_entry.data.get(self._data_key)
+        return dt_util.parse_datetime(raw) if raw else None

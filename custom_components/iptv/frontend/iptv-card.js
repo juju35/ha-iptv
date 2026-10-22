@@ -8,7 +8,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_CARD_VERSION = '3.5.0';
+var IPTV_CARD_VERSION = '3.6.0';
 var IPTV_DOMAIN = 'iptv';
 var IPTV_LOGO_URL = '/' + IPTV_DOMAIN + '/logo.png?v=' + IPTV_CARD_VERSION;
 
@@ -40,6 +40,7 @@ var IptvCardI18n = {
     french_on: 'FR',
     french_off: 'No FR',
     french_title: 'French lists',
+    last_check: 'Last check',
     health_ok: 'Online',
     health_degraded: 'Slow',
     health_unreachable: 'Unreachable',
@@ -75,6 +76,7 @@ var IptvCardI18n = {
     french_on: 'FR',
     french_off: 'Pas de FR',
     french_title: 'Listes françaises',
+    last_check: 'Dernier contrôle',
     health_ok: 'En ligne',
     health_degraded: 'Lent',
     health_unreachable: 'Injoignable',
@@ -248,8 +250,9 @@ class IptvCard extends HTMLElement {
   _health(ids) {
     var st = ids.health && this._hass.states[ids.health];
     if (!st || st.state === 'unknown' || st.state === 'unavailable') return null;
-    var ms = st.attributes && st.attributes.response_time_ms;
-    return { status: st.state, ms: ms == null ? null : Number(ms) };
+    var attrs = st.attributes || {};
+    var ms = attrs.response_time_ms;
+    return { status: st.state, ms: ms == null ? null : Number(ms), at: attrs.last_check || null };
   }
 
   _view(d) {
@@ -364,6 +367,19 @@ class IptvCard extends HTMLElement {
         </div>`;
     };
 
+    var fmtCheck = (iso) => {
+      var when = new Date(iso);
+      if (isNaN(when.getTime())) return '';
+      var sameDay = when.toDateString() === new Date().toDateString();
+      return sameDay
+        ? when.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })
+        : when.toLocaleString(locale, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+    };
+    var checkedLine = (h) =>
+      h && h.at
+        ? `<div class="checked" data-entity="last_check"><ha-icon icon="mdi:clock-outline"></ha-icon>${esc(this._t('last_check'))} · ${esc(fmtCheck(h.at))}</div>`
+        : '';
+
     var body;
     var status = '';
     if (!this._hass) {
@@ -373,20 +389,24 @@ class IptvCard extends HTMLElement {
     } else if (!multi) {
       // One subscription: pills under the card title, as before
       var v = this._view(this._data(subs[0].ids));
-      status = chips(v, this._health(subs[0].ids), this._french(subs[0].ids));
+      var h0 = this._health(subs[0].ids);
+      status = chips(v, h0, this._french(subs[0].ids));
       body = '<div class="sect" data-sub="0">' +
-        (v ? details(v) : '<div class="msg err">' + this._t('unavailable') + '</div>') + '</div>';
+        (v ? details(v) : '<div class="msg err">' + this._t('unavailable') + '</div>') +
+        checkedLine(h0) + '</div>';
     } else {
       // Several subscriptions: one section each, named after its device
       body = subs.map((sub, i) => {
         var v = this._view(this._data(sub.ids));
+        var h = this._health(sub.ids);
         return `
           <div class="sect multi" data-sub="${i}">
             <div class="sect-head">
               <div class="sect-name">${esc(sub.name)}</div>
-              ${chips(v, this._health(sub.ids), this._french(sub.ids))}
+              ${chips(v, h, this._french(sub.ids))}
             </div>
             ${v ? details(v) : '<div class="msg err">' + this._t('unavailable') + '</div>'}
+            ${checkedLine(h)}
           </div>`;
       }).join('');
     }
@@ -405,6 +425,7 @@ class IptvCard extends HTMLElement {
                 color: var(--c); background: color-mix(in srgb, var(--c) 15%, transparent); --mdc-icon-size: 14px; }
         .chip.idle { padding-left: 10px; }
         .chip.fr { padding-left: 6px; gap: 5px; }
+        .checked { display: flex; align-items: center; gap: 4px; color: var(--secondary-text-color); font-size: 11px; --mdc-icon-size: 13px; }
         .flag { width: 14px; height: 10px; border-radius: 2px; flex: none; box-shadow: 0 0 0 1px rgba(0,0,0,.12);
                 background: linear-gradient(90deg, #0055a4 0 33.3%, #fff 33.3% 66.6%, #ef4135 66.6%); }
         .flag.off { filter: grayscale(1); opacity: .6; }

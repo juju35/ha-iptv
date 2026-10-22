@@ -1,7 +1,7 @@
 """Constants for the IPTV integration."""
 
 DOMAIN = "iptv"
-VERSION = "3.5.0"
+VERSION = "3.6.0"
 
 CONF_SCAN_INTERVAL = "scan_interval"
 DEFAULT_SCAN_INTERVAL = 60  # minutes
@@ -26,6 +26,9 @@ CONF_PROVIDER = "provider"
 CONF_MAC = "mac"
 # Add form only, not stored: notify service that receives the connection details
 CONF_NOTIFY_SERVICE = "notify_service"
+# Stored in the entry data: when the account was added / last updated (ISO 8601)
+CONF_ADDED_AT = "added_at"
+CONF_UPDATED_AT = "updated_at"
 PROVIDER_XTREAM = "xtream"
 PROVIDER_STALKER = "stalker"
 PROVIDERS = [PROVIDER_XTREAM, PROVIDER_STALKER]
