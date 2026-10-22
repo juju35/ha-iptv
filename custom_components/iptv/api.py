@@ -28,17 +28,17 @@ TIMEOUT = aiohttp.ClientTimeout(total=60)
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 
 
-class XtreamError(Exception):
+class IptvError(Exception):
     """Server unreachable or invalid answer."""
 
 
-class XtreamAuthError(XtreamError):
+class IptvAuthError(IptvError):
     """Credentials refused."""
 
 
 # Neutral aliases: the errors are shared by both providers.
-IptvError = XtreamError
-IptvAuthError = XtreamAuthError
+IptvError = IptvError
+IptvAuthError = IptvAuthError
 
 
 def normalize_url(url: str) -> str:
@@ -73,28 +73,28 @@ class XtreamClient:
                 resp.raise_for_status()
                 return await resp.json(content_type=None)
         except (aiohttp.ClientError, asyncio.TimeoutError, ValueError) as err:
-            raise XtreamError(str(err) or type(err).__name__) from err
+            raise IptvError(str(err) or type(err).__name__) from err
 
     async def _count(self, action: str) -> int | None:
         try:
             result = await self._get(action)
-        except XtreamError:
+        except IptvError:
             return None
         return len(result) if isinstance(result, list) else None
 
     async def async_get_user_info(self) -> dict[str, Any]:
-        """Return user_info, raise XtreamAuthError if credentials are refused."""
+        """Return user_info, raise IptvAuthError if credentials are refused."""
         data = await self._get()
         info = data.get("user_info") if isinstance(data, dict) else None
         if not isinstance(info, dict) or str(info.get("auth")) != "1":
-            raise XtreamAuthError
+            raise IptvAuthError
         return info
 
     async def async_get_data(self) -> dict[str, Any]:
         """Return the account info plus live / VOD / series counts."""
         try:
             info = await self.async_get_user_info()
-        except XtreamAuthError:
+        except IptvAuthError:
             return {"auth": False}
         channels, movies, series = await asyncio.gather(
             self._count("get_live_streams"),
@@ -249,7 +249,7 @@ class StalkerClient:
             if token:
                 self._portal, self._token = portal, str(token)
                 return
-        raise XtreamError("no Stalker portal answered the handshake")
+        raise IptvError("no Stalker portal answered the handshake")
 
     async def _get(self, params: dict[str, str]) -> Any:
         if not self._token or not self._portal:
@@ -258,7 +258,7 @@ class StalkerClient:
         try:
             return await self._call(self._portal, params, self._token)
         except (aiohttp.ClientError, asyncio.TimeoutError, ValueError) as err:
-            raise XtreamError(str(err) or type(err).__name__) from err
+            raise IptvError(str(err) or type(err).__name__) from err
 
     async def _activate(self) -> None:
         """Call get_profile to validate the session; ignore if unsupported."""
@@ -274,19 +274,19 @@ class StalkerClient:
                     "not_valid_token": "0",
                 }
             )
-        except XtreamError:
+        except IptvError:
             pass
 
     async def async_get_user_info(self) -> dict[str, Any]:
-        """Return the account info, raise XtreamAuthError if the MAC is refused."""
+        """Return the account info, raise IptvAuthError if the MAC is refused."""
         await self._handshake()
         await self._activate()
         try:
             info = await self._get({"type": "account_info", "action": "get_main_info"})
-        except XtreamError:
+        except IptvError:
             info = None
         if not isinstance(info, dict) or not info or str(info.get("blocked")) == "1":
-            raise XtreamAuthError
+            raise IptvAuthError
         return info
 
     async def _count(self, kind: str) -> int | None:
@@ -294,14 +294,14 @@ class StalkerClient:
         params["genre" if kind == "itv" else "category"] = "*"
         try:
             return extract_count(await self._get(params))
-        except XtreamError:
+        except IptvError:
             return None
 
     async def async_get_data(self) -> dict[str, Any]:
         """Return the account info plus live / VOD / series counts."""
         try:
             info = await self.async_get_user_info()
-        except XtreamAuthError:
+        except IptvAuthError:
             return {"auth": False}
         channels, movies, series = await asyncio.gather(
             self._count("itv"), self._count("vod"), self._count("series")

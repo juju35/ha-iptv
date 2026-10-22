@@ -10,8 +10,8 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parent.parent
-CARD_JS = (ROOT / "custom_components/iptv_xtream/frontend/iptv-card.js").read_text()
-LOGO = (ROOT / "custom_components/iptv_xtream/brand/icon@2x.png").read_bytes()
+CARD_JS = (ROOT / "custom_components/iptv/frontend/iptv-card.js").read_text()
+LOGO = (ROOT / "custom_components/iptv/brand/icon@2x.png").read_bytes()
 BASE_URL = "http://ha.local/"
 NOW = "2026-10-10T09:00:00+02:00"
 WIDTH = 388
@@ -108,7 +108,7 @@ for device_id, (name, entities) in SUBSCRIPTIONS.items():
     for key, (domain, value) in entities.items():
         entity_id = f"{domain}.{device_id}_{key}"
         STATES[entity_id] = {"entity_id": entity_id, "state": value, "attributes": {}}
-        ENTITIES[entity_id] = {"entity_id": entity_id, "device_id": device_id, "platform": "iptv_xtream", "translation_key": key}
+        ENTITIES[entity_id] = {"entity_id": entity_id, "device_id": device_id, "platform": "iptv", "translation_key": key}
 
 SHOTS = [
     {"file": "card", "theme": "light", "lang": "en", "config": {"devices": ["iptv"]}},
@@ -134,9 +134,9 @@ def main():
         context = browser.new_context(device_scale_factor=2, viewport={"width": 1000, "height": 1200}, timezone_id="Europe/Paris")
         page = context.new_page()
         page.clock.set_fixed_time(NOW)
-        # The card loads its logo from /iptv_xtream/logo.png, served by the integration:
+        # The card loads its logo from /iptv/logo.png, served by the integration:
         # open a page on an http origin so the relative URL resolves
-        page.route("**/iptv_xtream/logo.png*", lambda route: route.fulfill(body=LOGO, content_type="image/png"))
+        page.route("**/iptv/logo.png*", lambda route: route.fulfill(body=LOGO, content_type="image/png"))
         page.route(BASE_URL, lambda route: route.fulfill(body="<!doctype html>", content_type="text/html"))
         page.goto(BASE_URL)
         for shot in SHOTS:

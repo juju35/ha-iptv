@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Report a bug with the IPTV Xtream integration or card
+about: Report a bug with the IPTV integration or card
 title: "[Bug] "
 labels: bug
 assignees: ""
@@ -27,7 +27,7 @@ If applicable, add screenshots to help explain your problem.
 - HACS version:
 - Card version:
 - Integration version:
-- States of the IPTV Xtream entities (Developer tools → States):
+- States of the IPTV entities (Developer tools → States):
 
 **Card configuration:**
 ```yaml

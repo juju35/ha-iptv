@@ -1,4 +1,4 @@
-"""IPTV Xtream integration: subscription sensors and the bundled Lovelace card."""
+"""IPTV integration: subscription sensors and the bundled Lovelace card."""
 
 from __future__ import annotations
 
@@ -16,6 +16,7 @@ from homeassistant.helpers.typing import ConfigType
 
 from .const import CARD_URL, DOMAIN, LOGO_URL, VERSION
 from .coordinator import IptvConfigEntry, IptvCoordinator
+from .migrate import LEGACY_DOMAIN, async_migrate_legacy, async_restore_snapshot
 from .notify_expiry import ExpiryNotifier, notification_id
 
 _LOGGER = logging.getLogger(__name__)
@@ -43,6 +44,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         await _register()
     else:
         hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STARTED, _register)
+
+    # Accounts created before 3.0 under the former iptv_xtream domain
+    await async_migrate_legacy(hass)
     return True
 
 
@@ -62,6 +66,9 @@ async def _async_register_resource(hass: HomeAssistant) -> bool:
     url = f"{CARD_URL}?v={VERSION}"
     try:
         await resources.async_get_info()  # loads the collection from storage
+        for item in list(resources.async_items()):
+            if item.get("url", "").startswith(f"/{LEGACY_DOMAIN}/"):
+                await resources.async_delete_item(item["id"])
         existing = [
             item
             for item in resources.async_items()
@@ -83,7 +90,7 @@ async def _async_register_resource(hass: HomeAssistant) -> bool:
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: IptvConfigEntry) -> bool:
-    """Set up one Xtream account."""
+    """Set up one IPTV account."""
     coordinator = IptvCoordinator(hass, entry)
     await coordinator.async_config_entry_first_refresh()
     entry.runtime_data = coordinator
@@ -94,6 +101,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: IptvConfigEntry) -> bool
         coordinator.async_add_listener(lambda: notifier.update(coordinator.data))
     )
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    await async_restore_snapshot(hass, entry)
     entry.async_on_unload(entry.add_update_listener(_async_reload))
     return True
 

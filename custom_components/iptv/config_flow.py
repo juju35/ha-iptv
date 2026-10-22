@@ -27,9 +27,9 @@ from homeassistant.helpers.selector import (
 
 from .api import (
     StalkerClient,
-    XtreamAuthError,
+    IptvAuthError,
     XtreamClient,
-    XtreamError,
+    IptvError,
     normalize_mac,
     normalize_url,
     valid_mac,
@@ -46,6 +46,7 @@ from .const import (
     PROVIDER_STALKER,
     PROVIDER_XTREAM,
 )
+from .migrate import async_migrate_legacy
 
 XTREAM_SCHEMA = vol.Schema(
     {
@@ -68,7 +69,7 @@ def _host(url: str) -> str:
     return urlparse(url).hostname or url
 
 
-class IptvXtreamConfigFlow(ConfigFlow, domain=DOMAIN):
+class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
     """Pick a provider, ask for its credentials, and check them."""
 
     VERSION = 1
@@ -93,17 +94,34 @@ class IptvXtreamConfigFlow(ConfigFlow, domain=DOMAIN):
     async def _check(self, client: XtreamClient | StalkerClient) -> dict[str, str]:
         try:
             await client.async_get_user_info()
-        except XtreamAuthError:
+        except IptvAuthError:
             return {"base": "invalid_auth"}
-        except XtreamError:
+        except IptvError:
             return {"base": "cannot_connect"}
         return {}
+
+    # ── migration from the former iptv_xtream domain ──
+
+    async def async_step_import(self, import_data: dict[str, Any]) -> ConfigFlowResult:
+        """Re-create a legacy account as is, without checking the server."""
+        await self.async_set_unique_id(import_data["unique_id"])
+        self._abort_if_unique_id_configured()
+        return self.async_create_entry(
+            title=import_data["title"],
+            data=import_data["data"],
+            options=import_data["options"],
+        )
 
     # ── new entry ──
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
+        # Upgrading from iptv_xtream (< 3.0): move the existing accounts instead
+        if count := await async_migrate_legacy(self.hass):
+            return self.async_abort(
+                reason="migrated", description_placeholders={"count": str(count)}
+            )
         return self.async_show_menu(
             step_id="user", menu_options=[PROVIDER_XTREAM, PROVIDER_STALKER]
         )
@@ -189,10 +207,10 @@ class IptvXtreamConfigFlow(ConfigFlow, domain=DOMAIN):
     @staticmethod
     @callback
     def async_get_options_flow(config_entry: ConfigEntry) -> OptionsFlow:
-        return IptvXtreamOptionsFlow()
+        return IptvOptionsFlow()
 
 
-class IptvXtreamOptionsFlow(OptionsFlow):
+class IptvOptionsFlow(OptionsFlow):
     """Polling interval and expiration notification."""
 
     async def async_step_init(

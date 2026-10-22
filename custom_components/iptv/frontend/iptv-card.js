@@ -1,15 +1,15 @@
 /*
- * IPTV Subscription Card — Home Assistant Lovelace card for Xtream Codes subscriptions.
+ * IPTV Subscription Card — Home Assistant Lovelace card for Xtream Codes and Stalker subscriptions.
  * Shows status, expiration date, days left, number of live channels, movies, series and connections
  * of one or several subscriptions (one section per provider).
  *
- * Bundled with the iptv_xtream integration, which polls the Xtream API server-side:
+ * Bundled with the iptv integration, which polls the Xtream Codes or Stalker server:
  * the card only reads the entities of the subscription devices.
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_CARD_VERSION = '2.5.0';
-var IPTV_DOMAIN = 'iptv_xtream';
+var IPTV_CARD_VERSION = '3.0.0';
+var IPTV_DOMAIN = 'iptv';
 var IPTV_LOGO_URL = '/' + IPTV_DOMAIN + '/logo.png?v=' + IPTV_CARD_VERSION;
 
 // ── i18n ──────────────────────────────────────────────────────────────────────
@@ -18,8 +18,8 @@ var IptvCardI18n = {
     default_title: 'IPTV subscription',
     default_title_multi: 'IPTV subscriptions',
     loading: 'Loading…',
-    no_device: 'No IPTV Xtream subscription found: add the IPTV Xtream integration in Settings → Devices & services.',
-    unavailable: 'Xtream server unreachable',
+    no_device: 'No IPTV subscription found: add the IPTV integration in Settings → Devices & services.',
+    unavailable: 'IPTV server unreachable',
     refresh: 'Refresh',
     status_active: 'Active',
     status_expired: 'Expired',
@@ -46,8 +46,8 @@ var IptvCardI18n = {
     default_title: 'Abonnement IPTV',
     default_title_multi: 'Abonnements IPTV',
     loading: 'Chargement…',
-    no_device: 'Aucun abonnement IPTV Xtream : ajoute l’intégration IPTV Xtream dans Paramètres → Appareils et services.',
-    unavailable: 'Serveur Xtream injoignable',
+    no_device: 'Aucun abonnement IPTV : ajoute l’intégration IPTV dans Paramètres → Appareils et services.',
+    unavailable: 'Serveur IPTV injoignable',
     refresh: 'Actualiser',
     status_active: 'Actif',
     status_expired: 'Expiré',
@@ -149,7 +149,7 @@ class IptvCard extends HTMLElement {
     return iptvT(iptvLang(this._config, this._hass), key, vars);
   }
 
-  // Devices to show: `devices` (list), the legacy `device`, or every IPTV Xtream device
+  // Devices to show: `devices` (list), the legacy `device`, or every IPTV device
   _wanted() {
     var c = this._config || {};
     var list = [].concat(c.devices || []).filter(Boolean);
@@ -195,7 +195,7 @@ class IptvCard extends HTMLElement {
     }
   }
 
-  // Rebuild the Xtream account summary of one subscription from its entity states
+  // Rebuild the account summary of one subscription from its entity states
   _data(ids) {
     if (!ids.status) return null;
     var states = this._hass.states;
@@ -411,7 +411,7 @@ if (!customElements.get('iptv-card')) {
   window.customCards.push({
     type: 'iptv-card',
     name: 'IPTV Subscription Card',
-    description: 'Status, expiration date, channel, movie and series counts of one or several Xtream Codes IPTV subscriptions.',
+    description: 'Status, expiration date, channel, movie and series counts of one or several IPTV subscriptions (Xtream Codes or Stalker).',
     preview: false,
     documentationURL: 'https://github.com/juju35/ha-iptv',
   });

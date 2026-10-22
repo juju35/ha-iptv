@@ -1,4 +1,4 @@
-<img src="custom_components/iptv_xtream/brand/icon.png" alt="" width="96" align="right">
+<img src="custom_components/iptv/brand/icon.png" alt="" width="96" align="right">
 
 # ha-iptv
 
@@ -45,33 +45,45 @@ Or manually:
 
 1. Open HACS → **⋮** → **Custom repositories**
 2. Add `https://github.com/juju35/ha-iptv` — Type: **Integration**
-3. Search for **IPTV Xtream** and download it
+3. Search for **IPTV** and download it
 4. Restart Home Assistant
 
 ### Manual
 
-1. Download `iptv_xtream.zip` from the [latest release](https://github.com/juju35/ha-iptv/releases/latest)
-2. Unzip it into `/config/custom_components/iptv_xtream/`
+1. Download `iptv.zip` from the [latest release](https://github.com/juju35/ha-iptv/releases/latest)
+2. Unzip it into `/config/custom_components/iptv/`
 3. Restart Home Assistant
+
+### Upgrading from 2.x (IPTV Xtream)
+
+Version 3.0 renames the integration from **IPTV Xtream** (`iptv_xtream`) to **IPTV** (`iptv`), since it handles Stalker portals too. Your accounts are moved over with the same entity ids, so automations, history and statistics keep working:
+
+1. Update the integration in HACS and restart Home Assistant
+2. **Settings → Devices & services → Add integration → IPTV** (or the button below): the existing accounts are moved and the flow closes with "N account(s) moved"
+
+   [![Add the integration](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=iptv)
+3. If `/config/custom_components/iptv_xtream/` is still there, delete it and restart
+
+The data, options (refresh interval, notification delay), entity ids, entity names and icons, device name and area are carried over. The device ids change: they are replaced automatically in UI-managed dashboards (`device` / `devices` card options); update them by hand in YAML dashboards and in device-based automations.
 
 ### Upgrading from 1.x (shell_command)
 
 Version 2.0 replaces the `shell_command` with a real integration, and the repository was renamed from `ha-iptv-card` to `ha-iptv`:
 
 1. In HACS, remove the old **IPTV Subscription Card** (Dashboard), then the old `https://github.com/juju35/ha-iptv-card` custom repository, and the `/hacsfiles/ha-iptv-card/iptv-card.js` or `/local/iptv-card.js` resource if it is still listed in **Settings → Dashboards → Resources**
-2. Add `https://github.com/juju35/ha-iptv` as an **Integration** custom repository, install **IPTV Xtream**, restart and add your account
+2. Add `https://github.com/juju35/ha-iptv` as an **Integration** custom repository, install **IPTV**, restart and add your account
 3. Remove `iptv_xtream:` from `shell_command:` in `configuration.yaml`
 4. In your cards, remove `url`, `username`, `password`, `refresh_interval` and `service`: the card now reads the integration entities
 
 ### Removal
 
-Delete the account in **Settings → Devices & services → IPTV Xtream**, then remove the integration in HACS and restart. Deleting the last account also removes the card resource. Remove the cards from your dashboards first, or they will show a "no subscription found" message.
+Delete the account in **Settings → Devices & services → IPTV**, then remove the integration in HACS and restart. Deleting the last account also removes the card resource. Remove the cards from your dashboards first, or they will show a "no subscription found" message.
 
 ## Configuration
 
-[![Add the integration](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=iptv_xtream)
+[![Add the integration](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=iptv)
 
-**Settings → Devices & services → Add integration → IPTV Xtream**, then choose the provider type.
+**Settings → Devices & services → Add integration → IPTV**, then choose the provider type.
 
 **Xtream Codes** (username / password):
 
@@ -131,7 +143,7 @@ actions:
 
 ### Card
 
-The card is available in the card picker as **IPTV Subscription Card**, with a visual editor. With no option it shows every IPTV Xtream subscription, one section per provider named after its device (rename the device to change it):
+The card is available in the card picker as **IPTV Subscription Card**, with a visual editor. With no option it shows every IPTV subscription, one section per provider named after its device (rename the device to change it):
 
 ```yaml
 type: custom:iptv-card
@@ -150,7 +162,7 @@ devices:
 
 | Option | Required | Default | Description |
 |---|---|---|---|
-| `devices` | ❌ | All IPTV Xtream devices | Devices of the accounts to show, in this order (pick them in the visual editor) |
+| `devices` | ❌ | All IPTV devices | Devices of the accounts to show, in this order (pick them in the visual editor) |
 | `device` | ❌ | — | Legacy single-device option, still read when `devices` is not set |
 | `title` | ❌ | Auto (i18n) | Card title |
 | `warning_days` | ❌ | `7` | Turns orange when fewer days than this are left |
@@ -170,7 +182,7 @@ For **Xtream Codes**, the integration polls the `player_api.php` endpoint for th
 
 For a **Stalker / Ministra portal**, it performs the STB handshake with the MAC to get a session token, then reads `account_info/get_main_info` for the expiration and `itv` / `vod` / `series` `get_ordered_list` for the catalogue sizes. Only the summary is kept, never the channel lists.
 
-The card is served by the integration at `/iptv_xtream/iptv-card.js` and registered in **Settings → Dashboards → Resources** when the integration starts (with YAML-managed resources, it is loaded on every page instead).
+The card is served by the integration at `/iptv/iptv-card.js` and registered in **Settings → Dashboards → Resources** when the integration starts (with YAML-managed resources, it is loaded on every page instead).
 
 ### Security notes
 
@@ -184,13 +196,13 @@ pip install playwright && playwright install chromium
 python scripts/screenshots.py   # renders screenshots/card.png and card-multi.png with mock subscriptions
 ```
 
-The card is plain JavaScript (`custom_components/iptv_xtream/frontend/iptv-card.js`), served by the integration: no build step.
+The card is plain JavaScript (`custom_components/iptv/frontend/iptv-card.js`), served by the integration: no build step.
 
 ### Releasing
 
-1. Bump the version in `custom_components/iptv_xtream/manifest.json`, `VERSION` in `const.py` and `IPTV_CARD_VERSION` in `frontend/iptv-card.js`
+1. Bump the version in `custom_components/iptv/manifest.json`, `VERSION` in `const.py` and `IPTV_CARD_VERSION` in `frontend/iptv-card.js`
 2. Add a `## <version>` section at the top of [CHANGELOG.md](CHANGELOG.md)
-3. Push to `main`: the **Release** workflow creates the tag and the GitHub release with `iptv_xtream.zip` and the changelog section as notes
+3. Push to `main`: the **Release** workflow creates the tag and the GitHub release with `iptv.zip` and the changelog section as notes
 
 ## Translations
 

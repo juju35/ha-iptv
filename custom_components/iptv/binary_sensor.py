@@ -1,4 +1,4 @@
-"""Binary sensors for an Xtream subscription."""
+"""Binary sensors for an IPTV subscription."""
 
 from __future__ import annotations
 

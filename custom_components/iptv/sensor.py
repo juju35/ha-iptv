@@ -1,4 +1,4 @@
-"""Sensors for an Xtream subscription."""
+"""Sensors for an IPTV subscription."""
 
 from __future__ import annotations
 
@@ -120,7 +120,7 @@ async def async_setup_entry(
 
 
 class IptvSensor(IptvEntity, SensorEntity):
-    """Xtream subscription sensor."""
+    """IPTV subscription sensor."""
 
     entity_description: IptvSensorDescription
 
