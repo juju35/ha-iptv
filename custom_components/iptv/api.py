@@ -20,6 +20,7 @@ from __future__ import annotations
 import asyncio
 from datetime import datetime, timezone
 import re
+import time
 from typing import Any
 from urllib.parse import urlparse
 
@@ -101,6 +102,38 @@ def french_summary(categories: dict[str, list[str] | None]) -> dict[str, Any] | 
     return summary
 
 
+# ── Video stream probe ──────────────────────────────────────────────────────
+
+STREAM_TIMEOUT = aiohttp.ClientTimeout(total=15, sock_connect=6, sock_read=10)
+
+
+async def _probe_stream(
+    session: aiohttp.ClientSession, url: str, headers: dict[str, str]
+) -> dict[str, Any]:
+    """Open a channel stream, read a little, and tell whether it plays.
+
+    Opening a stream uses one of the account's connection slots, briefly.
+    Returns {ok: bool, latency_ms, error}.
+    """
+    start = time.monotonic()
+    ms = lambda: round((time.monotonic() - start) * 1000)  # noqa: E731
+    try:
+        async with session.get(
+            url, headers=headers, timeout=STREAM_TIMEOUT, allow_redirects=True
+        ) as resp:
+            if resp.status >= 400:
+                return {"ok": False, "latency_ms": ms(), "error": f"HTTP {resp.status}"}
+            ctype = (resp.headers.get("Content-Type") or "").lower()
+            chunk = await resp.content.read(16384)
+            if not chunk:
+                return {"ok": False, "latency_ms": ms(), "error": "empty stream"}
+            if ctype.startswith("text/") or "html" in ctype or "json" in ctype:
+                return {"ok": False, "latency_ms": ms(), "error": "not a media stream"}
+            return {"ok": True, "latency_ms": ms(), "error": None}
+    except (aiohttp.ClientError, asyncio.TimeoutError) as err:
+        return {"ok": False, "latency_ms": None, "error": str(err) or type(err).__name__}
+
+
 def server_key(url: str) -> str:
     """``host:port`` of a server URL, to spot two accounts on the same server."""
     parsed = urlparse(normalize_url(url))
@@ -118,7 +151,10 @@ class XtreamClient:
         self, session: aiohttp.ClientSession, url: str, username: str, password: str
     ) -> None:
         self._session = session
-        self._endpoint = normalize_url(url) + "/player_api.php"
+        self._base = normalize_url(url)
+        self._endpoint = self._base + "/player_api.php"
+        self._username = username
+        self._password = password
         self._auth = {"username": username, "password": password}
 
     async def _get(self, action: str | None = None) -> Any:
@@ -158,6 +194,26 @@ class XtreamClient:
             self._categories("get_series_categories"),
         )
         return french_summary({"live": live, "vod": vod, "series": series})
+
+    async def async_test_stream(self) -> dict[str, Any]:
+        """Probe the first live channel. ok True/False, or None when untestable."""
+        try:
+            streams = await self._get("get_live_streams")
+        except IptvError as err:
+            return {"ok": None, "channel": None, "latency_ms": None, "error": str(err)}
+        first = (
+            next((s for s in streams if isinstance(s, dict) and s.get("stream_id") is not None), None)
+            if isinstance(streams, list)
+            else None
+        )
+        if not first:
+            return {"ok": None, "channel": None, "latency_ms": None, "error": "no channel"}
+        sid = first["stream_id"]
+        name = str(first.get("name") or sid)
+        url = f"{self._base}/live/{self._username}/{self._password}/{sid}.ts"
+        res = await _probe_stream(self._session, url, HEADERS)
+        res["channel"] = name
+        return res
 
     async def async_get_user_info(self) -> dict[str, Any]:
         """Return user_info, raise IptvAuthError if credentials are refused."""
@@ -394,6 +450,33 @@ class StalkerClient:
             self._categories("itv"), self._categories("vod"), self._categories("series")
         )
         return french_summary({"live": live, "vod": vod, "series": series})
+
+    async def async_test_stream(self) -> dict[str, Any]:
+        """Probe the first live channel via create_link. ok True/False/None."""
+        try:
+            js = await self._get(
+                {"type": "itv", "action": "get_ordered_list", "genre": "*", "p": "1"}
+            )
+        except IptvError as err:
+            return {"ok": None, "channel": None, "latency_ms": None, "error": str(err)}
+        data = js.get("data") if isinstance(js, dict) else None
+        first = data[0] if isinstance(data, list) and data else None
+        if not isinstance(first, dict) or not first.get("cmd"):
+            return {"ok": None, "channel": None, "latency_ms": None, "error": "no channel"}
+        name = str(first.get("name") or first.get("id") or "")
+        try:
+            link = await self._get(
+                {"type": "itv", "action": "create_link", "cmd": str(first["cmd"]), "forced_storage": "0", "disable_ad": "0"}
+            )
+        except IptvError as err:
+            return {"ok": None, "channel": name, "latency_ms": None, "error": str(err)}
+        cmd = link.get("cmd") if isinstance(link, dict) else None
+        url = cmd.split()[-1] if isinstance(cmd, str) and cmd else None
+        if not url or "://" not in url:
+            return {"ok": False, "channel": name, "latency_ms": None, "error": "no stream link"}
+        res = await _probe_stream(self._session, url, self._headers(self._token))
+        res["channel"] = name
+        return res
 
     async def _count(self, kind: str) -> int | None:
         params = {"type": kind, "action": "get_ordered_list", "p": "1"}

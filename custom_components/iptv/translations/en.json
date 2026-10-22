@@ -56,7 +56,8 @@
       "invalid_auth": "Credentials refused by the server",
       "invalid_mac": "Invalid MAC address (format AA:BB:CC:DD:EE:FF)",
       "no_french_lists": "No French list found on this provider (live, VOD or series categories): the account is not added.",
-      "french_unknown": "Could not read the categories of this provider to check for French lists."
+      "french_unknown": "Could not read the categories of this provider to check for French lists.",
+      "stream_ko": "The test channel's video stream does not play: the account is not added."
     },
     "abort": {
       "already_configured": "This account is already configured",
@@ -72,11 +73,13 @@
         "data": {
           "scan_interval": "Refresh interval",
           "notify_days": "Notify before expiration",
-          "health_interval": "Health check interval"
+          "health_interval": "Health check interval",
+          "stream_check": "Test a channel's video stream"
         },
         "data_description": {
           "notify_days": "Persistent notification this many days before the subscription expires (0 to disable)",
-          "health_interval": "How often the server is checked with a light request (account info only)"
+          "health_interval": "How often the server is checked with a light request (account info only)",
+          "stream_check": "During each health check, briefly open a channel to confirm it plays (uses one connection slot). Health shows Stream down if it fails."
         }
       }
     }
@@ -123,7 +126,8 @@
           "ok": "OK",
           "degraded": "Slow",
           "auth_failed": "Credentials refused",
-          "unreachable": "Unreachable"
+          "unreachable": "Unreachable",
+          "stream_ko": "Stream down"
         }
       },
       "response_time": {

@@ -56,7 +56,8 @@
       "invalid_auth": "Identifiants refusés par le serveur",
       "invalid_mac": "Adresse MAC invalide (format AA:BB:CC:DD:EE:FF)",
       "no_french_lists": "Aucune liste française trouvée chez ce fournisseur (catégories live, VOD ou séries) : le compte n’est pas ajouté.",
-      "french_unknown": "Impossible de lire les catégories de ce fournisseur pour vérifier les listes françaises."
+      "french_unknown": "Impossible de lire les catégories de ce fournisseur pour vérifier les listes françaises.",
+      "stream_ko": "Le flux vidéo de la chaîne de test ne se lit pas : le compte n'est pas ajouté."
     },
     "abort": {
       "already_configured": "Ce compte est déjà configuré",
@@ -72,11 +73,13 @@
         "data": {
           "scan_interval": "Intervalle d'actualisation",
           "notify_days": "Notifier avant expiration",
-          "health_interval": "Intervalle du health check"
+          "health_interval": "Intervalle du health check",
+          "stream_check": "Tester le flux vidéo d'une chaîne"
         },
         "data_description": {
           "notify_days": "Notification persistante ce nombre de jours avant l’expiration de l’abonnement (0 pour désactiver)",
-          "health_interval": "Fréquence de la vérification légère du serveur (infos du compte uniquement)"
+          "health_interval": "Fréquence de la vérification légère du serveur (infos du compte uniquement)",
+          "stream_check": "À chaque contrôle de santé, ouvre brièvement une chaîne pour vérifier qu'elle se lit (utilise un slot de connexion). La santé passe à Flux KO en cas d'échec."
         }
       }
     }
@@ -123,7 +126,8 @@
           "ok": "OK",
           "degraded": "Lent",
           "auth_failed": "Identifiants refusés",
-          "unreachable": "Injoignable"
+          "unreachable": "Injoignable",
+          "stream_ko": "Flux KO"
         }
       },
       "response_time": {

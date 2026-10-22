@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.10.0
+
+### What's new
+- Video stream check: the health check can open a real channel briefly to confirm it plays (Xtream and Stalker). On failure the health sensor reports `stream_ko` and the card pill turns red. The health sensor gains `stream_ok` and `stream_channel` attributes.
+- Adding an account is refused when the test channel's video stream does not play.
+- New **Test a channel's video stream** option (Configure, on by default) to enable or disable the periodic stream check per account. Opening a stream uses one of the account's connection slots, so disable it on accounts limited to a single connection if it interferes.
+
 ## 3.9.0
 
 ### Fixes

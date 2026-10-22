@@ -23,7 +23,7 @@ Home Assistant integration and Lovelace card that track one or several **IPTV su
 - Active / maximum connections, trial badge
 - Several providers in one card, one section per subscription
 - Orange warning when the subscription expires soon (configurable)
-- Health check per account (reachability and response time), shown as a pill on the card
+- Health check per account (reachability, response time and, optionally, a real channel's video stream), shown as a pill on the card
 - French lists check: accounts without French categories are refused, and the card shows a French flag pill
 - Optional notification with the connection details when an account is added
 - Persistent notification a configurable number of days before expiration (7 by default)
@@ -103,7 +103,7 @@ Delete the account in **Settings → Devices & services → IPTV**, then remove 
 | Portal URL | Including the port, e.g. `http://your-portal:80` (the portal path like `/c/` or `/portal.php` is found automatically) |
 | MAC address | The MAC registered with the provider, format `AA:BB:CC:DD:EE:FF` |
 
-The credentials are checked before the account is added, and so are the **French lists**: a provider whose live, VOD and series categories contain nothing French is refused. A category counts as French with a marker (`FR`, `FRA`, `FRANCE`, `FRENCH`, `FRANÇAIS`, `VF`, `VOSTFR`, 🇫🇷, as whole words) or when it is a category well known in French lists (TF1, M6, Canal+, Ciné+, Arte, BFM, RMC, OCS, Gulli, Ligue 1…, or French-only words such as Séries, Cinéma, Dessins animés, Documentaires, Jeunesse).
+The credentials are checked before the account is added, the **video stream** of a test channel must play (it is opened briefly — this uses a connection slot), and so are the **French lists**: a provider whose live, VOD and series categories contain nothing French is refused. A category counts as French with a marker (`FR`, `FRA`, `FRANCE`, `FRENCH`, `FRANÇAIS`, `VF`, `VOSTFR`, 🇫🇷, as whole words) or when it is a category well known in French lists (TF1, M6, Canal+, Ciné+, Arte, BFM, RMC, OCS, Gulli, Ligue 1…, or French-only words such as Séries, Cinéma, Dessins animés, Documentaires, Jeunesse).
 
 The credentials are stored in the config entry together with the server URL (username / password, or MAC address).
 
@@ -116,6 +116,7 @@ The credentials are stored in the config entry together with the server URL (use
 | Refresh interval | `60` min | How often the server is queried (minimum 5) |
 | Notify before expiration | `7` days | Persistent notification when the subscription expires within this many days, `0` to disable |
 | Health check interval | `5` min | How often the server is checked with a light request (account info only) |
+| Test a channel's video stream | on | During each health check, briefly open a channel to confirm it plays (uses one connection slot); health shows `stream_ko` if it fails |
 
 The notification names the account and its expiration date, is refreshed once a day while the account is in that window (dismissing it silences it until the next day), also reports an expired account, and disappears once the subscription is renewed.
 
@@ -138,7 +139,7 @@ Each account is a device named after its **server** (the host of the URL, e.g. `
 | `sensor.<account>_created` | Subscription start date (diagnostic) |
 | `binary_sensor.<account>_trial` | On for a trial account (diagnostic) |
 | `binary_sensor.<account>_french_lists` | On when the provider has French categories (live, VOD or series); attributes `live`, `vod`, `series` (French category counts) and `examples` |
-| `sensor.<account>_health` | Health check: `ok`, `degraded` (answer slower than 3 s), `auth_failed` or `unreachable`; attributes `response_time_ms`, `last_check`, `error` |
+| `sensor.<account>_health` | Health check: `ok`, `degraded` (answer slower than 3 s), `auth_failed`, `unreachable` or `stream_ko` (the test channel does not play); attributes `response_time_ms`, `last_check`, `error`, `stream_ok`, `stream_channel` |
 | `sensor.<account>_response_time` | Response time of the last health check, in ms (diagnostic) |
 | `sensor.<account>_last_check` | Moment of the last health check (timestamp, diagnostic) |
 | `sensor.<account>_added` | When the account was added (timestamp, diagnostic) |

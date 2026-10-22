@@ -8,7 +8,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_CARD_VERSION = '3.9.0';
+var IPTV_CARD_VERSION = '3.10.0';
 var IPTV_DOMAIN = 'iptv';
 var IPTV_LOGO_URL = '/' + IPTV_DOMAIN + '/logo.png?v=' + IPTV_CARD_VERSION;
 
@@ -44,6 +44,7 @@ var IptvCardI18n = {
     health_ok: 'Online',
     health_degraded: 'Slow',
     health_unreachable: 'Unreachable',
+    health_stream_ko: 'Stream down',
     health_auth_failed: 'Credentials refused',
     ed_title: 'Title',
     ed_devices: 'Subscriptions (all if empty)',
@@ -80,6 +81,7 @@ var IptvCardI18n = {
     health_ok: 'En ligne',
     health_degraded: 'Lent',
     health_unreachable: 'Injoignable',
+    health_stream_ko: 'Flux KO',
     health_auth_failed: 'Identifiants refusés',
     ed_title: 'Titre',
     ed_devices: 'Abonnements (tous si vide)',
@@ -317,7 +319,7 @@ class IptvCard extends HTMLElement {
       // Refused credentials are already shown by the status pill
       if (h.status === 'auth_failed' && v && !v.d.auth) return '';
       var cls = { ok: 'ok', degraded: 'warning' }[h.status] || 'error';
-      var icon = { ok: 'mdi:lan-connect', degraded: 'mdi:speedometer-slow' }[h.status] || 'mdi:lan-disconnect';
+      var icon = { ok: 'mdi:lan-connect', degraded: 'mdi:speedometer-slow', stream_ko: 'mdi:television-off' }[h.status] || 'mdi:lan-disconnect';
       var label = this._t('health_' + h.status) + (h.ms != null && h.status !== 'unreachable' ? ' · ' + fmtMs(h.ms) : '');
       return `<span class="chip ${cls}" data-entity="health"><ha-icon icon="${icon}"></ha-icon>${esc(label)}</span>`;
     };
