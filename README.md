@@ -25,6 +25,7 @@ Home Assistant integration and Lovelace card that track one or several **IPTV su
 - Orange warning when the subscription expires soon (configurable)
 - Health check per account (reachability and response time), shown as a pill on the card
 - French lists check: accounts without French categories are refused, and the card shows a French flag pill
+- Optional notification with the connection details when an account is added
 - Persistent notification a configurable number of days before expiration (7 by default)
 - Visual editor, refresh button
 - Fully compatible with Home Assistant dark mode
@@ -105,6 +106,8 @@ Delete the account in **Settings → Devices & services → IPTV**, then remove 
 The credentials are checked before the account is added, and so are the **French lists**: a provider whose live, VOD and series categories contain nothing French is refused. A category counts as French with a marker (`FR`, `FRA`, `FRANCE`, `FRENCH`, `FRANÇAIS`, `VF`, `VOSTFR`, 🇫🇷, as whole words) or when it is a category well known in French lists (TF1, M6, Canal+, Ciné+, Arte, BFM, RMC, OCS, Gulli, Ligue 1…, or French-only words such as Séries, Cinéma, Dessins animés, Documentaires, Jeunesse).
 
 The credentials are stored in the config entry together with the server URL (username / password, or MAC address).
+
+**Send the connection details** (optional, add form only): pick a notify service (e.g. `notify.mobile_app_phone`) and, once the account is added or an existing account on the same server takes the new credentials, it receives the provider name, server URL, username and password (or MAC address), expiration date and French category counts. Leave it empty to send nothing; a failing service never blocks the account. The message contains the password in clear text: choose a service that only you receive.
 
 **Same server already configured** (same host and port): the new credentials are checked, then compared with the account already on that server. When the new account is valid longer (later expiration, unlimited, or the existing one no longer works), the existing account takes the new username / password or MAC address and is reloaded: same device, same entities, and its title is kept if you renamed it. Otherwise nothing changes and the flow says which account is valid longer. With several accounts on the server, the one valid the shortest is the one compared. Add the integration once per account; both provider types can live side by side and share the same card. The URL and credentials can be changed later with **⋮ → Reconfigure**, and with **Configure**:
 

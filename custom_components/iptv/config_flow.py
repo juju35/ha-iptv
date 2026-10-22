@@ -23,6 +23,9 @@ from homeassistant.helpers.selector import (
     NumberSelector,
     NumberSelectorConfig,
     NumberSelectorMode,
+    SelectSelector,
+    SelectSelectorConfig,
+    SelectSelectorMode,
     TextSelector,
     TextSelectorConfig,
     TextSelectorType,
@@ -43,6 +46,7 @@ from .api import (
 from .const import (
     CONF_HEALTH_INTERVAL,
     CONF_MAC,
+    CONF_NOTIFY_SERVICE,
     CONF_PROVIDER,
     CONF_NOTIFY_DAYS,
     CONF_SCAN_INTERVAL,
@@ -55,6 +59,7 @@ from .const import (
     PROVIDER_XTREAM,
 )
 from .migrate import async_migrate_legacy
+from .notify_add import async_send, notify_services
 
 XTREAM_SCHEMA = vol.Schema(
     {
@@ -150,6 +155,7 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
             self._validity = _validity(info.get("status"), info.get("exp_date"))
         if french:
             summary = await client.async_get_french()
+            self._french = summary
             if summary is None:
                 return {"base": "french_unknown"}
             if not summary["total"]:
@@ -169,6 +175,7 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
             if CONF_URL in e.data and server_key(e.data[CONF_URL]) == server
         ]
         if not same:
+            self._notify(title, data, updated=False)
             return self.async_create_entry(title=title, data=data)
         existing = min(same, key=_entry_validity)
         current = _entry_validity(existing)
@@ -184,7 +191,48 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
             data=data,
         )
         self.hass.config_entries.async_schedule_reload(existing.entry_id)
+        self._notify(existing.title, data, updated=True)
         return self.async_abort(reason="account_updated", description_placeholders=placeholders)
+
+    def _notify(self, title: str, data: dict[str, Any], updated: bool) -> None:
+        """Send the connection details when a notify service was picked (optional)."""
+        service = getattr(self, "_notify_service", None)
+        if not service:
+            return
+        self.hass.async_create_task(
+            async_send(
+                self.hass,
+                service,
+                title,
+                data,
+                getattr(self, "_validity", None),
+                getattr(self, "_french", None),
+                updated=updated,
+            ),
+            f"iptv notify {title}",
+        )
+
+    def _suggested(self, user_input: dict[str, Any] | None) -> dict[str, Any] | None:
+        """Form values shown again after an error, notify service included."""
+        if user_input is None:
+            return None
+        service = getattr(self, "_notify_service", None)
+        return {**user_input, CONF_NOTIFY_SERVICE: service} if service else user_input
+
+    def _add_schema(self, schema: vol.Schema) -> vol.Schema:
+        """Add form: the credentials plus an optional notify service."""
+        services = notify_services(self.hass)
+        if not services:
+            return schema
+        return schema.extend(
+            {
+                vol.Optional(CONF_NOTIFY_SERVICE): SelectSelector(
+                    SelectSelectorConfig(
+                        options=services, mode=SelectSelectorMode.DROPDOWN, custom_value=True
+                    )
+                )
+            }
+        )
 
     # ── migration from the former iptv_xtream domain ──
 
@@ -217,6 +265,7 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
     ) -> ConfigFlowResult:
         errors: dict[str, str] = {}
         if user_input is not None:
+            self._notify_service = user_input.pop(CONF_NOTIFY_SERVICE, None)
             user_input[CONF_URL] = normalize_url(user_input[CONF_URL])
             user_input[CONF_PROVIDER] = PROVIDER_XTREAM
             await self.async_set_unique_id(
@@ -228,7 +277,9 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
                 return self._create_or_replace(user_input)
         return self.async_show_form(
             step_id="xtream",
-            data_schema=self.add_suggested_values_to_schema(XTREAM_SCHEMA, user_input),
+            data_schema=self.add_suggested_values_to_schema(
+                self._add_schema(XTREAM_SCHEMA), self._suggested(user_input)
+            ),
             errors=errors,
         )
 
@@ -237,6 +288,7 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
     ) -> ConfigFlowResult:
         errors: dict[str, str] = {}
         if user_input is not None:
+            self._notify_service = user_input.pop(CONF_NOTIFY_SERVICE, None)
             user_input[CONF_URL] = normalize_url(user_input[CONF_URL])
             user_input[CONF_MAC] = normalize_mac(user_input[CONF_MAC])
             user_input[CONF_PROVIDER] = PROVIDER_STALKER
@@ -252,7 +304,9 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
                     return self._create_or_replace(user_input)
         return self.async_show_form(
             step_id="stalker",
-            data_schema=self.add_suggested_values_to_schema(STALKER_SCHEMA, user_input),
+            data_schema=self.add_suggested_values_to_schema(
+                self._add_schema(STALKER_SCHEMA), self._suggested(user_input)
+            ),
             errors=errors,
         )
 

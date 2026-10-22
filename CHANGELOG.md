@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.4.0
+
+### What's new
+- Optional **Send the connection details to** field in the add form (Xtream and Stalker): the chosen notify service receives the provider, server URL, username / password or MAC address, expiration and French category counts once the account is added, or when an existing account on the same server takes the new credentials. Not stored; a failing or missing service never blocks the account.
+
 ## 3.3.0
 
 ### What's new
