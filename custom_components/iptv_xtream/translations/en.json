@@ -61,7 +61,11 @@
     "step": {
       "init": {
         "data": {
-          "scan_interval": "Refresh interval"
+          "scan_interval": "Refresh interval",
+          "notify_days": "Notify before expiration"
+        },
+        "data_description": {
+          "notify_days": "Persistent notification this many days before the subscription expires (0 to disable)"
         }
       }
     }

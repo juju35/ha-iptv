@@ -3,11 +3,11 @@
   "name": "IPTV Xtream",
   "codeowners": ["@juju35"],
   "config_flow": true,
-  "dependencies": ["frontend", "http", "lovelace"],
+  "dependencies": ["frontend", "http", "lovelace", "persistent_notification"],
   "documentation": "https://github.com/juju35/ha-iptv",
   "integration_type": "service",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/juju35/ha-iptv/issues",
   "requirements": [],
-  "version": "2.4.1"
+  "version": "2.5.0"
 }

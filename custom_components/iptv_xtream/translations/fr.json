@@ -61,7 +61,11 @@
     "step": {
       "init": {
         "data": {
-          "scan_interval": "Intervalle d'actualisation"
+          "scan_interval": "Intervalle d'actualisation",
+          "notify_days": "Notifier avant expiration"
+        },
+        "data_description": {
+          "notify_days": "Notification persistante ce nombre de jours avant l’expiration de l’abonnement (0 pour désactiver)"
         }
       }
     }

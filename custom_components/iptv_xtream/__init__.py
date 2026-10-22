@@ -6,6 +6,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from homeassistant.components import persistent_notification
 from homeassistant.components.frontend import add_extra_js_url
 from homeassistant.components.http import StaticPathConfig
 from homeassistant.const import EVENT_HOMEASSISTANT_STARTED, Platform
@@ -15,6 +16,7 @@ from homeassistant.helpers.typing import ConfigType
 
 from .const import CARD_URL, DOMAIN, LOGO_URL, VERSION
 from .coordinator import IptvConfigEntry, IptvCoordinator
+from .notify_expiry import ExpiryNotifier, notification_id
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -85,6 +87,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: IptvConfigEntry) -> bool
     coordinator = IptvCoordinator(hass, entry)
     await coordinator.async_config_entry_first_refresh()
     entry.runtime_data = coordinator
+
+    notifier = ExpiryNotifier(hass, entry.entry_id, entry.title, dict(entry.options))
+    notifier.update(coordinator.data)
+    entry.async_on_unload(
+        coordinator.async_add_listener(lambda: notifier.update(coordinator.data))
+    )
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     entry.async_on_unload(entry.add_update_listener(_async_reload))
     return True
@@ -96,7 +104,8 @@ async def async_unload_entry(hass: HomeAssistant, entry: IptvConfigEntry) -> boo
 
 
 async def async_remove_entry(hass: HomeAssistant, entry: IptvConfigEntry) -> None:
-    """Remove the card resource with the last account."""
+    """Drop the account notification, and the card resource with the last account."""
+    persistent_notification.async_dismiss(hass, notification_id(entry.entry_id))
     if hass.config_entries.async_entries(DOMAIN):
         return
     if (resources := _storage_resources(hass)) is None:

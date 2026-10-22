@@ -37,7 +37,9 @@ from .api import (
 from .const import (
     CONF_MAC,
     CONF_PROVIDER,
+    CONF_NOTIFY_DAYS,
     CONF_SCAN_INTERVAL,
+    DEFAULT_NOTIFY_DAYS,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
     MIN_SCAN_INTERVAL,
@@ -191,7 +193,7 @@ class IptvXtreamConfigFlow(ConfigFlow, domain=DOMAIN):
 
 
 class IptvXtreamOptionsFlow(OptionsFlow):
-    """Polling interval."""
+    """Polling interval and expiration notification."""
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
@@ -215,7 +217,21 @@ class IptvXtreamOptionsFlow(OptionsFlow):
                             unit_of_measurement="min",
                             mode=NumberSelectorMode.BOX,
                         )
-                    )
+                    ),
+                    vol.Required(
+                        CONF_NOTIFY_DAYS,
+                        default=self.config_entry.options.get(
+                            CONF_NOTIFY_DAYS, DEFAULT_NOTIFY_DAYS
+                        ),
+                    ): NumberSelector(
+                        NumberSelectorConfig(
+                            min=0,
+                            max=60,
+                            step=1,
+                            unit_of_measurement="d",
+                            mode=NumberSelectorMode.BOX,
+                        )
+                    ),
                 }
             ),
         )
