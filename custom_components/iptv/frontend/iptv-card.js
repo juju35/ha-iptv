@@ -8,7 +8,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_CARD_VERSION = '3.6.0';
+var IPTV_CARD_VERSION = '3.7.0';
 var IPTV_DOMAIN = 'iptv';
 var IPTV_LOGO_URL = '/' + IPTV_DOMAIN + '/logo.png?v=' + IPTV_CARD_VERSION;
 
@@ -178,6 +178,16 @@ class IptvCard extends HTMLElement {
   _subs() {
     if (!this._hass || !this._hass.entities) return [];
     var wanted = this._wanted();
+    var subs = this._collect(wanted);
+    // Configured devices all gone (e.g. account removed, or re-added with a new
+    // id): fall back to every subscription instead of showing an empty card
+    if (wanted.length && !subs.length) subs = this._collect([]);
+    return subs;
+  }
+
+  // Subscriptions matching `wanted` (device ids), or all when `wanted` is empty,
+  // in the configured order or by name
+  _collect(wanted) {
     var byDevice = {};
     Object.values(this._hass.entities).forEach(function (e) {
       if (e.platform !== IPTV_DOMAIN || !e.translation_key || !e.device_id) return;
