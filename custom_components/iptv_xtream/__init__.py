@@ -13,7 +13,7 @@ from homeassistant.core import CoreState, Event, HomeAssistant
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.typing import ConfigType
 
-from .const import CARD_URL, DOMAIN, VERSION
+from .const import CARD_URL, DOMAIN, LOGO_URL, VERSION
 from .coordinator import IptvConfigEntry, IptvCoordinator
 
 _LOGGER = logging.getLogger(__name__)
@@ -23,12 +23,12 @@ CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
-    """Serve the card and load it on every dashboard."""
+    """Serve the card and its logo, and load the card on every dashboard."""
+    base = Path(__file__).parent
     await hass.http.async_register_static_paths(
         [
-            StaticPathConfig(
-                CARD_URL, str(Path(__file__).parent / "frontend" / "iptv-card.js"), True
-            )
+            StaticPathConfig(CARD_URL, str(base / "frontend" / "iptv-card.js"), True),
+            StaticPathConfig(LOGO_URL, str(base / "brand" / "icon@2x.png"), True),
         ]
     )
 
