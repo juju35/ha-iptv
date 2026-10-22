@@ -18,7 +18,7 @@ Home Assistant integration and Lovelace card that track one or several **IPTV su
 - **Home Assistant integration** (UI setup, no YAML): one device per account with sensors you can use in automations
 - **Lovelace card bundled with the integration**, added automatically to the dashboard resources (nothing to add by hand)
 - Subscription status (Active, Expired, Banned, Disabled, invalid credentials) with color coding
-- Expiration date, days left and a progress bar since the subscription started
+- Expiration date, days left and a progress bar since the subscription started (estimated on Stalker portals)
 - Number of live channels, movies (VOD) and series
 - Active / maximum connections, trial badge
 - Several providers in one card, one section per subscription
@@ -89,7 +89,7 @@ Delete the account in **Settings → Devices & services → IPTV Xtream**, then 
 
 The credentials are checked before the account is added. Add the integration once per account; both provider types can live side by side and share the same card. The URL and credentials can be changed later with **⋮ → Reconfigure**, and the refresh interval (default 60 minutes, minimum 5) with **Configure**.
 
-> **Stalker portals** do not expose a start date, the connection counts or the trial flag, so those are shown as `—` (the expiration progress bar needs the start date and is hidden). Expiration and the live / VOD / series counts are read from the portal's `account_info` and `get_ordered_list` endpoints.
+> **Stalker portals** do not expose a start date, the connection counts or the trial flag, so those are shown as `—` (the expiration progress bar then assumes the shortest usual subscription length, 1, 3, 6 or 12 months, that covers the days left). Expiration and the live / VOD / series counts are read from the portal's `account_info` and `get_ordered_list` endpoints.
 
 ### Entities
 

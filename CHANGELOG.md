@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.4.1
+
+### Fixes
+- Stalker accounts show the expiration bar again. Without a start date, the card assumes the shortest usual subscription length (1, 3, 6 or 12 months, then whole years) that covers the days left.
+
 ## 2.4.0
 
 ### What's new
