@@ -100,7 +100,9 @@ Delete the account in **Settings → Devices & services → IPTV**, then remove 
 | Portal URL | Including the port, e.g. `http://your-portal:80` (the portal path like `/c/` or `/portal.php` is found automatically) |
 | MAC address | The MAC registered with the provider, format `AA:BB:CC:DD:EE:FF` |
 
-The credentials are checked before the account is added. Add the integration once per account; both provider types can live side by side and share the same card. The URL and credentials can be changed later with **⋮ → Reconfigure**, and with **Configure**:
+The credentials are checked before the account is added, and stored in the config entry together with the server URL (username / password, or MAC address).
+
+**Same server already configured** (same host and port): the new credentials are checked, then compared with the account already on that server. When the new account is valid longer (later expiration, unlimited, or the existing one no longer works), the existing account takes the new username / password or MAC address and is reloaded: same device, same entities, and its title is kept if you renamed it. Otherwise nothing changes and the flow says which account is valid longer. With several accounts on the server, the one valid the shortest is the one compared. Add the integration once per account; both provider types can live side by side and share the same card. The URL and credentials can be changed later with **⋮ → Reconfigure**, and with **Configure**:
 
 | Option | Default | Description |
 |---|---|---|

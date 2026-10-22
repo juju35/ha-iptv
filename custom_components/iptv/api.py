@@ -21,6 +21,7 @@ import asyncio
 from datetime import datetime, timezone
 import re
 from typing import Any
+from urllib.parse import urlparse
 
 import aiohttp
 
@@ -47,6 +48,13 @@ def normalize_url(url: str) -> str:
     if "://" not in url:
         url = "http://" + url
     return url
+
+
+def server_key(url: str) -> str:
+    """``host:port`` of a server URL, to spot two accounts on the same server."""
+    parsed = urlparse(normalize_url(url))
+    port = parsed.port or (443 if parsed.scheme == "https" else 80)
+    return f"{(parsed.hostname or '').lower()}:{port}"
 
 
 # ── Xtream Codes ────────────────────────────────────────────────────────────
@@ -179,6 +187,14 @@ def parse_expiry(value: Any) -> int | None:
     return None
 
 
+def stalker_expiry(info: dict[str, Any]) -> int | None:
+    """Expiration of a Stalker account (epoch seconds), None when unknown or unlimited."""
+    return next(
+        (p for f in _EXPIRY_FIELDS if (p := parse_expiry(info.get(f))) is not None),
+        None,
+    )
+
+
 def stalker_status(info: dict[str, Any], exp_date: int | None, now: int) -> str:
     """Derive an Xtream-style status from the Stalker account info."""
     if str(info.get("blocked")) == "1" or str(info.get("status")) in ("0", "2"):
@@ -306,10 +322,7 @@ class StalkerClient:
         channels, movies, series = await asyncio.gather(
             self._count("itv"), self._count("vod"), self._count("series")
         )
-        exp_date = next(
-            (p for f in _EXPIRY_FIELDS if (p := parse_expiry(info.get(f))) is not None),
-            None,
-        )
+        exp_date = stalker_expiry(info)
         now = int(datetime.now(timezone.utc).timestamp())
         return {
             "auth": True,
