@@ -36,13 +36,13 @@ from .api import (
     IptvError,
     StalkerClient,
     XtreamClient,
-    counts_ok,
     normalize_mac,
     normalize_url,
     server_key,
     stalker_expiry,
     stalker_status,
     valid_mac,
+    validate_catalogue,
 )
 from .const import (
     CONF_ADDED_AT,
@@ -150,17 +150,9 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
         else:
             self._validity = _validity(info.get("status"), info.get("exp_date"))
         if french:
-            summary = await client.async_get_french()
-            self._french = summary
-            if summary is None:
-                return {"base": "french_unknown"}
-            if not summary["total"]:
-                return {"base": "no_french_lists"}
-            stream = await client.async_test_stream()
-            if stream.get("ok") is False:
-                return {"base": "stream_ko"}
-            if not counts_ok(await client.async_get_counts()):
-                return {"base": "empty_catalogue"}
+            error, self._french = await validate_catalogue(client)
+            if error:
+                return {"base": error}
         return {}
 
     def _create_or_replace(self, data: dict[str, Any]) -> ConfigFlowResult:

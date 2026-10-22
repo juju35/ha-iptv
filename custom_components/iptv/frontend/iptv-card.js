@@ -8,7 +8,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_CARD_VERSION = '3.13.1';
+var IPTV_CARD_VERSION = '3.13.2';
 var IPTV_DOMAIN = 'iptv';
 var IPTV_LOGO_URL = '/' + IPTV_DOMAIN + '/logo.png?v=' + IPTV_CARD_VERSION;
 
@@ -170,6 +170,10 @@ function iptvT(lang, key, vars) {
   var s = strings[key] || IptvCardI18n.en[key] || key;
   if (vars) Object.keys(vars).forEach(function (k) { s = s.replace('{' + k + '}', vars[k]); });
   return s;
+}
+
+function iptvEsc(x) {
+  return String(x == null ? '' : x).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 }
 
 // ── iptv-card ─────────────────────────────────────────────────────────────────
@@ -373,8 +377,7 @@ class IptvCard extends HTMLElement {
     var fmtDate = (ms) =>
       new Date(ms).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' });
     var nf = new Intl.NumberFormat(locale);
-    var esc = (s) =>
-      String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+    var esc = iptvEsc;
     var subs = this._hass ? this._subs() : [];
     var multi = subs.length > 1;
     var title = this._config.title || this._t(multi ? 'default_title_multi' : 'default_title');
@@ -606,22 +609,11 @@ class IptvCard extends HTMLElement {
 
   // ── Edit credentials popup ────────────────────────────────────────────────
   async _openEditor(sub) {
-    this._closeEditor();
-    var esc = (x) =>
-      String(x == null ? '' : x).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
-    var modal = document.createElement('div');
-    modal.className = 'backdrop';
-    modal.innerHTML = `<div class="modal"><h3>${esc(this._t('edit_title'))}</h3><div class="hint">${esc(this._t('edit_saving'))}</div></div>`;
-    modal.addEventListener('click', (e) => { if (e.target === modal) this._closeEditor(); });
-    this.shadowRoot.appendChild(modal);
-    this._modal = modal;
+    var esc = iptvEsc;
+    var modal = this._openModal(`<h3>${esc(this._t('edit_title'))}</h3><div class="hint">${esc(this._t('edit_saving'))}</div>`);
     this._editDevice = sub.device;
 
-    var prefill = {};
-    try {
-      var res = await this._hass.callService('iptv', 'edit_account', { device_id: sub.device }, undefined, false, true);
-      prefill = (res && res.response) || {};
-    } catch (e) { prefill = {}; }
+    var prefill = await this._svc('edit_account', { device_id: sub.device });
     if (this._modal !== modal) return;
 
     var provider = prefill.provider === 'stalker' ? 'stalker' : 'xtream';
@@ -656,14 +648,31 @@ class IptvCard extends HTMLElement {
     if (this._modal) { this._modal.remove(); this._modal = null; }
   }
 
-  _confirmDelete(sub) {
+  // Call an iptv service that returns a response; {} or {ok:false} on failure
+  async _svc(service, data) {
+    try {
+      var res = await this._hass.callService('iptv', service, data, undefined, false, true);
+      return (res && res.response) || {};
+    } catch (e) {
+      return { ok: false, error: 'generic' };
+    }
+  }
+
+  // Open a modal with the given inner HTML (wrapped in .modal) and return it
+  _openModal(innerHtml) {
     this._closeEditor();
-    var esc = (x) =>
-      String(x == null ? '' : x).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
     var modal = document.createElement('div');
     modal.className = 'backdrop';
-    modal.innerHTML = `
-      <div class="modal">
+    modal.innerHTML = '<div class="modal">' + innerHtml + '</div>';
+    modal.addEventListener('click', (e) => { if (e.target === modal) this._closeEditor(); });
+    this.shadowRoot.appendChild(modal);
+    this._modal = modal;
+    return modal;
+  }
+
+  _confirmDelete(sub) {
+    var esc = iptvEsc;
+    var modal = this._openModal(`
         <h3>${esc(this._t('del_title'))}</h3>
         <div class="hint">${esc(sub.name)} — ${esc(this._t('del_confirm'))}</div>
         <div class="err"></div>
@@ -671,10 +680,7 @@ class IptvCard extends HTMLElement {
           <button class="act cancel">${esc(this._t('edit_cancel'))}</button>
           <button class="act danger">${esc(this._t('del_delete'))}</button>
         </div>
-      </div>`;
-    modal.addEventListener('click', (e) => { if (e.target === modal) this._closeEditor(); });
-    this.shadowRoot.appendChild(modal);
-    this._modal = modal;
+      `);
     this._delDevice = sub.device;
     modal.querySelector('.cancel').addEventListener('click', () => this._closeEditor());
     modal.querySelector('.danger').addEventListener('click', () => this._deleteAccount());
@@ -688,11 +694,7 @@ class IptvCard extends HTMLElement {
     errEl.textContent = '';
     btn.setAttribute('disabled', '');
     btn.textContent = this._t('edit_saving');
-    var out = {};
-    try {
-      var res = await this._hass.callService('iptv', 'remove_account', { device_id: this._delDevice }, undefined, false, true);
-      out = (res && res.response) || {};
-    } catch (e) { out = { ok: false, error: 'generic' }; }
+    var out = await this._svc('remove_account', { device_id: this._delDevice });
     if (this._modal !== modal) return;
     if (out.ok) {
       this._closeEditor();
@@ -706,13 +708,8 @@ class IptvCard extends HTMLElement {
 
   // ── Add account popup ─────────────────────────────────────────────────────
   _openAdd() {
-    this._closeEditor();
-    var esc = (x) =>
-      String(x == null ? '' : x).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
-    var modal = document.createElement('div');
-    modal.className = 'backdrop';
-    modal.innerHTML = `
-      <div class="modal">
+    var esc = iptvEsc;
+    var modal = this._openModal(`
         <h3>${esc(this._t('add_title'))}</h3>
         <div class="field">
           <label>${esc(this._t('add_provider'))}</label>
@@ -727,10 +724,7 @@ class IptvCard extends HTMLElement {
           <button class="act cancel">${esc(this._t('edit_cancel'))}</button>
           <button class="act primary">${esc(this._t('add_create'))}</button>
         </div>
-      </div>`;
-    modal.addEventListener('click', (e) => { if (e.target === modal) this._closeEditor(); });
-    this.shadowRoot.appendChild(modal);
-    this._modal = modal;
+      `);
     var sel = modal.querySelector('.prov');
     var renderFields = () => {
       var field = (key, type) => `
@@ -767,11 +761,7 @@ class IptvCard extends HTMLElement {
     errEl.textContent = '';
     btn.setAttribute('disabled', '');
     btn.textContent = this._t('edit_saving');
-    var out = {};
-    try {
-      var res = await this._hass.callService('iptv', 'add_account', payload, undefined, false, true);
-      out = (res && res.response) || {};
-    } catch (e) { out = { ok: false, error: 'generic' }; }
+    var out = await this._svc('add_account', payload);
     if (this._modal !== modal) return;
     if (out.ok) {
       this._closeEditor();
@@ -785,20 +775,9 @@ class IptvCard extends HTMLElement {
 
   // ── View credentials popup ────────────────────────────────────────────────
   async _openView(sub) {
-    this._closeEditor();
-    var esc = (x) =>
-      String(x == null ? '' : x).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
-    var modal = document.createElement('div');
-    modal.className = 'backdrop';
-    modal.innerHTML = `<div class="modal"><h3>${esc(this._t('view_title'))}</h3><div class="hint">${esc(this._t('edit_saving'))}</div></div>`;
-    modal.addEventListener('click', (e) => { if (e.target === modal) this._closeEditor(); });
-    this.shadowRoot.appendChild(modal);
-    this._modal = modal;
-    var creds = {};
-    try {
-      var res = await this._hass.callService('iptv', 'get_credentials', { device_id: sub.device }, undefined, false, true);
-      creds = (res && res.response) || {};
-    } catch (e) { creds = {}; }
+    var esc = iptvEsc;
+    var modal = this._openModal(`<h3>${esc(this._t('view_title'))}</h3><div class="hint">${esc(this._t('edit_saving'))}</div>`);
+    var creds = await this._svc('get_credentials', { device_id: sub.device });
     if (this._modal !== modal) return;
     var close = `<div class="modal-actions"><button class="act cancel">${esc(this._t('edit_cancel'))}</button></div>`;
     if (!creds.ok) {
@@ -856,11 +835,7 @@ class IptvCard extends HTMLElement {
     errEl.textContent = '';
     primary.setAttribute('disabled', '');
     primary.textContent = this._t('edit_saving');
-    var out = {};
-    try {
-      var res = await this._hass.callService('iptv', 'edit_account', payload, undefined, false, true);
-      out = (res && res.response) || {};
-    } catch (e) { out = { ok: false, error: 'generic' }; }
+    var out = await this._svc('edit_account', payload);
     if (this._modal !== modal) return;
     if (out.ok) {
       this._closeEditor();
