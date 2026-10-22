@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.4.0
+
+### What's new
+- **Stalker / Ministra portals** are supported alongside Xtream Codes: add an account with a portal URL and a MAC address. The provider type is chosen when adding the integration.
+- The portal path (`/portal.php`, `/stalker_portal/server/load.php`, `/c/portal.php`) is detected automatically via the STB handshake.
+- Stalker accounts expose status, expiration, days left and the live / VOD / series counts; the start date, connections and trial flag are not provided by the protocol and show as `—`.
+
+### Changes
+- Config flow starts with a provider menu (Xtream Codes / Stalker). Existing Xtream accounts are untouched and keep working.
+- Screenshot mock data is fully anonymised; the multi-provider screenshot now shows a Stalker account next to an Xtream one.
+
 ## 2.3.0
 
 ### What's new
