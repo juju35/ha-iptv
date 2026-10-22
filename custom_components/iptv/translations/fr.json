@@ -50,7 +50,9 @@
     "error": {
       "cannot_connect": "Serveur IPTV injoignable",
       "invalid_auth": "Identifiants refusés par le serveur",
-      "invalid_mac": "Adresse MAC invalide (format AA:BB:CC:DD:EE:FF)"
+      "invalid_mac": "Adresse MAC invalide (format AA:BB:CC:DD:EE:FF)",
+      "no_french_lists": "Aucune liste française trouvée chez ce fournisseur (catégories live, VOD ou séries) : le compte n’est pas ajouté.",
+      "french_unknown": "Impossible de lire les catégories de ce fournisseur pour vérifier les listes françaises."
     },
     "abort": {
       "already_configured": "Ce compte est déjà configuré",
@@ -127,6 +129,9 @@
     "binary_sensor": {
       "trial": {
         "name": "Essai"
+      },
+      "french_lists": {
+        "name": "Listes françaises"
       }
     }
   }

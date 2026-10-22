@@ -117,22 +117,25 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
 
     # ── credential checks ──
 
-    async def _check_xtream(self, data: dict[str, Any]) -> dict[str, str]:
+    async def _check_xtream(self, data: dict[str, Any], french: bool = False) -> dict[str, str]:
         client = XtreamClient(
             async_get_clientsession(self.hass),
             data[CONF_URL],
             data[CONF_USERNAME],
             data[CONF_PASSWORD],
         )
-        return await self._check(client)
+        return await self._check(client, french)
 
-    async def _check_stalker(self, data: dict[str, Any]) -> dict[str, str]:
+    async def _check_stalker(self, data: dict[str, Any], french: bool = False) -> dict[str, str]:
         client = StalkerClient(
             async_get_clientsession(self.hass), data[CONF_URL], data[CONF_MAC]
         )
-        return await self._check(client)
+        return await self._check(client, french)
 
-    async def _check(self, client: XtreamClient | StalkerClient) -> dict[str, str]:
+    async def _check(
+        self, client: XtreamClient | StalkerClient, french: bool = False
+    ) -> dict[str, str]:
+        """Check the credentials and, for a new account, the French lists."""
         try:
             info = await client.async_get_user_info()
         except IptvAuthError:
@@ -145,6 +148,12 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
             self._validity = _validity(stalker_status(info, exp, now), exp)
         else:
             self._validity = _validity(info.get("status"), info.get("exp_date"))
+        if french:
+            summary = await client.async_get_french()
+            if summary is None:
+                return {"base": "french_unknown"}
+            if not summary["total"]:
+                return {"base": "no_french_lists"}
         return {}
 
     def _create_or_replace(self, data: dict[str, Any]) -> ConfigFlowResult:
@@ -214,7 +223,7 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
                 f"{user_input[CONF_URL]}|{user_input[CONF_USERNAME]}".lower()
             )
             self._abort_if_unique_id_configured()
-            errors = await self._check_xtream(user_input)
+            errors = await self._check_xtream(user_input, french=True)
             if not errors:
                 return self._create_or_replace(user_input)
         return self.async_show_form(
@@ -238,7 +247,7 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
                     f"{user_input[CONF_URL]}|{user_input[CONF_MAC]}".lower()
                 )
                 self._abort_if_unique_id_configured()
-                errors = await self._check_stalker(user_input)
+                errors = await self._check_stalker(user_input, french=True)
                 if not errors:
                     return self._create_or_replace(user_input)
         return self.async_show_form(

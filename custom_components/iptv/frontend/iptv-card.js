@@ -8,7 +8,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_CARD_VERSION = '3.2.0';
+var IPTV_CARD_VERSION = '3.3.0';
 var IPTV_DOMAIN = 'iptv';
 var IPTV_LOGO_URL = '/' + IPTV_DOMAIN + '/logo.png?v=' + IPTV_CARD_VERSION;
 
@@ -37,6 +37,9 @@ var IptvCardI18n = {
     movies: 'movies',
     series: 'series',
     connections: 'connections',
+    french_on: 'FR',
+    french_off: 'No FR',
+    french_title: 'French lists',
     health_ok: 'Online',
     health_degraded: 'Slow',
     health_unreachable: 'Unreachable',
@@ -69,6 +72,9 @@ var IptvCardI18n = {
     movies: 'films',
     series: 'séries',
     connections: 'connexions',
+    french_on: 'FR',
+    french_off: 'Pas de FR',
+    french_title: 'Listes françaises',
     health_ok: 'En ligne',
     health_degraded: 'Lent',
     health_unreachable: 'Injoignable',
@@ -231,6 +237,13 @@ class IptvCard extends HTMLElement {
     };
   }
 
+  // French lists of one subscription: true, false or null (unknown)
+  _french(ids) {
+    var st = ids.french_lists && this._hass.states[ids.french_lists];
+    if (!st || (st.state !== 'on' && st.state !== 'off')) return null;
+    return st.state === 'on';
+  }
+
   // Last health check of one subscription: { status, ms } or null
   _health(ids) {
     var st = ids.health && this._hass.states[ids.health];
@@ -297,14 +310,21 @@ class IptvCard extends HTMLElement {
       return `<span class="chip ${cls}" data-entity="health"><ha-icon icon="${icon}"></ha-icon>${esc(label)}</span>`;
     };
 
-    // Status, trial and health pills of one subscription
-    var chips = (v, h) => {
+    // French flag pill: French lists found (green) or not (red)
+    var frenchChip = (fr) =>
+      fr === null || fr === undefined
+        ? ''
+        : `<span class="chip ${fr ? 'ok' : 'error'} fr" data-entity="french_lists" title="${esc(this._t('french_title'))}"><span class="flag${fr ? '' : ' off'}"></span>${esc(this._t(fr ? 'french_on' : 'french_off'))}</span>`;
+
+    // Status, trial, French and health pills of one subscription
+    var chips = (v, h, fr) => {
       if (!v && !h) return '';
       var icon = v ? (v.state === 'ok' ? 'mdi:check-circle' : v.state === 'warning' ? 'mdi:alert' : 'mdi:close-circle') : '';
       return `
         <div class="chips">
           ${v ? `<span class="chip ${v.state}" data-entity="status"><ha-icon icon="${icon}"></ha-icon>${esc(v.statusLabel)}</span>` : ''}
           ${v && v.d.is_trial ? '<span class="chip idle">' + this._t('trial') + '</span>' : ''}
+          ${v ? frenchChip(fr) : ''}
           ${healthChip(h, v)}
         </div>`;
     };
@@ -353,7 +373,7 @@ class IptvCard extends HTMLElement {
     } else if (!multi) {
       // One subscription: pills under the card title, as before
       var v = this._view(this._data(subs[0].ids));
-      status = chips(v, this._health(subs[0].ids));
+      status = chips(v, this._health(subs[0].ids), this._french(subs[0].ids));
       body = '<div class="sect" data-sub="0">' +
         (v ? details(v) : '<div class="msg err">' + this._t('unavailable') + '</div>') + '</div>';
     } else {
@@ -364,7 +384,7 @@ class IptvCard extends HTMLElement {
           <div class="sect multi" data-sub="${i}">
             <div class="sect-head">
               <div class="sect-name">${esc(sub.name)}</div>
-              ${chips(v, this._health(sub.ids))}
+              ${chips(v, this._health(sub.ids), this._french(sub.ids))}
             </div>
             ${v ? details(v) : '<div class="msg err">' + this._t('unavailable') + '</div>'}
           </div>`;
@@ -384,6 +404,10 @@ class IptvCard extends HTMLElement {
         .chip { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px 1px 5px; border-radius: 12px; font-size: 11px; font-weight: 500;
                 color: var(--c); background: color-mix(in srgb, var(--c) 15%, transparent); --mdc-icon-size: 14px; }
         .chip.idle { padding-left: 10px; }
+        .chip.fr { padding-left: 6px; gap: 5px; }
+        .flag { width: 14px; height: 10px; border-radius: 2px; flex: none; box-shadow: 0 0 0 1px rgba(0,0,0,.12);
+                background: linear-gradient(90deg, #0055a4 0 33.3%, #fff 33.3% 66.6%, #ef4135 66.6%); }
+        .flag.off { filter: grayscale(1); opacity: .6; }
         .sect { display: flex; flex-direction: column; gap: 10px; }
         .sect.multi + .sect.multi { border-top: 1px solid var(--divider-color, rgba(127,127,127,.25)); padding-top: 10px; }
         .sect-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }

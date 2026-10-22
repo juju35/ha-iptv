@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from homeassistant.components.binary_sensor import BinarySensorEntity
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
@@ -17,7 +19,8 @@ async def async_setup_entry(
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     """Create the binary sensors of one account."""
-    async_add_entities([IptvTrialSensor(entry.runtime_data)])
+    coordinator = entry.runtime_data
+    async_add_entities([IptvTrialSensor(coordinator), IptvFrenchListsSensor(coordinator)])
 
 
 class IptvTrialSensor(IptvEntity, BinarySensorEntity):
@@ -33,3 +36,29 @@ class IptvTrialSensor(IptvEntity, BinarySensorEntity):
         if not self.coordinator.data.get("auth"):
             return None
         return str(self.coordinator.data.get("is_trial")) == "1"
+
+
+class IptvFrenchListsSensor(IptvEntity, BinarySensorEntity):
+    """On when the provider has French live, VOD or series categories."""
+
+    def __init__(self, coordinator) -> None:
+        super().__init__(coordinator, "french_lists")
+
+    @property
+    def _french(self) -> dict[str, Any] | None:
+        return self.coordinator.data.get("french") if self.coordinator.data.get("auth") else None
+
+    @property
+    def is_on(self) -> bool | None:
+        french = self._french
+        return None if french is None else french["total"] > 0
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        french = self._french or {}
+        return {
+            "live": french.get("live"),
+            "vod": french.get("vod"),
+            "series": french.get("series"),
+            "examples": french.get("examples", []),
+        }

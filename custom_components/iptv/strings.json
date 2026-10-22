@@ -50,7 +50,9 @@
     "error": {
       "cannot_connect": "Cannot reach the IPTV server",
       "invalid_auth": "Credentials refused by the server",
-      "invalid_mac": "Invalid MAC address (format AA:BB:CC:DD:EE:FF)"
+      "invalid_mac": "Invalid MAC address (format AA:BB:CC:DD:EE:FF)",
+      "no_french_lists": "No French list found on this provider (live, VOD or series categories): the account is not added.",
+      "french_unknown": "Could not read the categories of this provider to check for French lists."
     },
     "abort": {
       "already_configured": "This account is already configured",
@@ -127,6 +129,9 @@
     "binary_sensor": {
       "trial": {
         "name": "Trial"
+      },
+      "french_lists": {
+        "name": "French lists"
       }
     }
   }
