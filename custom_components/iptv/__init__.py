@@ -74,11 +74,7 @@ async def _async_register_resource(hass: HomeAssistant) -> bool:
         for item in list(resources.async_items()):
             if item.get("url", "").startswith(f"/{LEGACY_DOMAIN}/"):
                 await resources.async_delete_item(item["id"])
-        existing = [
-            item
-            for item in resources.async_items()
-            if item.get("url", "").split("?")[0] == CARD_URL
-        ]
+        existing = [item for item in resources.async_items() if item.get("url", "").split("?")[0] == CARD_URL]
         if not existing:
             await resources.async_create_item({"res_type": "module", "url": url})
             return True
@@ -113,9 +109,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: IptvConfigEntry) -> bool
     entry.async_on_unload(coordinator.async_add_listener(lambda: notifier.update(coordinator.data)))
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     await async_restore_snapshot(hass, entry)
-    entry.async_create_background_task(
-        hass, coordinator.health.async_check_now(), f"{DOMAIN} first health check"
-    )
+    entry.async_create_background_task(hass, coordinator.health.async_check_now(), f"{DOMAIN} first health check")
     entry.async_on_unload(entry.add_update_listener(_async_reload))
     return True
 

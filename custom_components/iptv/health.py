@@ -64,9 +64,7 @@ class HealthMonitor:
     def async_start(self) -> CALLBACK_TYPE:
         """Schedule the checks; return the function that stops them."""
         self._unsubs = [
-            async_track_time_interval(
-                self._hass, self._async_check, self._interval, name=f"{DOMAIN} health check"
-            ),
+            async_track_time_interval(self._hass, self._async_check, self._interval, name=f"{DOMAIN} health check"),
             self._coordinator.async_add_listener(self._async_from_refresh),
         ]
         return self.async_stop

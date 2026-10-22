@@ -80,16 +80,11 @@ def _snapshot(hass: HomeAssistant, entry: ConfigEntry) -> dict[str, Any]:
     dev_reg = dr.async_get(hass)
     prefix = f"{entry.entry_id}_"
     entities = {
-        e.unique_id.removeprefix(prefix): {"entity_id": e.entity_id}
-        | {f: getattr(e, f) for f in ENTITY_FIELDS}
+        e.unique_id.removeprefix(prefix): {"entity_id": e.entity_id} | {f: getattr(e, f) for f in ENTITY_FIELDS}
         for e in er.async_entries_for_config_entry(ent_reg, entry.entry_id)
     }
     devices = dr.async_entries_for_config_entry(dev_reg, entry.entry_id)
-    device = (
-        {"id": devices[0].id} | {f: getattr(devices[0], f) for f in DEVICE_FIELDS}
-        if devices
-        else None
-    )
+    device = {"id": devices[0].id} | {f: getattr(devices[0], f) for f in DEVICE_FIELDS} if devices else None
     return {"entities": entities, "device": device}
 
 

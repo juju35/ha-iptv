@@ -56,9 +56,7 @@ def normalize_url(url: str) -> str:
 
 # Whole-word markers of a French category ("FR | TF1", "[VOSTFR] Séries",
 # "FRANCE 4K", "🇫🇷 Sport"); "AFRICA" or "FREE" do not match.
-_FRENCH_RE = re.compile(
-    r"(?<![A-Z0-9])(FR|FRA|FRANCE|FRENCH|FRAN[CÇ]AISE?S?|VF|VFF|VOSTFR)(?![A-Z0-9])"
-)
+_FRENCH_RE = re.compile(r"(?<![A-Z0-9])(FR|FRA|FRANCE|FRENCH|FRAN[CÇ]AISE?S?|VF|VFF|VOSTFR)(?![A-Z0-9])")
 # Categories well known in French lists, even without an FR marker: French
 # channels and bouquets, and French-only category words (accented, so that
 # English "CINEMA" or "SERIES" do not match).
@@ -80,11 +78,7 @@ def is_french(name: Any) -> bool:
     """True for a category name that looks French (marker or known French category)."""
     text = str(name or "")
     upper = text.upper()
-    return (
-        FRENCH_FLAG in text
-        or bool(_FRENCH_RE.search(upper))
-        or bool(_KNOWN_FRENCH_RE.search(upper))
-    )
+    return FRENCH_FLAG in text or bool(_FRENCH_RE.search(upper)) or bool(_KNOWN_FRENCH_RE.search(upper))
 
 
 def french_summary(categories: dict[str, list[str] | None]) -> dict[str, Any] | None:
@@ -108,9 +102,7 @@ def french_summary(categories: dict[str, list[str] | None]) -> dict[str, Any] | 
 STREAM_TIMEOUT = aiohttp.ClientTimeout(total=15, sock_connect=6, sock_read=10)
 
 
-async def _probe_stream(
-    session: aiohttp.ClientSession, url: str, headers: dict[str, str]
-) -> dict[str, Any]:
+async def _probe_stream(session: aiohttp.ClientSession, url: str, headers: dict[str, str]) -> dict[str, Any]:
     """Open a channel stream, read a little, and tell whether it plays.
 
     Opening a stream uses one of the account's connection slots, briefly.
@@ -119,9 +111,7 @@ async def _probe_stream(
     start = time.monotonic()
     ms = lambda: round((time.monotonic() - start) * 1000)  # noqa: E731
     try:
-        async with session.get(
-            url, headers=headers, timeout=STREAM_TIMEOUT, allow_redirects=True
-        ) as resp:
+        async with session.get(url, headers=headers, timeout=STREAM_TIMEOUT, allow_redirects=True) as resp:
             if resp.status >= 400:
                 return {"ok": False, "latency_ms": ms(), "error": f"HTTP {resp.status}"}
             ctype = (resp.headers.get("Content-Type") or "").lower()
@@ -177,9 +167,7 @@ def server_key(url: str) -> str:
 class XtreamClient:
     """Query player_api.php for the account info and catalogue sizes."""
 
-    def __init__(
-        self, session: aiohttp.ClientSession, url: str, username: str, password: str
-    ) -> None:
+    def __init__(self, session: aiohttp.ClientSession, url: str, username: str, password: str) -> None:
         self._session = session
         self._base = normalize_url(url)
         self._endpoint = self._base + "/player_api.php"
@@ -192,9 +180,7 @@ class XtreamClient:
         if action:
             params["action"] = action
         try:
-            async with self._session.get(
-                self._endpoint, params=params, headers=HEADERS, timeout=TIMEOUT
-            ) as resp:
+            async with self._session.get(self._endpoint, params=params, headers=HEADERS, timeout=TIMEOUT) as resp:
                 resp.raise_for_status()
                 return await resp.json(content_type=None)
         except (TimeoutError, aiohttp.ClientError, ValueError) as err:
@@ -241,9 +227,7 @@ class XtreamClient:
         except IptvError as err:
             return {"ok": None, "channel": None, "latency_ms": None, "error": str(err)}
         first = (
-            next(
-                (s for s in streams if isinstance(s, dict) and s.get("stream_id") is not None), None
-            )
+            next((s for s in streams if isinstance(s, dict) and s.get("stream_id") is not None), None)
             if isinstance(streams, list)
             else None
         )
@@ -339,9 +323,7 @@ def parse_expiry(value: Any) -> int | None:
         return None
     if isinstance(value, bool):
         return None
-    if isinstance(value, (int, float)) or (
-        isinstance(value, str) and value.strip().lstrip("-").isdigit()
-    ):
+    if isinstance(value, (int, float)) or (isinstance(value, str) and value.strip().lstrip("-").isdigit()):
         seconds = int(value)
         return seconds if seconds > 1_000_000 else None
     text = str(value).strip()
@@ -490,17 +472,13 @@ class StalkerClient:
         """Channel / movie / series counts, for validating a real catalogue."""
         if not self._token:
             await self._handshake()
-        channels, movies, series = await asyncio.gather(
-            self._count("itv"), self._count("vod"), self._count("series")
-        )
+        channels, movies, series = await asyncio.gather(self._count("itv"), self._count("vod"), self._count("series"))
         return {"channels": channels, "movies": movies, "series": series}
 
     async def async_test_stream(self) -> dict[str, Any]:
         """Probe the first live channel via create_link. ok True/False/None."""
         try:
-            js = await self._get(
-                {"type": "itv", "action": "get_ordered_list", "genre": "*", "p": "1"}
-            )
+            js = await self._get({"type": "itv", "action": "get_ordered_list", "genre": "*", "p": "1"})
         except IptvError as err:
             return {"ok": None, "channel": None, "latency_ms": None, "error": str(err)}
         data = js.get("data") if isinstance(js, dict) else None

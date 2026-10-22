@@ -41,9 +41,7 @@ class ExpiryNotifier:
     the warning window, so dismissing it silences it until the next day.
     """
 
-    def __init__(
-        self, hass: HomeAssistant, entry_id: str, name: str, options: dict[str, Any]
-    ) -> None:
+    def __init__(self, hass: HomeAssistant, entry_id: str, name: str, options: dict[str, Any]) -> None:
         self._hass = hass
         self._id = notification_id(entry_id)
         self._name = name
@@ -72,9 +70,7 @@ class ExpiryNotifier:
         lang = "fr" if (self._hass.config.language or "").startswith("fr") else "en"
         text = MESSAGES[lang]
         date = dt_util.as_local(expiration).strftime("%d/%m/%Y" if lang == "fr" else "%Y-%m-%d")
-        message = (text["soon"] if days > 0 else text["expired"]).format(
-            name=self._name, date=date, days=days
-        )
+        message = (text["soon"] if days > 0 else text["expired"]).format(name=self._name, date=date, days=days)
         persistent_notification.async_create(
             self._hass,
             message,

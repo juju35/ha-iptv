@@ -180,12 +180,8 @@ def main():
         page.clock.set_fixed_time(NOW)
         # The card loads its logo from /iptv/logo.png, served by the integration:
         # open a page on an http origin so the relative URL resolves
-        page.route(
-            "**/iptv/logo.png*", lambda route: route.fulfill(body=LOGO, content_type="image/png")
-        )
-        page.route(
-            BASE_URL, lambda route: route.fulfill(body="<!doctype html>", content_type="text/html")
-        )
+        page.route("**/iptv/logo.png*", lambda route: route.fulfill(body=LOGO, content_type="image/png"))
+        page.route(BASE_URL, lambda route: route.fulfill(body="<!doctype html>", content_type="text/html"))
         page.goto(BASE_URL)
         for shot in SHOTS:
             page.set_content(page_html(shot["theme"]))
@@ -207,9 +203,7 @@ def main():
                 },
             )
             page.wait_for_timeout(300)
-            page.locator("iptv-card").screenshot(
-                path=str(out_dir / f"{shot['file']}.png"), animations="disabled"
-            )
+            page.locator("iptv-card").screenshot(path=str(out_dir / f"{shot['file']}.png"), animations="disabled")
             print(f"screenshots/{shot['file']}.png")
         browser.close()
 

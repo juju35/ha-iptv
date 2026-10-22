@@ -86,9 +86,7 @@ async def _validate(hass: HomeAssistant, provider: str, data: dict[str, Any]) ->
     if provider == PROVIDER_STALKER:
         if not valid_mac(data.get(CONF_MAC, "")):
             return "invalid_mac"
-        client: XtreamClient | StalkerClient = StalkerClient(
-            session, url, normalize_mac(data[CONF_MAC])
-        )
+        client: XtreamClient | StalkerClient = StalkerClient(session, url, normalize_mac(data[CONF_MAC]))
     else:
         client = XtreamClient(session, url, data[CONF_USERNAME], data[CONF_PASSWORD])
     try:
@@ -173,9 +171,7 @@ async def _async_get_credentials(call: ServiceCall) -> ServiceResponse:
 
 async def _async_add_account(call: ServiceCall) -> ServiceResponse:
     hass = call.hass
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": "card_add"}, data=dict(call.data)
-    )
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": "card_add"}, data=dict(call.data))
     if result["type"] == FlowResultType.CREATE_ENTRY:
         return {"ok": True}
     if result["type"] == FlowResultType.ABORT:

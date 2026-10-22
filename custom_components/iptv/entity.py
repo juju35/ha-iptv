@@ -22,11 +22,7 @@ class IptvEntity(CoordinatorEntity[IptvCoordinator]):
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name=entry.title,
-            manufacturer=(
-                "Stalker portal"
-                if entry.data.get(CONF_PROVIDER) == PROVIDER_STALKER
-                else "Xtream Codes"
-            ),
+            manufacturer=("Stalker portal" if entry.data.get(CONF_PROVIDER) == PROVIDER_STALKER else "Xtream Codes"),
             model="IPTV subscription",
             entry_type=DeviceEntryType.SERVICE,
         )

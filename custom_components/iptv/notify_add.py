@@ -77,9 +77,7 @@ def build_message(
             )
         lines.append(f"{t['expiration']}{sep}{expiration}")
     if french:
-        counts = ", ".join(
-            f"{t['kinds'][k]} {french[k]}" for k in ("live", "vod", "series") if french.get(k)
-        )
+        counts = ", ".join(f"{t['kinds'][k]} {french[k]}" for k in ("live", "vod", "series") if french.get(k))
         lines.append(f"{t['french']}{sep}{french['total']} ({counts})")
     return "\n".join(lines)
 
