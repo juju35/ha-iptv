@@ -10,7 +10,7 @@
  */
 var IPTV_CARD_VERSION = '3.13.2';
 var IPTV_DOMAIN = 'iptv';
-var IPTV_LOGO_URL = '/' + IPTV_DOMAIN + '/logo.png?v=' + IPTV_CARD_VERSION;
+var IPTV_LOGO_URL = `/${IPTV_DOMAIN}/logo.png?v=${IPTV_CARD_VERSION}`;
 
 // ── i18n ──────────────────────────────────────────────────────────────────────
 var IptvCardI18n = {
@@ -159,8 +159,8 @@ var IptvCardI18n = {
 };
 
 function iptvLang(config, hass) {
-  if (config && config.language) return config.language;
-  if (hass && hass.language) return hass.language.split('-')[0];
+  if (config?.language) return config.language;
+  if (hass?.language) return hass.language.split('-')[0];
   var docLang = document.documentElement.lang;
   return docLang ? docLang.split('-')[0] : 'en';
 }
@@ -168,7 +168,7 @@ function iptvLang(config, hass) {
 function iptvT(lang, key, vars) {
   var strings = IptvCardI18n[lang] || IptvCardI18n.en;
   var s = strings[key] || IptvCardI18n.en[key] || key;
-  if (vars) Object.keys(vars).forEach(function (k) { s = s.replace('{' + k + '}', vars[k]); });
+  if (vars) Object.keys(vars).forEach((k) => { s = s.replace(`{${k}}`, vars[k]); });
   return s;
 }
 
@@ -185,7 +185,7 @@ class IptvCard extends HTMLElement {
   // Visual editor: native Home Assistant form (rendered by HA itself)
   static getConfigForm() {
     var ha = document.querySelector('home-assistant');
-    var lang = iptvLang(null, ha && ha.hass);
+    var lang = iptvLang(null, ha?.hass);
     return {
       schema: [
         { name: 'title', selector: { text: {} } },
@@ -196,7 +196,7 @@ class IptvCard extends HTMLElement {
           { value: 'fr', label: 'Français' },
         ] } } },
       ],
-      computeLabel: (schema) => iptvT(lang, 'ed_' + schema.name),
+      computeLabel: (schema) => iptvT(lang, `ed_${schema.name}`),
     };
   }
 
@@ -211,11 +211,11 @@ class IptvCard extends HTMLElement {
     this._hass = hass;
     // Re-render only when one of our entities, a device name or the language changed
     var parts = [hass.language];
-    this._subs().forEach(function (sub) {
-      parts.push(sub.device + ':' + sub.name);
-      Object.keys(sub.ids).forEach(function (k) {
+    this._subs().forEach((sub) => {
+      parts.push(`${sub.device}:${sub.name}`);
+      Object.keys(sub.ids).forEach((k) => {
         var st = hass.states[sub.ids[k]];
-        parts.push(k + '=' + (st ? st.state + '@' + st.last_updated : ''));
+        parts.push(`${k}=${st ? `${st.state}@${st.last_updated}` : ''}`);
       });
     });
     var sig = parts.join('|');
@@ -249,7 +249,7 @@ class IptvCard extends HTMLElement {
   // [{ device, name, ids: { translation_key: entity_id } }] in the configured order,
   // or sorted by name when every subscription is shown
   _subs() {
-    if (!this._hass || !this._hass.entities) return [];
+    if (!this._hass?.entities) return [];
     var wanted = this._wanted();
     var subs = this._collect(wanted);
     // Configured devices all gone (e.g. account removed, or re-added with a new
@@ -262,13 +262,13 @@ class IptvCard extends HTMLElement {
   // in the configured order or by name
   _collect(wanted) {
     var byDevice = {};
-    Object.values(this._hass.entities).forEach(function (e) {
+    Object.values(this._hass.entities).forEach((e) => {
       if (e.platform !== IPTV_DOMAIN || !e.translation_key || !e.device_id) return;
       if (wanted.length && wanted.indexOf(e.device_id) < 0) return;
       (byDevice[e.device_id] = byDevice[e.device_id] || {})[e.translation_key] = e.entity_id;
     });
     var devices = this._hass.devices || {};
-    var subs = Object.keys(byDevice).map(function (id) {
+    var subs = Object.keys(byDevice).map((id) => {
       var dev = devices[id];
       return { device: id, name: (dev && (dev.name_by_user || dev.name)) || '', ids: byDevice[id] };
     });
@@ -279,7 +279,9 @@ class IptvCard extends HTMLElement {
 
   async _refresh() {
     var ids = [];
-    this._subs().forEach((sub) => ids.push(sub.ids.status, sub.ids.health));
+    this._subs().forEach((sub) => {
+      ids.push(sub.ids.status, sub.ids.health);
+    });
     ids = ids.filter(Boolean);
     if (!ids.length || this._loading) return;
     this._loading = true;
@@ -354,7 +356,7 @@ class IptvCard extends HTMLElement {
     var known = ['active', 'expired', 'banned', 'disabled'];
     var statusLabel = !d.auth
       ? this._t('auth_failed')
-      : known.indexOf(raw) >= 0 ? this._t('status_' + raw) : this._t('status_unknown');
+      : known.indexOf(raw) >= 0 ? this._t(`status_${raw}`) : this._t('status_unknown');
     var pct = null;
     if (exp && created && exp > created) {
       pct = Math.min(100, Math.max(0, ((exp - now) / (exp - created)) * 100));
@@ -373,7 +375,7 @@ class IptvCard extends HTMLElement {
   _render() {
     if (!this.shadowRoot || !this._config) return;
     var lang = iptvLang(this._config, this._hass);
-    var locale = (this._hass && this._hass.locale && this._hass.locale.language) || lang;
+    var locale = (this._hass?.locale?.language) || lang;
     var fmtDate = (ms) =>
       new Date(ms).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' });
     var nf = new Intl.NumberFormat(locale);
@@ -382,7 +384,7 @@ class IptvCard extends HTMLElement {
     var multi = subs.length > 1;
     var title = this._config.title || this._t(multi ? 'default_title_multi' : 'default_title');
 
-    var fmtMs = (ms) => (ms < 1000 ? nf.format(ms) + ' ms' : new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(ms / 1000) + ' s');
+    var fmtMs = (ms) => (ms < 1000 ? `${nf.format(ms)} ms` : `${new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(ms / 1000)} s`);
 
     // Health pill: server reachability and response time
     var healthChip = (h, v) => {
@@ -391,7 +393,7 @@ class IptvCard extends HTMLElement {
       if (h.status === 'auth_failed' && v && !v.d.auth) return '';
       var cls = { ok: 'ok', degraded: 'warning' }[h.status] || 'error';
       var icon = { ok: 'mdi:lan-connect', degraded: 'mdi:speedometer-slow', stream_ko: 'mdi:television-off' }[h.status] || 'mdi:lan-disconnect';
-      var label = this._t('health_' + h.status) + (h.ms != null && h.status !== 'unreachable' ? ' · ' + fmtMs(h.ms) : '');
+      var label = this._t(`health_${h.status}`) + (h.ms != null && h.status !== 'unreachable' ? ` · ${fmtMs(h.ms)}` : '');
       return `<span class="chip ${cls}" data-entity="health"><ha-icon icon="${icon}"></ha-icon>${esc(label)}</span>`;
     };
 
@@ -408,7 +410,7 @@ class IptvCard extends HTMLElement {
       return `
         <div class="chips">
           ${v ? `<span class="chip ${v.state}" data-entity="status"><ha-icon icon="${icon}"></ha-icon>${esc(v.statusLabel)}</span>` : ''}
-          ${v && v.d.is_trial ? '<span class="chip idle">' + this._t('trial') + '</span>' : ''}
+          ${v?.d.is_trial ? `<span class="chip idle">${this._t('trial')}</span>` : ''}
           ${v ? frenchChip(fr) : ''}
           ${healthChip(h, v)}
         </div>`;
@@ -423,7 +425,7 @@ class IptvCard extends HTMLElement {
             ? this._t(v.daysLeft > 1 ? 'days_left' : 'day_left', { n: v.daysLeft })
             : this._t('status_expired');
       var cons =
-        v.d.max_connections != null ? (v.d.active_cons || 0) + ' / ' + v.d.max_connections : '—';
+        v.d.max_connections != null ? `${v.d.active_cons || 0} / ${v.d.max_connections}` : '—';
       var stat = (icon, n, key) => `
           <div class="stat" data-entity="${key}" title="${esc(this._t(key))}">
             <ha-icon icon="${icon}"></ha-icon>
@@ -452,7 +454,7 @@ class IptvCard extends HTMLElement {
 
     var fmtCheck = (iso) => {
       var when = new Date(iso);
-      if (isNaN(when.getTime())) return '';
+      if (Number.isNaN(when.getTime())) return '';
       var sameDay = when.toDateString() === new Date().toDateString();
       return sameDay
         ? when.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })
@@ -460,7 +462,7 @@ class IptvCard extends HTMLElement {
     };
     var footer = (h, i) => `
         <div class="foot">
-          ${h && h.at
+          ${h?.at
             ? `<div class="checked" data-entity="last_check"><ha-icon icon="mdi:clock-outline"></ha-icon>${esc(this._t('last_check'))} · ${esc(fmtCheck(h.at))}</div>`
             : '<span></span>'}
           <div class="foot-actions">
@@ -473,16 +475,16 @@ class IptvCard extends HTMLElement {
     var body;
     var status = '';
     if (!this._hass) {
-      body = '<div class="msg">' + this._t('loading') + '</div>';
+      body = `<div class="msg">${this._t('loading')}</div>`;
     } else if (!subs.length) {
-      body = '<div class="msg">' + this._t('no_device') + '</div>';
+      body = `<div class="msg">${this._t('no_device')}</div>`;
     } else if (!multi) {
       // One subscription: pills under the card title, as before
       var v = this._view(this._data(subs[0].ids));
       var h0 = this._health(subs[0].ids);
       status = chips(v, h0, this._french(subs[0].ids));
       body = '<div class="sect" data-sub="0">' +
-        (v ? details(v) : '<div class="msg err">' + this._t('unavailable') + '</div>') +
+        (v ? details(v) : `<div class="msg err">${this._t('unavailable')}</div>`) +
         footer(h0, 0) + '</div>';
     } else {
       // Several subscriptions: one section each, named after its device
@@ -495,7 +497,7 @@ class IptvCard extends HTMLElement {
               <div class="sect-name">${esc(sub.name)}</div>
               ${chips(v, h, this._french(sub.ids))}
             </div>
-            ${v ? details(v) : '<div class="msg err">' + this._t('unavailable') + '</div>'}
+            ${v ? details(v) : `<div class="msg err">${this._t('unavailable')}</div>`}
             ${footer(h, i)}
           </div>`;
       }).join('');
@@ -597,7 +599,7 @@ class IptvCard extends HTMLElement {
     this._root.querySelectorAll('[data-entity]').forEach((el) => {
       var sect = el.closest('[data-sub]');
       var sub = subs[sect ? Number(sect.dataset.sub) : 0];
-      var entityId = sub && sub.ids[el.dataset.entity];
+      var entityId = sub?.ids[el.dataset.entity];
       if (entityId) el.addEventListener('click', () => this._moreInfo(entityId));
     });
   }
@@ -620,7 +622,7 @@ class IptvCard extends HTMLElement {
     this._editProvider = provider;
     var field = (key, type, value) => `
       <div class="field">
-        <label>${esc(this._t('edit_' + key))}</label>
+        <label>${esc(this._t(`edit_${key}`))}</label>
         <input data-k="${key}" type="${type}" value="${esc(value)}" autocomplete="off" autocapitalize="off" spellcheck="false"
                ${type === 'password' ? `placeholder="${esc(this._t('edit_password_keep'))}"` : ''}>
       </div>`;
@@ -638,8 +640,9 @@ class IptvCard extends HTMLElement {
       </div>`;
     modal.querySelector('.cancel').addEventListener('click', () => this._closeEditor());
     modal.querySelector('.primary').addEventListener('click', () => this._submitEditor());
-    modal.querySelectorAll('input').forEach((el) =>
-      el.addEventListener('keydown', (e) => { if (e.key === 'Enter') this._submitEditor(); }));
+    modal.querySelectorAll('input').forEach((el) => {
+      el.addEventListener('keydown', (e) => { if (e.key === 'Enter') this._submitEditor(); });
+    });
     var firstInput = modal.querySelector('input');
     if (firstInput) firstInput.focus();
   }
@@ -652,8 +655,8 @@ class IptvCard extends HTMLElement {
   async _svc(service, data) {
     try {
       var res = await this._hass.callService('iptv', service, data, undefined, false, true);
-      return (res && res.response) || {};
-    } catch (e) {
+      return (res?.response) || {};
+    } catch (_e) {
       return { ok: false, error: 'generic' };
     }
   }
@@ -663,7 +666,7 @@ class IptvCard extends HTMLElement {
     this._closeEditor();
     var modal = document.createElement('div');
     modal.className = 'backdrop';
-    modal.innerHTML = '<div class="modal">' + innerHtml + '</div>';
+    modal.innerHTML = `<div class="modal">${innerHtml}</div>`;
     modal.addEventListener('click', (e) => { if (e.target === modal) this._closeEditor(); });
     this.shadowRoot.appendChild(modal);
     this._modal = modal;
@@ -703,7 +706,7 @@ class IptvCard extends HTMLElement {
     }
     btn.removeAttribute('disabled');
     btn.textContent = this._t('del_delete');
-    errEl.textContent = this._t('err_' + (out.error || 'generic'));
+    errEl.textContent = this._t(`err_${out.error || 'generic'}`);
   }
 
   // ── Add account popup ─────────────────────────────────────────────────────
@@ -729,7 +732,7 @@ class IptvCard extends HTMLElement {
     var renderFields = () => {
       var field = (key, type) => `
         <div class="field">
-          <label>${esc(this._t('edit_' + key))}</label>
+          <label>${esc(this._t(`edit_${key}`))}</label>
           <input data-k="${key}" type="${type}" autocomplete="off" autocapitalize="off" spellcheck="false">
         </div>`;
       modal.querySelector('.addfields').innerHTML =
@@ -770,7 +773,7 @@ class IptvCard extends HTMLElement {
     }
     btn.removeAttribute('disabled');
     btn.textContent = this._t('add_create');
-    errEl.textContent = this._t('err_' + (out.error || 'generic'));
+    errEl.textContent = this._t(`err_${out.error || 'generic'}`);
   }
 
   // ── View credentials popup ────────────────────────────────────────────────
@@ -781,7 +784,7 @@ class IptvCard extends HTMLElement {
     if (this._modal !== modal) return;
     var close = `<div class="modal-actions"><button class="act cancel">${esc(this._t('edit_cancel'))}</button></div>`;
     if (!creds.ok) {
-      modal.querySelector('.modal').innerHTML = `<h3>${esc(this._t('view_title'))}</h3><div class="err">${esc(this._t('err_' + (creds.error || 'generic')))}</div>${close}`;
+      modal.querySelector('.modal').innerHTML = `<h3>${esc(this._t('view_title'))}</h3><div class="err">${esc(this._t(`err_${creds.error || 'generic'}`))}</div>${close}`;
     } else {
       var rows = creds.provider === 'stalker'
         ? [['edit_url', creds.url], ['edit_mac', creds.mac]]
@@ -793,7 +796,9 @@ class IptvCard extends HTMLElement {
           <button class="copy" data-v="${esc(r[1])}" title="${esc(this._t('copy'))}"><ha-icon icon="mdi:content-copy"></ha-icon></button>
         </div>`).join('');
       modal.querySelector('.modal').innerHTML = `<h3>${esc(this._t('view_title'))}</h3>${rowsHtml}${close}`;
-      modal.querySelectorAll('button.copy').forEach((el) => el.addEventListener('click', () => this._copy(el)));
+      modal.querySelectorAll('button.copy').forEach((el) => {
+        el.addEventListener('click', () => this._copy(el));
+      });
     }
     modal.querySelector('.cancel').addEventListener('click', () => this._closeEditor());
   }
@@ -802,7 +807,7 @@ class IptvCard extends HTMLElement {
     var text = el.dataset.v;
     try {
       await navigator.clipboard.writeText(text);
-    } catch (e) {
+    } catch (_e) {
       try {
         var ta = document.createElement('textarea');
         ta.value = text;
@@ -810,7 +815,7 @@ class IptvCard extends HTMLElement {
         ta.select();
         document.execCommand('copy');
         ta.remove();
-      } catch (e2) { /* ignore */ }
+      } catch (_e2) { /* ignore */ }
     }
     var icon = el.querySelector('ha-icon');
     icon.setAttribute('icon', 'mdi:check');
@@ -844,7 +849,7 @@ class IptvCard extends HTMLElement {
     }
     primary.removeAttribute('disabled');
     primary.textContent = this._t('edit_save');
-    errEl.textContent = this._t('err_' + (out.error || 'generic'));
+    errEl.textContent = this._t(`err_${out.error || 'generic'}`);
   }
 }
 
@@ -861,7 +866,7 @@ if (!customElements.get('iptv-card')) {
   });
 
   console.info(
-    '%c IPTV-CARD %c v' + IPTV_CARD_VERSION + ' ',
+    `%c IPTV-CARD %c v${IPTV_CARD_VERSION} `,
     'color:white;background:#3f51b5;font-weight:700',
     'color:#3f51b5;background:white',
   );

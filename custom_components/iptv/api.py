@@ -18,9 +18,10 @@ which provider an account uses:
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime, timezone
+import contextlib
 import re
 import time
+from datetime import UTC, datetime
 from typing import Any
 from urllib.parse import urlparse
 
@@ -38,11 +39,6 @@ class IptvAuthError(IptvError):
     """Credentials refused."""
 
 
-# Neutral aliases: the errors are shared by both providers.
-IptvError = IptvError
-IptvAuthError = IptvAuthError
-
-
 def normalize_url(url: str) -> str:
     """Strip spaces and trailing slashes, default to http://."""
     url = url.strip().rstrip("/")
@@ -55,9 +51,7 @@ def normalize_url(url: str) -> str:
 
 # Whole-word markers of a French category ("FR | TF1", "[VOSTFR] Séries",
 # "FRANCE 4K", "🇫🇷 Sport"); "AFRICA" or "FREE" do not match.
-_FRENCH_RE = re.compile(
-    r"(?<![A-Z0-9])(FR|FRA|FRANCE|FRENCH|FRAN[CÇ]AISE?S?|VF|VFF|VOSTFR)(?![A-Z0-9])"
-)
+_FRENCH_RE = re.compile(r"(?<![A-Z0-9])(FR|FRA|FRANCE|FRENCH|FRAN[CÇ]AISE?S?|VF|VFF|VOSTFR)(?![A-Z0-9])")
 # Categories well known in French lists, even without an FR marker: French
 # channels and bouquets, and French-only category words (accented, so that
 # English "CINEMA" or "SERIES" do not match).
@@ -71,7 +65,7 @@ _KNOWN_FRENCH_RE = re.compile(
     r"TÉLÉ-RÉALITÉ|ACTUALITÉS?|CHAÎNES?"
     r")(?![A-Z0-9])"
 )
-FRENCH_FLAG = "\U0001F1EB\U0001F1F7"
+FRENCH_FLAG = "\U0001f1eb\U0001f1f7"
 FRENCH_KINDS = ("live", "vod", "series")
 
 
@@ -79,11 +73,7 @@ def is_french(name: Any) -> bool:
     """True for a category name that looks French (marker or known French category)."""
     text = str(name or "")
     upper = text.upper()
-    return (
-        FRENCH_FLAG in text
-        or bool(_FRENCH_RE.search(upper))
-        or bool(_KNOWN_FRENCH_RE.search(upper))
-    )
+    return FRENCH_FLAG in text or bool(_FRENCH_RE.search(upper)) or bool(_KNOWN_FRENCH_RE.search(upper))
 
 
 def french_summary(categories: dict[str, list[str] | None]) -> dict[str, Any] | None:
@@ -107,9 +97,7 @@ def french_summary(categories: dict[str, list[str] | None]) -> dict[str, Any] | 
 STREAM_TIMEOUT = aiohttp.ClientTimeout(total=15, sock_connect=6, sock_read=10)
 
 
-async def _probe_stream(
-    session: aiohttp.ClientSession, url: str, headers: dict[str, str]
-) -> dict[str, Any]:
+async def _probe_stream(session: aiohttp.ClientSession, url: str, headers: dict[str, str]) -> dict[str, Any]:
     """Open a channel stream, read a little, and tell whether it plays.
 
     Opening a stream uses one of the account's connection slots, briefly.
@@ -118,9 +106,7 @@ async def _probe_stream(
     start = time.monotonic()
     ms = lambda: round((time.monotonic() - start) * 1000)  # noqa: E731
     try:
-        async with session.get(
-            url, headers=headers, timeout=STREAM_TIMEOUT, allow_redirects=True
-        ) as resp:
+        async with session.get(url, headers=headers, timeout=STREAM_TIMEOUT, allow_redirects=True) as resp:
             if resp.status >= 400:
                 return {"ok": False, "latency_ms": ms(), "error": f"HTTP {resp.status}"}
             ctype = (resp.headers.get("Content-Type") or "").lower()
@@ -130,7 +116,7 @@ async def _probe_stream(
             if ctype.startswith("text/") or "html" in ctype or "json" in ctype:
                 return {"ok": False, "latency_ms": ms(), "error": "not a media stream"}
             return {"ok": True, "latency_ms": ms(), "error": None}
-    except (aiohttp.ClientError, asyncio.TimeoutError) as err:
+    except (TimeoutError, aiohttp.ClientError) as err:
         return {"ok": False, "latency_ms": None, "error": str(err) or type(err).__name__}
 
 
@@ -142,7 +128,9 @@ def counts_ok(counts: dict[str, Any]) -> bool:
     return chans > 0 and (movies > 0 or series > 0)
 
 
-async def validate_catalogue(client: XtreamClient | StalkerClient) -> tuple[str | None, dict[str, Any] | None]:
+async def validate_catalogue(
+    client: XtreamClient | StalkerClient,
+) -> tuple[str | None, dict[str, Any] | None]:
     """Shared add/edit checks: French lists, video stream, catalogue counts.
 
     Returns (error key or None, French summary). The credentials must already
@@ -174,9 +162,7 @@ def server_key(url: str) -> str:
 class XtreamClient:
     """Query player_api.php for the account info and catalogue sizes."""
 
-    def __init__(
-        self, session: aiohttp.ClientSession, url: str, username: str, password: str
-    ) -> None:
+    def __init__(self, session: aiohttp.ClientSession, url: str, username: str, password: str) -> None:
         self._session = session
         self._base = normalize_url(url)
         self._endpoint = self._base + "/player_api.php"
@@ -189,12 +175,10 @@ class XtreamClient:
         if action:
             params["action"] = action
         try:
-            async with self._session.get(
-                self._endpoint, params=params, headers=HEADERS, timeout=TIMEOUT
-            ) as resp:
+            async with self._session.get(self._endpoint, params=params, headers=HEADERS, timeout=TIMEOUT) as resp:
                 resp.raise_for_status()
                 return await resp.json(content_type=None)
-        except (aiohttp.ClientError, asyncio.TimeoutError, ValueError) as err:
+        except (TimeoutError, aiohttp.ClientError, ValueError) as err:
             raise IptvError(str(err) or type(err).__name__) from err
 
     async def _count(self, action: str) -> int | None:
@@ -334,9 +318,7 @@ def parse_expiry(value: Any) -> int | None:
         return None
     if isinstance(value, bool):
         return None
-    if isinstance(value, (int, float)) or (
-        isinstance(value, str) and value.strip().lstrip("-").isdigit()
-    ):
+    if isinstance(value, (int, float)) or (isinstance(value, str) and value.strip().lstrip("-").isdigit()):
         seconds = int(value)
         return seconds if seconds > 1_000_000 else None
     text = str(value).strip()
@@ -344,7 +326,7 @@ def parse_expiry(value: Any) -> int | None:
         return None
     for fmt in _DATE_FORMATS:
         try:
-            return int(datetime.strptime(text, fmt).replace(tzinfo=timezone.utc).timestamp())
+            return int(datetime.strptime(text, fmt).replace(tzinfo=UTC).timestamp())
         except ValueError:
             continue
     return None
@@ -400,9 +382,7 @@ class StalkerClient:
             headers["Authorization"] = f"Bearer {token}"
         return headers
 
-    async def _call(
-        self, portal: str, params: dict[str, str], token: str | None = None
-    ) -> Any:
+    async def _call(self, portal: str, params: dict[str, str], token: str | None = None) -> Any:
         query = dict(params)
         query["JsHttpRequest"] = "1-xml"
         async with self._session.get(
@@ -419,10 +399,8 @@ class StalkerClient:
         """Find the working portal path and get a session token."""
         for portal in STALKER_PORTALS:
             try:
-                js = await self._call(
-                    portal, {"type": "stb", "action": "handshake", "token": ""}
-                )
-            except (aiohttp.ClientError, asyncio.TimeoutError, ValueError):
+                js = await self._call(portal, {"type": "stb", "action": "handshake", "token": ""})
+            except (TimeoutError, aiohttp.ClientError, ValueError):
                 continue
             token = js.get("token") if isinstance(js, dict) else None
             if token:
@@ -436,12 +414,12 @@ class StalkerClient:
         assert self._portal is not None
         try:
             return await self._call(self._portal, params, self._token)
-        except (aiohttp.ClientError, asyncio.TimeoutError, ValueError) as err:
+        except (TimeoutError, aiohttp.ClientError, ValueError) as err:
             raise IptvError(str(err) or type(err).__name__) from err
 
     async def _activate(self) -> None:
         """Call get_profile to validate the session; ignore if unsupported."""
-        try:
+        with contextlib.suppress(IptvError):
             await self._get(
                 {
                     "type": "stb",
@@ -453,8 +431,6 @@ class StalkerClient:
                     "not_valid_token": "0",
                 }
             )
-        except IptvError:
-            pass
 
     async def async_get_user_info(self) -> dict[str, Any]:
         """Return the account info, raise IptvAuthError if the MAC is refused."""
@@ -491,17 +467,13 @@ class StalkerClient:
         """Channel / movie / series counts, for validating a real catalogue."""
         if not self._token:
             await self._handshake()
-        channels, movies, series = await asyncio.gather(
-            self._count("itv"), self._count("vod"), self._count("series")
-        )
+        channels, movies, series = await asyncio.gather(self._count("itv"), self._count("vod"), self._count("series"))
         return {"channels": channels, "movies": movies, "series": series}
 
     async def async_test_stream(self) -> dict[str, Any]:
         """Probe the first live channel via create_link. ok True/False/None."""
         try:
-            js = await self._get(
-                {"type": "itv", "action": "get_ordered_list", "genre": "*", "p": "1"}
-            )
+            js = await self._get({"type": "itv", "action": "get_ordered_list", "genre": "*", "p": "1"})
         except IptvError as err:
             return {"ok": None, "channel": None, "latency_ms": None, "error": str(err)}
         data = js.get("data") if isinstance(js, dict) else None
@@ -511,7 +483,13 @@ class StalkerClient:
         name = str(first.get("name") or first.get("id") or "")
         try:
             link = await self._get(
-                {"type": "itv", "action": "create_link", "cmd": str(first["cmd"]), "forced_storage": "0", "disable_ad": "0"}
+                {
+                    "type": "itv",
+                    "action": "create_link",
+                    "cmd": str(first["cmd"]),
+                    "forced_storage": "0",
+                    "disable_ad": "0",
+                }
             )
         except IptvError as err:
             return {"ok": None, "channel": name, "latency_ms": None, "error": str(err)}
@@ -541,7 +519,7 @@ class StalkerClient:
             self._count("itv"), self._count("vod"), self._count("series"), self.async_get_french()
         )
         exp_date = stalker_expiry(info)
-        now = int(datetime.now(timezone.utc).timestamp())
+        now = int(datetime.now(UTC).timestamp())
         return {
             "auth": True,
             "status": stalker_status(info, exp_date, now),

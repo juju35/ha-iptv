@@ -11,12 +11,12 @@ from __future__ import annotations
 from typing import Any
 
 import voluptuous as vol
-
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_PASSWORD, CONF_URL, CONF_USERNAME
 from homeassistant.core import HomeAssistant, ServiceCall, ServiceResponse, SupportsResponse
 from homeassistant.data_entry_flow import FlowResultType
-from homeassistant.helpers import config_validation as cv, device_registry as dr
+from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.util import dt as dt_util
 
@@ -171,9 +171,7 @@ async def _async_get_credentials(call: ServiceCall) -> ServiceResponse:
 
 async def _async_add_account(call: ServiceCall) -> ServiceResponse:
     hass = call.hass
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": "card_add"}, data=dict(call.data)
-    )
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": "card_add"}, data=dict(call.data))
     if result["type"] == FlowResultType.CREATE_ENTRY:
         return {"ok": True}
     if result["type"] == FlowResultType.ABORT:

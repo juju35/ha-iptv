@@ -2,10 +2,11 @@
 
 Before 3.0 the integration was called ``iptv_xtream``. Home Assistant only loads
 ``iptv`` once it has an entry, so the migration runs from the "Add integration"
-flow (and again at startup, for leftovers). Every ``iptv_xtream`` config entry is removed and re-created under ``iptv`` with the
-same data, options and title. The entity ids, entity names and icons, the device
-name and area are carried over, and the old device ids are replaced by the new
-ones in UI-managed dashboards, so automations, history and cards keep working.
+flow (and again at startup, for leftovers). Every ``iptv_xtream`` config entry is
+removed and re-created under ``iptv`` with the same data, options and title. The
+entity ids, entity names and icons, the device name and area are carried over,
+and the old device ids are replaced by the new ones in UI-managed dashboards, so
+automations, history and cards keep working.
 """
 
 from __future__ import annotations
@@ -17,7 +18,8 @@ from typing import Any
 from homeassistant.components import persistent_notification
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import device_registry as dr, entity_registry as er
+from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers import entity_registry as er
 
 from .const import DOMAIN
 
@@ -64,7 +66,8 @@ async def async_migrate_legacy(hass: HomeAssistant) -> int:
         persistent_notification.async_create(
             hass,
             f"{len(legacy)} IPTV account(s) moved from `{LEGACY_DOMAIN}` to `{DOMAIN}`. "
-            f"Delete the old `custom_components/{LEGACY_DOMAIN}` folder and restart Home Assistant.",
+            f"Delete the old `custom_components/{LEGACY_DOMAIN}` folder and restart "
+            "Home Assistant.",
             title="IPTV: integration renamed",
             notification_id=f"{DOMAIN}_legacy_folder",
         )
@@ -77,16 +80,11 @@ def _snapshot(hass: HomeAssistant, entry: ConfigEntry) -> dict[str, Any]:
     dev_reg = dr.async_get(hass)
     prefix = f"{entry.entry_id}_"
     entities = {
-        e.unique_id.removeprefix(prefix): {"entity_id": e.entity_id}
-        | {f: getattr(e, f) for f in ENTITY_FIELDS}
+        e.unique_id.removeprefix(prefix): {"entity_id": e.entity_id} | {f: getattr(e, f) for f in ENTITY_FIELDS}
         for e in er.async_entries_for_config_entry(ent_reg, entry.entry_id)
     }
     devices = dr.async_entries_for_config_entry(dev_reg, entry.entry_id)
-    device = (
-        {"id": devices[0].id} | {f: getattr(devices[0], f) for f in DEVICE_FIELDS}
-        if devices
-        else None
-    )
+    device = {"id": devices[0].id} | {f: getattr(devices[0], f) for f in DEVICE_FIELDS} if devices else None
     return {"entities": entities, "device": device}
 
 

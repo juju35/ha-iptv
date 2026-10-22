@@ -20,7 +20,13 @@ HEALTH_DEGRADED = "degraded"
 HEALTH_AUTH_FAILED = "auth_failed"
 HEALTH_UNREACHABLE = "unreachable"
 HEALTH_STREAM_KO = "stream_ko"
-HEALTH_STATES = [HEALTH_OK, HEALTH_DEGRADED, HEALTH_AUTH_FAILED, HEALTH_UNREACHABLE, HEALTH_STREAM_KO]
+HEALTH_STATES = [
+    HEALTH_OK,
+    HEALTH_DEGRADED,
+    HEALTH_AUTH_FAILED,
+    HEALTH_UNREACHABLE,
+    HEALTH_STREAM_KO,
+]
 
 # Probe a channel's video stream during the health check (uses a connection slot)
 CONF_STREAM_CHECK = "stream_check"

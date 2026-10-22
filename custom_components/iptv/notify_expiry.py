@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 import math
+from datetime import UTC, datetime
 from typing import Any
 
 from homeassistant.components import persistent_notification
@@ -58,7 +58,7 @@ class ExpiryNotifier:
         if not self._threshold or not exp or not (data or {}).get("auth"):
             self.dismiss()
             return
-        expiration = datetime.fromtimestamp(exp, tz=timezone.utc)
+        expiration = datetime.fromtimestamp(exp, tz=UTC)
         days = math.ceil((expiration - dt_util.utcnow()).total_seconds() / 86400)
         if days > self._threshold:
             self.dismiss()
@@ -70,11 +70,12 @@ class ExpiryNotifier:
         lang = "fr" if (self._hass.config.language or "").startswith("fr") else "en"
         text = MESSAGES[lang]
         date = dt_util.as_local(expiration).strftime("%d/%m/%Y" if lang == "fr" else "%Y-%m-%d")
-        message = (text["soon"] if days > 0 else text["expired"]).format(
-            name=self._name, date=date, days=days
-        )
+        message = (text["soon"] if days > 0 else text["expired"]).format(name=self._name, date=date, days=days)
         persistent_notification.async_create(
-            self._hass, message, title=text["title"].format(name=self._name), notification_id=self._id
+            self._hass,
+            message,
+            title=text["title"].format(name=self._name),
+            notification_id=self._id,
         )
 
     @callback
