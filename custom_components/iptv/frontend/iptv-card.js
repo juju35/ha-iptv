@@ -8,7 +8,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_CARD_VERSION = '3.7.0';
+var IPTV_CARD_VERSION = '3.8.0';
 var IPTV_DOMAIN = 'iptv';
 var IPTV_LOGO_URL = '/' + IPTV_DOMAIN + '/logo.png?v=' + IPTV_CARD_VERSION;
 
@@ -353,26 +353,25 @@ class IptvCard extends HTMLElement {
       var cons =
         v.d.max_connections != null ? (v.d.active_cons || 0) + ' / ' + v.d.max_connections : '—';
       var stat = (icon, n, key) => `
-          <div class="stat" data-entity="${key}">
+          <div class="stat" data-entity="${key}" title="${esc(this._t(key))}">
             <ha-icon icon="${icon}"></ha-icon>
-            <div><div class="num">${n != null ? nf.format(n) : '—'}</div><div class="lbl">${this._t(key)}</div></div>
+            <div class="num">${n != null ? nf.format(n) : '—'}</div>
           </div>`;
       return `
         <div class="exp" data-entity="expiration">
           <div class="row">
             <span class="lbl">${this._t('expiration')}</span>
-            <span class="val">${v.exp ? fmtDate(v.exp) : this._t('never')}</span>
+            <span class="val">${v.exp ? fmtDate(v.exp) : this._t('never')} <span class="rem ${v.state}">· ${esc(remaining)}</span></span>
           </div>
-          <div class="sub ${v.state}">${esc(remaining)}</div>
           ${v.pct !== null ? `<div class="bar"><div class="fill ${v.state}" style="width:${v.pct.toFixed(1)}%"></div></div>` : ''}
         </div>
         <div class="stats">
           ${stat('mdi:television-classic', v.d.channels, 'channels')}
           ${stat('mdi:movie-open', v.d.movies, 'movies')}
           ${stat('mdi:filmstrip-box-multiple', v.d.series, 'series')}
-          <div class="stat" data-entity="active_connections">
+          <div class="stat" data-entity="active_connections" title="${esc(this._t('connections'))}">
             <ha-icon icon="mdi:account-multiple"></ha-icon>
-            <div><div class="num">${esc(cons)}</div><div class="lbl">${this._t('connections')}</div></div>
+            <div class="num">${esc(cons)}</div>
           </div>
         </div>`;
     };
@@ -424,7 +423,7 @@ class IptvCard extends HTMLElement {
     this.shadowRoot.innerHTML = `
       <style>
         :host { --iptv-ok: var(--success-color, #43a047); --iptv-warn: var(--warning-color, #ffa600); --iptv-crit: var(--error-color, #db4437); }
-        ha-card { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+        ha-card { padding: 10px; display: flex; flex-direction: column; gap: 8px; }
         .ok { --c: var(--iptv-ok); } .warning { --c: var(--iptv-warn); } .error { --c: var(--iptv-crit); } .idle { --c: var(--secondary-text-color); }
         .header { display: flex; align-items: center; gap: 10px; }
         .logo { width: 36px; height: 36px; flex: none; object-fit: contain; }
@@ -439,8 +438,8 @@ class IptvCard extends HTMLElement {
         .flag { width: 14px; height: 10px; border-radius: 2px; flex: none; box-shadow: 0 0 0 1px rgba(0,0,0,.12);
                 background: linear-gradient(90deg, #0055a4 0 33.3%, #fff 33.3% 66.6%, #ef4135 66.6%); }
         .flag.off { filter: grayscale(1); opacity: .6; }
-        .sect { display: flex; flex-direction: column; gap: 10px; }
-        .sect.multi + .sect.multi { border-top: 1px solid var(--divider-color, rgba(127,127,127,.25)); padding-top: 10px; }
+        .sect { display: flex; flex-direction: column; gap: 8px; }
+        .sect.multi + .sect.multi { border-top: 1px solid var(--divider-color, rgba(127,127,127,.25)); padding-top: 8px; }
         .sect-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
         .sect-head .chips { margin-top: 0; flex: none; justify-content: flex-end; }
         .sect-name { font-size: 14px; font-weight: 500; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -452,17 +451,15 @@ class IptvCard extends HTMLElement {
         .lbl { color: var(--secondary-text-color); font-size: 11px; }
         .exp .lbl { font-size: 12px; }
         .val { font-weight:500; font-size: 15px; }
-        .sub { font-size: 12px; margin-top:2px; text-align:right; color: var(--secondary-text-color); }
-        .sub.warning, .sub.error { color: var(--c); }
-        .bar { height:4px; border-radius:3px; background: var(--divider-color, rgba(127,127,127,.25)); margin-top:6px; overflow:hidden; }
+        .bar { height:4px; border-radius:3px; background: var(--divider-color, rgba(127,127,127,.25)); margin-top:5px; overflow:hidden; }
+        .rem { font-weight:400; font-size:12px; color: var(--secondary-text-color); }
+        .rem.warning, .rem.error { color: var(--c); }
         .fill { height:100%; border-radius:3px; background: var(--c, var(--iptv-ok)); transition: width .6s ease; }
         .stats { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:6px; }
-        .stat { display:grid; align-items:center; gap:10px; padding:6px 8px; border-radius:10px; min-width: 0;
-                background: var(--secondary-background-color, rgba(127,127,127,.08)); grid-template-columns: auto minmax(0, 1fr); column-gap: 6px; }
-        .stat .lbl { grid-column: 1 / -1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .stat > div { display: contents; }
+        .stat { display:flex; align-items:center; gap:5px; padding:5px 7px; border-radius:9px; min-width: 0;
+                background: var(--secondary-background-color, rgba(127,127,127,.08)); }
         .stat ha-icon { color: var(--primary-color); --mdc-icon-size: 16px; flex: none; }
-        .num { font-size: 14px; font-weight: 500; line-height: 1.2; }
+        .num { font-size: 14px; font-weight: 500; line-height: 1.2; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
         .msg { color: var(--secondary-text-color); padding:8px 0; }
         .msg.err { color: var(--iptv-crit); }
         [data-entity] { cursor:pointer; }

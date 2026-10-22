@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.8.0
+
+### Changes
+- More compact card: expiration date and days left share one line, the four tiles (channels, movies, series, connections) are a single row of icon + number with the label kept as a tooltip, and paddings are tighter. About 25 % shorter with two subscriptions; the last health check stays visible.
+
 ## 3.7.0
 
 ### Fixes
