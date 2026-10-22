@@ -25,10 +25,10 @@ from .api import (
     IptvError,
     StalkerClient,
     XtreamClient,
-    counts_ok,
     normalize_mac,
     normalize_url,
     valid_mac,
+    validate_catalogue,
 )
 from .const import (
     CONF_ADDED_AT,
@@ -95,17 +95,8 @@ async def _validate(hass: HomeAssistant, provider: str, data: dict[str, Any]) ->
         return "invalid_auth"
     except IptvError:
         return "cannot_connect"
-    french = await client.async_get_french()
-    if french is None:
-        return "french_unknown"
-    if not french["total"]:
-        return "no_french_lists"
-    stream = await client.async_test_stream()
-    if stream.get("ok") is False:
-        return "stream_ko"
-    if not counts_ok(await client.async_get_counts()):
-        return "empty_catalogue"
-    return None
+    error, _ = await validate_catalogue(client)
+    return error
 
 
 async def _async_edit_account(call: ServiceCall) -> ServiceResponse:

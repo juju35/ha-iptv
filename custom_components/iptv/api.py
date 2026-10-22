@@ -142,6 +142,25 @@ def counts_ok(counts: dict[str, Any]) -> bool:
     return chans > 0 and (movies > 0 or series > 0)
 
 
+async def validate_catalogue(client: XtreamClient | StalkerClient) -> tuple[str | None, dict[str, Any] | None]:
+    """Shared add/edit checks: French lists, video stream, catalogue counts.
+
+    Returns (error key or None, French summary). The credentials must already
+    have been verified by the caller.
+    """
+    french = await client.async_get_french()
+    if french is None:
+        return "french_unknown", None
+    if not french["total"]:
+        return "no_french_lists", french
+    stream = await client.async_test_stream()
+    if stream.get("ok") is False:
+        return "stream_ko", french
+    if not counts_ok(await client.async_get_counts()):
+        return "empty_catalogue", french
+    return None, french
+
+
 def server_key(url: str) -> str:
     """``host:port`` of a server URL, to spot two accounts on the same server."""
     parsed = urlparse(normalize_url(url))

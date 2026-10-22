@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.13.2
+
+### Maintenance
+- Internal clean-up, no functional change: the shared add/edit checks (French lists, stream, catalogue counts) are factored into `validate_catalogue` instead of being duplicated in the config flow and the services; the card de-duplicates its HTML escaping, service calls and popup creation into helpers.
+
 ## 3.13.1
 
 ### Fixes
