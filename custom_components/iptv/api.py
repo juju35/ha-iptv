@@ -39,11 +39,6 @@ class IptvAuthError(IptvError):
     """Credentials refused."""
 
 
-# Neutral aliases: the errors are shared by both providers.
-IptvError = IptvError
-IptvAuthError = IptvAuthError
-
-
 def normalize_url(url: str) -> str:
     """Strip spaces and trailing slashes, default to http://."""
     url = url.strip().rstrip("/")
