@@ -8,7 +8,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_CARD_VERSION = '3.8.0';
+var IPTV_CARD_VERSION = '3.9.0';
 var IPTV_DOMAIN = 'iptv';
 var IPTV_LOGO_URL = '/' + IPTV_DOMAIN + '/logo.png?v=' + IPTV_CARD_VERSION;
 
@@ -152,13 +152,12 @@ class IptvCard extends HTMLElement {
   }
 
   getGridOptions() {
-    var n = Math.max(1, this._hass ? this._subs().length : 1);
-    return { columns: 6, min_columns: 4, rows: n > 1 ? 1 + 3 * n : 'auto' };
+    return { columns: 6, min_columns: 4, rows: 'auto' };
   }
 
   getCardSize() {
     var n = Math.max(1, this._hass ? this._subs().length : 1);
-    return n > 1 ? 1 + 3 * n : 3;
+    return n > 1 ? 1 + 2 * n : 3;
   }
 
   _t(key, vars) {
@@ -423,7 +422,7 @@ class IptvCard extends HTMLElement {
     this.shadowRoot.innerHTML = `
       <style>
         :host { --iptv-ok: var(--success-color, #43a047); --iptv-warn: var(--warning-color, #ffa600); --iptv-crit: var(--error-color, #db4437); }
-        ha-card { padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+        ha-card { padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; }
         .ok { --c: var(--iptv-ok); } .warning { --c: var(--iptv-warn); } .error { --c: var(--iptv-crit); } .idle { --c: var(--secondary-text-color); }
         .header { display: flex; align-items: center; gap: 10px; }
         .logo { width: 36px; height: 36px; flex: none; object-fit: contain; }
@@ -438,8 +437,8 @@ class IptvCard extends HTMLElement {
         .flag { width: 14px; height: 10px; border-radius: 2px; flex: none; box-shadow: 0 0 0 1px rgba(0,0,0,.12);
                 background: linear-gradient(90deg, #0055a4 0 33.3%, #fff 33.3% 66.6%, #ef4135 66.6%); }
         .flag.off { filter: grayscale(1); opacity: .6; }
-        .sect { display: flex; flex-direction: column; gap: 8px; }
-        .sect.multi + .sect.multi { border-top: 1px solid var(--divider-color, rgba(127,127,127,.25)); padding-top: 8px; }
+        .sect { display: flex; flex-direction: column; gap: 5px; }
+        .sect.multi + .sect.multi { border-top: 1px solid var(--divider-color, rgba(127,127,127,.25)); padding-top: 6px; }
         .sect-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
         .sect-head .chips { margin-top: 0; flex: none; justify-content: flex-end; }
         .sect-name { font-size: 14px; font-weight: 500; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -451,14 +450,14 @@ class IptvCard extends HTMLElement {
         .lbl { color: var(--secondary-text-color); font-size: 11px; }
         .exp .lbl { font-size: 12px; }
         .val { font-weight:500; font-size: 15px; }
-        .bar { height:4px; border-radius:3px; background: var(--divider-color, rgba(127,127,127,.25)); margin-top:5px; overflow:hidden; }
+        .bar { height:4px; border-radius:3px; background: var(--divider-color, rgba(127,127,127,.25)); margin-top:4px; overflow:hidden; }
         .rem { font-weight:400; font-size:12px; color: var(--secondary-text-color); }
         .rem.warning, .rem.error { color: var(--c); }
         .fill { height:100%; border-radius:3px; background: var(--c, var(--iptv-ok)); transition: width .6s ease; }
-        .stats { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:6px; }
-        .stat { display:flex; align-items:center; gap:5px; padding:5px 7px; border-radius:9px; min-width: 0;
+        .stats { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:5px; }
+        .stat { display:flex; align-items:center; gap:5px; padding:3px 7px; border-radius:8px; min-width: 0;
                 background: var(--secondary-background-color, rgba(127,127,127,.08)); }
-        .stat ha-icon { color: var(--primary-color); --mdc-icon-size: 16px; flex: none; }
+        .stat ha-icon { color: var(--primary-color); --mdc-icon-size: 15px; flex: none; }
         .num { font-size: 14px; font-weight: 500; line-height: 1.2; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
         .msg { color: var(--secondary-text-color); padding:8px 0; }
         .msg.err { color: var(--iptv-crit); }

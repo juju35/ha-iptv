@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.9.0
+
+### Fixes
+- The card no longer reserves empty space beneath it: its grid height follows the content (`rows: auto`) instead of a fixed estimate that was too large for the compact layout.
+
+### Changes
+- Slightly tighter layout (smaller paddings and tiles), for a shorter card.
+
 ## 3.8.0
 
 ### Changes
