@@ -8,7 +8,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_CARD_VERSION = '3.12.0';
+var IPTV_CARD_VERSION = '3.13.0';
 var IPTV_DOMAIN = 'iptv';
 var IPTV_LOGO_URL = '/' + IPTV_DOMAIN + '/logo.png?v=' + IPTV_CARD_VERSION;
 
@@ -51,6 +51,10 @@ var IptvCardI18n = {
     add_stalker: 'Stalker / Ministra',
     add_create: 'Add',
     err_existing_longer: 'An account valid longer is already on this server',
+    err_empty_catalogue: 'The provider has no usable catalogue',
+    view_btn: 'View credentials',
+    view_title: 'Credentials',
+    copy: 'Copy',
     status_active: 'Active',
     status_expired: 'Expired',
     status_banned: 'Banned',
@@ -118,6 +122,10 @@ var IptvCardI18n = {
     add_stalker: 'Stalker / Ministra',
     add_create: 'Ajouter',
     err_existing_longer: 'Un compte valide plus longtemps existe déjà sur ce serveur',
+    err_empty_catalogue: 'Le fournisseur n\'a pas de catalogue exploitable',
+    view_btn: 'Voir les identifiants',
+    view_title: 'Identifiants',
+    copy: 'Copier',
     status_active: 'Actif',
     status_expired: 'Expiré',
     status_banned: 'Banni',
@@ -451,8 +459,9 @@ class IptvCard extends HTMLElement {
             ? `<div class="checked" data-entity="last_check"><ha-icon icon="mdi:clock-outline"></ha-icon>${esc(this._t('last_check'))} · ${esc(fmtCheck(h.at))}</div>`
             : '<span></span>'}
           <div class="foot-actions">
-            <button class="del" data-sub="${i}" title="${esc(this._t('del_btn'))}"><ha-icon icon="mdi:trash-can-outline"></ha-icon></button>
+            <button class="view" data-sub="${i}" title="${esc(this._t('view_btn'))}"><ha-icon icon="mdi:eye-outline"></ha-icon></button>
             <button class="edit" data-sub="${i}" title="${esc(this._t('edit_btn'))}"><ha-icon icon="mdi:pencil"></ha-icon></button>
+            <button class="del" data-sub="${i}" title="${esc(this._t('del_btn'))}"><ha-icon icon="mdi:trash-can-outline"></ha-icon></button>
           </div>
         </div>`;
 
@@ -533,8 +542,8 @@ class IptvCard extends HTMLElement {
         [data-entity] { cursor:pointer; }
         .stat:hover { filter: brightness(0.95); }
         .foot { display:flex; align-items:center; justify-content:space-between; gap:8px; min-height:20px; }
-        .foot-actions { display:flex; align-items:center; gap:2px; }
-        button.edit, button.del { padding:3px; margin:0; align-self:center; --mdc-icon-size:16px; }
+        .foot-actions { display:flex; align-items:center; gap:8px; }
+        button.edit, button.del, button.view { padding:3px; margin:0; align-self:center; --mdc-icon-size:16px; }
         button.del:hover { color:var(--iptv-crit); background:color-mix(in srgb, var(--iptv-crit) 12%, transparent); }
         .backdrop { position:absolute; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; z-index:9; border-radius:inherit; }
         .modal { background:var(--card-background-color, #1c1c1c); color:var(--primary-text-color); width:min(92%, 340px); border-radius:14px; padding:16px; box-shadow:0 8px 30px rgba(0,0,0,.4); display:flex; flex-direction:column; gap:10px; }
@@ -550,6 +559,11 @@ class IptvCard extends HTMLElement {
         .modal button.primary { background:var(--primary-color, #03a9f4); color:#fff; }
         .modal button.primary[disabled], .modal button.danger[disabled] { opacity:.6; cursor:default; }
         .modal button.danger { background:var(--iptv-crit); color:#fff; }
+        .view-row { display:flex; align-items:center; gap:8px; }
+        .view-k { font-size:11px; color:var(--secondary-text-color); width:96px; flex:none; }
+        .view-v { flex:1; min-width:0; font-size:13px; font-family:monospace; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; user-select:all; }
+        .modal button.copy { padding:4px; --mdc-icon-size:16px; width:auto; height:auto; background:none; color:var(--secondary-text-color); }
+        .modal button.copy.ok { color:var(--iptv-ok); }
       </style>
       <ha-card>
         <div class="header">
@@ -569,6 +583,10 @@ class IptvCard extends HTMLElement {
     this._root.querySelectorAll('button.del').forEach((el) => {
       var sub = subs[Number(el.dataset.sub)];
       if (sub) el.addEventListener('click', () => this._confirmDelete(sub));
+    });
+    this._root.querySelectorAll('button.view').forEach((el) => {
+      var sub = subs[Number(el.dataset.sub)];
+      if (sub) el.addEventListener('click', () => this._openView(sub));
     });
     // Header pills (single subscription) belong to the first subscription
     this._root.querySelectorAll('[data-entity]').forEach((el) => {
@@ -761,6 +779,62 @@ class IptvCard extends HTMLElement {
     btn.removeAttribute('disabled');
     btn.textContent = this._t('add_create');
     errEl.textContent = this._t('err_' + (out.error || 'generic'));
+  }
+
+  // ── View credentials popup ────────────────────────────────────────────────
+  async _openView(sub) {
+    this._closeEditor();
+    var esc = (x) =>
+      String(x == null ? '' : x).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+    var modal = document.createElement('div');
+    modal.className = 'backdrop';
+    modal.innerHTML = `<div class="modal"><h3>${esc(this._t('view_title'))}</h3><div class="hint">${esc(this._t('edit_saving'))}</div></div>`;
+    modal.addEventListener('click', (e) => { if (e.target === modal) this._closeEditor(); });
+    this.shadowRoot.appendChild(modal);
+    this._modal = modal;
+    var creds = {};
+    try {
+      var res = await this._hass.callService('iptv', 'get_credentials', { device_id: sub.device }, undefined, false, true);
+      creds = (res && res.response) || {};
+    } catch (e) { creds = {}; }
+    if (this._modal !== modal) return;
+    var close = `<div class="modal-actions"><button class="act cancel">${esc(this._t('edit_cancel'))}</button></div>`;
+    if (!creds.ok) {
+      modal.querySelector('.modal').innerHTML = `<h3>${esc(this._t('view_title'))}</h3><div class="err">${esc(this._t('err_' + (creds.error || 'generic')))}</div>${close}`;
+    } else {
+      var rows = creds.provider === 'stalker'
+        ? [['edit_url', creds.url], ['edit_mac', creds.mac]]
+        : [['edit_url', creds.url], ['edit_username', creds.username], ['edit_password', creds.password]];
+      var rowsHtml = rows.map((r) => `
+        <div class="view-row">
+          <div class="view-k">${esc(this._t(r[0]))}</div>
+          <div class="view-v">${esc(r[1])}</div>
+          <button class="copy" data-v="${esc(r[1])}" title="${esc(this._t('copy'))}"><ha-icon icon="mdi:content-copy"></ha-icon></button>
+        </div>`).join('');
+      modal.querySelector('.modal').innerHTML = `<h3>${esc(this._t('view_title'))}</h3>${rowsHtml}${close}`;
+      modal.querySelectorAll('button.copy').forEach((el) => el.addEventListener('click', () => this._copy(el)));
+    }
+    modal.querySelector('.cancel').addEventListener('click', () => this._closeEditor());
+  }
+
+  async _copy(el) {
+    var text = el.dataset.v;
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (e) {
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        this.shadowRoot.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        ta.remove();
+      } catch (e2) { /* ignore */ }
+    }
+    var icon = el.querySelector('ha-icon');
+    icon.setAttribute('icon', 'mdi:check');
+    el.classList.add('ok');
+    setTimeout(() => { icon.setAttribute('icon', 'mdi:content-copy'); el.classList.remove('ok'); }, 1200);
   }
 
   async _submitEditor() {

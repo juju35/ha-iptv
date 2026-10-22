@@ -57,7 +57,8 @@
       "invalid_mac": "Invalid MAC address (format AA:BB:CC:DD:EE:FF)",
       "no_french_lists": "No French list found on this provider (live, VOD or series categories): the account is not added.",
       "french_unknown": "Could not read the categories of this provider to check for French lists.",
-      "stream_ko": "The test channel's video stream does not play: the account is not added."
+      "stream_ko": "The test channel's video stream does not play: the account is not added.",
+      "empty_catalogue": "The provider has no usable channel / movie / series catalogue: the account is not added."
     },
     "abort": {
       "already_configured": "This account is already configured",
@@ -211,6 +212,16 @@
         },
         "mac": {
           "name": "MAC address",
+          "description": ""
+        }
+      }
+    },
+    "get_credentials": {
+      "name": "Get credentials",
+      "description": "Return an account's server URL and credentials for viewing.",
+      "fields": {
+        "device_id": {
+          "name": "Account",
           "description": ""
         }
       }

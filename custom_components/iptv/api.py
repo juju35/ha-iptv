@@ -134,6 +134,14 @@ async def _probe_stream(
         return {"ok": False, "latency_ms": None, "error": str(err) or type(err).__name__}
 
 
+def counts_ok(counts: dict[str, Any]) -> bool:
+    """True when the channel / movie / series counts look like a real catalogue."""
+    chans = counts.get("channels") or 0
+    movies = counts.get("movies") or 0
+    series = counts.get("series") or 0
+    return chans > 0 and (movies > 0 or series > 0)
+
+
 def server_key(url: str) -> str:
     """``host:port`` of a server URL, to spot two accounts on the same server."""
     parsed = urlparse(normalize_url(url))
@@ -194,6 +202,15 @@ class XtreamClient:
             self._categories("get_series_categories"),
         )
         return french_summary({"live": live, "vod": vod, "series": series})
+
+    async def async_get_counts(self) -> dict[str, Any]:
+        """Channel / movie / series counts, for validating a real catalogue."""
+        channels, movies, series = await asyncio.gather(
+            self._count("get_live_streams"),
+            self._count("get_vod_streams"),
+            self._count("get_series"),
+        )
+        return {"channels": channels, "movies": movies, "series": series}
 
     async def async_test_stream(self) -> dict[str, Any]:
         """Probe the first live channel. ok True/False, or None when untestable."""
@@ -450,6 +467,15 @@ class StalkerClient:
             self._categories("itv"), self._categories("vod"), self._categories("series")
         )
         return french_summary({"live": live, "vod": vod, "series": series})
+
+    async def async_get_counts(self) -> dict[str, Any]:
+        """Channel / movie / series counts, for validating a real catalogue."""
+        if not self._token:
+            await self._handshake()
+        channels, movies, series = await asyncio.gather(
+            self._count("itv"), self._count("vod"), self._count("series")
+        )
+        return {"channels": channels, "movies": movies, "series": series}
 
     async def async_test_stream(self) -> dict[str, Any]:
         """Probe the first live channel via create_link. ok True/False/None."""
