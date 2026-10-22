@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.3.0
+
+### What's new
+- The card shows several subscriptions: one section per provider, named after its device, with its own status pills, expiration and tiles.
+- New `devices` option (multiple device picker in the visual editor) to choose which subscriptions to show and in which order; without it, every IPTV Xtream subscription is shown.
+- The ⟳ button refreshes every shown subscription; the default title becomes "IPTV subscriptions" when there are several.
+
+### Changes
+- A card without `device` used to show only the first subscription found: it now shows all of them. The `device` option is still read when `devices` is not set; with a single subscription the card looks the same as before.
+
 ## 2.2.1
 
 ### Fixes
