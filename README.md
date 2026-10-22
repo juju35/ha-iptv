@@ -23,6 +23,7 @@ Home Assistant integration and Lovelace card that track one or several **IPTV su
 - Active / maximum connections, trial badge
 - Several providers in one card, one section per subscription
 - Orange warning when the subscription expires soon (configurable)
+- Persistent notification a configurable number of days before expiration (7 by default)
 - Visual editor, refresh button
 - Fully compatible with Home Assistant dark mode
 - English and French, auto-detected
@@ -87,7 +88,14 @@ Delete the account in **Settings → Devices & services → IPTV Xtream**, then 
 | Portal URL | Including the port, e.g. `http://your-portal:80` (the portal path like `/c/` or `/portal.php` is found automatically) |
 | MAC address | The MAC registered with the provider, format `AA:BB:CC:DD:EE:FF` |
 
-The credentials are checked before the account is added. Add the integration once per account; both provider types can live side by side and share the same card. The URL and credentials can be changed later with **⋮ → Reconfigure**, and the refresh interval (default 60 minutes, minimum 5) with **Configure**.
+The credentials are checked before the account is added. Add the integration once per account; both provider types can live side by side and share the same card. The URL and credentials can be changed later with **⋮ → Reconfigure**, and with **Configure**:
+
+| Option | Default | Description |
+|---|---|---|
+| Refresh interval | `60` min | How often the server is queried (minimum 5) |
+| Notify before expiration | `7` days | Persistent notification when the subscription expires within this many days, `0` to disable |
+
+The notification names the account and its expiration date, is refreshed once a day while the account is in that window (dismissing it silences it until the next day), also reports an expired account, and disappears once the subscription is renewed.
 
 > **Stalker portals** do not expose a start date, the connection counts or the trial flag, so those are shown as `—` (the expiration progress bar then assumes the shortest usual subscription length, 1, 3, 6 or 12 months, that covers the days left). Expiration and the live / VOD / series counts are read from the portal's `account_info` and `get_ordered_list` endpoints.
 

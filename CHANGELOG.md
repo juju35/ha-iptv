@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.5.0
+
+### What's new
+- Persistent notification when a subscription expires within a configurable number of days (**Configure → Notify before expiration**, 7 by default, `0` to disable), one per account.
+- The notification is refreshed once a day while in that window, also reports an expired subscription, and is dismissed when the subscription is renewed or the account is removed.
+
 ## 2.4.1
 
 ### Fixes
