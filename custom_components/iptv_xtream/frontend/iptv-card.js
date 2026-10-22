@@ -7,8 +7,9 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_CARD_VERSION = '2.2.0';
+var IPTV_CARD_VERSION = '2.2.1';
 var IPTV_DOMAIN = 'iptv_xtream';
+var IPTV_LOGO_URL = '/' + IPTV_DOMAIN + '/logo.png?v=' + IPTV_CARD_VERSION;
 
 // ── i18n ──────────────────────────────────────────────────────────────────────
 var IptvCardI18n = {
@@ -235,7 +236,6 @@ class IptvCard extends HTMLElement {
 
     var body;
     var status = '';
-    var level = v ? v.state : 'idle';
     if (!this._hass) {
       body = '<div class="msg">' + this._t('loading') + '</div>';
     } else if (!data) {
@@ -288,9 +288,7 @@ class IptvCard extends HTMLElement {
         ha-card { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
         .ok { --c: var(--iptv-ok); } .warning { --c: var(--iptv-warn); } .error { --c: var(--iptv-crit); } .idle { --c: var(--secondary-text-color); }
         .header { display: flex; align-items: center; gap: 10px; }
-        .hicon { width: 36px; height: 36px; border-radius: 50%; flex: none; display: flex; align-items: center; justify-content: center;
-                 color: var(--c, var(--primary-color)); background: color-mix(in srgb, var(--c, var(--primary-color)) 15%, transparent); --mdc-icon-size: 24px; }
-        .hicon.idle { --c: var(--primary-color); }
+        .logo { width: 36px; height: 36px; flex: none; object-fit: contain; }
         .titles { flex: 1; min-width: 0; }
         .name { font-size: 16px; font-weight: 500; line-height: 1.25; color: var(--primary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
@@ -323,7 +321,7 @@ class IptvCard extends HTMLElement {
       </style>
       <ha-card>
         <div class="header">
-          <div class="hicon ${level}"><ha-icon icon="mdi:television-play"></ha-icon></div>
+          <img class="logo" src="${IPTV_LOGO_URL}" alt="">
           <div class="titles"><div class="name">${esc(title)}</div>${status}</div>
           <button class="${this._loading ? 'spin' : ''}" title="${this._t('refresh')}"><ha-icon icon="mdi:refresh"></ha-icon></button>
         </div>

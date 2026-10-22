@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.2.1
+
+### Fixes
+- The card header shows the integration logo instead of a generic icon; the integration serves it at `/iptv_xtream/logo.png`.
+
 ## 2.2.0
 
 ### Changes
