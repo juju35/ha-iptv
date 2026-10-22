@@ -123,7 +123,7 @@ The notification names the account and its expiration date, is refreshed once a 
 
 ### Entities
 
-Each account is a device named `<username> @ <server>` (Xtream) or `<mac> @ <portal>` (Stalker), with these entities. On a Stalker portal the start date, connection and trial entities stay `unknown`. `<account>` below is that name as an entity id, e.g. `sensor.john_myserver_com_status` for `john @ myserver.com`; entity names follow your Home Assistant language.
+Each account is a device named after its **server** (the host of the URL, e.g. `myserver.com`), with these entities. On a Stalker portal the start date, connection and trial entities stay `unknown`. `<account>` below is that name as an entity id, e.g. `sensor.myserver_com_status` for the server `myserver.com`; entity names follow your Home Assistant language. You can rename the device; accounts added before 3.5 are renamed to their server name on upgrade unless you had already renamed them.
 
 | Entity | Description |
 |---|---|

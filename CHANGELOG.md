@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.5.0
+
+### Changes
+- An account is now named after its server (the host of the URL, e.g. `myserver.com`) instead of `<username> @ <server>`. Accounts added earlier are renamed on upgrade, unless you had renamed them yourself; the device name drives the card section titles.
+
 ## 3.4.0
 
 ### What's new

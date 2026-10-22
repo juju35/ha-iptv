@@ -1,7 +1,7 @@
 """Constants for the IPTV integration."""
 
 DOMAIN = "iptv"
-VERSION = "3.4.0"
+VERSION = "3.5.0"
 
 CONF_SCAN_INTERVAL = "scan_interval"
 DEFAULT_SCAN_INTERVAL = 60  # minutes
