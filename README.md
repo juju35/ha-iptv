@@ -187,7 +187,7 @@ devices:
 | `warning_days` | ❌ | `7` | Turns orange when fewer days than this are left |
 | `language` | ❌ | Auto | Force language: `en` or `fr` (auto-detects from HA settings) |
 
-Each subscription shows a French flag pill (**FR** in green when French lists were found, **No FR** in red otherwise), a health pill next to its status, and the moment of its last health check: **Online** with the response time (green), **Slow** above 3 s (orange), **Unreachable** (red). The ⟳ button asks the integration to query every shown server and run a health check right away.
+Each subscription shows a French flag pill (**FR** in green when French lists were found, **No FR** in red otherwise), a health pill next to its status, and the moment of its last health check: **Online** with the response time (green), **Slow** above 3 s (orange), **Unreachable** (red). The ⟳ button asks the integration to query every shown server and run a health check right away. The ✎ button on each subscription opens a popup to change that account's server URL and username / password (or MAC address); saving runs the same checks as adding an account (credentials, French lists and video stream), and the form is also available from **Settings → Devices & services → IPTV → ⋮ → Reconfigure**.
 
 ## Screenshots
 

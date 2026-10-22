@@ -151,5 +151,33 @@
         "name": "Listes françaises"
       }
     }
+  },
+  "services": {
+    "edit_account": {
+      "name": "Modifier le compte",
+      "description": "Change les identifiants ou l'adresse MAC d'un compte après les mêmes contrôles que l'ajout.",
+      "fields": {
+        "device_id": {
+          "name": "Compte",
+          "description": "Le compte IPTV à modifier."
+        },
+        "url": {
+          "name": "URL du serveur",
+          "description": ""
+        },
+        "username": {
+          "name": "Identifiant",
+          "description": ""
+        },
+        "password": {
+          "name": "Mot de passe",
+          "description": ""
+        },
+        "mac": {
+          "name": "Adresse MAC",
+          "description": ""
+        }
+      }
+    }
   }
 }

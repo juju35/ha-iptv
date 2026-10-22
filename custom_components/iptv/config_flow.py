@@ -332,9 +332,9 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
                 if not valid_mac(user_input[CONF_MAC]):
                     errors = {"base": "invalid_mac"}
                 else:
-                    errors = await self._check_stalker(user_input)
+                    errors = await self._check_stalker(user_input, french=True)
             else:
-                errors = await self._check_xtream(user_input)
+                errors = await self._check_xtream(user_input, french=True)
             if not errors:
                 user_input[CONF_ADDED_AT] = entry.data.get(CONF_ADDED_AT)
                 user_input[CONF_UPDATED_AT] = dt_util.utcnow().replace(microsecond=0).isoformat()
