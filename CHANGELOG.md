@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.13.4
+
+### Fixes
+- Card popups (add, view, edit, delete) sit at the top of the card instead of its vertical middle, so they stay in view without scrolling when the subscriptions list is long.
+- The popup backdrop now covers the card itself (the card is its positioning context), with its rounded corners, instead of whatever positioned element wrapped it.
+
 ## 3.13.3
 
 ### Maintenance
