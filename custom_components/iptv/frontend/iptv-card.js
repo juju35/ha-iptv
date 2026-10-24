@@ -8,7 +8,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_CARD_VERSION = '3.13.6';
+var IPTV_CARD_VERSION = '3.13.7';
 var IPTV_DOMAIN = 'iptv';
 var IPTV_LOGO_URL = `/${IPTV_DOMAIN}/logo.png?v=${IPTV_CARD_VERSION}`;
 
@@ -861,7 +861,7 @@ if (!customElements.get('iptv-card')) {
     type: 'iptv-card',
     name: 'IPTV Subscription Card',
     description: 'Status, expiration date, channel, movie and series counts of one or several IPTV subscriptions (Xtream Codes or Stalker).',
-    preview: false,
+    preview: true,
     documentationURL: 'https://github.com/juju35/ha-iptv',
   });
 

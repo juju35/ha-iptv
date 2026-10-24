@@ -1,0 +1,48 @@
+{
+  "entity": {
+    "sensor": {
+      "status": {
+        "default": "mdi:television-classic",
+        "state": {
+          "active": "mdi:television-classic",
+          "expired": "mdi:television-classic-off",
+          "banned": "mdi:cancel",
+          "disabled": "mdi:television-off",
+          "invalid_auth": "mdi:account-alert"
+        }
+      },
+      "expiration": { "default": "mdi:calendar-clock" },
+      "days_left": { "default": "mdi:calendar-end" },
+      "created": { "default": "mdi:calendar-start" },
+      "active_connections": { "default": "mdi:account-multiple" },
+      "max_connections": { "default": "mdi:account-multiple-check" },
+      "channels": { "default": "mdi:television-play" },
+      "movies": { "default": "mdi:movie-open" },
+      "series": { "default": "mdi:filmstrip-box-multiple" },
+      "health": {
+        "default": "mdi:heart-pulse",
+        "state": {
+          "ok": "mdi:check-network",
+          "degraded": "mdi:network-strength-2-alert",
+          "auth_failed": "mdi:account-alert",
+          "unreachable": "mdi:close-network",
+          "stream_ko": "mdi:video-off"
+        }
+      },
+      "response_time": { "default": "mdi:timer-outline" },
+      "last_check": { "default": "mdi:clock-check-outline" },
+      "added": { "default": "mdi:account-plus" },
+      "updated": { "default": "mdi:account-edit" }
+    },
+    "binary_sensor": {
+      "trial": { "default": "mdi:timer-sand" },
+      "french_lists": { "default": "mdi:flag" }
+    }
+  },
+  "services": {
+    "add_account": { "service": "mdi:account-plus" },
+    "edit_account": { "service": "mdi:account-edit" },
+    "remove_account": { "service": "mdi:account-remove" },
+    "get_credentials": { "service": "mdi:key" }
+  }
+}

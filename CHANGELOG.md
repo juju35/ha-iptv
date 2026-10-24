@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.13.7
+
+### Changes
+- Entity and service icons declared in `icons.json`, like the other ha-* integrations: the status and health sensors change icon with their state (expired, banned, unreachable…).
+- The card shows a live preview in the card picker.
+
+### Maintenance
+- Same `.gitignore` as the other ha-* integrations.
+
 ## 3.13.6
 
 ### Changes

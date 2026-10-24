@@ -22,6 +22,7 @@ custom_components/iptv/
 ├── migrate.py         # Moves accounts of the former iptv_xtream domain to iptv
 ├── config_flow.py     # Xtream Codes or Stalker portal, options
 ├── const.py           # Constants, VERSION (card cache-buster), CARD_URL / LOGO_URL
+├── icons.json         # Entity and service icons
 ├── services.yaml / translations/{en,fr}.json
 ├── brand/             # Integration icon and logo
 └── frontend/iptv-card.js   # Vanilla JS card, no dependencies
