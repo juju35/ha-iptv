@@ -191,7 +191,7 @@ def main():
                 """({states, entities, devices, lang, config}) => {
                   const el = document.createElement("iptv-card");
                   el.setConfig({type: "custom:iptv-card", ...config});
-                  el.hass = {states, entities, devices, language: lang, locale: {language: lang}, callService: () => Promise.resolve()};
+                  el.hass = {states, entities, devices, user: {is_admin: true}, language: lang, locale: {language: lang}, callService: () => Promise.resolve()};
                   document.getElementById("root").appendChild(el);
                 }""",
                 {

@@ -110,7 +110,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: IptvConfigEntry) -> bool
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     await async_restore_snapshot(hass, entry)
     entry.async_create_background_task(hass, coordinator.health.async_check_now(), f"{DOMAIN} first health check")
-    entry.async_on_unload(entry.add_update_listener(_async_reload))
+    # Reload on an options change only: the flows and services that change the
+    # data reload the entry themselves (they also work while setup is retrying)
+    options = dict(entry.options)
+
+    async def _async_options_updated(hass: HomeAssistant, entry: IptvConfigEntry) -> None:
+        if dict(entry.options) != options:
+            await hass.config_entries.async_reload(entry.entry_id)
+
+    entry.async_on_unload(entry.add_update_listener(_async_options_updated))
     return True
 
 
@@ -129,7 +137,3 @@ async def async_remove_entry(hass: HomeAssistant, entry: IptvConfigEntry) -> Non
     for item in list(resources.async_items()):
         if item.get("url", "").split("?")[0] == CARD_URL:
             await resources.async_delete_item(item["id"])
-
-
-async def _async_reload(hass: HomeAssistant, entry: IptvConfigEntry) -> None:
-    await hass.config_entries.async_reload(entry.entry_id)

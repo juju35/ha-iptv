@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Mapping
 from datetime import UTC, datetime
 from typing import Any
 
@@ -206,6 +207,12 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
             f"iptv notify {title}",
         )
 
+    def _prepare(self, user_input: dict[str, Any], provider: str) -> None:
+        """Common add-form handling: notify service apart, normalised URL, provider."""
+        self._notify_service = user_input.pop(CONF_NOTIFY_SERVICE, None)
+        user_input[CONF_URL] = normalize_url(user_input[CONF_URL])
+        user_input[CONF_PROVIDER] = provider
+
     def _suggested(self, user_input: dict[str, Any] | None) -> dict[str, Any] | None:
         """Form values shown again after an error, notify service included."""
         if user_input is None:
@@ -275,9 +282,7 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
     async def async_step_xtream(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         errors: dict[str, str] = {}
         if user_input is not None:
-            self._notify_service = user_input.pop(CONF_NOTIFY_SERVICE, None)
-            user_input[CONF_URL] = normalize_url(user_input[CONF_URL])
-            user_input[CONF_PROVIDER] = PROVIDER_XTREAM
+            self._prepare(user_input, PROVIDER_XTREAM)
             await self.async_set_unique_id(f"{user_input[CONF_URL]}|{user_input[CONF_USERNAME]}".lower())
             self._abort_if_unique_id_configured()
             errors = await self._check_xtream(user_input, french=True)
@@ -294,10 +299,8 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
     async def async_step_stalker(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         errors: dict[str, str] = {}
         if user_input is not None:
-            self._notify_service = user_input.pop(CONF_NOTIFY_SERVICE, None)
-            user_input[CONF_URL] = normalize_url(user_input[CONF_URL])
+            self._prepare(user_input, PROVIDER_STALKER)
             user_input[CONF_MAC] = normalize_mac(user_input[CONF_MAC])
-            user_input[CONF_PROVIDER] = PROVIDER_STALKER
             if not valid_mac(user_input[CONF_MAC]):
                 errors = {"base": "invalid_mac"}
             else:
@@ -314,10 +317,22 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
             errors=errors,
         )
 
-    # ── reconfigure (same provider as the entry) ──
+    # ── reconfigure and re-authentication (same provider as the entry) ──
 
     async def async_step_reconfigure(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
-        entry = self._get_reconfigure_entry()
+        return await self._async_edit(self._get_reconfigure_entry(), "reconfigure", user_input)
+
+    async def async_step_reauth(self, entry_data: Mapping[str, Any]) -> ConfigFlowResult:
+        """The server refused the credentials: ask for new ones."""
+        return await self.async_step_reauth_confirm()
+
+    async def async_step_reauth_confirm(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        return await self._async_edit(self._get_reauth_entry(), "reauth_confirm", user_input)
+
+    async def _async_edit(
+        self, entry: ConfigEntry, step_id: str, user_input: dict[str, Any] | None
+    ) -> ConfigFlowResult:
+        """Check the new URL and credentials, then update the entry and its unique id."""
         stalker = entry.data.get(CONF_PROVIDER) == PROVIDER_STALKER
         schema = STALKER_SCHEMA if stalker else XTREAM_SCHEMA
         errors: dict[str, str] = {}
@@ -333,11 +348,18 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
             else:
                 errors = await self._check_xtream(user_input, french=True)
             if not errors:
+                login = user_input[CONF_MAC] if stalker else user_input[CONF_USERNAME]
+                unique_id = f"{user_input[CONF_URL]}|{login}".lower()
+                if any(
+                    other.entry_id != entry.entry_id and other.unique_id == unique_id
+                    for other in self._async_current_entries(include_ignore=False)
+                ):
+                    return self.async_abort(reason="already_configured")
                 user_input[CONF_ADDED_AT] = entry.data.get(CONF_ADDED_AT)
                 user_input[CONF_UPDATED_AT] = dt_util.utcnow().replace(microsecond=0).isoformat()
-                return self.async_update_reload_and_abort(entry, data=user_input)
+                return self.async_update_reload_and_abort(entry, unique_id=unique_id, data=user_input)
         return self.async_show_form(
-            step_id="reconfigure",
+            step_id=step_id,
             data_schema=self.add_suggested_values_to_schema(schema, user_input or entry.data),
             errors=errors,
         )
