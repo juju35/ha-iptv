@@ -14,11 +14,12 @@ from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.exceptions import Unauthorized
 from homeassistant.helpers import device_registry as dr
 from homeassistant.setup import async_setup_component
-from pytest_homeassistant_custom_component.common import MockConfigEntry
+from pytest_homeassistant_custom_component.common import MockConfigEntry, async_mock_service
 from yarl import URL
 
-from custom_components.iptv.api import StalkerClient, _probe_stream, _safe_err, stalker_expiry
+from custom_components.iptv.api import StalkerClient, _probe_stream, _safe_err, server_key, stalker_expiry
 from custom_components.iptv.const import CONF_MAC, CONF_PROVIDER, DOMAIN, PROVIDER_STALKER, PROVIDER_XTREAM
+from custom_components.iptv.notify_add import build_message
 
 SERVER = "http://provider.example:8080"
 API = f"{SERVER}/player_api.php"
@@ -474,3 +475,49 @@ async def test_stalker_refused_mac_starts_reauth(hass, aioclient_mock, stalker_e
     await hass.async_block_till_done()
     assert hass.states.get("sensor.portal_example_status").state == "invalid_auth"
     assert len(_reauth_flows(hass)) == 1
+
+
+async def test_config_flow_invalid_port(hass, aioclient_mock):
+    _mock_server(aioclient_mock)
+    result = await _start_xtream(hass)
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {CONF_URL: "http://provider.example:99999", CONF_USERNAME: USERNAME, CONF_PASSWORD: PASSWORD}
+    )
+    assert result["type"] is FlowResultType.FORM
+    assert result["errors"] == {"base": "cannot_connect"}
+
+
+def test_server_key_invalid_port():
+    assert server_key("provider.example:8080/") == "provider.example:8080"
+    assert server_key("https://Provider.example") == "provider.example:443"
+    assert server_key("http://Provider.example:99999") == "provider.example:99999"
+    assert server_key("http://user@provider.example:abc/x") == "provider.example:abc"
+
+
+def test_add_notification_has_no_password():
+    message = build_message("en", "provider.example", DATA, None, None)
+    assert USERNAME in message
+    assert PASSWORD not in message
+    assert "Password" not in message
+    assert PASSWORD not in build_message("fr", "provider.example", DATA, None, None)
+
+
+async def test_add_notification_sent_without_password(hass, aioclient_mock):
+    _mock_server(aioclient_mock)
+    calls = async_mock_service(hass, "notify", "mobile_app_phone")
+    result = await _start_xtream(hass)
+    with patch("custom_components.iptv.async_setup_entry", return_value=True):
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"],
+            {
+                CONF_URL: SERVER,
+                CONF_USERNAME: USERNAME,
+                CONF_PASSWORD: PASSWORD,
+                "notify_service": "notify.mobile_app_phone",
+            },
+        )
+        await hass.async_block_till_done()
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert len(calls) == 1
+    assert USERNAME in calls[0].data["message"]
+    assert PASSWORD not in str(calls[0].data)
