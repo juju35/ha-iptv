@@ -20,7 +20,7 @@
         },
         "data_description": {
           "url": "Including the port, e.g. http://server:8080",
-          "notify_service": "Optional: notify service (e.g. notify.mobile_app_phone) that receives the server, credentials and expiration once the account is added"
+          "notify_service": "Optional: notify service (e.g. notify.mobile_app_phone) that receives the server, username (or MAC address) and expiration, never the password once the account is added"
         }
       },
       "stalker": {
@@ -34,7 +34,7 @@
         "data_description": {
           "url": "Including the port, e.g. http://portal:80",
           "mac": "Format AA:BB:CC:DD:EE:FF",
-          "notify_service": "Optional: notify service (e.g. notify.mobile_app_phone) that receives the server, credentials and expiration once the account is added"
+          "notify_service": "Optional: notify service (e.g. notify.mobile_app_phone) that receives the server, username (or MAC address) and expiration, never the password once the account is added"
         }
       },
       "reconfigure": {

@@ -7,7 +7,7 @@ import math
 from datetime import UTC, datetime
 from typing import Any
 
-from homeassistant.const import CONF_PASSWORD, CONF_URL, CONF_USERNAME
+from homeassistant.const import CONF_URL, CONF_USERNAME
 from homeassistant.core import HomeAssistant
 from homeassistant.util import dt as dt_util
 
@@ -22,7 +22,6 @@ TEXTS = {
         "provider": "Provider",
         "server": "Server",
         "username": "Username",
-        "password": "Password",
         "mac": "MAC address",
         "expiration": "Expiration",
         "unlimited": "unlimited",
@@ -35,7 +34,6 @@ TEXTS = {
         "provider": "Fournisseur",
         "server": "Serveur",
         "username": "Identifiant",
-        "password": "Mot de passe",
         "mac": "Adresse MAC",
         "expiration": "Expiration",
         "unlimited": "illimitée",
@@ -66,8 +64,8 @@ def build_message(
     if data.get(CONF_PROVIDER) == PROVIDER_STALKER:
         lines.append(f"{t['mac']}{sep}{data[CONF_MAC]}")
     else:
+        # Never the password: the message is kept by the phone app and the push services
         lines.append(f"{t['username']}{sep}{data[CONF_USERNAME]}")
-        lines.append(f"{t['password']}{sep}{data[CONF_PASSWORD]}")
     if validity is not None and validity != -math.inf:
         if validity == math.inf:
             expiration = t["unlimited"]

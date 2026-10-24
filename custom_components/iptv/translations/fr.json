@@ -20,7 +20,7 @@
         },
         "data_description": {
           "url": "Port compris, ex : http://serveur:8080",
-          "notify_service": "Facultatif : service de notification (ex. notify.mobile_app_telephone) qui reçoit le serveur, les identifiants et l’expiration une fois le compte ajouté"
+          "notify_service": "Facultatif : service de notification (ex. notify.mobile_app_telephone) qui reçoit le serveur, l’identifiant (ou l’adresse MAC) et l’expiration, jamais le mot de passe une fois le compte ajouté"
         }
       },
       "stalker": {
@@ -34,7 +34,7 @@
         "data_description": {
           "url": "Port compris, ex : http://portail:80",
           "mac": "Format AA:BB:CC:DD:EE:FF",
-          "notify_service": "Facultatif : service de notification (ex. notify.mobile_app_telephone) qui reçoit le serveur, les identifiants et l’expiration une fois le compte ajouté"
+          "notify_service": "Facultatif : service de notification (ex. notify.mobile_app_telephone) qui reçoit le serveur, l’identifiant (ou l’adresse MAC) et l’expiration, jamais le mot de passe une fois le compte ajouté"
         }
       },
       "reconfigure": {
