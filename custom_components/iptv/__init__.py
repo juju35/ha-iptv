@@ -21,6 +21,7 @@ from .health import HealthMonitor
 from .migrate import LEGACY_DOMAIN, async_migrate_legacy, async_restore_snapshot
 from .naming import auto_title, is_auto_generated
 from .notify_expiry import ExpiryNotifier, notification_id
+from .registry_compat import get_device
 from .services import async_register_services
 
 _LOGGER = logging.getLogger(__name__)
@@ -125,7 +126,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: IptvConfigEntry) -> bool
         if entry.title != title:
             title = entry.title
             registry = dr.async_get(hass)
-            if device := registry.async_get_device(identifiers={(DOMAIN, entry.entry_id)}):
+            if device := get_device(registry, (DOMAIN, entry.entry_id), entry.entry_id):
                 registry.async_update_device(device.id, name=entry.title)
             notifier.rename(entry.title, coordinator.data)
 

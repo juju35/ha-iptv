@@ -21,6 +21,7 @@ from yarl import URL
 from custom_components.iptv.api import StalkerClient, _probe_stream, _safe_err, server_key, stalker_expiry
 from custom_components.iptv.const import CONF_MAC, CONF_PROVIDER, DOMAIN, PROVIDER_STALKER, PROVIDER_XTREAM
 from custom_components.iptv.notify_add import build_message
+from custom_components.iptv.registry_compat import get_device
 
 SERVER = "http://provider.example:8080"
 API = f"{SERVER}/player_api.php"
@@ -89,7 +90,7 @@ async def _setup(hass, aioclient_mock, entry) -> None:
 
 
 def _device_id(hass, entry) -> str:
-    return dr.async_get(hass).async_get_device(identifiers={(DOMAIN, entry.entry_id)}).id
+    return get_device(dr.async_get(hass), (DOMAIN, entry.entry_id), entry.entry_id).id
 
 
 # ── setup / unload ──────────────────────────────────────────────────────────
@@ -626,7 +627,7 @@ async def test_rename_updates_device_without_reload(hass, aioclient_mock, entry)
     with patch.object(hass.config_entries, "async_reload", wraps=hass.config_entries.async_reload) as reload:
         hass.config_entries.async_update_entry(entry, title="Renamed")
         await hass.async_block_till_done()
-    device = dr.async_get(hass).async_get_device(identifiers={(DOMAIN, entry.entry_id)})
+    device = get_device(dr.async_get(hass), (DOMAIN, entry.entry_id), entry.entry_id)
     assert device.name == "Renamed"
     assert reload.call_count == 0
     assert entry.state is ConfigEntryState.LOADED

@@ -25,7 +25,6 @@ from homeassistant.const import CONF_PASSWORD, CONF_URL, CONF_USERNAME
 from homeassistant.core import HomeAssistant, ServiceCall, ServiceResponse, SupportsResponse, callback
 from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.helpers import config_validation as cv
-from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.service import async_register_admin_service
 from homeassistant.util import dt as dt_util
@@ -48,6 +47,7 @@ from .const import (
     DOMAIN,
     PROVIDER_STALKER,
 )
+from .registry_compat import entry_for_device
 
 SERVICE_EDIT_ACCOUNT = "edit_account"
 SERVICE_REMOVE_ACCOUNT = "remove_account"
@@ -79,14 +79,7 @@ ADD_SCHEMA = vol.Schema(
 
 
 def _entry_for_device(hass: HomeAssistant, device_id: str) -> ConfigEntry | None:
-    device = dr.async_get(hass).async_get(device_id)
-    if not device:
-        return None
-    for entry_id in device.config_entries:
-        entry = hass.config_entries.async_get_entry(entry_id)
-        if entry and entry.domain == DOMAIN:
-            return entry
-    return None
+    return entry_for_device(hass, device_id, DOMAIN)
 
 
 async def _validate(hass: HomeAssistant, provider: str, data: dict[str, Any]) -> str | None:
