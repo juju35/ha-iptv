@@ -32,10 +32,7 @@ def entry_for_device(hass: HomeAssistant, device_id: str, domain: str) -> Config
     device = dr.async_get(hass).async_get(device_id)
     if device is None:
         return None
-    if hasattr(type(device), "config_entry_id"):
-        entry_ids = {device.config_entry_id}
-    else:
-        entry_ids = device.config_entries
+    entry_ids = {device.config_entry_id} if hasattr(type(device), "config_entry_id") else device.config_entries
     for entry_id in entry_ids:
         entry = hass.config_entries.async_get_entry(entry_id)
         if entry and entry.domain == domain:
