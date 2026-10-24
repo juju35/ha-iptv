@@ -1,5 +1,24 @@
 # Changelog
 
+## 3.15.0
+
+### Changes
+- Compatible with Home Assistant 2026.8 and later (2026.10 included): the account device is looked up with the new device registry API, which gives a device a single config entry. Home Assistant 2025.6 is still supported.
+- The card adds, shows and edits accounts through admin-only WebSocket commands instead of the `iptv.add_account`, `iptv.edit_account` and `iptv.get_credentials` actions, so the password never shows up in a `call_service` event, and so in the recorder database, any more.
+- The `iptv.add_account` and `iptv.edit_account` actions stay available for automations, but Home Assistant stores their data, password included, in the database: their descriptions and the README now say so, recommend the card or **Reconfigure** instead, and show how to exclude `call_service` events from the recorder.
+- The reconfigure and re-authentication forms no longer send the current password to the browser. For Xtream, leave the password blank to keep the current one.
+- Renaming the account renames its device and its expiration notification right away, without reloading it.
+- Stalker: the health check skips the video stream test while a refresh is using the portal session, since Stalker portals do not report their connection slots.
+- The URL field of the reconfigure and re-authentication forms is labelled "Server or portal URL", which also fits Stalker accounts.
+
+### Fixes
+- Stalker: the health check measures the server's own response time, so waiting for a running refresh no longer shows the account as slow, and checks no longer pile up when the portal is unreachable.
+- Xtream: a username or password with special characters (`#`, `?`, `/`, `%`, spaces) no longer breaks the video stream test.
+- Reconfigure and re-authentication reload the account without the Home Assistant deprecation warning reported since 2026.10.
+
+### Maintenance
+- Tests run on Home Assistant 2026.10 and on the minimum version (2025.6), and fail on any deprecated Home Assistant call; new tests for the fixes.
+
 ## 3.14.0
 
 ### Changes
