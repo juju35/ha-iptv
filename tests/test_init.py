@@ -301,6 +301,10 @@ async def test_stalker_operations_do_not_overlap():
 
 async def _start_xtream(hass):
     result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": "user"})
+    # Starting the flow sets up the dependencies: let http finish its setup (its start_server task saves its
+    # settings with a delayed write) while Home Assistant runs. Left to the teardown, that write is scheduled after
+    # the final write and its timer lingers (Home Assistant 2025.6).
+    await hass.async_block_till_done()
     assert result["type"] is FlowResultType.MENU
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {"next_step_id": "xtream"})
     assert result["type"] is FlowResultType.FORM
