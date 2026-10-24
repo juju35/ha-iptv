@@ -116,7 +116,7 @@ The credentials are stored in the config entry together with the server URL (use
 | Refresh interval | `60` min | How often the server is queried (minimum 5) |
 | Notify before expiration | `7` days | Persistent notification when the subscription expires within this many days, `0` to disable |
 | Health check interval | `5` min | How often the server is checked with a light request (account info only) |
-| Test a channel's video stream | on | During each health check, briefly open a channel to confirm it plays (uses one connection slot, skipped while every slot is in use); health shows `stream_ko` if it fails |
+| Test a channel's video stream | on | During each health check, briefly open a channel to confirm it plays (uses one connection slot, skipped while every slot is in use; Stalker portals do not report their slots, so there it is skipped while a refresh is using the portal session); health shows `stream_ko` if it fails |
 
 The notification names the account and its expiration date, is refreshed once a day while the account is in that window (dismissing it silences it until the next day), also reports an expired account, and disappears once the subscription is renewed.
 
@@ -187,7 +187,7 @@ devices:
 | `warning_days` | ❌ | `7` | Turns orange when fewer days than this are left |
 | `language` | ❌ | Auto | Force language: `en` or `fr` (auto-detects from HA settings) |
 
-Each subscription shows a French flag pill (**FR** in green when French lists were found, **No FR** in red otherwise), a health pill next to its status, and the moment of its last health check: **Online** with the response time (green), **Slow** above 3 s (orange), **Unreachable** (red). The **+** button (card header) opens a popup to add a new account, the 👁 button on each subscription shows its server URL and credentials with a copy button for each, the ✎ button edits them, and the 🗑 button removes the account (with confirmation). Adding or editing runs the same checks as the UI (credentials, French lists and video stream). The edit form is also available from **Settings → Devices & services → IPTV → ⋮ → Reconfigure**. The ⟳ button queries every shown server and runs a health check right away. The add, view, edit and remove buttons are shown to Home Assistant administrators only: the services behind them (`iptv.add_account`, `iptv.edit_account`, `iptv.remove_account`, `iptv.get_credentials`) are admin-only.
+Each subscription shows a French flag pill (**FR** in green when French lists were found, **No FR** in red otherwise), a health pill next to its status, and the moment of its last health check: **Online** with the response time (green), **Slow** above 3 s (orange), **Unreachable** (red). The **+** button (card header) opens a popup to add a new account, the 👁 button on each subscription shows its server URL and credentials with a copy button for each, the ✎ button edits them, and the 🗑 button removes the account (with confirmation). Adding or editing runs the same checks as the UI (credentials, French lists and video stream). The edit form is also available from **Settings → Devices & services → IPTV → ⋮ → Reconfigure**. The ⟳ button queries every shown server and runs a health check right away. The add, view, edit and remove buttons are shown to Home Assistant administrators only. The card adds, views and edits accounts through admin-only WebSocket commands (`iptv/add_account`, `iptv/edit_account`, `iptv/get_credentials`), so the password never goes through a service call; removing uses the admin-only `iptv.remove_account` service.
 
 ## Screenshots
 
@@ -205,7 +205,16 @@ The card is served by the integration at `/iptv/iptv-card.js` and registered in 
 
 ### Security notes
 
-- The credentials are stored in Home Assistant's config entries, not in the dashboard configuration, and only administrators can read them back (`iptv.get_credentials` is an admin service).
+- The credentials are stored in Home Assistant's config entries, not in the dashboard configuration, and only administrators can read them back (`iptv.get_credentials` and the card's `iptv/get_credentials` command are admin-only).
+- The services `iptv.add_account`, `iptv.edit_account`, `iptv.remove_account` and `iptv.get_credentials` (admin-only) remain available for automations and scripts. **Service call data is stored by the recorder**: Home Assistant fires a `call_service` event with the raw data, so a password given to `iptv.add_account` or `iptv.edit_account` is written to the database (and its backups). Prefer the card, or the integration's **Reconfigure** form, which do not go through a service call. If you do call these services with a password, exclude the event from the recorder:
+
+  ```yaml
+  recorder:
+    exclude:
+      event_types:
+        - call_service
+  ```
+- The reconfigure and re-authentication forms never send the current password to the browser: leave the field blank to keep it.
 - Error messages (logs, the `error` attribute of the health sensor) give the HTTP status or the error type, never the request URL, which carries the Xtream credentials.
 - They are only sent to the Xtream server you configured, as `player_api.php` query parameters (that is how the Xtream API works, so prefer an `https://` URL when your provider offers one).
 

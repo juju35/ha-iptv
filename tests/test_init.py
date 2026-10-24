@@ -8,18 +8,20 @@ from unittest.mock import Mock, patch
 import aiohttp
 import pytest
 from homeassistant.config_entries import ConfigEntryState
-from homeassistant.const import CONF_PASSWORD, CONF_URL, CONF_USERNAME
+from homeassistant.const import CONF_PASSWORD, CONF_URL, CONF_USERNAME, EVENT_CALL_SERVICE
 from homeassistant.core import Context, HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.exceptions import Unauthorized
 from homeassistant.helpers import device_registry as dr
 from homeassistant.setup import async_setup_component
-from pytest_homeassistant_custom_component.common import MockConfigEntry, async_mock_service
+from homeassistant.util import dt as dt_util
+from pytest_homeassistant_custom_component.common import MockConfigEntry, async_capture_events, async_mock_service
 from yarl import URL
 
 from custom_components.iptv.api import StalkerClient, _probe_stream, _safe_err, server_key, stalker_expiry
 from custom_components.iptv.const import CONF_MAC, CONF_PROVIDER, DOMAIN, PROVIDER_STALKER, PROVIDER_XTREAM
 from custom_components.iptv.notify_add import build_message
+from custom_components.iptv.registry_compat import get_device
 
 SERVER = "http://provider.example:8080"
 API = f"{SERVER}/player_api.php"
@@ -51,14 +53,14 @@ def _secret_error(status: int) -> aiohttp.ClientResponseError:
     return err
 
 
-def _mock_server(aioclient_mock, user_info=USER_INFO) -> None:
+def _mock_server(aioclient_mock, user_info=USER_INFO, api=API) -> None:
     """A working Xtream server (specific actions first: the bare endpoint matches any query)."""
     for action in ("get_live_categories", "get_vod_categories", "get_series_categories"):
-        aioclient_mock.get(API, params={"action": action}, json=CATEGORIES)
-    aioclient_mock.get(API, params={"action": "get_live_streams"}, json=LIVE)
-    aioclient_mock.get(API, params={"action": "get_vod_streams"}, json=[{"stream_id": 5}])
-    aioclient_mock.get(API, params={"action": "get_series"}, json=[{"series_id": 7}])
-    aioclient_mock.get(API, json=user_info)
+        aioclient_mock.get(api, params={"action": action}, json=CATEGORIES)
+    aioclient_mock.get(api, params={"action": "get_live_streams"}, json=LIVE)
+    aioclient_mock.get(api, params={"action": "get_vod_streams"}, json=[{"stream_id": 5}])
+    aioclient_mock.get(api, params={"action": "get_series"}, json=[{"series_id": 7}])
+    aioclient_mock.get(api, json=user_info)
     # Any account's stream (the path holds the username and password)
     aioclient_mock.get(re.compile(r"/live/.+\.ts$"), content=b"\x47" * 188, headers={"Content-Type": "video/mp2t"})
 
@@ -88,7 +90,7 @@ async def _setup(hass, aioclient_mock, entry) -> None:
 
 
 def _device_id(hass, entry) -> str:
-    return dr.async_get(hass).async_get_device(identifiers={(DOMAIN, entry.entry_id)}).id
+    return get_device(dr.async_get(hass), (DOMAIN, entry.entry_id), entry.entry_id).id
 
 
 # ── setup / unload ──────────────────────────────────────────────────────────
@@ -300,6 +302,10 @@ async def test_stalker_operations_do_not_overlap():
 
 async def _start_xtream(hass):
     result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": "user"})
+    # Starting the flow sets up the dependencies: let http finish its setup (its start_server task saves its
+    # settings with a delayed write) while Home Assistant runs. Left to the teardown, that write is scheduled after
+    # the final write and its timer lingers (Home Assistant 2025.6).
+    await hass.async_block_till_done()
     assert result["type"] is FlowResultType.MENU
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {"next_step_id": "xtream"})
     assert result["type"] is FlowResultType.FORM
@@ -521,3 +527,247 @@ async def test_add_notification_sent_without_password(hass, aioclient_mock):
     assert len(calls) == 1
     assert USERNAME in calls[0].data["message"]
     assert PASSWORD not in str(calls[0].data)
+
+
+# ── health check behind the Stalker lock ────────────────────────────────────
+
+
+def _health_monitor(hass, client, stream_check=False):
+    """A HealthMonitor on a stand-in coordinator that shares `client`."""
+    from custom_components.iptv.health import HealthMonitor
+
+    coordinator = Mock()
+    coordinator.config_entry = Mock(entry_id="e1", options={"stream_check": stream_check})
+    coordinator.client = client
+    coordinator.data = {"max_connections": None, "active_cons": None}
+    coordinator.last_update_success = True
+    return HealthMonitor(hass, coordinator)
+
+
+def _slow_stalker(delay: float) -> StalkerClient:
+    """A Stalker client whose every portal request takes `delay` seconds."""
+    client = StalkerClient(Mock(), PORTAL, MAC)
+
+    async def call(portal, params, token=None):
+        await asyncio.sleep(delay)
+        if params.get("action") == "handshake":
+            return {"token": "t"}
+        return {"phone": "2099-01-01"}
+
+    client._call = call  # noqa: SLF001
+    return client
+
+
+async def test_health_latency_excludes_lock_wait(hass):
+    """Waiting for a refresh to release the shared client is not server latency."""
+    client = _slow_stalker(0.02)
+    monitor = _health_monitor(hass, client)
+
+    async def refresh():
+        async with client._lock:  # noqa: SLF001
+            await asyncio.sleep(0.4)
+
+    task = asyncio.ensure_future(refresh())
+    await asyncio.sleep(0)
+    await monitor.async_check_now()
+    await task
+    assert monitor.status == "ok"
+    # three portal requests of 20 ms, not the 400 ms spent waiting for the lock
+    assert monitor.latency_ms < 300
+
+
+async def test_health_ticks_do_not_pile_up(hass):
+    """A tick that comes while a check still runs is skipped instead of queued."""
+    client = _slow_stalker(0.05)
+    monitor = _health_monitor(hass, client)
+    with patch.object(client, "async_get_user_info", wraps=client.async_get_user_info) as user_info:
+        await asyncio.gather(*(monitor._async_check() for _ in range(3)))  # noqa: SLF001
+    assert user_info.call_count == 1
+    assert monitor.status == "ok"
+
+
+@pytest.mark.parametrize(("busy", "probed"), [(True, False), (False, True)])
+async def test_stalker_probe_skipped_while_refresh_holds_lock(hass, busy, probed):
+    """Unknown occupancy (Stalker): skip the probe only while a refresh uses the client."""
+    client = StalkerClient(Mock(), PORTAL, MAC)
+    monitor = _health_monitor(hass, client, stream_check=True)
+    hold = asyncio.Event()
+    tasks = []
+
+    async def refresh():
+        async with client._lock:  # noqa: SLF001
+            await hold.wait()
+
+    async def user_info():
+        if busy:
+            tasks.append(asyncio.ensure_future(refresh()))
+            await asyncio.sleep(0)
+        return {"phone": "2099-01-01"}
+
+    async def stream():
+        return {"ok": True, "channel": "Channel 1"}
+
+    with (
+        patch.object(client, "async_get_user_info", side_effect=user_info),
+        patch.object(client, "async_test_stream", side_effect=stream) as probe,
+    ):
+        await monitor.async_check_now()
+    hold.set()
+    await asyncio.gather(*tasks)
+    assert probe.called is probed
+    assert monitor.stream_ok is (True if probed else None)
+    assert monitor.status == "ok"
+
+
+# ── renaming the entry ──────────────────────────────────────────────────────
+
+
+async def test_rename_updates_device_without_reload(hass, aioclient_mock, entry):
+    await _setup(hass, aioclient_mock, entry)
+    with patch.object(hass.config_entries, "async_reload", wraps=hass.config_entries.async_reload) as reload:
+        hass.config_entries.async_update_entry(entry, title="Renamed")
+        await hass.async_block_till_done()
+    device = get_device(dr.async_get(hass), (DOMAIN, entry.entry_id), entry.entry_id)
+    assert device.name == "Renamed"
+    assert reload.call_count == 0
+    assert entry.state is ConfigEntryState.LOADED
+
+
+async def test_rename_updates_expiry_notification(hass, aioclient_mock, entry):
+    soon = {"user_info": {**USER_INFO["user_info"], "exp_date": str(int(dt_util.utcnow().timestamp()) + 3 * 86400)}}
+    _mock_server(aioclient_mock, user_info=soon)
+    assert await async_setup_component(hass, "http", {})
+    with patch("custom_components.iptv.notify_expiry.persistent_notification.async_create") as create:
+        assert await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
+        assert create.call_args.kwargs["title"].endswith("provider.example")
+        hass.config_entries.async_update_entry(entry, title="Renamed")
+        await hass.async_block_till_done()
+    assert create.call_args.kwargs["title"].endswith("Renamed")
+    assert "Renamed" in create.call_args.args[1]
+
+
+# ── stream probe URL ────────────────────────────────────────────────────────
+
+
+@pytest.mark.parametrize("password", ["ab#cd", "ab?cd", "ab/cd", "ab%cd", "a b"])
+async def test_stream_probe_url_quotes_credentials(password):
+    """# ? / % in a username or password stay inside their path segment."""
+    from custom_components.iptv.api import XtreamClient
+
+    client = XtreamClient(Mock(), SERVER, "al/ex", password)
+    seen = {}
+
+    async def probe(session, url, headers):
+        seen["url"] = url
+        return {"ok": True, "latency_ms": 1, "error": None}
+
+    with (
+        patch.object(client, "_get", return_value=LIVE),
+        patch("custom_components.iptv.api._probe_stream", side_effect=probe),
+    ):
+        res = await client.async_test_stream()
+    assert res["ok"] is True
+    url = URL(seen["url"])
+    assert url.query_string == ""
+    assert url.fragment == ""
+    assert url.parts == ("/", "live", "al/ex", password, "1.ts")
+
+
+# ── admin websocket commands: no password in call_service events ────────────
+
+
+async def test_card_commands_keep_password_out_of_events(hass, aioclient_mock, entry, hass_ws_client):
+    await _setup(hass, aioclient_mock, entry)
+    events = async_capture_events(hass, EVENT_CALL_SERVICE)
+    client = await hass_ws_client(hass)
+    device_id = _device_id(hass, entry)
+
+    await client.send_json_auto_id({"type": "iptv/edit_account", "device_id": device_id})
+    msg = await client.receive_json()
+    assert msg["success"]
+    assert msg["result"]["ok"] is True
+    assert msg["result"][CONF_USERNAME] == USERNAME
+    assert CONF_PASSWORD not in msg["result"]
+
+    await client.send_json_auto_id({"type": "iptv/edit_account", "device_id": device_id, CONF_PASSWORD: "NEWSECRET"})
+    msg = await client.receive_json()
+    await hass.async_block_till_done()
+    assert msg["result"] == {"ok": True}
+    assert entry.data[CONF_PASSWORD] == "NEWSECRET"
+
+    await client.send_json_auto_id({"type": "iptv/get_credentials", "device_id": device_id})
+    msg = await client.receive_json()
+    assert msg["result"][CONF_PASSWORD] == "NEWSECRET"
+
+    aioclient_mock.clear_requests()
+    _mock_server(aioclient_mock, api="http://other.example:8080/player_api.php")
+    with patch("custom_components.iptv.async_setup_entry", return_value=True):
+        await client.send_json_auto_id(
+            {
+                "type": "iptv/add_account",
+                CONF_PROVIDER: PROVIDER_XTREAM,
+                CONF_URL: "http://other.example:8080",
+                CONF_USERNAME: "sam",
+                CONF_PASSWORD: "ADDSECRET",
+            }
+        )
+        msg = await client.receive_json()
+        await hass.async_block_till_done()
+    assert msg["result"] == {"ok": True}
+    assert any(e.data.get(CONF_PASSWORD) == "ADDSECRET" for e in hass.config_entries.async_entries(DOMAIN))
+
+    for event in events:
+        assert "NEWSECRET" not in str(event.data)
+        assert "ADDSECRET" not in str(event.data)
+        assert event.data.get("domain") != DOMAIN
+
+
+@pytest.mark.parametrize("command", ["iptv/get_credentials", "iptv/edit_account", "iptv/add_account"])
+async def test_card_commands_refused_to_non_admin(
+    hass, aioclient_mock, entry, hass_ws_client, hass_read_only_access_token, command
+):
+    await _setup(hass, aioclient_mock, entry)
+    client = await hass_ws_client(hass, hass_read_only_access_token)
+    data = (
+        {CONF_PROVIDER: PROVIDER_XTREAM, CONF_URL: SERVER}
+        if command == "iptv/add_account"
+        else {"device_id": _device_id(hass, entry)}
+    )
+    await client.send_json_auto_id({"type": command, **data})
+    msg = await client.receive_json()
+    assert not msg["success"]
+    assert msg["error"]["code"] == "unauthorized"
+
+
+# ── reconfigure / reauth form ───────────────────────────────────────────────
+
+
+def _suggested(result) -> dict:
+    return {
+        str(key): key.description["suggested_value"]
+        for key in result["data_schema"].schema
+        if key.description and "suggested_value" in key.description
+    }
+
+
+async def test_reconfigure_form_does_not_send_password(hass, aioclient_mock, entry):
+    await _setup(hass, aioclient_mock, entry)
+    result = await entry.start_reconfigure_flow(hass)
+    assert result["type"] is FlowResultType.FORM
+    suggested = _suggested(result)
+    assert suggested[CONF_USERNAME] == USERNAME
+    assert CONF_PASSWORD not in suggested
+    assert PASSWORD not in str(suggested)
+
+
+async def test_reconfigure_blank_password_keeps_current(hass, aioclient_mock, entry):
+    await _setup(hass, aioclient_mock, entry)
+    result = await entry.start_reconfigure_flow(hass)
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {CONF_URL: SERVER, CONF_USERNAME: USERNAME}
+    )
+    await hass.async_block_till_done()
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "reconfigure_successful"
+    assert entry.data[CONF_PASSWORD] == PASSWORD

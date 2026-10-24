@@ -8,7 +8,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_CARD_VERSION = '3.14.0';
+var IPTV_CARD_VERSION = '3.15.0';
 var IPTV_DOMAIN = 'iptv';
 var IPTV_LOGO_URL = `/${IPTV_DOMAIN}/logo.png?v=${IPTV_CARD_VERSION}`;
 
@@ -619,7 +619,7 @@ class IptvCard extends HTMLElement {
     var modal = this._openModal(`<h3>${esc(this._t('edit_title'))}</h3><div class="hint">${esc(this._t('edit_saving'))}</div>`);
     this._editDevice = sub.device;
 
-    var prefill = await this._svc('edit_account', { device_id: sub.device });
+    var prefill = await this._ws('edit_account', { device_id: sub.device });
     if (this._modal !== modal) return;
     // not_found / generic: the error, as in the view popup, instead of an empty form
     if (!prefill.ok) return this._modalError(modal, 'edit_title', prefill.error);
@@ -662,6 +662,16 @@ class IptvCard extends HTMLElement {
     try {
       var res = await this._hass.callService('iptv', service, data, undefined, false, true);
       return (res?.response) || {};
+    } catch (_e) {
+      return { ok: false, error: 'generic' };
+    }
+  }
+
+  // Admin WebSocket command (iptv/<command>): unlike a service call, it fires no
+  // call_service event, so the password never reaches the recorder database
+  async _ws(command, data) {
+    try {
+      return (await this._hass.callWS({ type: `iptv/${command}`, ...data })) || {};
     } catch (_e) {
       return { ok: false, error: 'generic' };
     }
@@ -770,7 +780,7 @@ class IptvCard extends HTMLElement {
     errEl.textContent = '';
     btn.setAttribute('disabled', '');
     btn.textContent = this._t('edit_saving');
-    var out = await this._svc('add_account', payload);
+    var out = await this._ws('add_account', payload);
     if (this._modal !== modal) return;
     if (out.ok) {
       this._closeEditor();
@@ -786,7 +796,7 @@ class IptvCard extends HTMLElement {
   async _openView(sub) {
     var esc = iptvEsc;
     var modal = this._openModal(`<h3>${esc(this._t('view_title'))}</h3><div class="hint">${esc(this._t('edit_saving'))}</div>`);
-    var creds = await this._svc('get_credentials', { device_id: sub.device });
+    var creds = await this._ws('get_credentials', { device_id: sub.device });
     if (this._modal !== modal) return;
     if (!creds.ok) return this._modalError(modal, 'view_title', creds.error);
     var close = `<div class="modal-actions"><button class="act cancel">${esc(this._t('edit_cancel'))}</button></div>`;
@@ -850,7 +860,7 @@ class IptvCard extends HTMLElement {
     errEl.textContent = '';
     primary.setAttribute('disabled', '');
     primary.textContent = this._t('edit_saving');
-    var out = await this._svc('edit_account', payload);
+    var out = await this._ws('edit_account', payload);
     if (this._modal !== modal) return;
     if (out.ok) {
       this._closeEditor();

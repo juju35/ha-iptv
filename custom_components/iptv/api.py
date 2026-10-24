@@ -22,9 +22,10 @@ import contextlib
 import json
 import re
 import time
+from collections.abc import AsyncIterator
 from datetime import UTC, datetime
 from typing import Any
-from urllib.parse import urlparse
+from urllib.parse import quote, urlparse
 
 import aiohttp
 
@@ -52,6 +53,10 @@ def _safe_err(err: BaseException) -> str:
     if isinstance(err, aiohttp.ClientResponseError) and err.status:
         return f"HTTP {err.status}"
     return type(err).__name__
+
+
+def _elapsed_ms(start: float) -> int:
+    return round((time.monotonic() - start) * 1000)
 
 
 def normalize_url(url: str) -> str:
@@ -187,6 +192,10 @@ class XtreamClient:
         self._username = username
         self._password = password
         self._auth = {"username": username, "password": password}
+        # Response time of the last account info request (ms), for the health check
+        self.user_info_ms: int | None = None
+        # No shared session state: a health check never waits for a refresh
+        self.busy = False
 
     async def _get(self, action: str | None = None) -> Any:
         params = dict(self._auth)
@@ -249,14 +258,21 @@ class XtreamClient:
             return {"ok": None, "channel": None, "latency_ms": None, "error": "no channel"}
         sid = first["stream_id"]
         name = str(first.get("name") or sid)
-        url = f"{self._base}/live/{self._username}/{self._password}/{sid}.ts"
+        # Each credential is one path segment: # ? / % must not end it
+        user, password = quote(self._username, safe=""), quote(self._password, safe="")
+        url = f"{self._base}/live/{user}/{password}/{sid}.ts"
         res = await _probe_stream(self._session, url, HEADERS)
         res["channel"] = name
         return res
 
     async def async_get_user_info(self) -> dict[str, Any]:
         """Return user_info, raise IptvAuthError if credentials are refused."""
-        data = await self._get()
+        start = time.monotonic()
+        self.user_info_ms = None
+        try:
+            data = await self._get()
+        finally:
+            self.user_info_ms = _elapsed_ms(start)
         info = data.get("user_info") if isinstance(data, dict) else None
         if not isinstance(info, dict) or str(info.get("auth")) != "1":
             raise IptvAuthError
@@ -402,6 +418,10 @@ class StalkerClient:
         # The coordinator and the health check share this client: a handshake
         # replaces the token, so one operation runs at a time
         self._lock = asyncio.Lock()
+        self._users = 0  # operations holding or waiting for the lock
+        # Response time of the last account info request (ms), measured once the
+        # lock is held: waiting for a refresh is not server latency
+        self.user_info_ms: int | None = None
 
     def _headers(self, token: str | None = None) -> dict[str, str]:
         headers = {
@@ -477,8 +497,28 @@ class StalkerClient:
 
     async def async_get_user_info(self) -> dict[str, Any]:
         """Return the account info, raise IptvAuthError if the MAC is refused."""
-        async with self._lock:
-            return await self._user_info()
+        async with self._use():
+            start = time.monotonic()
+            self.user_info_ms = None
+            try:
+                return await self._user_info()
+            finally:
+                self.user_info_ms = _elapsed_ms(start)
+
+    @property
+    def busy(self) -> bool:
+        """True while another operation (a refresh) holds or waits for the client."""
+        return self._users > 0 or self._lock.locked()
+
+    @contextlib.asynccontextmanager
+    async def _use(self) -> AsyncIterator[None]:
+        """Run one operation at a time, counting the waiting ones (see busy)."""
+        self._users += 1
+        try:
+            async with self._lock:
+                yield
+        finally:
+            self._users -= 1
 
     async def _user_info(self) -> dict[str, Any]:
         await self._handshake()
@@ -502,7 +542,7 @@ class StalkerClient:
 
     async def async_get_french(self) -> dict[str, Any] | None:
         """French genres / categories among live, VOD and series."""
-        async with self._lock:
+        async with self._use():
             return await self._french()
 
     async def _french(self) -> dict[str, Any] | None:
@@ -515,7 +555,7 @@ class StalkerClient:
 
     async def async_get_counts(self) -> dict[str, Any]:
         """Channel / movie / series counts, for validating a real catalogue."""
-        async with self._lock:
+        async with self._use():
             if not self._token:
                 await self._handshake()
             channels, movies, series = await asyncio.gather(
@@ -525,7 +565,7 @@ class StalkerClient:
 
     async def async_test_stream(self) -> dict[str, Any]:
         """Probe the first live channel via create_link. ok True/False/None."""
-        async with self._lock:
+        async with self._use():
             return await self._test_stream()
 
     async def _test_stream(self) -> dict[str, Any]:
@@ -568,7 +608,7 @@ class StalkerClient:
 
     async def async_get_data(self) -> dict[str, Any]:
         """Return the account info plus live / VOD / series counts."""
-        async with self._lock:
+        async with self._use():
             try:
                 info = await self._user_info()
             except IptvAuthError:

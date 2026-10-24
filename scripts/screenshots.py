@@ -176,14 +176,16 @@ def main():
             viewport={"width": 1000, "height": 1200},
             timezone_id="Europe/Paris",
         )
-        page = context.new_page()
-        page.clock.set_fixed_time(NOW)
         # The card loads its logo from /iptv/logo.png, served by the integration:
         # open a page on an http origin so the relative URL resolves
-        page.route("**/iptv/logo.png*", lambda route: route.fulfill(body=LOGO, content_type="image/png"))
-        page.route(BASE_URL, lambda route: route.fulfill(body="<!doctype html>", content_type="text/html"))
-        page.goto(BASE_URL)
+        context.route("**/iptv/logo.png*", lambda route: route.fulfill(body=LOGO, content_type="image/png"))
+        context.route(BASE_URL, lambda route: route.fulfill(body="<!doctype html>", content_type="text/html"))
         for shot in SHOTS:
+            # A fresh page per shot: the card script declares top-level constants
+            page = context.new_page()
+            page.on("pageerror", lambda err: print(f"page error: {err}"))
+            page.clock.set_fixed_time(NOW)
+            page.goto(BASE_URL)
             page.set_content(page_html(shot["theme"]))
             page.add_script_tag(content=HA_ELEMENTS)
             page.add_script_tag(content=CARD_JS)
@@ -205,6 +207,7 @@ def main():
             page.wait_for_timeout(300)
             page.locator("iptv-card").screenshot(path=str(out_dir / f"{shot['file']}.png"), animations="disabled")
             print(f"screenshots/{shot['file']}.png")
+            page.close()
         browser.close()
 
 

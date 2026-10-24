@@ -79,6 +79,14 @@ class ExpiryNotifier:
         )
 
     @callback
+    def rename(self, name: str, data: dict[str, Any] | None) -> None:
+        """The account was renamed: show the new name in a current notification."""
+        self._name = name
+        if self._last != OFF:
+            self._last = None
+        self.update(data)
+
+    @callback
     def dismiss(self) -> None:
         # The first call also clears a notification left over from before a restart
         if self._last != OFF:

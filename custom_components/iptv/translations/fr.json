@@ -40,27 +40,29 @@
       "reconfigure": {
         "title": "Abonnement IPTV",
         "data": {
-          "url": "URL du serveur Xtream",
+          "url": "URL du serveur ou du portail",
           "username": "Identifiant",
           "password": "Mot de passe",
           "mac": "Adresse MAC"
         },
         "data_description": {
           "url": "Port compris, ex : http://serveur:8080",
-          "mac": "Format AA:BB:CC:DD:EE:FF"
+          "mac": "Format AA:BB:CC:DD:EE:FF",
+          "password": "Laisser vide pour garder le mot de passe actuel"
         }
       },
       "reauth_confirm": {
         "title": "Abonnement IPTV",
         "data": {
-          "url": "URL du serveur Xtream",
+          "url": "URL du serveur ou du portail",
           "username": "Identifiant",
           "password": "Mot de passe",
           "mac": "Adresse MAC"
         },
         "data_description": {
           "url": "Port compris, ex : http://serveur:8080",
-          "mac": "Format AA:BB:CC:DD:EE:FF"
+          "mac": "Format AA:BB:CC:DD:EE:FF",
+          "password": "Laisser vide pour garder le mot de passe actuel"
         },
         "description": "Le serveur a refusé les identifiants de {name}. Saisis les nouveaux."
       }
@@ -171,7 +173,7 @@
   "services": {
     "edit_account": {
       "name": "Modifier le compte",
-      "description": "Change les identifiants ou l'adresse MAC d'un compte après les mêmes contrôles que l'ajout.",
+      "description": "Change les identifiants ou l'adresse MAC d'un compte après les mêmes contrôles que l'ajout. Les données d'appel de service sont enregistrées par le recorder (événement call_service), mot de passe compris : préférez la carte.",
       "fields": {
         "device_id": {
           "name": "Compte",
@@ -207,7 +209,7 @@
     },
     "add_account": {
       "name": "Ajouter un compte",
-      "description": "Ajoute un nouveau compte IPTV avec les mêmes contrôles que l'interface.",
+      "description": "Ajoute un nouveau compte IPTV avec les mêmes contrôles que l'interface. Les données d'appel de service sont enregistrées par le recorder (événement call_service), mot de passe compris : préférez la carte.",
       "fields": {
         "provider": {
           "name": "Type de fournisseur",

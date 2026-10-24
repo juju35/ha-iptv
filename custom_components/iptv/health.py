@@ -3,6 +3,14 @@
 Between the full refreshes (which download the catalogue lists), only the
 account info is requested (``user_info`` for Xtream, the handshake and
 ``account_info`` for Stalker) and its response time is measured.
+
+A Stalker client runs one operation at a time (the coordinator and the health
+check share its session token). The response time is the one measured by the
+client once it holds the client, so waiting for a refresh does not count; a
+tick that comes while the previous check still runs is skipped. The stream
+probe takes a connection slot: it is skipped when every slot is in use, and,
+when the occupancy is unknown (Stalker portals do not report it), while a
+refresh holds or waits for the client.
 """
 
 from __future__ import annotations
@@ -59,6 +67,7 @@ class HealthMonitor:
         self.stream_ok: bool | None = None
         self.stream_channel: str | None = None
         self._unsubs: list[CALLBACK_TYPE] = []
+        self._running = False
 
     @callback
     def async_start(self) -> CALLBACK_TYPE:
@@ -83,18 +92,30 @@ class HealthMonitor:
             self._set(HEALTH_UNREACHABLE, None, _safe_err(err.__cause__ or err) if err else None)
 
     async def _async_check(self, _now: datetime | None = None) -> None:
+        # A check can outlast the interval (unreachable portal): skip the tick
+        # rather than queue checks behind the Stalker lock
+        if self._running:
+            return
+        self._running = True
+        try:
+            await self._async_run_check()
+        finally:
+            self._running = False
+
+    async def _async_run_check(self) -> None:
+        client = self._coordinator.client
         start = time.monotonic()
         try:
-            info = await self._coordinator.client.async_get_user_info()
+            info = await client.async_get_user_info()
         except IptvAuthError:
-            self._set(HEALTH_AUTH_FAILED, self._elapsed(start), "credentials refused")
+            self._set(HEALTH_AUTH_FAILED, self._latency(client, start), "credentials refused")
         except IptvError as err:
             self._set(HEALTH_UNREACHABLE, None, _safe_err(err))
         else:
-            latency = self._elapsed(start)
+            latency = self._latency(client, start)
             status = HEALTH_DEGRADED if latency > HEALTH_SLOW_MS else HEALTH_OK
             error = None
-            if self._stream_check and not self._slots_full(info):
+            if self._stream_check and not self._slots_full(info) and not self._client_busy(info):
                 stream = await self._coordinator.client.async_test_stream()
                 self.stream_ok = stream.get("ok")
                 self.stream_channel = stream.get("channel")
@@ -121,12 +142,20 @@ class HealthMonitor:
         except (KeyError, TypeError, ValueError):
             return False
 
+    def _client_busy(self, info: dict[str, Any]) -> bool:
+        """Unknown occupancy and a refresh using the client: do not take a slot too."""
+        data = info if "max_connections" in info else (self._coordinator.data or {})
+        known = data.get("max_connections") not in (None, "") and data.get("active_cons") not in (None, "")
+        return not known and bool(getattr(self._coordinator.client, "busy", False))
+
     async def async_check_now(self) -> None:
         await self._async_check()
 
     @staticmethod
-    def _elapsed(start: float) -> int:
-        return round((time.monotonic() - start) * 1000)
+    def _latency(client: Any, start: float) -> int:
+        """Response time measured by the client, or the time since `start`."""
+        measured = getattr(client, "user_info_ms", None)
+        return measured if isinstance(measured, int) else round((time.monotonic() - start) * 1000)
 
     @callback
     def _set(self, status: str, latency: int | None, error: str | None) -> None:

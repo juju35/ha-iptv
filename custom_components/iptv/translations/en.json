@@ -40,27 +40,29 @@
       "reconfigure": {
         "title": "IPTV subscription",
         "data": {
-          "url": "Xtream server URL",
+          "url": "Server or portal URL",
           "username": "Username",
           "password": "Password",
           "mac": "MAC address"
         },
         "data_description": {
           "url": "Including the port, e.g. http://server:8080",
-          "mac": "Format AA:BB:CC:DD:EE:FF"
+          "mac": "Format AA:BB:CC:DD:EE:FF",
+          "password": "Leave blank to keep the current password"
         }
       },
       "reauth_confirm": {
         "title": "IPTV subscription",
         "data": {
-          "url": "Xtream server URL",
+          "url": "Server or portal URL",
           "username": "Username",
           "password": "Password",
           "mac": "MAC address"
         },
         "data_description": {
           "url": "Including the port, e.g. http://server:8080",
-          "mac": "Format AA:BB:CC:DD:EE:FF"
+          "mac": "Format AA:BB:CC:DD:EE:FF",
+          "password": "Leave blank to keep the current password"
         },
         "description": "The server refused the credentials of {name}. Enter the new ones."
       }
@@ -171,7 +173,7 @@
   "services": {
     "edit_account": {
       "name": "Edit account",
-      "description": "Change an account's credentials or MAC address after running the same checks as adding one.",
+      "description": "Change an account's credentials or MAC address after running the same checks as adding one. Service call data is stored by the recorder (call_service event), password included: prefer the card.",
       "fields": {
         "device_id": {
           "name": "Account",
@@ -207,7 +209,7 @@
     },
     "add_account": {
       "name": "Add account",
-      "description": "Add a new IPTV account with the same checks as the UI.",
+      "description": "Add a new IPTV account with the same checks as the UI. Service call data is stored by the recorder (call_service event), password included: prefer the card.",
       "fields": {
         "provider": {
           "name": "Provider type",
