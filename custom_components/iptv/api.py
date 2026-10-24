@@ -167,7 +167,10 @@ async def validate_catalogue(
 def server_key(url: str) -> str:
     """``host:port`` of a server URL, to spot two accounts on the same server."""
     parsed = urlparse(normalize_url(url))
-    port = parsed.port or (443 if parsed.scheme == "https" else 80)
+    try:
+        port = parsed.port or (443 if parsed.scheme == "https" else 80)
+    except ValueError:  # out-of-range or non-numeric port: compare the raw host:port
+        return parsed.netloc.rpartition("@")[2].lower()
     return f"{(parsed.hostname or '').lower()}:{port}"
 
 

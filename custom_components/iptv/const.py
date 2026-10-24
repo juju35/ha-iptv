@@ -42,7 +42,6 @@ CONF_ADDED_AT = "added_at"
 CONF_UPDATED_AT = "updated_at"
 PROVIDER_XTREAM = "xtream"
 PROVIDER_STALKER = "stalker"
-PROVIDERS = [PROVIDER_XTREAM, PROVIDER_STALKER]
 
 CARD_URL = f"/{DOMAIN}/iptv-card.js"
 LOGO_URL = f"/{DOMAIN}/logo.png"

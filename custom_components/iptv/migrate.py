@@ -59,7 +59,7 @@ async def async_migrate_legacy(hass: HomeAssistant) -> int:
             ),
             f"{DOMAIN} import of {old.title}",
         )
-        _LOGGER.info("Migrating IPTV account %s from %s to %s", old.title, LEGACY_DOMAIN, DOMAIN)
+        _LOGGER.info("Migrating IPTV entry %s from %s to %s", old.entry_id, LEGACY_DOMAIN, DOMAIN)
 
     old_folder = Path(hass.config.path("custom_components", LEGACY_DOMAIN))
     if await hass.async_add_executor_job(old_folder.exists):

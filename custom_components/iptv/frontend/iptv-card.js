@@ -621,6 +621,8 @@ class IptvCard extends HTMLElement {
 
     var prefill = await this._svc('edit_account', { device_id: sub.device });
     if (this._modal !== modal) return;
+    // not_found / generic: the error, as in the view popup, instead of an empty form
+    if (!prefill.ok) return this._modalError(modal, 'edit_title', prefill.error);
 
     var provider = prefill.provider === 'stalker' ? 'stalker' : 'xtream';
     this._editProvider = provider;
@@ -786,24 +788,28 @@ class IptvCard extends HTMLElement {
     var modal = this._openModal(`<h3>${esc(this._t('view_title'))}</h3><div class="hint">${esc(this._t('edit_saving'))}</div>`);
     var creds = await this._svc('get_credentials', { device_id: sub.device });
     if (this._modal !== modal) return;
+    if (!creds.ok) return this._modalError(modal, 'view_title', creds.error);
     var close = `<div class="modal-actions"><button class="act cancel">${esc(this._t('edit_cancel'))}</button></div>`;
-    if (!creds.ok) {
-      modal.querySelector('.modal').innerHTML = `<h3>${esc(this._t('view_title'))}</h3><div class="err">${esc(this._t(`err_${creds.error || 'generic'}`))}</div>${close}`;
-    } else {
-      var rows = creds.provider === 'stalker'
-        ? [['edit_url', creds.url], ['edit_mac', creds.mac]]
-        : [['edit_url', creds.url], ['edit_username', creds.username], ['edit_password', creds.password]];
-      var rowsHtml = rows.map((r) => `
-        <div class="view-row">
-          <div class="view-k">${esc(this._t(r[0]))}</div>
-          <div class="view-v">${esc(r[1])}</div>
-          <button class="copy" data-v="${esc(r[1])}" title="${esc(this._t('copy'))}"><ha-icon icon="mdi:content-copy"></ha-icon></button>
-        </div>`).join('');
-      modal.querySelector('.modal').innerHTML = `<h3>${esc(this._t('view_title'))}</h3>${rowsHtml}${close}`;
-      modal.querySelectorAll('button.copy').forEach((el) => {
-        el.addEventListener('click', () => this._copy(el));
-      });
-    }
+    var rows = creds.provider === 'stalker'
+      ? [['edit_url', creds.url], ['edit_mac', creds.mac]]
+      : [['edit_url', creds.url], ['edit_username', creds.username], ['edit_password', creds.password]];
+    var rowsHtml = rows.map((r) => `
+      <div class="view-row">
+        <div class="view-k">${esc(this._t(r[0]))}</div>
+        <div class="view-v">${esc(r[1])}</div>
+        <button class="copy" data-v="${esc(r[1])}" title="${esc(this._t('copy'))}"><ha-icon icon="mdi:content-copy"></ha-icon></button>
+      </div>`).join('');
+    modal.querySelector('.modal').innerHTML = `<h3>${esc(this._t('view_title'))}</h3>${rowsHtml}${close}`;
+    modal.querySelectorAll('button.copy').forEach((el) => {
+      el.addEventListener('click', () => this._copy(el));
+    });
+    modal.querySelector('.cancel').addEventListener('click', () => this._closeEditor());
+  }
+
+  // Error message in an open popup, with a close button
+  _modalError(modal, titleKey, error) {
+    var esc = iptvEsc;
+    modal.querySelector('.modal').innerHTML = `<h3>${esc(this._t(titleKey))}</h3><div class="err">${esc(this._t(`err_${error || 'generic'}`))}</div><div class="modal-actions"><button class="act cancel">${esc(this._t('edit_cancel'))}</button></div>`;
     modal.querySelector('.cancel').addEventListener('click', () => this._closeEditor());
   }
 
