@@ -1,9 +1,17 @@
-"""The ``iptv.edit_account`` service: edit an account's credentials / MAC.
+"""Account services and the card's admin WebSocket commands.
 
-Used by the card's edit popup. Called with only a device it returns the
-account's current URL and username / MAC (never the password) to pre-fill the
-form. Called with new values it runs the same checks as adding an account
-(credentials, French lists, video stream) and, on success, updates the entry.
+``edit_account`` called with only a device returns the account's current URL
+and username / MAC (never the password) to pre-fill a form. Called with new
+values it runs the same checks as adding an account (credentials, French
+lists, video stream) and, on success, updates the entry.
+
+The services (``iptv.add_account`` / ``edit_account`` / ``remove_account`` /
+``get_credentials``) are kept for automations and scripts. Home Assistant
+fires a ``call_service`` event with the raw service data before running a
+service, and the recorder stores it: a password given to ``add_account`` or
+``edit_account`` ends up in the database. The card therefore uses the
+``iptv/add_account``, ``iptv/edit_account`` and ``iptv/get_credentials``
+WebSocket commands, which run the same code without that event.
 """
 
 from __future__ import annotations
@@ -11,9 +19,10 @@ from __future__ import annotations
 from typing import Any
 
 import voluptuous as vol
+from homeassistant.components import websocket_api
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_PASSWORD, CONF_URL, CONF_USERNAME
-from homeassistant.core import HomeAssistant, ServiceCall, ServiceResponse, SupportsResponse
+from homeassistant.core import HomeAssistant, ServiceCall, ServiceResponse, SupportsResponse, callback
 from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import device_registry as dr
@@ -100,14 +109,13 @@ async def _validate(hass: HomeAssistant, provider: str, data: dict[str, Any]) ->
     return error
 
 
-async def _async_edit_account(call: ServiceCall) -> ServiceResponse:
-    hass = call.hass
-    entry = _entry_for_device(hass, call.data["device_id"])
+async def _edit_account(hass: HomeAssistant, params: dict[str, Any]) -> dict[str, Any]:
+    entry = _entry_for_device(hass, params["device_id"])
     if entry is None:
         return {"ok": False, "error": "not_found"}
     provider = entry.data.get(CONF_PROVIDER, "xtream")
     fields = (CONF_URL, CONF_USERNAME, CONF_PASSWORD, CONF_MAC)
-    given = {k: call.data[k] for k in fields if k in call.data}
+    given = {k: params[k] for k in fields if k in params}
 
     # No new value: return the current account for the form to pre-fill
     if not given:
@@ -155,9 +163,9 @@ async def _async_remove_account(call: ServiceCall) -> ServiceResponse:
     return {"ok": True}
 
 
-async def _async_get_credentials(call: ServiceCall) -> ServiceResponse:
+def _get_credentials(hass: HomeAssistant, params: dict[str, Any]) -> dict[str, Any]:
     """Return the full credentials of an account (password included) for viewing."""
-    entry = _entry_for_device(call.hass, call.data["device_id"])
+    entry = _entry_for_device(hass, params["device_id"])
     if entry is None:
         return {"ok": False, "error": "not_found"}
     return {
@@ -170,15 +178,56 @@ async def _async_get_credentials(call: ServiceCall) -> ServiceResponse:
     }
 
 
-async def _async_add_account(call: ServiceCall) -> ServiceResponse:
-    hass = call.hass
-    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": "card_add"}, data=dict(call.data))
+async def _add_account(hass: HomeAssistant, params: dict[str, Any]) -> dict[str, Any]:
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": "card_add"}, data=params)
     if result["type"] == FlowResultType.CREATE_ENTRY:
         return {"ok": True}
     if result["type"] == FlowResultType.ABORT:
         reason = result.get("reason") or "generic"
         return {"ok": True} if reason == "account_updated" else {"ok": False, "error": reason}
     return {"ok": False, "error": "generic"}
+
+
+async def _async_edit_account(call: ServiceCall) -> ServiceResponse:
+    return await _edit_account(call.hass, dict(call.data))
+
+
+async def _async_get_credentials(call: ServiceCall) -> ServiceResponse:
+    return _get_credentials(call.hass, dict(call.data))
+
+
+async def _async_add_account(call: ServiceCall) -> ServiceResponse:
+    return await _add_account(call.hass, dict(call.data))
+
+
+# ── WebSocket commands used by the card (no call_service event) ─────────────
+
+
+def _ws_params(msg: dict[str, Any]) -> dict[str, Any]:
+    return {k: v for k, v in msg.items() if k not in ("id", "type")}
+
+
+@websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/edit_account", **EDIT_SCHEMA.schema})
+@websocket_api.require_admin
+@websocket_api.async_response
+async def _ws_edit_account(
+    hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]
+) -> None:
+    connection.send_result(msg["id"], await _edit_account(hass, _ws_params(msg)))
+
+
+@websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/add_account", **ADD_SCHEMA.schema})
+@websocket_api.require_admin
+@websocket_api.async_response
+async def _ws_add_account(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]) -> None:
+    connection.send_result(msg["id"], await _add_account(hass, _ws_params(msg)))
+
+
+@websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/get_credentials", **CREDENTIALS_SCHEMA.schema})
+@websocket_api.require_admin
+@callback
+def _ws_get_credentials(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]) -> None:
+    connection.send_result(msg["id"], _get_credentials(hass, _ws_params(msg)))
 
 
 def async_register_services(hass: HomeAssistant) -> None:
@@ -195,3 +244,5 @@ def async_register_services(hass: HomeAssistant) -> None:
         (SERVICE_GET_CREDENTIALS, _async_get_credentials, CREDENTIALS_SCHEMA, SupportsResponse.ONLY),
     ):
         async_register_admin_service(hass, DOMAIN, service, func, schema=schema, supports_response=response)
+    for command in (_ws_edit_account, _ws_add_account, _ws_get_credentials):
+        websocket_api.async_register_command(hass, command)

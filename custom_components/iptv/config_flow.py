@@ -74,6 +74,15 @@ XTREAM_SCHEMA = vol.Schema(
         vol.Required(CONF_PASSWORD): TextSelector(TextSelectorConfig(type=TextSelectorType.PASSWORD)),
     }
 )
+# Reconfigure / reauth: a blank password keeps the current one, which is never
+# sent back to the browser as a suggested value
+XTREAM_EDIT_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_URL): TextSelector(TextSelectorConfig(type=TextSelectorType.URL)),
+        vol.Required(CONF_USERNAME): TextSelector(),
+        vol.Optional(CONF_PASSWORD): TextSelector(TextSelectorConfig(type=TextSelectorType.PASSWORD)),
+    }
+)
 STALKER_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_URL): TextSelector(TextSelectorConfig(type=TextSelectorType.URL)),
@@ -334,9 +343,11 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
     ) -> ConfigFlowResult:
         """Check the new URL and credentials, then update the entry and its unique id."""
         stalker = entry.data.get(CONF_PROVIDER) == PROVIDER_STALKER
-        schema = STALKER_SCHEMA if stalker else XTREAM_SCHEMA
+        schema = STALKER_SCHEMA if stalker else XTREAM_EDIT_SCHEMA
         errors: dict[str, str] = {}
         if user_input is not None:
+            if not stalker and not user_input.get(CONF_PASSWORD):
+                user_input[CONF_PASSWORD] = entry.data.get(CONF_PASSWORD, "")
             user_input[CONF_URL] = normalize_url(user_input[CONF_URL])
             user_input[CONF_PROVIDER] = entry.data.get(CONF_PROVIDER, PROVIDER_XTREAM)
             if stalker:
@@ -360,7 +371,9 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
                 return self.async_update_reload_and_abort(entry, unique_id=unique_id, data=user_input)
         return self.async_show_form(
             step_id=step_id,
-            data_schema=self.add_suggested_values_to_schema(schema, user_input or entry.data),
+            data_schema=self.add_suggested_values_to_schema(
+                schema, {k: v for k, v in (user_input or entry.data).items() if k != CONF_PASSWORD}
+            ),
             errors=errors,
         )
 

@@ -12,6 +12,7 @@ from homeassistant.components.http import StaticPathConfig
 from homeassistant.const import EVENT_HOMEASSISTANT_STARTED, Platform
 from homeassistant.core import CoreState, Event, HomeAssistant
 from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.typing import ConfigType
 
 from .const import CARD_URL, DOMAIN, LOGO_URL, VERSION
@@ -111,14 +112,24 @@ async def async_setup_entry(hass: HomeAssistant, entry: IptvConfigEntry) -> bool
     await async_restore_snapshot(hass, entry)
     entry.async_create_background_task(hass, coordinator.health.async_check_now(), f"{DOMAIN} first health check")
     # Reload on an options change only: the flows and services that change the
-    # data reload the entry themselves (they also work while setup is retrying)
+    # data reload the entry themselves (they also work while setup is retrying).
+    # A new title renames the device and the expiration notification in place.
     options = dict(entry.options)
+    title = entry.title
 
-    async def _async_options_updated(hass: HomeAssistant, entry: IptvConfigEntry) -> None:
+    async def _async_entry_updated(hass: HomeAssistant, entry: IptvConfigEntry) -> None:
+        nonlocal title
         if dict(entry.options) != options:
             await hass.config_entries.async_reload(entry.entry_id)
+            return
+        if entry.title != title:
+            title = entry.title
+            registry = dr.async_get(hass)
+            if device := registry.async_get_device(identifiers={(DOMAIN, entry.entry_id)}):
+                registry.async_update_device(device.id, name=entry.title)
+            notifier.rename(entry.title, coordinator.data)
 
-    entry.async_on_unload(entry.add_update_listener(_async_options_updated))
+    entry.async_on_unload(entry.add_update_listener(_async_entry_updated))
     return True
 
 
