@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.13.6
+
+### Changes
+- Card: expiration date in 14 px, the value size of the other ha-* cards.
+
+### Maintenance
+- Removed `strings.json`, a copy of `translations/en.json` that Home Assistant does not read for custom integrations.
+- Added `AGENT.md`, like the other ha-* integrations.
+
 ## 3.13.5
 
 ### Changes

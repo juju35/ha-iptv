@@ -8,7 +8,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_CARD_VERSION = '3.13.5';
+var IPTV_CARD_VERSION = '3.13.6';
 var IPTV_DOMAIN = 'iptv';
 var IPTV_LOGO_URL = `/${IPTV_DOMAIN}/logo.png?v=${IPTV_CARD_VERSION}`;
 
@@ -534,7 +534,7 @@ class IptvCard extends HTMLElement {
         .row { display:flex; justify-content:space-between; align-items:baseline; gap: 8px; }
         .lbl { color: var(--secondary-text-color); font-size: 11px; }
         .exp .lbl { font-size: 12px; }
-        .val { font-weight:500; font-size: 15px; }
+        .val { font-weight:500; font-size: 14px; }
         .bar { height:4px; border-radius:3px; background: var(--divider-color, rgba(127,127,127,.25)); margin-top:4px; overflow:hidden; }
         .rem { font-weight:400; font-size:12px; color: var(--secondary-text-color); }
         .rem.warning, .rem.error { color: var(--c); }
