@@ -10,7 +10,7 @@
         }
       },
       "xtream": {
-        "title": "IPTV Codes",
+        "title": "Xtream Codes",
         "description": "Home Assistant interroge l'API Xtream Codes de ton fournisseur.",
         "data": {
           "url": "URL du serveur Xtream",
