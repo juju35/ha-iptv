@@ -1,5 +1,29 @@
 # Changelog
 
+## 3.14.0
+
+### Changes
+- Requires Home Assistant 2025.6 or newer (was 2025.2).
+- Account management is reserved to administrators: the `get_credentials`, `add_account`, `edit_account` and `remove_account` actions refuse other users, and the card shows the add, view, edit and remove buttons only to administrators.
+- The optional **Send the connection details to** notification never contains the password any more: it keeps the provider, server, username or MAC address, expiration and French counts.
+- When the server refuses the credentials, Home Assistant also offers to re-authenticate the account in **Settings → Devices & services**.
+- The health check no longer opens a stream when every connection slot of the account is in use, so it no longer reports a false `stream_ko` or kicks the viewer off.
+- The add step is titled "Xtream Codes" instead of "IPTV Codes".
+
+### Fixes
+- The password no longer shows up in error messages, logs or the `error` attribute of the health sensor when the server answers with an error (HTTP 401, 500…): only the HTTP status or the error type is kept.
+- Stalker: a phone number in the `phone` field is no longer read as an expiration date, which showed the account as expired.
+- Stalker: a timeout or server error no longer counts as refused credentials, and the refresh and the health check no longer replace each other's token.
+- Reconfigure, the same-server update and editing an account reload it once instead of twice (one catalogue download and stream probe less).
+- Reconfigure updates the account's unique id and refuses an account that is already configured.
+- A server URL with an invalid port gives "cannot connect" instead of an unknown error.
+- Card: editing an account that cannot be read shows the error instead of an empty form.
+- The `iptv_xtream` migration no longer logs a title that could contain the username.
+
+### Maintenance
+- Test suite (pytest) with a test job in CI.
+- CI hardening: actions pinned by commit SHA, read-only token, Dependabot for actions, duplication check with PR annotations.
+
 ## 3.13.7
 
 ### Changes
