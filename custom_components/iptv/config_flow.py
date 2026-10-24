@@ -9,6 +9,7 @@ from typing import Any
 
 import voluptuous as vol
 from homeassistant.config_entries import (
+    SOURCE_RECONFIGURE,
     ConfigEntry,
     ConfigFlow,
     ConfigFlowResult,
@@ -368,7 +369,12 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
                     return self.async_abort(reason="already_configured")
                 user_input[CONF_ADDED_AT] = entry.data.get(CONF_ADDED_AT)
                 user_input[CONF_UPDATED_AT] = dt_util.utcnow().replace(microsecond=0).isoformat()
-                return self.async_update_reload_and_abort(entry, unique_id=unique_id, data=user_input)
+                # Not async_update_reload_and_abort: HA reports it for an entry with an update listener
+                # (ours only reloads on an options change, data changes reload here).
+                self.hass.config_entries.async_update_entry(entry, unique_id=unique_id, data=user_input)
+                self.hass.config_entries.async_schedule_reload(entry.entry_id)
+                reason = "reconfigure_successful" if self.source == SOURCE_RECONFIGURE else "reauth_successful"
+                return self.async_abort(reason=reason)
         return self.async_show_form(
             step_id=step_id,
             data_schema=self.add_suggested_values_to_schema(
