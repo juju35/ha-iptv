@@ -59,6 +59,12 @@ class IptvCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
     async def _async_update_data(self) -> dict[str, Any]:
         try:
-            return await self.client.async_get_data()
+            data = await self.client.async_get_data()
         except IptvError as err:
+            # IptvError messages never contain the credentials (see api._safe_err)
             raise UpdateFailed(f"IPTV server unreachable: {err}") from err
+        if not data.get("auth"):
+            # Credentials or MAC refused: keep the invalid_auth status and offer
+            # the "Re-authenticate" repair (no-op while one is already open)
+            self.config_entry.async_start_reauth(self.hass)
+        return data

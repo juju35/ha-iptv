@@ -17,7 +17,7 @@ from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.helpers.event import async_track_time_interval
 from homeassistant.util import dt as dt_util
 
-from .api import IptvAuthError, IptvError
+from .api import IptvAuthError, IptvError, _safe_err
 from .const import (
     CONF_HEALTH_INTERVAL,
     CONF_STREAM_CHECK,
@@ -79,21 +79,22 @@ class HealthMonitor:
         """A failed full refresh also means the server is unreachable."""
         if not self._coordinator.last_update_success and self.status != HEALTH_UNREACHABLE:
             err = self._coordinator.last_exception
-            self._set(HEALTH_UNREACHABLE, None, str(err) if err else None)
+            # UpdateFailed wraps an IptvError: describe that one, never the raw text
+            self._set(HEALTH_UNREACHABLE, None, _safe_err(err.__cause__ or err) if err else None)
 
     async def _async_check(self, _now: datetime | None = None) -> None:
         start = time.monotonic()
         try:
-            await self._coordinator.client.async_get_user_info()
+            info = await self._coordinator.client.async_get_user_info()
         except IptvAuthError:
             self._set(HEALTH_AUTH_FAILED, self._elapsed(start), "credentials refused")
         except IptvError as err:
-            self._set(HEALTH_UNREACHABLE, None, str(err) or type(err).__name__)
+            self._set(HEALTH_UNREACHABLE, None, _safe_err(err))
         else:
             latency = self._elapsed(start)
             status = HEALTH_DEGRADED if latency > HEALTH_SLOW_MS else HEALTH_OK
             error = None
-            if self._stream_check:
+            if self._stream_check and not self._slots_full(info):
                 stream = await self._coordinator.client.async_test_stream()
                 self.stream_ok = stream.get("ok")
                 self.stream_channel = stream.get("channel")
@@ -107,6 +108,18 @@ class HealthMonitor:
             if status != HEALTH_STREAM_KO and not self._coordinator.last_update_success:
                 # Back online: refresh the account data right away
                 await self._coordinator.async_request_refresh()
+
+    def _slots_full(self, info: dict[str, Any]) -> bool:
+        """True when every connection slot is in use: the stream probe would take one.
+
+        Xtream returns the connections with the account info; otherwise the last
+        refresh is used.
+        """
+        data = info if "max_connections" in info else (self._coordinator.data or {})
+        try:
+            return int(data["active_cons"]) >= int(data["max_connections"]) > 0
+        except (KeyError, TypeError, ValueError):
+            return False
 
     async def async_check_now(self) -> None:
         await self._async_check()

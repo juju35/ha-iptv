@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import json
 import re
 import time
 from datetime import UTC, datetime
@@ -37,6 +38,20 @@ class IptvError(Exception):
 
 class IptvAuthError(IptvError):
     """Credentials refused."""
+
+
+def _safe_err(err: BaseException) -> str:
+    """Describe an error without leaking the credentials.
+
+    Xtream Codes sends the username and password in the query string, and the
+    stream URLs carry them in the path: the text of an aiohttp error contains
+    the request URL, so it is never used. An IptvError message is built here.
+    """
+    if isinstance(err, IptvError):
+        return str(err) or type(err).__name__
+    if isinstance(err, aiohttp.ClientResponseError) and err.status:
+        return f"HTTP {err.status}"
+    return type(err).__name__
 
 
 def normalize_url(url: str) -> str:
@@ -117,7 +132,7 @@ async def _probe_stream(session: aiohttp.ClientSession, url: str, headers: dict[
                 return {"ok": False, "latency_ms": ms(), "error": "not a media stream"}
             return {"ok": True, "latency_ms": ms(), "error": None}
     except (TimeoutError, aiohttp.ClientError) as err:
-        return {"ok": False, "latency_ms": None, "error": str(err) or type(err).__name__}
+        return {"ok": False, "latency_ms": None, "error": _safe_err(err)}
 
 
 def counts_ok(counts: dict[str, Any]) -> bool:
@@ -179,7 +194,8 @@ class XtreamClient:
                 resp.raise_for_status()
                 return await resp.json(content_type=None)
         except (TimeoutError, aiohttp.ClientError, ValueError) as err:
-            raise IptvError(str(err) or type(err).__name__) from err
+            # from None: the chained aiohttp error would print the URL in a traceback
+            raise IptvError(_safe_err(err)) from None
 
     async def _count(self, action: str) -> int | None:
         try:
@@ -220,7 +236,7 @@ class XtreamClient:
         try:
             streams = await self._get("get_live_streams")
         except IptvError as err:
-            return {"ok": None, "channel": None, "latency_ms": None, "error": str(err)}
+            return {"ok": None, "channel": None, "latency_ms": None, "error": _safe_err(err)}
         first = (
             next((s for s in streams if isinstance(s, dict) and s.get("stream_id") is not None), None)
             if isinstance(streams, list)
@@ -294,7 +310,10 @@ _DATE_FORMATS = (
     "%d/%m/%Y",
 )
 # account_info fields that may hold the expiration, best first.
-_EXPIRY_FIELDS = ("end_date", "expire_billing_date", "exp_date", "phone")
+_EXPIRY_FIELDS = ("end_date", "expire_billing_date", "exp_date")
+# Some panels write the expiration date in the ``phone`` field; only a dated
+# string is read there, never digits (a real phone number is not an epoch).
+_PHONE_FIELD = "phone"
 
 
 def normalize_mac(mac: str) -> str:
@@ -310,9 +329,8 @@ def valid_mac(mac: str) -> bool:
 def parse_expiry(value: Any) -> int | None:
     """Parse a Stalker expiration into epoch seconds, or None.
 
-    Accepts an epoch (int or digit string) or one of the dated string formats.
-    A value that is not a recognisable date (e.g. a real phone number in the
-    ``phone`` field) yields None rather than a wrong date.
+    Accepts an epoch (int or digit string) or one of the dated string formats;
+    anything else yields None rather than a wrong date.
     """
     if value is None:
         return None
@@ -321,9 +339,12 @@ def parse_expiry(value: Any) -> int | None:
     if isinstance(value, (int, float)) or (isinstance(value, str) and value.strip().lstrip("-").isdigit()):
         seconds = int(value)
         return seconds if seconds > 1_000_000 else None
-    text = str(value).strip()
-    if not text:
-        return None
+    return _parse_date(value)
+
+
+def _parse_date(value: Any) -> int | None:
+    """Parse one of the dated string formats into epoch seconds, or None."""
+    text = str(value or "").strip()
     for fmt in _DATE_FORMATS:
         try:
             return int(datetime.strptime(text, fmt).replace(tzinfo=UTC).timestamp())
@@ -334,10 +355,11 @@ def parse_expiry(value: Any) -> int | None:
 
 def stalker_expiry(info: dict[str, Any]) -> int | None:
     """Expiration of a Stalker account (epoch seconds), None when unknown or unlimited."""
-    return next(
+    found = next(
         (p for f in _EXPIRY_FIELDS if (p := parse_expiry(info.get(f))) is not None),
         None,
     )
+    return found if found is not None else _parse_date(info.get(_PHONE_FIELD))
 
 
 def stalker_status(info: dict[str, Any], exp_date: int | None, now: int) -> str:
@@ -361,6 +383,10 @@ def extract_count(js: Any) -> int | None:
         return len(data) if isinstance(data, list) else None
 
 
+class _StalkerRefused(ValueError):
+    """The portal answered "Authorization failed." (a ValueError: the handshake skips it like bad JSON)."""
+
+
 class StalkerClient:
     """Authenticate a MAC against a Stalker portal and read its account info."""
 
@@ -370,6 +396,9 @@ class StalkerClient:
         self._mac = normalize_mac(mac)
         self._portal: str | None = None
         self._token: str | None = None
+        # The coordinator and the health check share this client: a handshake
+        # replaces the token, so one operation runs at a time
+        self._lock = asyncio.Lock()
 
     def _headers(self, token: str | None = None) -> dict[str, str]:
         headers = {
@@ -392,7 +421,16 @@ class StalkerClient:
             timeout=TIMEOUT,
         ) as resp:
             resp.raise_for_status()
-            data = await resp.json(content_type=None)
+            text = await resp.text()
+        if not text.strip():
+            return None  # as aiohttp's resp.json() does for an empty body
+        try:
+            data = json.loads(text)
+        except ValueError:
+            # A refused MAC or token gets a plain "Authorization failed." instead of JSON
+            if "authorization failed" in text.lower():
+                raise _StalkerRefused from None
+            raise
         return data.get("js") if isinstance(data, dict) else None
 
     async def _handshake(self) -> None:
@@ -414,8 +452,10 @@ class StalkerClient:
         assert self._portal is not None
         try:
             return await self._call(self._portal, params, self._token)
+        except _StalkerRefused:
+            raise IptvAuthError from None
         except (TimeoutError, aiohttp.ClientError, ValueError) as err:
-            raise IptvError(str(err) or type(err).__name__) from err
+            raise IptvError(_safe_err(err)) from None
 
     async def _activate(self) -> None:
         """Call get_profile to validate the session; ignore if unsupported."""
@@ -434,12 +474,15 @@ class StalkerClient:
 
     async def async_get_user_info(self) -> dict[str, Any]:
         """Return the account info, raise IptvAuthError if the MAC is refused."""
+        async with self._lock:
+            return await self._user_info()
+
+    async def _user_info(self) -> dict[str, Any]:
         await self._handshake()
         await self._activate()
-        try:
-            info = await self._get({"type": "account_info", "action": "get_main_info"})
-        except IptvError:
-            info = None
+        # A timeout or an HTTP error is a temporary failure (IptvError), not a refused MAC: only
+        # "Authorization failed.", an empty answer or a blocked account raise IptvAuthError
+        info = await self._get({"type": "account_info", "action": "get_main_info"})
         if not isinstance(info, dict) or not info or str(info.get("blocked")) == "1":
             raise IptvAuthError
         return info
@@ -456,6 +499,10 @@ class StalkerClient:
 
     async def async_get_french(self) -> dict[str, Any] | None:
         """French genres / categories among live, VOD and series."""
+        async with self._lock:
+            return await self._french()
+
+    async def _french(self) -> dict[str, Any] | None:
         if not self._token:
             await self._handshake()
         live, vod, series = await asyncio.gather(
@@ -465,17 +512,24 @@ class StalkerClient:
 
     async def async_get_counts(self) -> dict[str, Any]:
         """Channel / movie / series counts, for validating a real catalogue."""
-        if not self._token:
-            await self._handshake()
-        channels, movies, series = await asyncio.gather(self._count("itv"), self._count("vod"), self._count("series"))
+        async with self._lock:
+            if not self._token:
+                await self._handshake()
+            channels, movies, series = await asyncio.gather(
+                self._count("itv"), self._count("vod"), self._count("series")
+            )
         return {"channels": channels, "movies": movies, "series": series}
 
     async def async_test_stream(self) -> dict[str, Any]:
         """Probe the first live channel via create_link. ok True/False/None."""
+        async with self._lock:
+            return await self._test_stream()
+
+    async def _test_stream(self) -> dict[str, Any]:
         try:
             js = await self._get({"type": "itv", "action": "get_ordered_list", "genre": "*", "p": "1"})
         except IptvError as err:
-            return {"ok": None, "channel": None, "latency_ms": None, "error": str(err)}
+            return {"ok": None, "channel": None, "latency_ms": None, "error": _safe_err(err)}
         data = js.get("data") if isinstance(js, dict) else None
         first = data[0] if isinstance(data, list) and data else None
         if not isinstance(first, dict) or not first.get("cmd"):
@@ -492,7 +546,7 @@ class StalkerClient:
                 }
             )
         except IptvError as err:
-            return {"ok": None, "channel": name, "latency_ms": None, "error": str(err)}
+            return {"ok": None, "channel": name, "latency_ms": None, "error": _safe_err(err)}
         cmd = link.get("cmd") if isinstance(link, dict) else None
         url = cmd.split()[-1] if isinstance(cmd, str) and cmd else None
         if not url or "://" not in url:
@@ -511,13 +565,14 @@ class StalkerClient:
 
     async def async_get_data(self) -> dict[str, Any]:
         """Return the account info plus live / VOD / series counts."""
-        try:
-            info = await self.async_get_user_info()
-        except IptvAuthError:
-            return {"auth": False}
-        channels, movies, series, french = await asyncio.gather(
-            self._count("itv"), self._count("vod"), self._count("series"), self.async_get_french()
-        )
+        async with self._lock:
+            try:
+                info = await self._user_info()
+            except IptvAuthError:
+                return {"auth": False}
+            channels, movies, series, french = await asyncio.gather(
+                self._count("itv"), self._count("vod"), self._count("series"), self._french()
+            )
         exp_date = stalker_expiry(info)
         now = int(datetime.now(UTC).timestamp())
         return {

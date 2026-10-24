@@ -49,6 +49,20 @@
           "url": "Including the port, e.g. http://server:8080",
           "mac": "Format AA:BB:CC:DD:EE:FF"
         }
+      },
+      "reauth_confirm": {
+        "title": "IPTV subscription",
+        "data": {
+          "url": "Xtream server URL",
+          "username": "Username",
+          "password": "Password",
+          "mac": "MAC address"
+        },
+        "data_description": {
+          "url": "Including the port, e.g. http://server:8080",
+          "mac": "Format AA:BB:CC:DD:EE:FF"
+        },
+        "description": "The server refused the credentials of {name}. Enter the new ones."
       }
     },
     "error": {
@@ -63,6 +77,7 @@
     "abort": {
       "already_configured": "This account is already configured",
       "reconfigure_successful": "Reconfiguration successful",
+      "reauth_successful": "Re-authentication successful",
       "migrated": "{count} account(s) of the former IPTV Xtream integration moved to IPTV, with the same entities. Delete the old custom_components/iptv_xtream folder if it is still there and restart Home Assistant.",
       "account_updated": "{title} is on the same server: the new account is valid longer ({new} instead of {current}), so {title} now uses the new credentials.",
       "existing_longer": "{title} is on the same server and is valid longer or as long ({current}, new account: {new}): nothing changed."
@@ -164,19 +179,19 @@
         },
         "url": {
           "name": "Server URL",
-          "description": ""
+          "description": "New server URL; leave out to keep the current one."
         },
         "username": {
           "name": "Username",
-          "description": ""
+          "description": "New username (Xtream Codes)."
         },
         "password": {
           "name": "Password",
-          "description": ""
+          "description": "New password (Xtream Codes); leave out to keep the current one."
         },
         "mac": {
           "name": "MAC address",
-          "description": ""
+          "description": "New MAC address (Stalker portal)."
         }
       }
     },
@@ -200,19 +215,19 @@
         },
         "url": {
           "name": "Server URL",
-          "description": ""
+          "description": "Including the port, e.g. http://server:8080."
         },
         "username": {
           "name": "Username",
-          "description": ""
+          "description": "Xtream Codes only."
         },
         "password": {
           "name": "Password",
-          "description": ""
+          "description": "Xtream Codes only."
         },
         "mac": {
           "name": "MAC address",
-          "description": ""
+          "description": "Stalker portal only, format AA:BB:CC:DD:EE:FF."
         }
       }
     },

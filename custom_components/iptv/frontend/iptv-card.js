@@ -210,7 +210,7 @@ class IptvCard extends HTMLElement {
   set hass(hass) {
     this._hass = hass;
     // Re-render only when one of our entities, a device name or the language changed
-    var parts = [hass.language];
+    var parts = [hass.language, !!hass.user?.is_admin];
     this._subs().forEach((sub) => {
       parts.push(`${sub.device}:${sub.name}`);
       Object.keys(sub.ids).forEach((k) => {
@@ -460,16 +460,20 @@ class IptvCard extends HTMLElement {
         ? when.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })
         : when.toLocaleString(locale, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
     };
+    // Account management (view / edit / remove / add) uses admin-only services
+    var admin = !!this._hass?.user?.is_admin;
     var footer = (h, i) => `
         <div class="foot">
           ${h?.at
             ? `<div class="checked" data-entity="last_check"><ha-icon icon="mdi:clock-outline"></ha-icon>${esc(this._t('last_check'))} · ${esc(fmtCheck(h.at))}</div>`
             : '<span></span>'}
-          <div class="foot-actions">
+          ${admin
+            ? `<div class="foot-actions">
             <button class="view" data-sub="${i}" title="${esc(this._t('view_btn'))}"><ha-icon icon="mdi:eye-outline"></ha-icon></button>
             <button class="edit" data-sub="${i}" title="${esc(this._t('edit_btn'))}"><ha-icon icon="mdi:pencil"></ha-icon></button>
             <button class="del" data-sub="${i}" title="${esc(this._t('del_btn'))}"><ha-icon icon="mdi:trash-can-outline"></ha-icon></button>
-          </div>
+          </div>`
+            : ''}
         </div>`;
 
     var body;
@@ -576,13 +580,13 @@ class IptvCard extends HTMLElement {
         <div class="header">
           <img class="logo" src="${IPTV_LOGO_URL}" alt="">
           <div class="titles"><div class="name">${esc(title)}</div>${status}</div>
-          <button class="add" title="${this._t('add_btn')}"><ha-icon icon="mdi:plus"></ha-icon></button>
+          ${admin ? `<button class="add" title="${this._t('add_btn')}"><ha-icon icon="mdi:plus"></ha-icon></button>` : ''}
           <button class="refresh ${this._loading ? 'spin' : ''}" title="${this._t('refresh')}"><ha-icon icon="mdi:refresh"></ha-icon></button>
         </div>
         ${body}
       </ha-card>`;
     this._root.querySelector('button.refresh').addEventListener('click', () => this._refresh());
-    this._root.querySelector('button.add').addEventListener('click', () => this._openAdd());
+    this._root.querySelector('button.add')?.addEventListener('click', () => this._openAdd());
     this._root.querySelectorAll('button.edit').forEach((el) => {
       var sub = subs[Number(el.dataset.sub)];
       if (sub) el.addEventListener('click', () => this._openEditor(sub));

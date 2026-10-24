@@ -18,6 +18,7 @@ from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.service import async_register_admin_service
 from homeassistant.util import dt as dt_util
 
 from .api import (
@@ -181,34 +182,16 @@ async def _async_add_account(call: ServiceCall) -> ServiceResponse:
 
 
 def async_register_services(hass: HomeAssistant) -> None:
-    """Register the integration services (once)."""
+    """Register the integration services (once).
+
+    They read the password or change config entries: administrators only.
+    """
     if hass.services.has_service(DOMAIN, SERVICE_ADD_ACCOUNT):
         return
-    hass.services.async_register(
-        DOMAIN,
-        SERVICE_EDIT_ACCOUNT,
-        _async_edit_account,
-        schema=EDIT_SCHEMA,
-        supports_response=SupportsResponse.OPTIONAL,
-    )
-    hass.services.async_register(
-        DOMAIN,
-        SERVICE_REMOVE_ACCOUNT,
-        _async_remove_account,
-        schema=REMOVE_SCHEMA,
-        supports_response=SupportsResponse.OPTIONAL,
-    )
-    hass.services.async_register(
-        DOMAIN,
-        SERVICE_ADD_ACCOUNT,
-        _async_add_account,
-        schema=ADD_SCHEMA,
-        supports_response=SupportsResponse.OPTIONAL,
-    )
-    hass.services.async_register(
-        DOMAIN,
-        SERVICE_GET_CREDENTIALS,
-        _async_get_credentials,
-        schema=CREDENTIALS_SCHEMA,
-        supports_response=SupportsResponse.ONLY,
-    )
+    for service, func, schema, response in (
+        (SERVICE_EDIT_ACCOUNT, _async_edit_account, EDIT_SCHEMA, SupportsResponse.OPTIONAL),
+        (SERVICE_REMOVE_ACCOUNT, _async_remove_account, REMOVE_SCHEMA, SupportsResponse.OPTIONAL),
+        (SERVICE_ADD_ACCOUNT, _async_add_account, ADD_SCHEMA, SupportsResponse.OPTIONAL),
+        (SERVICE_GET_CREDENTIALS, _async_get_credentials, CREDENTIALS_SCHEMA, SupportsResponse.ONLY),
+    ):
+        async_register_admin_service(hass, DOMAIN, service, func, schema=schema, supports_response=response)
