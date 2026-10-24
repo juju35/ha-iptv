@@ -18,7 +18,7 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 from yarl import URL
 
 from custom_components.iptv.api import StalkerClient, _probe_stream, _safe_err, stalker_expiry
-from custom_components.iptv.const import CONF_PROVIDER, DOMAIN, PROVIDER_XTREAM
+from custom_components.iptv.const import CONF_MAC, CONF_PROVIDER, DOMAIN, PROVIDER_STALKER, PROVIDER_XTREAM
 
 SERVER = "http://provider.example:8080"
 API = f"{SERVER}/player_api.php"
@@ -392,3 +392,85 @@ async def test_refused_credentials_start_reauth(hass, aioclient_mock, entry):
     assert result["type"] is FlowResultType.ABORT
     assert result["reason"] == "reauth_successful"
     assert entry.data[CONF_PASSWORD] == "renewed"
+
+
+# ── Stalker: temporary failures are not a refused MAC ───────────────────────
+
+PORTAL = "http://portal.example"
+MAC = "00:1A:79:00:00:01"
+
+
+def _mock_stalker(aioclient_mock, main_info) -> None:
+    """A Stalker portal answering the handshake; get_main_info answers with `main_info` (kwargs)."""
+    load = f"{PORTAL}/portal.php"
+    aioclient_mock.get(load, params={"action": "handshake"}, json={"js": {"token": "t"}})
+    aioclient_mock.get(load, params={"action": "get_profile"}, json={"js": {}})
+    aioclient_mock.get(load, params={"action": "get_main_info"}, **main_info)
+    aioclient_mock.get(load, json={"js": {"total_items": 3}})
+
+
+@pytest.fixture
+def stalker_entry(hass: HomeAssistant) -> MockConfigEntry:
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        title="portal.example",
+        data={CONF_URL: PORTAL, CONF_MAC: MAC, CONF_PROVIDER: PROVIDER_STALKER},
+        unique_id=f"{PORTAL}|{MAC}".lower(),
+    )
+    entry.add_to_hass(hass)
+    return entry
+
+
+def _reauth_flows(hass):
+    return [f for f in hass.config_entries.flow.async_progress() if f["context"]["source"] == "reauth"]
+
+
+@pytest.mark.parametrize(
+    "main_info",
+    [{"exc": TimeoutError()}, {"status": 500, "text": "boom"}],
+    ids=["timeout", "http_500"],
+)
+async def test_stalker_main_info_failure_is_temporary(hass, aioclient_mock, stalker_entry, main_info):
+    """A timeout or a 5xx on get_main_info retries the setup; no reauth repair for a valid MAC."""
+    _mock_stalker(aioclient_mock, main_info)
+    assert await async_setup_component(hass, "http", {})
+    await hass.config_entries.async_setup(stalker_entry.entry_id)
+    await hass.async_block_till_done()
+    assert stalker_entry.state is ConfigEntryState.SETUP_RETRY
+    assert _reauth_flows(hass) == []
+
+
+@pytest.mark.parametrize(
+    "main_info",
+    [{"exc": TimeoutError()}, {"status": 500, "text": "boom"}],
+    ids=["timeout", "http_500"],
+)
+async def test_stalker_main_info_failure_after_setup(hass, aioclient_mock, stalker_entry, main_info):
+    _mock_stalker(aioclient_mock, {"json": {"js": {"phone": "2099-01-01"}}})
+    assert await async_setup_component(hass, "http", {})
+    assert await hass.config_entries.async_setup(stalker_entry.entry_id)
+    await hass.async_block_till_done()
+    assert hass.states.get("sensor.portal_example_status").state == "active"
+
+    aioclient_mock.clear_requests()
+    _mock_stalker(aioclient_mock, main_info)
+    coordinator = stalker_entry.runtime_data
+    await coordinator.async_refresh()
+    await hass.async_block_till_done()
+    assert not coordinator.last_update_success
+    assert hass.states.get("sensor.portal_example_status").state == "unavailable"
+    assert _reauth_flows(hass) == []
+
+
+@pytest.mark.parametrize(
+    "main_info",
+    [{"text": "Authorization failed."}, {"json": {"js": {"blocked": "1"}}}, {"json": {"js": []}}],
+    ids=["authorization_failed", "blocked", "empty"],
+)
+async def test_stalker_refused_mac_starts_reauth(hass, aioclient_mock, stalker_entry, main_info):
+    _mock_stalker(aioclient_mock, main_info)
+    assert await async_setup_component(hass, "http", {})
+    assert await hass.config_entries.async_setup(stalker_entry.entry_id)
+    await hass.async_block_till_done()
+    assert hass.states.get("sensor.portal_example_status").state == "invalid_auth"
+    assert len(_reauth_flows(hass)) == 1

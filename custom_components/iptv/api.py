@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import json
 import re
 import time
 from datetime import UTC, datetime
@@ -382,6 +383,10 @@ def extract_count(js: Any) -> int | None:
         return len(data) if isinstance(data, list) else None
 
 
+class _StalkerRefused(ValueError):
+    """The portal answered "Authorization failed." (a ValueError: the handshake skips it like bad JSON)."""
+
+
 class StalkerClient:
     """Authenticate a MAC against a Stalker portal and read its account info."""
 
@@ -416,7 +421,16 @@ class StalkerClient:
             timeout=TIMEOUT,
         ) as resp:
             resp.raise_for_status()
-            data = await resp.json(content_type=None)
+            text = await resp.text()
+        if not text.strip():
+            return None  # as aiohttp's resp.json() does for an empty body
+        try:
+            data = json.loads(text)
+        except ValueError:
+            # A refused MAC or token gets a plain "Authorization failed." instead of JSON
+            if "authorization failed" in text.lower():
+                raise _StalkerRefused from None
+            raise
         return data.get("js") if isinstance(data, dict) else None
 
     async def _handshake(self) -> None:
@@ -438,6 +452,8 @@ class StalkerClient:
         assert self._portal is not None
         try:
             return await self._call(self._portal, params, self._token)
+        except _StalkerRefused:
+            raise IptvAuthError from None
         except (TimeoutError, aiohttp.ClientError, ValueError) as err:
             raise IptvError(_safe_err(err)) from None
 
@@ -464,10 +480,9 @@ class StalkerClient:
     async def _user_info(self) -> dict[str, Any]:
         await self._handshake()
         await self._activate()
-        try:
-            info = await self._get({"type": "account_info", "action": "get_main_info"})
-        except IptvError:
-            info = None
+        # A timeout or an HTTP error is a temporary failure (IptvError), not a refused MAC: only
+        # "Authorization failed.", an empty answer or a blocked account raise IptvAuthError
+        info = await self._get({"type": "account_info", "action": "get_main_info"})
         if not isinstance(info, dict) or not info or str(info.get("blocked")) == "1":
             raise IptvAuthError
         return info
