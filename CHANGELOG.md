@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.13.5
+
+### Changes
+- Popup titles in medium weight, like the rest of the card.
+
 ## 3.13.4
 
 ### Fixes
