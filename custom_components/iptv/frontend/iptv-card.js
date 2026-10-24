@@ -8,7 +8,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_CARD_VERSION = '3.13.3';
+var IPTV_CARD_VERSION = '3.13.4';
 var IPTV_DOMAIN = 'iptv';
 var IPTV_LOGO_URL = `/${IPTV_DOMAIN}/logo.png?v=${IPTV_CARD_VERSION}`;
 
@@ -506,7 +506,7 @@ class IptvCard extends HTMLElement {
     if (!this._root) { this._root = document.createElement('div'); this.shadowRoot.appendChild(this._root); }
     this._root.innerHTML = `
       <style>
-        :host { --iptv-ok: var(--success-color, #43a047); --iptv-warn: var(--warning-color, #ffa600); --iptv-crit: var(--error-color, #db4437); }
+        :host { display: block; position: relative; --iptv-ok: var(--success-color, #43a047); --iptv-warn: var(--warning-color, #ffa600); --iptv-crit: var(--error-color, #db4437); }
         ha-card { padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; }
         .ok { --c: var(--iptv-ok); } .warning { --c: var(--iptv-warn); } .error { --c: var(--iptv-crit); } .idle { --c: var(--secondary-text-color); }
         .header { display: flex; align-items: center; gap: 10px; }
@@ -552,7 +552,7 @@ class IptvCard extends HTMLElement {
         .foot-actions { display:flex; align-items:center; gap:8px; }
         button.edit, button.del, button.view { padding:3px; margin:0; align-self:center; --mdc-icon-size:16px; }
         button.del:hover { color:var(--iptv-crit); background:color-mix(in srgb, var(--iptv-crit) 12%, transparent); }
-        .backdrop { position:absolute; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; z-index:9; border-radius:inherit; }
+        .backdrop { position:absolute; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:flex-start; justify-content:center; padding-top:12px; box-sizing:border-box; z-index:9; border-radius:var(--ha-card-border-radius, 12px); }
         .modal { background:var(--card-background-color, #1c1c1c); color:var(--primary-text-color); width:min(92%, 340px); border-radius:14px; padding:16px; box-shadow:0 8px 30px rgba(0,0,0,.4); display:flex; flex-direction:column; gap:10px; }
         .modal h3 { margin:0; font-size:16px; font-weight:600; }
         .field { display:flex; flex-direction:column; gap:3px; }
