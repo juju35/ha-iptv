@@ -3,6 +3,7 @@
 import asyncio
 import logging
 import re
+from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 import aiohttp
@@ -19,7 +20,7 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry, async_
 from yarl import URL
 
 from custom_components.iptv.api import StalkerClient, _probe_stream, _safe_err, server_key, stalker_expiry
-from custom_components.iptv.const import CONF_MAC, CONF_PROVIDER, DOMAIN, PROVIDER_STALKER, PROVIDER_XTREAM
+from custom_components.iptv.const import CONF_MAC, CONF_PROVIDER, DOMAIN, PROVIDER_STALKER, PROVIDER_XTREAM, VERSION
 from custom_components.iptv.notify_add import build_message
 from custom_components.iptv.registry_compat import get_device
 
@@ -771,3 +772,33 @@ async def test_reconfigure_blank_password_keeps_current(hass, aioclient_mock, en
     assert result["type"] is FlowResultType.ABORT
     assert result["reason"] == "reconfigure_successful"
     assert entry.data[CONF_PASSWORD] == PASSWORD
+
+
+# ── dashboard resource ──────────────────────────────────────────────────────
+
+
+def _lovelace_data(key: str, mode: str, resources) -> SimpleNamespace:
+    """hass.data["lovelace"] as a dataclass: its `mode` field is `resource_mode` from Home Assistant 2026.2."""
+    return SimpleNamespace(**{key: mode, "resources": resources, "dashboards": {}, "yaml_dashboards": {}})
+
+
+@pytest.mark.parametrize("key", ["mode", "resource_mode"])
+async def test_card_resource_with_lovelace_data_variants(hass, aioclient_mock, entry, stub_frontend, key):
+    assert await async_setup_component(hass, "lovelace", {})
+    resources = hass.data["lovelace"].resources
+    hass.data["lovelace"] = _lovelace_data(key, "storage", resources)
+    await _setup(hass, aioclient_mock, entry)
+    urls = [item["url"] for item in resources.async_items()]
+    assert urls == [f"/iptv/iptv-card.js?v={VERSION}"]
+    stub_frontend.assert_not_called()
+
+
+@pytest.mark.parametrize("key", ["mode", "resource_mode"])
+async def test_card_resource_yaml_mode_uses_extra_js(hass, aioclient_mock, entry, stub_frontend, key):
+    """Resources in YAML mode can't be edited: the card is loaded on every page instead."""
+    from homeassistant.components.lovelace.resources import ResourceYAMLCollection
+
+    assert await async_setup_component(hass, "lovelace", {})
+    hass.data["lovelace"] = _lovelace_data(key, "yaml", ResourceYAMLCollection([]))
+    await _setup(hass, aioclient_mock, entry)
+    stub_frontend.assert_called_once_with(hass, f"/iptv/iptv-card.js?v={VERSION}")

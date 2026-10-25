@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.15.1
+
+### Fixes
+- On Home Assistant 2025.6 to 2026.1, the card is added to the dashboard resources again instead of being loaded as an extra script on every page.
+
+### Maintenance
+- New tests for the dashboard resource; the duplication check runs on Node 22.
+
 ## 3.15.0
 
 ### Changes
