@@ -27,12 +27,13 @@ custom_components/iptv/
 ├── icons.json         # Entity and service icons
 ├── services.yaml / translations/{en,fr}.json
 ├── brand/             # Integration icon and logo
-└── frontend/iptv-card.js   # Vanilla JS card, no dependencies
+└── frontend/iptv-card.js   # Vanilla JS cards (iptv-card, iptv-mini-card), no dependencies
 ```
 
 ## Card
 - Served from `/iptv/iptv-card.js` (logo from `/iptv/logo.png`) and added to the Lovelace resources at startup, URL versioned with `VERSION`. Falls back to `add_extra_js_url` when resources are in YAML mode. `_storage_resources()` reads the mode from the `hass.data["lovelace"]` dataclass, whose `mode` field became `resource_mode` in Home Assistant 2026.2.
 - Popups (add, edit, confirmation) open at the top of the card, like the other ha-* cards.
+- `iptv-mini-card` (`IptvMiniCard extends IptvCard`, same file): two lines (logo, title, global status pill; one chip per subscription), detail button (`zoom`, default true) rendering the full card's `_render()`, collapsed by an outside click (capture-phase document listener) except in a dialog or while a popup (`_modal`) is open, like ha-zoraxy and ha-room-card. Each element is defined under its own `customElements.get` guard, so an older copy already loaded on the page doesn't hide the mini card.
 - Add, view and edit go through the admin WebSocket commands (`hass.callWS({type: 'iptv/…'})`), never `callService`: a service call fires a `call_service` event with its raw data, which the recorder stores, password included. Remove still uses the `iptv.remove_account` service (no secret). The services stay for automations, with a recorder warning in the README and service descriptions.
 
 ## Health check

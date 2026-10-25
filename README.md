@@ -22,6 +22,7 @@ Home Assistant integration and Lovelace card that track one or several **IPTV su
 - Number of live channels, movies (VOD) and series
 - Active / maximum connections, trial badge
 - Several providers in one card, one section per subscription
+- Mini card (`custom:iptv-mini-card`): every provider on two lines, with a detail button showing the full card
 - Orange warning when the subscription expires soon (configurable)
 - Health check per account (reachability, response time and, optionally, a real channel's video stream), shown as a pill on the card
 - French lists check: accounts without French categories are refused, and the card shows a French flag pill
@@ -189,11 +190,32 @@ devices:
 
 Each subscription shows a French flag pill (**FR** in green when French lists were found, **No FR** in red otherwise), a health pill next to its status, and the moment of its last health check: **Online** with the response time (green), **Slow** above 3 s (orange), **Unreachable** (red). The **+** button (card header) opens a popup to add a new account, the 👁 button on each subscription shows its server URL and credentials with a copy button for each, the ✎ button edits them, and the 🗑 button removes the account (with confirmation). Adding or editing runs the same checks as the UI (credentials, French lists and video stream). The edit form is also available from **Settings → Devices & services → IPTV → ⋮ → Reconfigure**. The ⟳ button queries every shown server and runs a health check right away. The add, view, edit and remove buttons are shown to Home Assistant administrators only. The card adds, views and edits accounts through admin-only WebSocket commands (`iptv/add_account`, `iptv/edit_account`, `iptv/get_credentials`), so the password never goes through a service call; removing uses the admin-only `iptv.remove_account` service.
 
+### Mini card
+
+`custom:iptv-mini-card` (**IPTV Subscription Mini Card** in the card picker, with a visual editor) shows the same subscriptions on two lines: the logo, title and a global status pill (**All active**, **1 expiring**, **1 expired**, **Unavailable**…), then one chip per provider with its days left. A chip is plain while the subscription is fine, orange when it expires within `warning_days`, red when it is expired, disabled, banned or its credentials are refused; it opens the days left entity (or the status entity when the account is not active).
+
+```yaml
+type: custom:iptv-mini-card
+```
+
+It takes the options of the full card, plus:
+
+| Option | Required | Default | Description |
+|---|---|---|---|
+| `zoom` | ❌ | `true` | Detail button (top right): switches to the full card and back. `false` removes it |
+
+In the full view, a click anywhere outside the card also brings back the compact view, unless it lands in a dialog opened from the card (more-info) or one of the card's popups (add, view, edit, remove) is open: close the popup first.
+
 ## Screenshots
 
 ![iptv-card](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/card.png)
 
 ![iptv-card with two providers](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/card-multi.png)
+
+| Mini card | Zoomed in |
+|---|---|
+| ![iptv-mini-card](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/mini.png) | ![iptv-mini-card zoomed in](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/mini-zoom.png) |
+| ![iptv-mini-card, dark theme](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/mini-dark.png) | ![iptv-mini-card zoomed in, dark theme](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/mini-zoom-dark.png) |
 
 ## How it works
 
@@ -222,7 +244,7 @@ The card is served by the integration at `/iptv/iptv-card.js` and registered in 
 
 ```bash
 pip install playwright && playwright install chromium
-python scripts/screenshots.py   # renders screenshots/card.png and card-multi.png with mock subscriptions
+python scripts/screenshots.py   # renders screenshots/card.png, card-multi.png and mini*.png with mock subscriptions
 ```
 
 The card is plain JavaScript (`custom_components/iptv/frontend/iptv-card.js`), served by the integration: no build step.

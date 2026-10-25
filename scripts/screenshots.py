@@ -1,4 +1,4 @@
-"""Render the IPTV card with mock subscriptions and save the README screenshots.
+"""Render the IPTV card and mini card with mock subscriptions and save the README screenshots.
 
 Usage: python scripts/screenshots.py  (needs `pip install playwright` and `playwright install chromium`)
 The clock is frozen so the days left stay the same.
@@ -59,6 +59,8 @@ ICONS = {
     "eye-outline": "M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9M12,4.5C17,4.5 21.27,7.61 23,12C21.27,16.39 17,19.5 12,19.5C7,19.5 2.73,16.39 1,12C2.73,7.61 7,4.5 12,4.5M3.18,12C4.83,15.36 8.24,17.5 12,17.5C15.76,17.5 19.17,15.36 20.82,12C19.17,8.64 15.76,6.5 12,6.5C8.24,6.5 4.83,8.64 3.18,12Z",
     "pencil": "M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z",
     "clock-outline": "M12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12.5,7H11V13L16.25,16.15L17,14.92L12.5,12.25V7Z",
+    "arrow-expand": "M10,21V19H6.41L10.91,14.5L9.5,13.09L5,17.59V14H3V21H10M14.5,10.91L19,6.41V10H21V3H14V5H17.59L13.09,9.5L14.5,10.91Z",
+    "arrow-collapse": "M19.5,3.09L15,7.59V4H13V11H20V9H16.41L20.91,4.5L19.5,3.09M4,13V15H7.59L3.09,19.5L4.5,20.91L9,16.41V20H11V13H4Z",
     "account-multiple": "M16 17V19H2V17S2 13 9 13 16 17 16 17M12.5 7.5A3.5 3.5 0 1 0 9 11A3.5 3.5 0 0 0 12.5 7.5M15.94 13A5.32 5.32 0 0 1 18 17V19H22V17S22 13.37 15.94 13M15 4A3.39 3.39 0 0 0 13.07 4.59A5 5 0 0 1 13.07 10.41A3.39 3.39 0 0 0 15 11A3.5 3.5 0 0 0 15 4Z",
 }
 
@@ -132,6 +134,39 @@ SUBSCRIPTIONS = {
             "french_lists": ("binary_sensor", "off"),
         },
     ),
+    # Shown by the mini card only: one account expiring within the warning delay, one expired.
+    "iptv3": (
+        "Provider C",
+        {
+            "status": ("sensor", "active"),
+            "expiration": ("sensor", "2026-10-14T00:00:00+00:00"),
+            "days_left": ("sensor", "4"),
+            "created": ("sensor", "2026-09-14T00:00:00+00:00"),
+            "active_connections": ("sensor", "0"),
+            "max_connections": ("sensor", "2"),
+            "channels": ("sensor", "7604"),
+            "movies": ("sensor", "31270"),
+            "series": ("sensor", "9488"),
+            "health": ("sensor", "ok", {"response_time_ms": 240, "last_check": "2026-10-10T08:56:00+02:00"}),
+            "french_lists": ("binary_sensor", "on"),
+        },
+    ),
+    "iptv4": (
+        "Provider D",
+        {
+            "status": ("sensor", "expired"),
+            "expiration": ("sensor", "2026-10-02T00:00:00+00:00"),
+            "days_left": ("sensor", "0"),
+            "created": ("sensor", "2025-10-02T00:00:00+00:00"),
+            "active_connections": ("sensor", "0"),
+            "max_connections": ("sensor", "1"),
+            "channels": ("sensor", "5122"),
+            "movies": ("sensor", "12800"),
+            "series": ("sensor", "3051"),
+            "health": ("sensor", "ok", {"response_time_ms": 310, "last_check": "2026-10-10T08:54:00+02:00"}),
+            "french_lists": ("binary_sensor", "on"),
+        },
+    ),
 }
 STATES, ENTITIES, DEVICES = {}, {}, {}
 for device_id, (name, entities) in SUBSCRIPTIONS.items():
@@ -152,7 +187,20 @@ for device_id, (name, entities) in SUBSCRIPTIONS.items():
 
 SHOTS = [
     {"file": "card", "theme": "light", "lang": "en", "config": {"devices": ["iptv"]}},
-    {"file": "card-multi", "theme": "light", "lang": "en", "config": {}},
+    {"file": "card-multi", "theme": "light", "lang": "en", "config": {"devices": ["iptv", "iptv2"]}},
+    # The mini card, and the same card zoomed in (its detail button clicked).
+    *[
+        {
+            "file": f"mini{suffix}{dark}",
+            "theme": theme,
+            "lang": "en",
+            "tag": "iptv-mini-card",
+            "zoom": zoom,
+            "config": {"devices": ["iptv", "iptv3", "iptv4"]},
+        }
+        for suffix, zoom in (("", False), ("-zoom", True))
+        for theme, dark in (("light", ""), ("dark", "-dark"))
+    ],
 ]
 
 
@@ -190,11 +238,13 @@ def main():
             page.add_script_tag(content=HA_ELEMENTS)
             page.add_script_tag(content=CARD_JS)
             page.evaluate(
-                """({states, entities, devices, lang, config}) => {
-                  const el = document.createElement("iptv-card");
-                  el.setConfig({type: "custom:iptv-card", ...config});
+                """({states, entities, devices, lang, config, tag, zoom}) => {
+                  const el = document.createElement(tag);
+                  el.setConfig({type: `custom:${tag}`, ...config});
                   el.hass = {states, entities, devices, user: {is_admin: true}, language: lang, locale: {language: lang}, callService: () => Promise.resolve()};
                   document.getElementById("root").appendChild(el);
+                  // A mouse click (detail: 1), so that no focus ring shows on the new button.
+                  if (zoom) el.shadowRoot.querySelector("button.zoom").dispatchEvent(new MouseEvent("click", {bubbles: true, composed: true, detail: 1}));
                 }""",
                 {
                     "states": STATES,
@@ -202,10 +252,14 @@ def main():
                     "devices": DEVICES,
                     "lang": shot["lang"],
                     "config": shot["config"],
+                    "tag": shot.get("tag", "iptv-card"),
+                    "zoom": shot.get("zoom", False),
                 },
             )
             page.wait_for_timeout(300)
-            page.locator("iptv-card").screenshot(path=str(out_dir / f"{shot['file']}.png"), animations="disabled")
+            page.locator(shot.get("tag", "iptv-card")).screenshot(
+                path=str(out_dir / f"{shot['file']}.png"), animations="disabled"
+            )
             print(f"screenshots/{shot['file']}.png")
             page.close()
         browser.close()

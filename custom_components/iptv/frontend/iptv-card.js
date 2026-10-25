@@ -8,7 +8,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_CARD_VERSION = '3.15.1';
+var IPTV_CARD_VERSION = '3.16.0';
 var IPTV_DOMAIN = 'iptv';
 var IPTV_LOGO_URL = `/${IPTV_DOMAIN}/logo.png?v=${IPTV_CARD_VERSION}`;
 
@@ -84,6 +84,17 @@ var IptvCardI18n = {
     ed_devices: 'Subscriptions (all if empty)',
     ed_warning_days: 'Warn before expiration',
     ed_language: 'Language',
+    ed_zoom: 'Detail button',
+    zoom_in: 'Show the full card',
+    zoom_out: 'Back to the compact view',
+    mini_all_active: 'All active',
+    mini_expiring: '{n} expiring',
+    mini_expiring_plural: '{n} expiring',
+    mini_expired: '{n} expired',
+    mini_expired_plural: '{n} expired',
+    mini_error: '{n} in error',
+    mini_error_plural: '{n} in error',
+    mini_days: '{n} d',
   },
   fr: {
     default_title: 'Abonnement IPTV',
@@ -155,6 +166,17 @@ var IptvCardI18n = {
     ed_devices: 'Abonnements (tous si vide)',
     ed_warning_days: 'Alerte avant expiration',
     ed_language: 'Langue',
+    ed_zoom: 'Bouton détail',
+    zoom_in: 'Afficher la carte complète',
+    zoom_out: 'Revenir à la vue compacte',
+    mini_all_active: 'Tous actifs',
+    mini_expiring: '{n} expire bientôt',
+    mini_expiring_plural: '{n} expirent bientôt',
+    mini_expired: '{n} expiré',
+    mini_expired_plural: '{n} expirés',
+    mini_error: '{n} en erreur',
+    mini_error_plural: '{n} en erreur',
+    mini_days: '{n} j',
   },
 };
 
@@ -172,12 +194,85 @@ function iptvT(lang, key, vars) {
   return s;
 }
 
+// Icon of a subscription state (ok, warning, error)
+function iptvStateIcon(state) {
+  return { ok: 'mdi:check-circle', warning: 'mdi:alert' }[state] || 'mdi:close-circle';
+}
+
 function iptvEsc(x) {
   return String(x == null ? '' : x).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 }
 
 // ── iptv-card ─────────────────────────────────────────────────────────────────
 class IptvCard extends HTMLElement {
+  static CSS = `
+    :host { display: block; position: relative; --iptv-ok: var(--success-color, #43a047); --iptv-warn: var(--warning-color, #ffa600); --iptv-crit: var(--error-color, #db4437); }
+    ha-card { padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; }
+    .ok { --c: var(--iptv-ok); } .warning { --c: var(--iptv-warn); } .error { --c: var(--iptv-crit); } .idle { --c: var(--secondary-text-color); }
+    .header { display: flex; align-items: center; gap: 10px; }
+    .logo { width: 36px; height: 36px; flex: none; object-fit: contain; }
+    .titles { flex: 1; min-width: 0; }
+    .name { font-size: 16px; font-weight: 500; line-height: 1.25; color: var(--primary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+    .chip { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px 1px 5px; border-radius: 12px; font-size: 11px; font-weight: 500;
+            color: var(--c); background: color-mix(in srgb, var(--c) 15%, transparent); --mdc-icon-size: 14px; }
+    .chip.idle { padding-left: 10px; }
+    .chip.fr { padding-left: 6px; gap: 5px; }
+    .checked { display: flex; align-items: center; gap: 4px; color: var(--secondary-text-color); font-size: 11px; --mdc-icon-size: 13px; }
+    .flag { width: 14px; height: 10px; border-radius: 2px; flex: none; box-shadow: 0 0 0 1px rgba(0,0,0,.12);
+            background: linear-gradient(90deg, #0055a4 0 33.3%, #fff 33.3% 66.6%, #ef4135 66.6%); }
+    .flag.off { filter: grayscale(1); opacity: .6; }
+    .sect { display: flex; flex-direction: column; gap: 5px; }
+    .sect.multi + .sect.multi { border-top: 1px solid var(--divider-color, rgba(127,127,127,.25)); padding-top: 6px; }
+    .sect-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .sect-head .chips { margin-top: 0; flex: none; justify-content: flex-end; }
+    .sect-name { font-size: 14px; font-weight: 500; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    button { background:none; border:none; cursor:pointer; color:var(--secondary-text-color); padding:8px; border-radius:50%; align-self: flex-start; display: flex; }
+    button:hover { background: var(--secondary-background-color); }
+    button.spin ha-icon { animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .row { display:flex; justify-content:space-between; align-items:baseline; gap: 8px; }
+    .lbl { color: var(--secondary-text-color); font-size: 11px; }
+    .exp .lbl { font-size: 12px; }
+    .val { font-weight:500; font-size: 14px; }
+    .bar { height:4px; border-radius:3px; background: var(--divider-color, rgba(127,127,127,.25)); margin-top:4px; overflow:hidden; }
+    .rem { font-weight:400; font-size:12px; color: var(--secondary-text-color); }
+    .rem.warning, .rem.error { color: var(--c); }
+    .fill { height:100%; border-radius:3px; background: var(--c, var(--iptv-ok)); transition: width .6s ease; }
+    .stats { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:5px; }
+    .stat { display:flex; align-items:center; gap:5px; padding:3px 7px; border-radius:8px; min-width: 0;
+            background: var(--secondary-background-color, rgba(127,127,127,.08)); }
+    .stat ha-icon { color: var(--primary-color); --mdc-icon-size: 15px; flex: none; }
+    .num { font-size: 14px; font-weight: 500; line-height: 1.2; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .msg { color: var(--secondary-text-color); padding:8px 0; }
+    .msg.err { color: var(--iptv-crit); }
+    [data-entity] { cursor:pointer; }
+    .stat:hover { filter: brightness(0.95); }
+    .foot { display:flex; align-items:center; justify-content:space-between; gap:8px; min-height:20px; }
+    .foot-actions { display:flex; align-items:center; gap:8px; }
+    button.edit, button.del, button.view { padding:3px; margin:0; align-self:center; --mdc-icon-size:16px; }
+    button.del:hover { color:var(--iptv-crit); background:color-mix(in srgb, var(--iptv-crit) 12%, transparent); }
+    .backdrop { position:absolute; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:flex-start; justify-content:center; padding-top:12px; box-sizing:border-box; z-index:9; border-radius:var(--ha-card-border-radius, 12px); }
+    .modal { background:var(--card-background-color, #1c1c1c); color:var(--primary-text-color); width:min(92%, 340px); border-radius:14px; padding:16px; box-shadow:0 8px 30px rgba(0,0,0,.4); display:flex; flex-direction:column; gap:10px; }
+    .modal h3 { margin:0; font-size:16px; font-weight:500; }
+    .field { display:flex; flex-direction:column; gap:3px; }
+    .field label { font-size:11px; color:var(--secondary-text-color); }
+    .field input, .field select { font:inherit; font-size:14px; padding:8px 10px; border-radius:8px; border:1px solid var(--divider-color, rgba(127,127,127,.3)); background:var(--secondary-background-color, rgba(127,127,127,.08)); color:var(--primary-text-color); }
+    .field .hint { font-size:10px; color:var(--secondary-text-color); }
+    .modal .err { color:var(--iptv-crit); font-size:12px; min-height:14px; }
+    .modal-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:2px; }
+    .modal button.act { border-radius:8px; padding:8px 14px; font:inherit; font-size:13px; font-weight:500; width:auto; height:auto; }
+    .modal button.cancel { background:var(--secondary-background-color, rgba(127,127,127,.12)); color:var(--primary-text-color); }
+    .modal button.primary { background:var(--primary-color, #03a9f4); color:#fff; }
+    .modal button.primary[disabled], .modal button.danger[disabled] { opacity:.6; cursor:default; }
+    .modal button.danger { background:var(--iptv-crit); color:#fff; }
+    .view-row { display:flex; align-items:center; gap:8px; }
+    .view-k { font-size:11px; color:var(--secondary-text-color); width:96px; flex:none; }
+    .view-v { flex:1; min-width:0; font-size:13px; font-family:monospace; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; user-select:all; }
+    .modal button.copy { padding:4px; --mdc-icon-size:16px; width:auto; height:auto; background:none; color:var(--secondary-text-color); }
+    .modal button.copy.ok { color:var(--iptv-ok); }
+  `;
+
   static getStubConfig() {
     return {};
   }
@@ -406,7 +501,7 @@ class IptvCard extends HTMLElement {
     // Status, trial, French and health pills of one subscription
     var chips = (v, h, fr) => {
       if (!v && !h) return '';
-      var icon = v ? (v.state === 'ok' ? 'mdi:check-circle' : v.state === 'warning' ? 'mdi:alert' : 'mdi:close-circle') : '';
+      var icon = v ? iptvStateIcon(v.state) : '';
       return `
         <div class="chips">
           ${v ? `<span class="chip ${v.state}" data-entity="status"><ha-icon icon="${icon}"></ha-icon>${esc(v.statusLabel)}</span>` : ''}
@@ -509,73 +604,7 @@ class IptvCard extends HTMLElement {
 
     if (!this._root) { this._root = document.createElement('div'); this.shadowRoot.appendChild(this._root); }
     this._root.innerHTML = `
-      <style>
-        :host { display: block; position: relative; --iptv-ok: var(--success-color, #43a047); --iptv-warn: var(--warning-color, #ffa600); --iptv-crit: var(--error-color, #db4437); }
-        ha-card { padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; }
-        .ok { --c: var(--iptv-ok); } .warning { --c: var(--iptv-warn); } .error { --c: var(--iptv-crit); } .idle { --c: var(--secondary-text-color); }
-        .header { display: flex; align-items: center; gap: 10px; }
-        .logo { width: 36px; height: 36px; flex: none; object-fit: contain; }
-        .titles { flex: 1; min-width: 0; }
-        .name { font-size: 16px; font-weight: 500; line-height: 1.25; color: var(--primary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
-        .chip { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px 1px 5px; border-radius: 12px; font-size: 11px; font-weight: 500;
-                color: var(--c); background: color-mix(in srgb, var(--c) 15%, transparent); --mdc-icon-size: 14px; }
-        .chip.idle { padding-left: 10px; }
-        .chip.fr { padding-left: 6px; gap: 5px; }
-        .checked { display: flex; align-items: center; gap: 4px; color: var(--secondary-text-color); font-size: 11px; --mdc-icon-size: 13px; }
-        .flag { width: 14px; height: 10px; border-radius: 2px; flex: none; box-shadow: 0 0 0 1px rgba(0,0,0,.12);
-                background: linear-gradient(90deg, #0055a4 0 33.3%, #fff 33.3% 66.6%, #ef4135 66.6%); }
-        .flag.off { filter: grayscale(1); opacity: .6; }
-        .sect { display: flex; flex-direction: column; gap: 5px; }
-        .sect.multi + .sect.multi { border-top: 1px solid var(--divider-color, rgba(127,127,127,.25)); padding-top: 6px; }
-        .sect-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-        .sect-head .chips { margin-top: 0; flex: none; justify-content: flex-end; }
-        .sect-name { font-size: 14px; font-weight: 500; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        button { background:none; border:none; cursor:pointer; color:var(--secondary-text-color); padding:8px; border-radius:50%; align-self: flex-start; display: flex; }
-        button:hover { background: var(--secondary-background-color); }
-        button.spin ha-icon { animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .row { display:flex; justify-content:space-between; align-items:baseline; gap: 8px; }
-        .lbl { color: var(--secondary-text-color); font-size: 11px; }
-        .exp .lbl { font-size: 12px; }
-        .val { font-weight:500; font-size: 14px; }
-        .bar { height:4px; border-radius:3px; background: var(--divider-color, rgba(127,127,127,.25)); margin-top:4px; overflow:hidden; }
-        .rem { font-weight:400; font-size:12px; color: var(--secondary-text-color); }
-        .rem.warning, .rem.error { color: var(--c); }
-        .fill { height:100%; border-radius:3px; background: var(--c, var(--iptv-ok)); transition: width .6s ease; }
-        .stats { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:5px; }
-        .stat { display:flex; align-items:center; gap:5px; padding:3px 7px; border-radius:8px; min-width: 0;
-                background: var(--secondary-background-color, rgba(127,127,127,.08)); }
-        .stat ha-icon { color: var(--primary-color); --mdc-icon-size: 15px; flex: none; }
-        .num { font-size: 14px; font-weight: 500; line-height: 1.2; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-        .msg { color: var(--secondary-text-color); padding:8px 0; }
-        .msg.err { color: var(--iptv-crit); }
-        [data-entity] { cursor:pointer; }
-        .stat:hover { filter: brightness(0.95); }
-        .foot { display:flex; align-items:center; justify-content:space-between; gap:8px; min-height:20px; }
-        .foot-actions { display:flex; align-items:center; gap:8px; }
-        button.edit, button.del, button.view { padding:3px; margin:0; align-self:center; --mdc-icon-size:16px; }
-        button.del:hover { color:var(--iptv-crit); background:color-mix(in srgb, var(--iptv-crit) 12%, transparent); }
-        .backdrop { position:absolute; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:flex-start; justify-content:center; padding-top:12px; box-sizing:border-box; z-index:9; border-radius:var(--ha-card-border-radius, 12px); }
-        .modal { background:var(--card-background-color, #1c1c1c); color:var(--primary-text-color); width:min(92%, 340px); border-radius:14px; padding:16px; box-shadow:0 8px 30px rgba(0,0,0,.4); display:flex; flex-direction:column; gap:10px; }
-        .modal h3 { margin:0; font-size:16px; font-weight:500; }
-        .field { display:flex; flex-direction:column; gap:3px; }
-        .field label { font-size:11px; color:var(--secondary-text-color); }
-        .field input, .field select { font:inherit; font-size:14px; padding:8px 10px; border-radius:8px; border:1px solid var(--divider-color, rgba(127,127,127,.3)); background:var(--secondary-background-color, rgba(127,127,127,.08)); color:var(--primary-text-color); }
-        .field .hint { font-size:10px; color:var(--secondary-text-color); }
-        .modal .err { color:var(--iptv-crit); font-size:12px; min-height:14px; }
-        .modal-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:2px; }
-        .modal button.act { border-radius:8px; padding:8px 14px; font:inherit; font-size:13px; font-weight:500; width:auto; height:auto; }
-        .modal button.cancel { background:var(--secondary-background-color, rgba(127,127,127,.12)); color:var(--primary-text-color); }
-        .modal button.primary { background:var(--primary-color, #03a9f4); color:#fff; }
-        .modal button.primary[disabled], .modal button.danger[disabled] { opacity:.6; cursor:default; }
-        .modal button.danger { background:var(--iptv-crit); color:#fff; }
-        .view-row { display:flex; align-items:center; gap:8px; }
-        .view-k { font-size:11px; color:var(--secondary-text-color); width:96px; flex:none; }
-        .view-v { flex:1; min-width:0; font-size:13px; font-family:monospace; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; user-select:all; }
-        .modal button.copy { padding:4px; --mdc-icon-size:16px; width:auto; height:auto; background:none; color:var(--secondary-text-color); }
-        .modal button.copy.ok { color:var(--iptv-ok); }
-      </style>
+      <style>${this.constructor.CSS}</style>
       <ha-card>
         <div class="header">
           <img class="logo" src="${IPTV_LOGO_URL}" alt="">
@@ -599,7 +628,12 @@ class IptvCard extends HTMLElement {
       var sub = subs[Number(el.dataset.sub)];
       if (sub) el.addEventListener('click', () => this._openView(sub));
     });
-    // Header pills (single subscription) belong to the first subscription
+    this._bindMoreInfo(subs);
+  }
+
+  // [data-entity] elements open their subscription's entity; header pills (single
+  // subscription) belong to the first subscription
+  _bindMoreInfo(subs) {
     this._root.querySelectorAll('[data-entity]').forEach((el) => {
       var sect = el.closest('[data-sub]');
       var sub = subs[sect ? Number(sect.dataset.sub) : 0];
@@ -873,10 +907,201 @@ class IptvCard extends HTMLElement {
   }
 }
 
+// ── iptv-mini-card ────────────────────────────────────────────────────────────
+// The full card on two lines: the logo, title and a global status pill, then one chip per
+// subscription with its days left. Its detail button (top right, `zoom: false` removes it)
+// switches it to the full card and back; a click anywhere else brings it back too, unless it
+// lands in a dialog opened from the card (more-info) or a popup of the card is open.
+class IptvMiniCard extends IptvCard {
+  static CSS = `${IptvCard.CSS}
+    .mini { display: flex; align-items: center; gap: 10px; }
+    .mini .logo { width: 32px; height: 32px; }
+    .body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+    .head { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .mini .name { flex: 0 1 auto; font-size: 14px; line-height: 18px; }
+    .head .chip { flex: none; margin-left: auto; }
+    .rs { display: flex; flex-wrap: wrap; gap: 2px 4px; margin-left: -4px; }
+    .mini .msg { padding: 0; font-size: 12px; }
+    button.r { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; padding: 0 6px 0 4px; border-radius: 999px;
+               font-size: 12px; font-weight: 500; line-height: 18px; white-space: nowrap; color: var(--primary-text-color); --mdc-icon-size: 13px; }
+    .r ha-icon { color: var(--c); display: inline-flex; }
+    .r .fig { font-weight: 400; color: var(--secondary-text-color); }
+    .r.warning, .r.error { color: var(--c); background: color-mix(in srgb, var(--c) 14%, transparent); }
+    .r.warning .fig, .r.error .fig { color: inherit; }
+    .r:hover { background: color-mix(in srgb, var(--c) 20%, var(--secondary-background-color, transparent)); }
+    .r:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 2px; }
+    button.zoom { all: unset; flex: none; cursor: pointer; width: 24px; height: 24px; margin: -4px -4px -4px 0; border-radius: 50%;
+                  display: grid; place-items: center; color: var(--secondary-text-color); --mdc-icon-size: 16px; }
+    .zoom ha-icon { display: inline-flex; }
+    .zoom:hover { background: color-mix(in srgb, var(--secondary-text-color) 16%, transparent); color: var(--primary-text-color); }
+    .zoom:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 1px; }
+    .header .zoom { align-self: flex-start; margin: 2px -4px 0 -6px; }
+  `;
+
+  static getConfigElement() {
+    return document.createElement('iptv-mini-card-editor');
+  }
+
+  constructor() {
+    super();
+    this._zoomed = false;
+    this._onUnzoom = (ev) => {
+      var path = ev.composedPath();
+      // An open popup of the card is closed first (its backdrop or buttons), as in the full card
+      if (!this._zoomed || this._modal || path.includes(this)) return;
+      if (path.some((n) => ['ha-more-info-dialog', 'ha-dialog', 'dialog'].includes(n.localName))) return;
+      this._zoomed = false;
+      this._render();
+    };
+  }
+
+  connectedCallback() {
+    document.addEventListener('click', this._onUnzoom, true);
+  }
+
+  disconnectedCallback() {
+    document.removeEventListener('click', this._onUnzoom, true);
+  }
+
+  setConfig(config) {
+    if (config?.zoom != null && typeof config.zoom !== 'boolean') throw new Error('zoom must be true or false');
+    super.setConfig(config);
+  }
+
+  getCardSize() {
+    return this._zoomed ? super.getCardSize() : 2;
+  }
+
+  _render() {
+    if (!this.shadowRoot || !this._config) return;
+    if (this._zoomed) super._render();
+    else this._renderMini();
+    this._addZoom();
+  }
+
+  // Global pill: the worst state of the subscriptions, with how many are in it
+  _miniStatus(views) {
+    if (!views.length) return '';
+    var count = (state) => views.filter((v) => v.state === state).length;
+    var n = (key, k) => this._t(k > 1 ? `${key}_plural` : key, { n: k });
+    var state;
+    var label;
+    if (views.every((v) => v.unavailable)) [state, label] = ['error', this._t('unavailable')];
+    else if (count('error')) {
+      var expired = views.filter((v) => v.expired).length;
+      [state, label] = ['error', expired === count('error') ? n('mini_expired', expired) : n('mini_error', count('error'))];
+    } else if (count('warning')) [state, label] = ['warning', n('mini_expiring', count('warning'))];
+    else [state, label] = ['ok', views.length > 1 ? this._t('mini_all_active') : this._t('status_active')];
+    return `<span class="chip ${state}"><ha-icon icon="${iptvStateIcon(state)}"></ha-icon>${iptvEsc(label)}</span>`;
+  }
+
+  // One chip per subscription: its name and days left (or why it is not active);
+  // plain when fine, tinted when expiring or in error. It opens the entity shown.
+  _miniChip(sub, v, i) {
+    var fig;
+    var entity = sub.ids.days_left ? 'days_left' : 'expiration';
+    if (v.unavailable) [fig, entity] = [this._t('status_unknown'), 'status'];
+    else if (v.state === 'error' && !v.expired) [fig, entity] = [v.statusLabel, 'status'];
+    else if (v.expired) fig = this._t('status_expired');
+    else fig = v.daysLeft === null ? this._t('unlimited') : this._t('mini_days', { n: v.daysLeft });
+    var title = `${sub.name} · ${fig}`;
+    return `<button class="r ${v.state}" data-sub="${i}" data-entity="${entity}" title="${iptvEsc(title)}"><ha-icon icon="${iptvStateIcon(v.state)}"></ha-icon>${iptvEsc(sub.name)} <span class="fig">${iptvEsc(fig)}</span></button>`;
+  }
+
+  _renderMini() {
+    var subs = this._hass ? this._subs() : [];
+    var views = subs.map((sub) => {
+      var v = this._view(this._data(sub.ids));
+      if (!v) return { unavailable: true, state: 'error' };
+      v.expired = v.state === 'error' && v.d.auth && (String(v.d.status).toLowerCase() === 'expired' || (v.daysLeft !== null && v.daysLeft <= 0));
+      return v;
+    });
+    var title = this._config.title || this._t(subs.length > 1 ? 'default_title_multi' : 'default_title');
+    var line = !this._hass
+      ? `<div class="msg">${this._t('loading')}</div>`
+      : !subs.length
+        ? `<div class="msg">${this._t('no_device')}</div>`
+        : subs.map((sub, i) => this._miniChip(sub, views[i], i)).join('');
+    if (!this._root) { this._root = document.createElement('div'); this.shadowRoot.appendChild(this._root); }
+    this._root.innerHTML = `
+      <style>${this.constructor.CSS}</style>
+      <ha-card>
+        <div class="mini">
+          <img class="logo" src="${IPTV_LOGO_URL}" alt="">
+          <div class="body">
+            <div class="head"><div class="name">${iptvEsc(title)}</div>${this._miniStatus(views)}</div>
+            <div class="rs">${line}</div>
+          </div>
+        </div>
+      </ha-card>`;
+    this._bindMoreInfo(subs);
+  }
+
+  // Detail button at the end of the header, top right in both views
+  _addZoom() {
+    var head = this._config.zoom !== false && this._root?.querySelector('.head, .header');
+    if (!head) return;
+    var button = document.createElement('button');
+    button.className = 'zoom';
+    button.title = this._t(this._zoomed ? 'zoom_out' : 'zoom_in');
+    button.setAttribute('aria-label', button.title);
+    button.innerHTML = `<ha-icon icon="mdi:${this._zoomed ? 'arrow-collapse' : 'arrow-expand'}"></ha-icon>`;
+    button.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      this._zoomed = !this._zoomed;
+      this._render();
+      // Keyboard use (Enter / Space: no click count) keeps the focus on the new button
+      if (ev.detail === 0) this._root.querySelector('button.zoom')?.focus();
+    });
+    head.appendChild(button);
+  }
+}
+
+// ── iptv-mini-card-editor ─────────────────────────────────────────────────────
+// The full card's fields plus the detail button, shown on by default and not written
+// to the YAML while it stays on
+class IptvMiniCardEditor extends HTMLElement {
+  setConfig(config) {
+    this._config = { ...config };
+    this._render();
+  }
+
+  set hass(hass) {
+    this._hass = hass;
+    this._render();
+  }
+
+  _render() {
+    if (!this._hass || !this._config) return;
+    if (!this._form) {
+      var form = IptvCard.getConfigForm();
+      var lang = iptvLang(null, this._hass);
+      this._form = document.createElement('ha-form');
+      this._form.schema = [...form.schema, { name: 'zoom', selector: { boolean: {} } }];
+      this._form.computeLabel = (schema) => iptvT(lang, `ed_${schema.name}`);
+      this._form.addEventListener('value-changed', (ev) => {
+        ev.stopPropagation();
+        var value = { ...ev.detail.value };
+        if (value.zoom === true) delete value.zoom;
+        this._config = value;
+        this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: value }, bubbles: true, composed: true }));
+      });
+      this.appendChild(this._form);
+    }
+    this._form.hass = this._hass;
+    this._form.data = { zoom: true, ...this._config };
+  }
+}
+
+if (!customElements.get('iptv-mini-card-editor')) {
+  customElements.define('iptv-mini-card-editor', IptvMiniCardEditor);
+}
+
+// Each card is registered on its own: a page that already loaded an older copy of this
+// file (a stale resource or a cached version without the mini card) still gets the mini card
+window.customCards = window.customCards || [];
 if (!customElements.get('iptv-card')) {
   customElements.define('iptv-card', IptvCard);
-
-  window.customCards = window.customCards || [];
   window.customCards.push({
     type: 'iptv-card',
     name: 'IPTV Subscription Card',
@@ -890,4 +1115,14 @@ if (!customElements.get('iptv-card')) {
     'color:white;background:#3f51b5;font-weight:700',
     'color:#3f51b5;background:white',
   );
+}
+if (!customElements.get('iptv-mini-card')) {
+  customElements.define('iptv-mini-card', IptvMiniCard);
+  window.customCards.push({
+    type: 'iptv-mini-card',
+    name: 'IPTV Subscription Mini Card',
+    description: 'The IPTV subscriptions on two lines (status and days left of each provider), with a detail button showing the full card.',
+    preview: true,
+    documentationURL: 'https://github.com/juju35/ha-iptv',
+  });
 }
