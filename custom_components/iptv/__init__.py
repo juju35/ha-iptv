@@ -58,9 +58,12 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
 
 def _storage_resources(hass: HomeAssistant) -> Any | None:
-    """Return the dashboard resources collection when it is editable from the UI."""
+    """Return the dashboard resources collection when it is editable from the UI.
+
+    hass.data["lovelace"] is a dataclass whose `mode` field became `resource_mode` in Home Assistant 2026.2.
+    """
     lovelace = hass.data.get("lovelace")
-    if getattr(lovelace, "resource_mode", None) != "storage":
+    if getattr(lovelace, "resource_mode", getattr(lovelace, "mode", None)) != "storage":
         return None
     return getattr(lovelace, "resources", None)
 
