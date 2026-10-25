@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.16.0
+
+### Changes
+- New mini card, `custom:iptv-mini-card`, served by the integration with the full card: the logo, title and a global status pill (all active, expiring, expired, unavailable) on one line, then one chip per provider with its days left, orange when it expires within `warning_days` and red when it is expired or in error. A chip opens its entity.
+- Its detail button (top right, `zoom: false` removes it) switches it to the full card and back; a click elsewhere on the page brings back the compact view, except in a dialog opened from the card or while one of its popups is open. Visual editor with the full card's fields and the detail button.
+- Each card is registered on its own, so a page that still runs an older copy of the card file gets the mini card too.
+
+### Maintenance
+- Screenshots of the mini card (light and dark, compact and zoomed in); test that the served file defines both cards.
+
 ## 3.15.1
 
 ### Fixes

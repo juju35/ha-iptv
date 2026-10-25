@@ -802,3 +802,15 @@ async def test_card_resource_yaml_mode_uses_extra_js(hass, aioclient_mock, entry
     hass.data["lovelace"] = _lovelace_data(key, "yaml", ResourceYAMLCollection([]))
     await _setup(hass, aioclient_mock, entry)
     stub_frontend.assert_called_once_with(hass, f"/iptv/iptv-card.js?v={VERSION}")
+
+
+async def test_card_served(hass, aioclient_mock, entry, hass_client):
+    """The served file defines both cards, each under its own guard."""
+    await _setup(hass, aioclient_mock, entry)
+    client = await hass_client()
+    resp = await client.get("/iptv/iptv-card.js")
+    assert resp.status == 200
+    text = await resp.text()
+    assert f"IPTV_CARD_VERSION = '{VERSION}'" in text
+    assert "customElements.define('iptv-card'" in text
+    assert "if (!customElements.get('iptv-mini-card')) {\n  customElements.define('iptv-mini-card'" in text
