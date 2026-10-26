@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.18.0
+
+### Fixes
+- Card: `iptvEsc` now also escapes the apostrophe (`'` → `&#39;`), aligning it with standard HTML escaping. Values that may come from the provider (test channel name, device name, displayed URL or credentials) are interpolated inside double-quoted attributes, so there is no visible rendering change; this removes any residual risk should an attribute ever be delimited by apostrophes.
+
 ## 3.17.0
 ### Changes
 - Card and mini card: the header shows a TV icon in a round badge, green, orange or red after the worst state of the subscriptions shown, instead of the integration logo, like the other cards.
