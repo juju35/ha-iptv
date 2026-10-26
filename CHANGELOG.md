@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+### Changes
+- Card and mini card: the header shows a TV icon in a round badge, green, orange or red after the worst state of the subscriptions shown, instead of the integration logo, like the other cards.
+
 ## 3.16.0
 
 ### Changes

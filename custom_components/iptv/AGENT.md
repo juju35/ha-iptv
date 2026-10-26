@@ -31,9 +31,10 @@ custom_components/iptv/
 ```
 
 ## Card
-- Served from `/iptv/iptv-card.js` (logo from `/iptv/logo.png`) and added to the Lovelace resources at startup, URL versioned with `VERSION`. Falls back to `add_extra_js_url` when resources are in YAML mode. `_storage_resources()` reads the mode from the `hass.data["lovelace"]` dataclass, whose `mode` field became `resource_mode` in Home Assistant 2026.2.
+- Served from `/iptv/iptv-card.js` (the integration logo is still served at `/iptv/logo.png`, the card no longer uses it) and added to the Lovelace resources at startup, URL versioned with `VERSION`. Falls back to `add_extra_js_url` when resources are in YAML mode. `_storage_resources()` reads the mode from the `hass.data["lovelace"]` dataclass, whose `mode` field became `resource_mode` in Home Assistant 2026.2.
 - Popups (add, edit, confirmation) open at the top of the card, like the other ha-* cards.
-- `iptv-mini-card` (`IptvMiniCard extends IptvCard`, same file): two lines (logo, title, global status pill; one chip per subscription), detail button (`zoom`, default true) rendering the full card's `_render()`, collapsed by an outside click (capture-phase document listener) except in a dialog or while a popup (`_modal`) is open, like ha-zoraxy and ha-room-card. Each element is defined under its own `customElements.get` guard, so an older copy already loaded on the page doesn't hide the mini card.
+- Header icon (both cards): `mdi:television-play` in a round `.badge` (40 px, 32 px on the mini card) tinted with the worst state of the subscriptions shown (`iptvWorstState`: error, warning, ok; idle when there are none).
+- `iptv-mini-card` (`IptvMiniCard extends IptvCard`, same file): two lines (badge, title, global status pill; one chip per subscription), detail button (`zoom`, default true) rendering the full card's `_render()`, collapsed by an outside click (capture-phase document listener) except in a dialog or while a popup (`_modal`) is open, like ha-zoraxy and ha-room-card. Each element is defined under its own `customElements.get` guard, so an older copy already loaded on the page doesn't hide the mini card.
 - Add, view and edit go through the admin WebSocket commands (`hass.callWS({type: 'iptv/…'})`), never `callService`: a service call fires a `call_service` event with its raw data, which the recorder stores, password included. Remove still uses the `iptv.remove_account` service (no secret). The services stay for automations, with a recorder warning in the README and service descriptions.
 
 ## Health check
