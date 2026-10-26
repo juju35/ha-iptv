@@ -6,6 +6,7 @@
 - Card and mini card: the header shows a TV icon in a round badge, green, orange or red after the worst state of the subscriptions shown, instead of the integration logo, like the other cards.
 - Mini card: the title uses the full card's size (16 px, line height 1.25) instead of 14 px; a long title still ends with an ellipsis.
 - Card with one subscription: the status pill (Active, Expired…) sits in the header row, right of the title and before the + and refresh buttons; the trial, French flag and health pills stay under the title.
+- Card with one subscription: the status pill is centred on the title line instead of the whole title block, so it stays level with the title when the French flag and health pills sit under it.
 - Add, edit and remove popups: the Save / Create and Delete buttons are tinted with the primary or error colour instead of filled.
 - Card and mini card: 12 px around the content (was 8 px at the top and 10 px on the sides) and 8 px between the header and the body; the mini card badge sits at the top, 12 px from the edges.
 

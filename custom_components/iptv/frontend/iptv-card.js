@@ -218,14 +218,16 @@ class IptvCard extends HTMLElement {
     :host { display: block; position: relative; --iptv-ok: var(--success-color, #43a047); --iptv-warn: var(--warning-color, #ffa600); --iptv-crit: var(--error-color, #db4437); }
     ha-card { padding: 12px; display: flex; flex-direction: column; gap: 6px; }
     .ok { --c: var(--iptv-ok); } .warning { --c: var(--iptv-warn); } .error { --c: var(--iptv-crit); } .idle { --c: var(--secondary-text-color); }
-    /* 8 px to the body (the card gap is 6 px); the status pill sits right of the titles, before the buttons */
+    /* 8 px to the body (the card gap is 6 px); the status pill ends the title line, before the buttons */
     .header { display: flex; align-items: center; gap: 10px; margin-bottom: 2px; }
-    .header > .chip { flex: none; }
     .header > button:last-child:not(.zoom) { margin-right: -4px; }
     .badge { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; flex: none;
              background: color-mix(in srgb, var(--c) 16%, transparent); color: var(--c); --mdc-icon-size: 24px; }
     .badge ha-icon { display: inline-flex; }
     .titles { flex: 1; min-width: 0; }
+    .title-row { display: flex; align-items: center; gap: 10px; }
+    .title-row .name { flex: 1; min-width: 0; }
+    .title-row > .chip { flex: none; }
     .name { font-size: 16px; font-weight: 500; line-height: 1.25; color: var(--primary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
     .chip { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px 1px 5px; border-radius: 12px; font-size: 11px; font-weight: 500;
@@ -584,7 +586,7 @@ class IptvCard extends HTMLElement {
         </div>`;
 
     var body;
-    // One subscription: its status pill in the header row, the other pills under the title
+    // One subscription: its status pill ends the title line, the other pills go under it
     var status = '';
     var info = '';
     // State of each subscription shown (an unreachable one counts as an error), for the header badge
@@ -627,8 +629,7 @@ class IptvCard extends HTMLElement {
       <ha-card>
         <div class="header">
           ${iptvBadge(iptvWorstState(states))}
-          <div class="titles"><div class="name">${esc(title)}</div>${info}</div>
-          ${status}
+          <div class="titles"><div class="title-row"><div class="name">${esc(title)}</div>${status}</div>${info}</div>
           ${admin ? `<button class="add" title="${this._t('add_btn')}"><ha-icon icon="mdi:plus"></ha-icon></button>` : ''}
           <button class="refresh ${this._loading ? 'spin' : ''}" title="${this._t('refresh')}"><ha-icon icon="mdi:refresh"></ha-icon></button>
         </div>
