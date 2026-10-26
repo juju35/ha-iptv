@@ -209,7 +209,7 @@ function iptvStateIcon(state) {
 }
 
 function iptvEsc(x) {
-  return String(x == null ? '' : x).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  return String(x == null ? '' : x).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 }
 
 // ── iptv-card ─────────────────────────────────────────────────────────────────
