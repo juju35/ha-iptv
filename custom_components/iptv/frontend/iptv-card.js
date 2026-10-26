@@ -10,7 +10,6 @@
  */
 var IPTV_CARD_VERSION = '3.16.0';
 var IPTV_DOMAIN = 'iptv';
-var IPTV_LOGO_URL = `/${IPTV_DOMAIN}/logo.png?v=${IPTV_CARD_VERSION}`;
 
 // ── i18n ──────────────────────────────────────────────────────────────────────
 var IptvCardI18n = {
@@ -194,6 +193,16 @@ function iptvT(lang, key, vars) {
   return s;
 }
 
+// Worst state of the subscriptions shown (error, then warning, then ok), idle when there are none
+function iptvWorstState(states) {
+  return ['error', 'warning', 'ok'].find((s) => states.includes(s)) || 'idle';
+}
+
+// Header badge: the TV icon tinted with the card's state colour
+function iptvBadge(state) {
+  return `<div class="badge ${state}"><ha-icon icon="mdi:television-play"></ha-icon></div>`;
+}
+
 // Icon of a subscription state (ok, warning, error)
 function iptvStateIcon(state) {
   return { ok: 'mdi:check-circle', warning: 'mdi:alert' }[state] || 'mdi:close-circle';
@@ -207,11 +216,18 @@ function iptvEsc(x) {
 class IptvCard extends HTMLElement {
   static CSS = `
     :host { display: block; position: relative; --iptv-ok: var(--success-color, #43a047); --iptv-warn: var(--warning-color, #ffa600); --iptv-crit: var(--error-color, #db4437); }
-    ha-card { padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; }
+    ha-card { padding: 12px; display: flex; flex-direction: column; gap: 6px; }
     .ok { --c: var(--iptv-ok); } .warning { --c: var(--iptv-warn); } .error { --c: var(--iptv-crit); } .idle { --c: var(--secondary-text-color); }
-    .header { display: flex; align-items: center; gap: 10px; }
-    .logo { width: 36px; height: 36px; flex: none; object-fit: contain; }
+    /* 8 px to the body (the card gap is 6 px); the status pill ends the title line, before the buttons */
+    .header { display: flex; align-items: center; gap: 10px; margin-bottom: 2px; }
+    .header > button:last-child:not(.zoom) { margin-right: -4px; }
+    .badge { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; flex: none;
+             background: color-mix(in srgb, var(--c) 16%, transparent); color: var(--c); --mdc-icon-size: 24px; }
+    .badge ha-icon { display: inline-flex; }
     .titles { flex: 1; min-width: 0; }
+    .title-row { display: flex; align-items: center; gap: 10px; }
+    .title-row .name { flex: 1; min-width: 0; }
+    .title-row > .chip { flex: none; }
     .name { font-size: 16px; font-weight: 500; line-height: 1.25; color: var(--primary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
     .chip { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px 1px 5px; border-radius: 12px; font-size: 11px; font-weight: 500;
@@ -263,9 +279,11 @@ class IptvCard extends HTMLElement {
     .modal-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:2px; }
     .modal button.act { border-radius:8px; padding:8px 14px; font:inherit; font-size:13px; font-weight:500; width:auto; height:auto; }
     .modal button.cancel { background:var(--secondary-background-color, rgba(127,127,127,.12)); color:var(--primary-text-color); }
-    .modal button.primary { background:var(--primary-color, #03a9f4); color:#fff; }
+    .modal button.primary { background:color-mix(in srgb, var(--primary-color, #03a9f4) 16%, transparent); color:var(--primary-color, #03a9f4); }
+    .modal button.primary:hover:not([disabled]) { background:color-mix(in srgb, var(--primary-color, #03a9f4) 24%, transparent); }
     .modal button.primary[disabled], .modal button.danger[disabled] { opacity:.6; cursor:default; }
-    .modal button.danger { background:var(--iptv-crit); color:#fff; }
+    .modal button.danger { background:color-mix(in srgb, var(--iptv-crit) 16%, transparent); color:var(--iptv-crit); }
+    .modal button.danger:hover:not([disabled]) { background:color-mix(in srgb, var(--iptv-crit) 24%, transparent); }
     .view-row { display:flex; align-items:center; gap:8px; }
     .view-k { font-size:11px; color:var(--secondary-text-color); width:96px; flex:none; }
     .view-v { flex:1; min-width:0; font-size:13px; font-family:monospace; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; user-select:all; }
@@ -498,18 +516,14 @@ class IptvCard extends HTMLElement {
         ? ''
         : `<span class="chip ${fr ? 'ok' : 'error'} fr" data-entity="french_lists" title="${esc(this._t('french_title'))}"><span class="flag${fr ? '' : ' off'}"></span>${esc(this._t(fr ? 'french_on' : 'french_off'))}</span>`;
 
-    // Status, trial, French and health pills of one subscription
-    var chips = (v, h, fr) => {
-      if (!v && !h) return '';
-      var icon = v ? iptvStateIcon(v.state) : '';
-      return `
-        <div class="chips">
-          ${v ? `<span class="chip ${v.state}" data-entity="status"><ha-icon icon="${icon}"></ha-icon>${esc(v.statusLabel)}</span>` : ''}
-          ${v?.d.is_trial ? `<span class="chip idle">${this._t('trial')}</span>` : ''}
-          ${v ? frenchChip(fr) : ''}
-          ${healthChip(h, v)}
-        </div>`;
-    };
+    // Status pill of one subscription
+    var statusChip = (v) =>
+      v ? `<span class="chip ${v.state}" data-entity="status"><ha-icon icon="${iptvStateIcon(v.state)}"></ha-icon>${esc(v.statusLabel)}</span>` : '';
+    // Trial, French and health pills of one subscription
+    var infoChips = (v, h, fr) =>
+      `${v?.d.is_trial ? `<span class="chip idle">${this._t('trial')}</span>` : ''}${v ? frenchChip(fr) : ''}${healthChip(h, v)}`;
+    // Every pill of one subscription, in a row
+    var chips = (v, h, fr) => (!v && !h ? '' : `<div class="chips">${statusChip(v)}${infoChips(v, h, fr)}</div>`);
 
     // Expiration and tiles of one subscription
     var details = (v) => {
@@ -572,16 +586,22 @@ class IptvCard extends HTMLElement {
         </div>`;
 
     var body;
+    // One subscription: its status pill ends the title line, the other pills go under it
     var status = '';
+    var info = '';
+    // State of each subscription shown (an unreachable one counts as an error), for the header badge
+    var states = [];
     if (!this._hass) {
       body = `<div class="msg">${this._t('loading')}</div>`;
     } else if (!subs.length) {
       body = `<div class="msg">${this._t('no_device')}</div>`;
     } else if (!multi) {
-      // One subscription: pills under the card title, as before
       var v = this._view(this._data(subs[0].ids));
       var h0 = this._health(subs[0].ids);
-      status = chips(v, h0, this._french(subs[0].ids));
+      states.push(v ? v.state : 'error');
+      status = statusChip(v);
+      info = infoChips(v, h0, this._french(subs[0].ids)).trim();
+      if (info) info = `<div class="chips">${info}</div>`;
       body = '<div class="sect" data-sub="0">' +
         (v ? details(v) : `<div class="msg err">${this._t('unavailable')}</div>`) +
         footer(h0, 0) + '</div>';
@@ -590,6 +610,7 @@ class IptvCard extends HTMLElement {
       body = subs.map((sub, i) => {
         var v = this._view(this._data(sub.ids));
         var h = this._health(sub.ids);
+        states.push(v ? v.state : 'error');
         return `
           <div class="sect multi" data-sub="${i}">
             <div class="sect-head">
@@ -607,8 +628,8 @@ class IptvCard extends HTMLElement {
       <style>${this.constructor.CSS}</style>
       <ha-card>
         <div class="header">
-          <img class="logo" src="${IPTV_LOGO_URL}" alt="">
-          <div class="titles"><div class="name">${esc(title)}</div>${status}</div>
+          ${iptvBadge(iptvWorstState(states))}
+          <div class="titles"><div class="title-row"><div class="name">${esc(title)}</div>${status}</div>${info}</div>
           ${admin ? `<button class="add" title="${this._t('add_btn')}"><ha-icon icon="mdi:plus"></ha-icon></button>` : ''}
           <button class="refresh ${this._loading ? 'spin' : ''}" title="${this._t('refresh')}"><ha-icon icon="mdi:refresh"></ha-icon></button>
         </div>
@@ -915,10 +936,11 @@ class IptvCard extends HTMLElement {
 class IptvMiniCard extends IptvCard {
   static CSS = `${IptvCard.CSS}
     .mini { display: flex; align-items: center; gap: 10px; }
-    .mini .logo { width: 32px; height: 32px; }
+    /* Top-aligned: 12 px from the card's top edge, like the other cards (the two lines are taller than the badge) */
+    .mini .badge { width: 32px; height: 32px; --mdc-icon-size: 20px; align-self: flex-start; }
     .body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
     .head { display: flex; align-items: center; gap: 8px; min-width: 0; }
-    .mini .name { flex: 0 1 auto; font-size: 14px; line-height: 18px; }
+    .mini .name { flex: 0 1 auto; }
     .head .chip { flex: none; margin-left: auto; }
     .rs { display: flex; flex-wrap: wrap; gap: 2px 4px; margin-left: -4px; }
     .mini .msg { padding: 0; font-size: 12px; }
@@ -1027,7 +1049,7 @@ class IptvMiniCard extends IptvCard {
       <style>${this.constructor.CSS}</style>
       <ha-card>
         <div class="mini">
-          <img class="logo" src="${IPTV_LOGO_URL}" alt="">
+          ${iptvBadge(iptvWorstState(views.map((v) => v.state)))}
           <div class="body">
             <div class="head"><div class="name">${iptvEsc(title)}</div>${this._miniStatus(views)}</div>
             <div class="rs">${line}</div>

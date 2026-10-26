@@ -192,7 +192,7 @@ Each subscription shows a French flag pill (**FR** in green when French lists we
 
 ### Mini card
 
-`custom:iptv-mini-card` (**IPTV Subscription Mini Card** in the card picker, with a visual editor) shows the same subscriptions on two lines: the logo, title and a global status pill (**All active**, **1 expiring**, **1 expired**, **Unavailable**…), then one chip per provider with its days left. A chip is plain while the subscription is fine, orange when it expires within `warning_days`, red when it is expired, disabled, banned or its credentials are refused; it opens the days left entity (or the status entity when the account is not active).
+`custom:iptv-mini-card` (**IPTV Subscription Mini Card** in the card picker, with a visual editor) shows the same subscriptions on two lines: the TV badge, title and a global status pill (**All active**, **1 expiring**, **1 expired**, **Unavailable**…), then one chip per provider with its days left. A chip is plain while the subscription is fine, orange when it expires within `warning_days`, red when it is expired, disabled, banned or its credentials are refused; it opens the days left entity (or the status entity when the account is not active).
 
 ```yaml
 type: custom:iptv-mini-card
