@@ -4,6 +4,7 @@
 
 ### Changes
 - Card and mini card: the header shows a TV icon in a round badge, green, orange or red after the worst state of the subscriptions shown, instead of the integration logo, like the other cards.
+- Mini card: the title uses the full card's size (16 px, line height 1.25) instead of 14 px; a long title still ends with an ellipsis.
 
 ## 3.16.0
 
