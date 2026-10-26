@@ -208,7 +208,7 @@ In the full view, a click anywhere outside the card also brings back the compact
 
 ## Screenshots
 
-While subscriptions reload, the card animates: the refresh button spins until the check finishes. It settles to a still card once done (and honours `prefers-reduced-motion`).
+While subscriptions reload, the card animates: the refresh button spins until the check finishes. It settles to a still card once done.
 
 ![refresh animation](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/refreshing.gif)
 
