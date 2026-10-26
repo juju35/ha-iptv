@@ -6,6 +6,8 @@ background around the card (full card 460 px wide, mini card 380 px, 460 px zoom
 """
 
 import os
+import subprocess
+import tempfile
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright
@@ -213,6 +215,71 @@ def page_html(theme, width):
 </style></head><body><div id="root"></div></body></html>"""
 
 
+def mount(context, shot):
+    """Open a fresh page (the card script declares top-level constants) and mount the card; return the page."""
+    page = context.new_page()
+    page.on("pageerror", lambda err: print(f"page error: {err}"))
+    page.clock.set_fixed_time(NOW)
+    width = shot.get("width", WIDTH)
+    page.set_content(page_html(shot["theme"], width))
+    page.add_script_tag(content=HA_ELEMENTS)
+    page.add_script_tag(content=CARD_JS)
+    page.evaluate(
+        """({states, entities, devices, dark, config, tag, zoom}) => {
+          const el = document.createElement(tag);
+          el.setConfig({type: `custom:${tag}`, ...config});
+          el.hass = {states, entities, devices, user: {is_admin: true}, language: "en", locale: {language: "en"}, themes: {darkMode: dark}, callService: () => Promise.resolve()};
+          document.getElementById("root").appendChild(el);
+          // A mouse click (detail: 1), so that no focus ring shows on the new button.
+          if (zoom) el.shadowRoot.querySelector("button.zoom").dispatchEvent(new MouseEvent("click", {bubbles: true, composed: true, detail: 1}));
+        }""",
+        {
+            "states": STATES,
+            "entities": ENTITIES,
+            "devices": DEVICES,
+            "dark": shot["theme"] == "dark",
+            "config": shot["config"],
+            "tag": shot.get("tag", "iptv-card"),
+            "zoom": shot.get("zoom", False),
+        },
+    )
+    return page
+
+
+def animate(context, shot, *, fps=20, seconds=2):
+    """Record the refresh spinner as a looping screenshots/<file>.gif (needs ffmpeg). Every animation is paused and
+    stepped frame by frame, so the GIF is identical whatever the machine's speed."""
+    page = mount(context, shot)
+    # Hold the refresh spinner: set the loading flag and re-render, with no service call or stop timer to clear it.
+    page.evaluate(
+        """() => { const el = document.getElementById("root").firstElementChild; el._loading = true; el._render(); }"""
+    )
+    page.wait_for_timeout(200)
+    width = shot.get("width", WIDTH)
+    box = page.locator("#root").bounding_box()
+    clip = {"x": 0, "y": 0, "width": width + 32, "height": int(box["height"] + 0.999) + 32}
+    frames = round(fps * seconds)
+    with tempfile.TemporaryDirectory() as frame_dir:
+        for i in range(frames):
+            page.evaluate(
+                "(t) => { for (const a of document.getAnimations()) { a.pause(); a.currentTime = t; } }",
+                (i * 1000) / fps,
+            )
+            page.screenshot(path=f"{frame_dir}/f{i:03d}.png", clip=clip)
+        page.close()
+        out = str(ROOT / "screenshots" / f"{shot['file']}.gif")
+        # Halve the retina capture and build a per-clip palette: the colours stay clean and the file stays small.
+        subprocess.run(
+            [
+                "ffmpeg", "-y", "-loglevel", "error", "-framerate", str(fps), "-i", f"{frame_dir}/f%03d.png",
+                "-vf", f"scale={clip['width']}:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=128[p];[b][p]paletteuse=dither=bayer:bayer_scale=4",
+                "-loop", "0", out,
+            ],
+            check=True,
+        )
+    print(f"screenshots/{shot['file']}.gif")
+
+
 def main():
     out_dir = ROOT / "screenshots"
     out_dir.mkdir(exist_ok=True)
@@ -225,34 +292,9 @@ def main():
             timezone_id="Europe/Paris",
         )
         for shot in SHOTS:
-            # A fresh page per shot: the card script declares top-level constants
-            page = context.new_page()
-            page.on("pageerror", lambda err: print(f"page error: {err}"))
-            page.clock.set_fixed_time(NOW)
-            width = shot.get("width", WIDTH)
-            page.set_content(page_html(shot["theme"], width))
-            page.add_script_tag(content=HA_ELEMENTS)
-            page.add_script_tag(content=CARD_JS)
-            page.evaluate(
-                """({states, entities, devices, dark, config, tag, zoom}) => {
-                  const el = document.createElement(tag);
-                  el.setConfig({type: `custom:${tag}`, ...config});
-                  el.hass = {states, entities, devices, user: {is_admin: true}, language: "en", locale: {language: "en"}, themes: {darkMode: dark}, callService: () => Promise.resolve()};
-                  document.getElementById("root").appendChild(el);
-                  // A mouse click (detail: 1), so that no focus ring shows on the new button.
-                  if (zoom) el.shadowRoot.querySelector("button.zoom").dispatchEvent(new MouseEvent("click", {bubbles: true, composed: true, detail: 1}));
-                }""",
-                {
-                    "states": STATES,
-                    "entities": ENTITIES,
-                    "devices": DEVICES,
-                    "dark": shot["theme"] == "dark",
-                    "config": shot["config"],
-                    "tag": shot.get("tag", "iptv-card"),
-                    "zoom": shot.get("zoom", False),
-                },
-            )
+            page = mount(context, shot)
             page.wait_for_timeout(300)
+            width = shot.get("width", WIDTH)
             # The card with 16 px of theme background around it
             box = page.locator("#root").bounding_box()
             page.screenshot(
@@ -262,6 +304,8 @@ def main():
             )
             print(f"screenshots/{shot['file']}.png")
             page.close()
+        # The refresh button spinning while subscriptions reload.
+        animate(context, {"file": "refreshing", "theme": "light", "config": {"devices": ["iptv"]}})
         browser.close()
 
 

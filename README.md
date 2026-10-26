@@ -208,6 +208,10 @@ In the full view, a click anywhere outside the card also brings back the compact
 
 ## Screenshots
 
+While subscriptions reload, the card animates: the refresh button spins until the check finishes. It settles to a still card once done.
+
+![refresh animation](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/refreshing.gif)
+
 ![iptv-card](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/card.png)
 
 ![iptv-card with two providers](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/card-multi.png)
@@ -244,7 +248,7 @@ The card is served by the integration at `/iptv/iptv-card.js` and registered in 
 
 ```bash
 pip install playwright && playwright install chromium
-python scripts/screenshots.py   # renders screenshots/card.png, card-multi.png and mini*.png with mock subscriptions
+python scripts/screenshots.py   # renders the card PNGs and refreshing.gif (needs ffmpeg) with mock subscriptions
 ```
 
 The card is plain JavaScript (`custom_components/iptv/frontend/iptv-card.js`), served by the integration: no build step.
