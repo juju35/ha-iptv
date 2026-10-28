@@ -124,18 +124,17 @@ async def _probe_stream(session: aiohttp.ClientSession, url: str, headers: dict[
     Returns {ok: bool, latency_ms, error}.
     """
     start = time.monotonic()
-    ms = lambda: round((time.monotonic() - start) * 1000)  # noqa: E731
     try:
         async with session.get(url, headers=headers, timeout=STREAM_TIMEOUT, allow_redirects=True) as resp:
             if resp.status >= 400:
-                return {"ok": False, "latency_ms": ms(), "error": f"HTTP {resp.status}"}
+                return {"ok": False, "latency_ms": _elapsed_ms(start), "error": f"HTTP {resp.status}"}
             ctype = (resp.headers.get("Content-Type") or "").lower()
             chunk = await resp.content.read(16384)
             if not chunk:
-                return {"ok": False, "latency_ms": ms(), "error": "empty stream"}
+                return {"ok": False, "latency_ms": _elapsed_ms(start), "error": "empty stream"}
             if ctype.startswith("text/") or "html" in ctype or "json" in ctype:
-                return {"ok": False, "latency_ms": ms(), "error": "not a media stream"}
-            return {"ok": True, "latency_ms": ms(), "error": None}
+                return {"ok": False, "latency_ms": _elapsed_ms(start), "error": "not a media stream"}
+            return {"ok": True, "latency_ms": _elapsed_ms(start), "error": None}
     except (TimeoutError, aiohttp.ClientError) as err:
         return {"ok": False, "latency_ms": None, "error": _safe_err(err)}
 
@@ -181,6 +180,11 @@ def server_key(url: str) -> str:
 
 # ── Xtream Codes ────────────────────────────────────────────────────────────
 
+# The full live / VOD / series lists (several MB) are downloaded only to be
+# counted: refresh the counters and the French summary at most this often,
+# instead of on every account refresh.
+CATALOG_MAX_AGE = 6 * 3600  # seconds
+
 
 class XtreamClient:
     """Query player_api.php for the account info and catalogue sizes."""
@@ -196,6 +200,9 @@ class XtreamClient:
         self.user_info_ms: int | None = None
         # No shared session state: a health check never waits for a refresh
         self.busy = False
+        # Last catalogue counters + French summary, and when they were read
+        self._catalog: dict[str, Any] | None = None
+        self._catalog_at = 0.0
 
     async def _get(self, action: str | None = None) -> Any:
         params = dict(self._auth)
@@ -282,18 +289,29 @@ class XtreamClient:
             raise IptvAuthError
         return info
 
-    async def async_get_data(self) -> dict[str, Any]:
-        """Return the account info plus live / VOD / series counts."""
-        try:
-            info = await self.async_get_user_info()
-        except IptvAuthError:
-            return {"auth": False}
+    async def _catalog_data(self) -> dict[str, Any]:
+        """Counters and French summary, refreshed at most every CATALOG_MAX_AGE."""
+        if self._catalog is not None and time.monotonic() - self._catalog_at < CATALOG_MAX_AGE:
+            return self._catalog
         channels, movies, series, french = await asyncio.gather(
             self._count("get_live_streams"),
             self._count("get_vod_streams"),
             self._count("get_series"),
             self.async_get_french(),
         )
+        catalog = {"channels": channels, "movies": movies, "series": series, "french": french}
+        if any(v is not None for v in catalog.values()):
+            self._catalog, self._catalog_at = catalog, time.monotonic()
+            return catalog
+        # Unreadable catalogue: keep the last known values, retry next refresh
+        return self._catalog or catalog
+
+    async def async_get_data(self) -> dict[str, Any]:
+        """Return the account info plus live / VOD / series counts."""
+        try:
+            info = await self.async_get_user_info()
+        except IptvAuthError:
+            return {"auth": False}
         return {
             "auth": True,
             "status": info.get("status"),
@@ -302,10 +320,7 @@ class XtreamClient:
             "is_trial": info.get("is_trial"),
             "active_cons": info.get("active_cons"),
             "max_connections": info.get("max_connections"),
-            "channels": channels,
-            "movies": movies,
-            "series": series,
-            "french": french,
+            **await self._catalog_data(),
         }
 
 
@@ -413,10 +428,12 @@ class _StalkerRefused(ValueError):
 class StalkerClient:
     """Authenticate a MAC against a Stalker portal and read its account info."""
 
-    def __init__(self, session: aiohttp.ClientSession, url: str, mac: str) -> None:
+    def __init__(self, session: aiohttp.ClientSession, url: str, mac: str, tz: str | None = None) -> None:
         self._session = session
         self._base = normalize_url(url)
         self._mac = normalize_mac(mac)
+        # Some panels use the STB timezone cookie for the EPG
+        self._tz = tz or "Europe/Paris"
         self._portal: str | None = None
         self._token: str | None = None
         # The coordinator and the health check share this client: a handshake
@@ -432,7 +449,7 @@ class StalkerClient:
             "User-Agent": STB_UA,
             "Referer": self._base + "/c/",
             "X-User-Agent": "Model: MAG250; Link: WiFi",
-            "Cookie": f"mac={self._mac}; stb_lang=en; timezone=Europe/Paris",
+            "Cookie": f"mac={self._mac}; stb_lang=en; timezone={self._tz}",
         }
         if token:
             headers["Authorization"] = f"Bearer {token}"

@@ -189,6 +189,7 @@ for device_id, (name, entities) in SUBSCRIPTIONS.items():
 
 SHOTS = [
     {"file": "card", "theme": "light", "config": {"devices": ["iptv"]}},
+    {"file": "card-dark", "theme": "dark", "config": {"devices": ["iptv"]}},
     {"file": "card-multi", "theme": "light", "config": {"devices": ["iptv", "iptv2"]}},
     # The mini card, and the same card zoomed in (its detail button clicked).
     *[
@@ -271,9 +272,19 @@ def animate(context, shot, *, fps=20, seconds=2):
         # Halve the retina capture and build a per-clip palette: the colours stay clean and the file stays small.
         subprocess.run(
             [
-                "ffmpeg", "-y", "-loglevel", "error", "-framerate", str(fps), "-i", f"{frame_dir}/f%03d.png",
-                "-vf", f"scale={clip['width']}:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=128[p];[b][p]paletteuse=dither=bayer:bayer_scale=4",
-                "-loop", "0", out,
+                "ffmpeg",
+                "-y",
+                "-loglevel",
+                "error",
+                "-framerate",
+                str(fps),
+                "-i",
+                f"{frame_dir}/f%03d.png",
+                "-vf",
+                f"scale={clip['width']}:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=128[p];[b][p]paletteuse=dither=bayer:bayer_scale=4",
+                "-loop",
+                "0",
+                out,
             ],
             check=True,
         )

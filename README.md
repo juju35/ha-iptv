@@ -214,6 +214,8 @@ While subscriptions reload, the card animates: the refresh button spins until th
 
 ![iptv-card](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/card.png)
 
+![iptv-card, dark theme](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/card-dark.png)
+
 ![iptv-card with two providers](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/card-multi.png)
 
 | Mini card | Zoomed in |

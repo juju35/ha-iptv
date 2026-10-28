@@ -76,6 +76,7 @@ SENSORS: tuple[IptvSensorDescription, ...] = (
     IptvSensorDescription(
         key="days_left",
         native_unit_of_measurement=UnitOfTime.DAYS,
+        state_class=SensorStateClass.MEASUREMENT,
         value_fn=_days_left,
     ),
     IptvSensorDescription(

@@ -18,6 +18,7 @@ from typing import Any
 from homeassistant.components import persistent_notification
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
 
@@ -47,16 +48,7 @@ async def async_migrate_legacy(hass: HomeAssistant) -> int:
         persistent_notification.async_dismiss(hass, f"{LEGACY_DOMAIN}_expiring_{old.entry_id}")
         pending[key] = snapshot
         hass.async_create_task(
-            hass.config_entries.flow.async_init(
-                DOMAIN,
-                context={"source": SOURCE_IMPORT},
-                data={
-                    "unique_id": key,
-                    "title": old.title,
-                    "data": dict(old.data),
-                    "options": dict(old.options),
-                },
-            ),
+            _async_import(hass, key, old),
             f"{DOMAIN} import of {old.title}",
         )
         _LOGGER.info("Migrating IPTV entry %s from %s to %s", old.entry_id, LEGACY_DOMAIN, DOMAIN)
@@ -72,6 +64,23 @@ async def async_migrate_legacy(hass: HomeAssistant) -> int:
             notification_id=f"{DOMAIN}_legacy_folder",
         )
     return len(legacy)
+
+
+async def _async_import(hass: HomeAssistant, key: str, old: ConfigEntry) -> None:
+    """Re-create one legacy entry under the new domain, through the import flow."""
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN,
+        context={"source": SOURCE_IMPORT},
+        data={
+            "unique_id": key,
+            "title": old.title,
+            "data": dict(old.data),
+            "options": dict(old.options),
+        },
+    )
+    if result.get("type") != FlowResultType.CREATE_ENTRY:
+        # Aborted flow (already configured): the snapshot will never be applied
+        hass.data.get(PENDING, {}).pop(key, None)
 
 
 def _snapshot(hass: HomeAssistant, entry: ConfigEntry) -> dict[str, Any]:

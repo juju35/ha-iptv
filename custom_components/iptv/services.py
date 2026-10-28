@@ -89,7 +89,9 @@ async def _validate(hass: HomeAssistant, provider: str, data: dict[str, Any]) ->
     if provider == PROVIDER_STALKER:
         if not valid_mac(data.get(CONF_MAC, "")):
             return "invalid_mac"
-        client: XtreamClient | StalkerClient = StalkerClient(session, url, normalize_mac(data[CONF_MAC]))
+        client: XtreamClient | StalkerClient = StalkerClient(
+            session, url, normalize_mac(data[CONF_MAC]), tz=hass.config.time_zone
+        )
     else:
         client = XtreamClient(session, url, data[CONF_USERNAME], data[CONF_PASSWORD])
     try:
