@@ -136,7 +136,9 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
         return await self._check(client, french)
 
     async def _check_stalker(self, data: dict[str, Any], french: bool = False) -> dict[str, str]:
-        client = StalkerClient(async_get_clientsession(self.hass), data[CONF_URL], data[CONF_MAC])
+        client = StalkerClient(
+            async_get_clientsession(self.hass), data[CONF_URL], data[CONF_MAC], tz=self.hass.config.time_zone
+        )
         return await self._check(client, french)
 
     async def _check(self, client: XtreamClient | StalkerClient, french: bool = False) -> dict[str, str]:

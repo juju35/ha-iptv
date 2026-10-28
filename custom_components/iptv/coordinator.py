@@ -48,7 +48,7 @@ class IptvCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         )
         session = async_get_clientsession(hass)
         if entry.data.get(CONF_PROVIDER) == PROVIDER_STALKER:
-            self.client = StalkerClient(session, entry.data[CONF_URL], entry.data[CONF_MAC])
+            self.client = StalkerClient(session, entry.data[CONF_URL], entry.data[CONF_MAC], tz=hass.config.time_zone)
         else:
             self.client = XtreamClient(
                 session,

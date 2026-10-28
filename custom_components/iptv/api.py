@@ -428,10 +428,12 @@ class _StalkerRefused(ValueError):
 class StalkerClient:
     """Authenticate a MAC against a Stalker portal and read its account info."""
 
-    def __init__(self, session: aiohttp.ClientSession, url: str, mac: str) -> None:
+    def __init__(self, session: aiohttp.ClientSession, url: str, mac: str, tz: str | None = None) -> None:
         self._session = session
         self._base = normalize_url(url)
         self._mac = normalize_mac(mac)
+        # Some panels use the STB timezone cookie for the EPG
+        self._tz = tz or "Europe/Paris"
         self._portal: str | None = None
         self._token: str | None = None
         # The coordinator and the health check share this client: a handshake
@@ -447,7 +449,7 @@ class StalkerClient:
             "User-Agent": STB_UA,
             "Referer": self._base + "/c/",
             "X-User-Agent": "Model: MAG250; Link: WiFi",
-            "Cookie": f"mac={self._mac}; stb_lang=en; timezone=Europe/Paris",
+            "Cookie": f"mac={self._mac}; stb_lang=en; timezone={self._tz}",
         }
         if token:
             headers["Authorization"] = f"Bearer {token}"
