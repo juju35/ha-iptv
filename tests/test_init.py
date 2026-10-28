@@ -720,6 +720,21 @@ async def test_stalker_probe_auth_headers_stay_on_portal_host(stream_url, authed
     assert seen["headers"]["User-Agent"]
 
 
+# ── migration: aborted import leaves no snapshot behind ──────────────────────
+
+
+async def test_aborted_import_purges_legacy_snapshot(hass, entry):
+    """An entry already configured aborts the import flow: its snapshot is dropped."""
+    from custom_components.iptv.migrate import LEGACY_DOMAIN, PENDING, async_migrate_legacy
+
+    legacy = MockConfigEntry(domain=LEGACY_DOMAIN, title="provider.example", data=DATA, unique_id=entry.unique_id)
+    legacy.add_to_hass(hass)
+    assert await async_migrate_legacy(hass) == 1
+    await hass.async_block_till_done()
+    assert not hass.config_entries.async_entries(LEGACY_DOMAIN)
+    assert hass.data.get(PENDING, {}) == {}
+
+
 # ── catalogue counters: cached between refreshes ─────────────────────────────
 
 
