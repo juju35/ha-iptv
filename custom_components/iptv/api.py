@@ -274,7 +274,11 @@ class XtreamClient:
         finally:
             self.user_info_ms = _elapsed_ms(start)
         info = data.get("user_info") if isinstance(data, dict) else None
-        if not isinstance(info, dict) or str(info.get("auth")) != "1":
+        if not isinstance(info, dict):
+            # A proxy or captive portal can answer valid but unrelated JSON:
+            # unreachable server, not refused credentials (no reauth)
+            raise IptvError("unexpected answer")
+        if str(info.get("auth")) != "1":
             raise IptvAuthError
         return info
 
@@ -594,7 +598,15 @@ class StalkerClient:
         url = cmd.split()[-1] if isinstance(cmd, str) and cmd else None
         if not url or "://" not in url:
             return {"ok": False, "channel": name, "latency_ms": None, "error": "no stream link"}
-        res = await _probe_stream(self._session, url, self._headers(self._token))
+        # create_link can hand the stream to another host (CDN / load
+        # balancer), and _probe_stream follows redirects: the session token
+        # and the MAC cookie are only sent to the portal host itself
+        headers = (
+            self._headers(self._token)
+            if urlparse(url).netloc == urlparse(self._base).netloc
+            else {"User-Agent": STB_UA}
+        )
+        res = await _probe_stream(self._session, url, headers)
         res["channel"] = name
         return res
 

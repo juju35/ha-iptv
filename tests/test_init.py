@@ -675,6 +675,59 @@ async def test_stream_probe_url_quotes_credentials(password):
     assert url.parts == ("/", "live", "al/ex", password, "1.ts")
 
 
+@pytest.mark.parametrize(
+    ("stream_url", "authed"),
+    [("http://portal.example/play/1.ts", True), ("http://cdn.example/play/1.ts", False)],
+)
+async def test_stalker_probe_auth_headers_stay_on_portal_host(stream_url, authed):
+    """The session token and the MAC cookie never reach a third-party stream host."""
+    client = StalkerClient(Mock(), PORTAL, MAC)
+    client._portal, client._token = "/portal.php", "tok"  # noqa: SLF001
+    seen = {}
+
+    async def get(params):
+        if params.get("action") == "create_link":
+            return {"cmd": f"ffmpeg {stream_url}"}
+        return {"data": [{"id": 1, "name": "Channel 1", "cmd": "ffmpeg http://localhost/ch/1"}]}
+
+    async def probe(session, url, headers):
+        seen["url"], seen["headers"] = url, headers
+        return {"ok": True, "latency_ms": 1, "error": None}
+
+    with (
+        patch.object(client, "_get", side_effect=get),
+        patch("custom_components.iptv.api._probe_stream", side_effect=probe),
+    ):
+        res = await client.async_test_stream()
+    assert res["ok"] is True
+    assert seen["url"] == stream_url
+    assert ("Authorization" in seen["headers"]) is authed
+    assert ("Cookie" in seen["headers"]) is authed
+    assert seen["headers"]["User-Agent"]
+
+
+# ── user info: refused credentials vs unexpected answer ─────────────────────
+
+
+@pytest.mark.parametrize("answer", [{"message": "login required"}, [], "maintenance", None])
+async def test_xtream_unexpected_answer_is_not_an_auth_error(answer):
+    """Valid but unrelated JSON (proxy, captive portal) must not trigger a reauth."""
+    from custom_components.iptv.api import IptvAuthError, IptvError, XtreamClient
+
+    client = XtreamClient(Mock(), SERVER, USERNAME, PASSWORD)
+    with patch.object(client, "_get", return_value=answer), pytest.raises(IptvError) as err:
+        await client.async_get_user_info()
+    assert not isinstance(err.value, IptvAuthError)
+
+
+async def test_xtream_refused_credentials_raise_auth_error():
+    from custom_components.iptv.api import IptvAuthError, XtreamClient
+
+    client = XtreamClient(Mock(), SERVER, USERNAME, PASSWORD)
+    with patch.object(client, "_get", return_value={"user_info": {"auth": 0}}), pytest.raises(IptvAuthError):
+        await client.async_get_user_info()
+
+
 # ── admin websocket commands: no password in call_service events ────────────
 
 
