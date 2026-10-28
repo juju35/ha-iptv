@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.20.0
+
+### Changes
+- German and Spanish translations: the integration (config flow, options, entities, services) and the card (including the mini card and its visual editor, whose language selector now offers Deutsch and Español).
+
 ## 3.19.0
 
 ### Changes

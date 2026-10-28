@@ -25,7 +25,7 @@ custom_components/iptv/
 ├── config_flow.py     # Xtream Codes or Stalker portal, options
 ├── const.py           # Constants, VERSION (card cache-buster), CARD_URL / LOGO_URL
 ├── icons.json         # Entity and service icons
-├── services.yaml / translations/{en,fr}.json
+├── services.yaml / translations/{en,fr,de,es}.json
 ├── brand/             # Integration icon and logo
 └── frontend/iptv-card.js   # Vanilla JS cards (iptv-card, iptv-mini-card), no dependencies
 ```

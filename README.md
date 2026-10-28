@@ -30,7 +30,7 @@ Home Assistant integration and Lovelace card that track one or several **IPTV su
 - Persistent notification a configurable number of days before expiration (7 by default)
 - Visual editor, refresh button
 - Fully compatible with Home Assistant dark mode
-- English and French, auto-detected
+- English, French, German and Spanish, auto-detected
 
 Home Assistant queries the Xtream server itself, so it works even when the server is plain `http://` without CORS headers or is only reachable from your network. Only a small summary is stored: the full channel, movie and series lists never reach the browser.
 
@@ -186,7 +186,7 @@ devices:
 | `device` | ❌ | — | Legacy single-device option, still read when `devices` is not set |
 | `title` | ❌ | Auto (i18n) | Card title |
 | `warning_days` | ❌ | `7` | Turns orange when fewer days than this are left |
-| `language` | ❌ | Auto | Force language: `en` or `fr` (auto-detects from HA settings) |
+| `language` | ❌ | Auto | Force language: `en`, `fr`, `de` or `es` (auto-detects from HA settings) |
 
 Each subscription shows a French flag pill (**FR** in green when French lists were found, **No FR** in red otherwise), a health pill next to its status, and the moment of its last health check: **Online** with the response time (green), **Slow** above 3 s (orange), **Unreachable** (red). The **+** button (card header) opens a popup to add a new account, the 👁 button on each subscription shows its server URL and credentials with a copy button for each, the ✎ button edits them, and the 🗑 button removes the account (with confirmation). Adding or editing runs the same checks as the UI (credentials, French lists and video stream). The edit form is also available from **Settings → Devices & services → IPTV → ⋮ → Reconfigure**. The ⟳ button queries every shown server and runs a health check right away. The add, view, edit and remove buttons are shown to Home Assistant administrators only. The card adds, views and edits accounts through admin-only WebSocket commands (`iptv/add_account`, `iptv/edit_account`, `iptv/get_credentials`), so the password never goes through a service call; removing uses the admin-only `iptv.remove_account` service.
 
@@ -269,6 +269,8 @@ The integration and the card auto-detect the language from your Home Assistant s
 |---|---|
 | English | `en` |
 | Français | `fr` |
+| Deutsch | `de` |
+| Español | `es` |
 
 Contributions for additional languages are welcome!
 
