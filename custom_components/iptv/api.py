@@ -124,18 +124,17 @@ async def _probe_stream(session: aiohttp.ClientSession, url: str, headers: dict[
     Returns {ok: bool, latency_ms, error}.
     """
     start = time.monotonic()
-    ms = lambda: round((time.monotonic() - start) * 1000)  # noqa: E731
     try:
         async with session.get(url, headers=headers, timeout=STREAM_TIMEOUT, allow_redirects=True) as resp:
             if resp.status >= 400:
-                return {"ok": False, "latency_ms": ms(), "error": f"HTTP {resp.status}"}
+                return {"ok": False, "latency_ms": _elapsed_ms(start), "error": f"HTTP {resp.status}"}
             ctype = (resp.headers.get("Content-Type") or "").lower()
             chunk = await resp.content.read(16384)
             if not chunk:
-                return {"ok": False, "latency_ms": ms(), "error": "empty stream"}
+                return {"ok": False, "latency_ms": _elapsed_ms(start), "error": "empty stream"}
             if ctype.startswith("text/") or "html" in ctype or "json" in ctype:
-                return {"ok": False, "latency_ms": ms(), "error": "not a media stream"}
-            return {"ok": True, "latency_ms": ms(), "error": None}
+                return {"ok": False, "latency_ms": _elapsed_ms(start), "error": "not a media stream"}
+            return {"ok": True, "latency_ms": _elapsed_ms(start), "error": None}
     except (TimeoutError, aiohttp.ClientError) as err:
         return {"ok": False, "latency_ms": None, "error": _safe_err(err)}
 
