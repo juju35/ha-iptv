@@ -274,7 +274,11 @@ class XtreamClient:
         finally:
             self.user_info_ms = _elapsed_ms(start)
         info = data.get("user_info") if isinstance(data, dict) else None
-        if not isinstance(info, dict) or str(info.get("auth")) != "1":
+        if not isinstance(info, dict):
+            # A proxy or captive portal can answer valid but unrelated JSON:
+            # unreachable server, not refused credentials (no reauth)
+            raise IptvError("unexpected answer")
+        if str(info.get("auth")) != "1":
             raise IptvAuthError
         return info
 

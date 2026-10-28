@@ -675,6 +675,28 @@ async def test_stream_probe_url_quotes_credentials(password):
     assert url.parts == ("/", "live", "al/ex", password, "1.ts")
 
 
+# ── user info: refused credentials vs unexpected answer ─────────────────────
+
+
+@pytest.mark.parametrize("answer", [{"message": "login required"}, [], "maintenance", None])
+async def test_xtream_unexpected_answer_is_not_an_auth_error(answer):
+    """Valid but unrelated JSON (proxy, captive portal) must not trigger a reauth."""
+    from custom_components.iptv.api import IptvAuthError, IptvError, XtreamClient
+
+    client = XtreamClient(Mock(), SERVER, USERNAME, PASSWORD)
+    with patch.object(client, "_get", return_value=answer), pytest.raises(IptvError) as err:
+        await client.async_get_user_info()
+    assert not isinstance(err.value, IptvAuthError)
+
+
+async def test_xtream_refused_credentials_raise_auth_error():
+    from custom_components.iptv.api import IptvAuthError, XtreamClient
+
+    client = XtreamClient(Mock(), SERVER, USERNAME, PASSWORD)
+    with patch.object(client, "_get", return_value={"user_info": {"auth": 0}}), pytest.raises(IptvAuthError):
+        await client.async_get_user_info()
+
+
 # ── admin websocket commands: no password in call_service events ────────────
 
 
