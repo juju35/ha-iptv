@@ -1,5 +1,23 @@
 # Changelog
 
+## 3.19.0
+
+### Changes
+- `days_left` sensor: `state_class: measurement`, so Home Assistant keeps long-term statistics for the days left on each subscription.
+- Xtream: the catalogue counters (channels, films, series and their categories) are refreshed at most every 6 hours instead of on every refresh, which avoids downloading several MB each time; the account info is still read on every refresh, and an unreadable catalogue keeps the last values and retries.
+- Stalker: the STB cookie uses the Home Assistant time zone (Europe/Paris as a fallback).
+
+### Fixes
+- Xtream: an unexpected answer (a proxy or captive portal returning unrelated JSON) is now a temporary error instead of an authentication failure, so it no longer starts a reauthentication flow or shows `invalid_auth`.
+- Stalker: the session token and MAC cookie are only sent to the stream probe when the stream is on the portal host, never to a third-party CDN.
+- Health: an authentication error or a failed refresh resets `stream_ok` / `stream_channel`, so the sensor no longer shows `unreachable` with a stale `stream_ok: true`.
+- Migration: a legacy `iptv_xtream` snapshot is cleared when the import is aborted instead of staying in memory.
+- Card: the add and refresh button titles are escaped like the other titles, and the credentials popup no longer writes the password into the copy button's attribute.
+
+### Maintenance
+- README: refresh animation GIF and dark-theme screenshot of the full card.
+- Screenshots workflow: hardened apt handling, only pushes on pull requests from this repository, manual runs upload the screenshots as an artifact.
+
 ## 3.18.0
 
 ### Fixes
