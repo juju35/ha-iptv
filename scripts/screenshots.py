@@ -189,6 +189,7 @@ for device_id, (name, entities) in SUBSCRIPTIONS.items():
 
 SHOTS = [
     {"file": "card", "theme": "light", "config": {"devices": ["iptv"]}},
+    {"file": "card-dark", "theme": "dark", "config": {"devices": ["iptv"]}},
     {"file": "card-multi", "theme": "light", "config": {"devices": ["iptv", "iptv2"]}},
     # The mini card, and the same card zoomed in (its detail button clicked).
     *[
