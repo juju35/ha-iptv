@@ -720,6 +720,61 @@ async def test_stalker_probe_auth_headers_stay_on_portal_host(stream_url, authed
     assert seen["headers"]["User-Agent"]
 
 
+# ── catalogue counters: cached between refreshes ─────────────────────────────
+
+
+def _counting_xtream(calls: list[str | None], fail: set[str | None] | None = None):
+    from custom_components.iptv.api import IptvError, XtreamClient
+
+    client = XtreamClient(Mock(), SERVER, USERNAME, PASSWORD)
+
+    async def get(action=None):
+        calls.append(action)
+        if fail and action in fail:
+            raise IptvError("HTTP 503")
+        if action is None:
+            return {"user_info": {"auth": 1, "status": "Active"}}
+        return [{"category_name": "FR | Généraliste"}] if "categories" in action else [{"stream_id": 1}]
+
+    return client, get
+
+
+async def test_xtream_catalog_lists_are_cached_between_refreshes():
+    """The heavy live / VOD / series lists are not downloaded on every refresh."""
+    from custom_components.iptv.api import CATALOG_MAX_AGE
+
+    calls: list[str | None] = []
+    client, get = _counting_xtream(calls)
+    with patch.object(client, "_get", side_effect=get):
+        first = await client.async_get_data()
+        second = await client.async_get_data()
+        assert calls.count("get_live_streams") == 1
+        assert calls.count(None) == 2  # the account info is read on every refresh
+        assert second["channels"] == first["channels"] == 1
+        assert second["french"] == first["french"]
+        # Catalogue older than CATALOG_MAX_AGE: downloaded again
+        client._catalog_at -= CATALOG_MAX_AGE  # noqa: SLF001
+        await client.async_get_data()
+    assert calls.count("get_live_streams") == 2
+
+
+async def test_xtream_unreadable_catalog_keeps_last_values_and_retries():
+    from custom_components.iptv.api import CATALOG_MAX_AGE
+
+    calls: list[str | None] = []
+    failing = {"get_live_streams", "get_vod_streams", "get_series"} | {
+        f"get_{k}_categories" for k in ("live", "vod", "series")
+    }
+    client, get = _counting_xtream(calls, fail=failing)
+    with patch.object(client, "_get", side_effect=get):
+        assert (await client.async_get_data())["channels"] is None
+        client._catalog = {"channels": 1, "movies": 1, "series": 1, "french": None}  # noqa: SLF001
+        client._catalog_at -= CATALOG_MAX_AGE  # noqa: SLF001
+        data = await client.async_get_data()
+    assert data["channels"] == 1  # last known values kept
+    assert calls.count("get_live_streams") == 2  # and the download retried
+
+
 # ── user info: refused credentials vs unexpected answer ─────────────────────
 
 
