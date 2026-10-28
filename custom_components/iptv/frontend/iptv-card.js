@@ -630,8 +630,8 @@ class IptvCard extends HTMLElement {
         <div class="header">
           ${iptvBadge(iptvWorstState(states))}
           <div class="titles"><div class="title-row"><div class="name">${esc(title)}</div>${status}</div>${info}</div>
-          ${admin ? `<button class="add" title="${this._t('add_btn')}"><ha-icon icon="mdi:plus"></ha-icon></button>` : ''}
-          <button class="refresh ${this._loading ? 'spin' : ''}" title="${this._t('refresh')}"><ha-icon icon="mdi:refresh"></ha-icon></button>
+          ${admin ? `<button class="add" title="${esc(this._t('add_btn'))}"><ha-icon icon="mdi:plus"></ha-icon></button>` : ''}
+          <button class="refresh ${this._loading ? 'spin' : ''}" title="${esc(this._t('refresh'))}"><ha-icon icon="mdi:refresh"></ha-icon></button>
         </div>
         ${body}
       </ha-card>`;
@@ -862,11 +862,12 @@ class IptvCard extends HTMLElement {
       <div class="view-row">
         <div class="view-k">${esc(this._t(r[0]))}</div>
         <div class="view-v">${esc(r[1])}</div>
-        <button class="copy" data-v="${esc(r[1])}" title="${esc(this._t('copy'))}"><ha-icon icon="mdi:content-copy"></ha-icon></button>
+        <button class="copy" title="${esc(this._t('copy'))}"><ha-icon icon="mdi:content-copy"></ha-icon></button>
       </div>`).join('');
     modal.querySelector('.modal').innerHTML = `<h3>${esc(this._t('view_title'))}</h3>${rowsHtml}${close}`;
-    modal.querySelectorAll('button.copy').forEach((el) => {
-      el.addEventListener('click', () => this._copy(el));
+    // The value stays in a closure: the password is never written into the DOM
+    modal.querySelectorAll('button.copy').forEach((el, i) => {
+      el.addEventListener('click', () => this._copy(el, rows[i][1]));
     });
     modal.querySelector('.cancel').addEventListener('click', () => this._closeEditor());
   }
@@ -878,8 +879,7 @@ class IptvCard extends HTMLElement {
     modal.querySelector('.cancel').addEventListener('click', () => this._closeEditor());
   }
 
-  async _copy(el) {
-    var text = el.dataset.v;
+  async _copy(el, text) {
     try {
       await navigator.clipboard.writeText(text);
     } catch (_e) {
