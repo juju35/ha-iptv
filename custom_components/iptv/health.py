@@ -88,6 +88,7 @@ class HealthMonitor:
         """A failed full refresh also means the server is unreachable."""
         if not self._coordinator.last_update_success and self.status != HEALTH_UNREACHABLE:
             err = self._coordinator.last_exception
+            self.stream_ok = self.stream_channel = None
             # UpdateFailed wraps an IptvError: describe that one, never the raw text
             self._set(HEALTH_UNREACHABLE, None, _safe_err(err.__cause__ or err) if err else None)
 
@@ -108,8 +109,11 @@ class HealthMonitor:
         try:
             info = await client.async_get_user_info()
         except IptvAuthError:
+            # No stream was probed: drop the result of the previous check
+            self.stream_ok = self.stream_channel = None
             self._set(HEALTH_AUTH_FAILED, self._latency(client, start), "credentials refused")
         except IptvError as err:
+            self.stream_ok = self.stream_channel = None
             self._set(HEALTH_UNREACHABLE, None, _safe_err(err))
         else:
             latency = self._latency(client, start)

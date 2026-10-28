@@ -620,6 +620,20 @@ async def test_stalker_probe_skipped_while_refresh_holds_lock(hass, busy, probed
     assert monitor.status == "ok"
 
 
+async def test_health_error_clears_stale_stream_result(hass):
+    """An unreachable server never keeps the stream_ok of a previous check."""
+    from custom_components.iptv.api import IptvError
+
+    client = StalkerClient(Mock(), PORTAL, MAC)
+    monitor = _health_monitor(hass, client, stream_check=True)
+    monitor.stream_ok, monitor.stream_channel = True, "Channel 1"
+    with patch.object(client, "async_get_user_info", side_effect=IptvError("HTTP 503")):
+        await monitor.async_check_now()
+    assert monitor.status == "unreachable"
+    assert monitor.stream_ok is None
+    assert monitor.stream_channel is None
+
+
 # ── renaming the entry ──────────────────────────────────────────────────────
 
 
