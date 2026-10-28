@@ -1,0 +1,247 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Suscripción IPTV",
+        "description": "Elige el tipo de proveedor.",
+        "menu_options": {
+          "xtream": "Xtream Codes (usuario / contraseña)",
+          "stalker": "Stalker / Ministra (dirección MAC)"
+        }
+      },
+      "xtream": {
+        "title": "Xtream Codes",
+        "description": "Home Assistant consulta la API Xtream Codes de tu proveedor.",
+        "data": {
+          "url": "URL del servidor Xtream",
+          "username": "Usuario",
+          "password": "Contraseña",
+          "notify_service": "Enviar los datos de conexión a"
+        },
+        "data_description": {
+          "url": "Incluido el puerto, p. ej. http://server:8080",
+          "notify_service": "Opcional: servicio de notificación (p. ej. notify.mobile_app_phone) que recibe el servidor, el usuario (o la dirección MAC) y la caducidad, nunca la contraseña, una vez añadida la cuenta"
+        }
+      },
+      "stalker": {
+        "title": "IPTV Stalker (dirección MAC)",
+        "description": "Home Assistant consulta el portal Stalker/Ministra de tu proveedor con una dirección MAC.",
+        "data": {
+          "url": "URL del portal",
+          "mac": "Dirección MAC",
+          "notify_service": "Enviar los datos de conexión a"
+        },
+        "data_description": {
+          "url": "Incluido el puerto, p. ej. http://portal:80",
+          "mac": "Formato AA:BB:CC:DD:EE:FF",
+          "notify_service": "Opcional: servicio de notificación (p. ej. notify.mobile_app_phone) que recibe el servidor, el usuario (o la dirección MAC) y la caducidad, nunca la contraseña, una vez añadida la cuenta"
+        }
+      },
+      "reconfigure": {
+        "title": "Suscripción IPTV",
+        "data": {
+          "url": "URL del servidor o del portal",
+          "username": "Usuario",
+          "password": "Contraseña",
+          "mac": "Dirección MAC"
+        },
+        "data_description": {
+          "url": "Incluido el puerto, p. ej. http://server:8080",
+          "mac": "Formato AA:BB:CC:DD:EE:FF",
+          "password": "Déjalo vacío para conservar la contraseña actual"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Suscripción IPTV",
+        "data": {
+          "url": "URL del servidor o del portal",
+          "username": "Usuario",
+          "password": "Contraseña",
+          "mac": "Dirección MAC"
+        },
+        "data_description": {
+          "url": "Incluido el puerto, p. ej. http://server:8080",
+          "mac": "Formato AA:BB:CC:DD:EE:FF",
+          "password": "Déjalo vacío para conservar la contraseña actual"
+        },
+        "description": "El servidor ha rechazado las credenciales de {name}. Introduce las nuevas."
+      }
+    },
+    "error": {
+      "cannot_connect": "No se puede conectar con el servidor IPTV",
+      "invalid_auth": "Credenciales rechazadas por el servidor",
+      "invalid_mac": "Dirección MAC no válida (formato AA:BB:CC:DD:EE:FF)",
+      "no_french_lists": "No se ha encontrado ninguna lista francesa en este proveedor (categorías en directo, VOD o series): la cuenta no se añade.",
+      "french_unknown": "No se han podido leer las categorías de este proveedor para buscar listas francesas.",
+      "stream_ko": "El flujo de vídeo del canal de prueba no se reproduce: la cuenta no se añade.",
+      "empty_catalogue": "El proveedor no tiene un catálogo de canales / películas / series utilizable: la cuenta no se añade."
+    },
+    "abort": {
+      "already_configured": "Esta cuenta ya está configurada",
+      "reconfigure_successful": "Reconfiguración correcta",
+      "reauth_successful": "Reautenticación correcta",
+      "migrated": "{count} cuenta(s) de la antigua integración IPTV Xtream se han trasladado a IPTV, con las mismas entidades. Elimina la antigua carpeta custom_components/iptv_xtream si sigue ahí y reinicia Home Assistant.",
+      "account_updated": "{title} está en el mismo servidor: la nueva cuenta es válida durante más tiempo ({new} en lugar de {current}), así que {title} usa ahora las nuevas credenciales.",
+      "existing_longer": "{title} está en el mismo servidor y es válida durante más o el mismo tiempo ({current}, nueva cuenta: {new}): no se ha cambiado nada."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Intervalo de actualización",
+          "notify_days": "Notificar antes de la caducidad",
+          "health_interval": "Intervalo de comprobación del estado",
+          "stream_check": "Probar el flujo de vídeo de un canal"
+        },
+        "data_description": {
+          "notify_days": "Notificación persistente este número de días antes de que caduque la suscripción (0 para desactivarla)",
+          "health_interval": "Con qué frecuencia se comprueba el servidor con una petición ligera (solo información de la cuenta)",
+          "stream_check": "En cada comprobación del estado, abre brevemente un canal para confirmar que se reproduce (usa una conexión). El estado muestra «Flujo caído» si falla."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "status": {
+        "name": "Estado",
+        "state": {
+          "active": "Activa",
+          "expired": "Caducada",
+          "banned": "Bloqueada",
+          "disabled": "Desactivada",
+          "invalid_auth": "Credenciales no válidas"
+        }
+      },
+      "expiration": {
+        "name": "Caducidad"
+      },
+      "days_left": {
+        "name": "Días restantes"
+      },
+      "created": {
+        "name": "Creada"
+      },
+      "active_connections": {
+        "name": "Conexiones activas"
+      },
+      "max_connections": {
+        "name": "Conexiones máximas"
+      },
+      "channels": {
+        "name": "Canales en directo"
+      },
+      "movies": {
+        "name": "Películas"
+      },
+      "series": {
+        "name": "Series"
+      },
+      "health": {
+        "name": "Salud",
+        "state": {
+          "ok": "OK",
+          "degraded": "Lento",
+          "auth_failed": "Credenciales rechazadas",
+          "unreachable": "Inaccesible",
+          "stream_ko": "Flujo caído"
+        }
+      },
+      "response_time": {
+        "name": "Tiempo de respuesta"
+      },
+      "last_check": {
+        "name": "Última comprobación"
+      },
+      "added": {
+        "name": "Añadida"
+      },
+      "updated": {
+        "name": "Actualizada"
+      }
+    },
+    "binary_sensor": {
+      "trial": {
+        "name": "Prueba"
+      },
+      "french_lists": {
+        "name": "Listas francesas"
+      }
+    }
+  },
+  "services": {
+    "edit_account": {
+      "name": "Editar cuenta",
+      "description": "Cambia las credenciales o la dirección MAC de una cuenta tras realizar las mismas comprobaciones que al añadirla. El grabador guarda los datos de la acción (evento call_service), contraseña incluida: mejor usa la tarjeta.",
+      "fields": {
+        "device_id": {
+          "name": "Cuenta",
+          "description": "La cuenta IPTV que se va a editar."
+        },
+        "url": {
+          "name": "URL del servidor",
+          "description": "Nueva URL del servidor; omítela para conservar la actual."
+        },
+        "username": {
+          "name": "Usuario",
+          "description": "Nuevo usuario (Xtream Codes)."
+        },
+        "password": {
+          "name": "Contraseña",
+          "description": "Nueva contraseña (Xtream Codes); omítela para conservar la actual."
+        },
+        "mac": {
+          "name": "Dirección MAC",
+          "description": "Nueva dirección MAC (portal Stalker)."
+        }
+      }
+    },
+    "remove_account": {
+      "name": "Eliminar cuenta",
+      "description": "Elimina una cuenta IPTV y sus entidades.",
+      "fields": {
+        "device_id": {
+          "name": "Cuenta",
+          "description": "La cuenta IPTV que se va a eliminar."
+        }
+      }
+    },
+    "add_account": {
+      "name": "Añadir cuenta",
+      "description": "Añade una nueva cuenta IPTV con las mismas comprobaciones que la interfaz. El grabador guarda los datos de la acción (evento call_service), contraseña incluida: mejor usa la tarjeta.",
+      "fields": {
+        "provider": {
+          "name": "Tipo de proveedor",
+          "description": "xtream o stalker"
+        },
+        "url": {
+          "name": "URL del servidor",
+          "description": "Incluido el puerto, p. ej. http://server:8080."
+        },
+        "username": {
+          "name": "Usuario",
+          "description": "Solo Xtream Codes."
+        },
+        "password": {
+          "name": "Contraseña",
+          "description": "Solo Xtream Codes."
+        },
+        "mac": {
+          "name": "Dirección MAC",
+          "description": "Solo portal Stalker, formato AA:BB:CC:DD:EE:FF."
+        }
+      }
+    },
+    "get_credentials": {
+      "name": "Obtener credenciales",
+      "description": "Devuelve la URL del servidor y las credenciales de una cuenta para consultarlas.",
+      "fields": {
+        "device_id": {
+          "name": "Cuenta",
+          "description": ""
+        }
+      }
+    }
+  }
+}
