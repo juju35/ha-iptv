@@ -173,7 +173,7 @@
   "services": {
     "edit_account": {
       "name": "Editar cuenta",
-      "description": "Cambia las credenciales o la dirección MAC de una cuenta tras realizar las mismas comprobaciones que al añadirla. El grabador guarda los datos de la acción (evento call_service), contraseña incluida: mejor usa la tarjeta.",
+      "description": "Cambia las credenciales o la dirección MAC de una cuenta tras realizar las mismas comprobaciones que al añadirla. Recorder guarda los datos de la acción (evento call_service), contraseña incluida: mejor usa la tarjeta.",
       "fields": {
         "device_id": {
           "name": "Cuenta",
@@ -209,7 +209,7 @@
     },
     "add_account": {
       "name": "Añadir cuenta",
-      "description": "Añade una nueva cuenta IPTV con las mismas comprobaciones que la interfaz. El grabador guarda los datos de la acción (evento call_service), contraseña incluida: mejor usa la tarjeta.",
+      "description": "Añade una nueva cuenta IPTV con las mismas comprobaciones que la interfaz. Recorder guarda los datos de la acción (evento call_service), contraseña incluida: mejor usa la tarjeta.",
       "fields": {
         "provider": {
           "name": "Tipo de proveedor",

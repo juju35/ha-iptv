@@ -23,7 +23,25 @@ MESSAGES = {
         "soon": "L’abonnement **{name}** expire le {date} : encore {days} jour(s).",
         "expired": "L’abonnement **{name}** a expiré le {date}.",
     },
+    "de": {
+        "title": "IPTV-Abonnement {name}",
+        "soon": "Das Abonnement **{name}** läuft am {date} ab: noch {days} Tag(e).",
+        "expired": "Das Abonnement **{name}** ist am {date} abgelaufen.",
+    },
+    "es": {
+        "title": "Suscripción IPTV {name}",
+        "soon": "La suscripción **{name}** caduca el {date}: quedan {days} día(s).",
+        "expired": "La suscripción **{name}** caducó el {date}.",
+    },
 }
+
+DATE_FORMATS = {"en": "%Y-%m-%d", "fr": "%d/%m/%Y", "de": "%d.%m.%Y", "es": "%d/%m/%Y"}
+
+
+def message_language(language: str | None) -> str:
+    """Supported language of a Home Assistant language code (``de-CH`` → ``de``), English otherwise."""
+    lang = (language or "").split("-")[0].lower()
+    return lang if lang in MESSAGES else "en"
 
 
 OFF = (0, 0)
@@ -67,9 +85,9 @@ class ExpiryNotifier:
         if key == self._last:
             return
         self._last = key
-        lang = "fr" if (self._hass.config.language or "").startswith("fr") else "en"
+        lang = message_language(self._hass.config.language)
         text = MESSAGES[lang]
-        date = dt_util.as_local(expiration).strftime("%d/%m/%Y" if lang == "fr" else "%Y-%m-%d")
+        date = dt_util.as_local(expiration).strftime(DATE_FORMATS[lang])
         message = (text["soon"] if days > 0 else text["expired"]).format(name=self._name, date=date, days=days)
         persistent_notification.async_create(
             self._hass,
