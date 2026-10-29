@@ -9,9 +9,11 @@
 - `iptv.add_account`: the `provider` field only accepts `xtream` or `stalker`; any other value is refused instead of creating an Xtream account with an invalid provider.
 - Card: a failed refresh (connection lost, server error) is caught and shown in the ⟳ button tooltip; an unexpected error reason (e.g. two accounts added at once) shows the generic error message instead of a raw key.
 - Spanish: "Recorder" kept as the integration name in the service descriptions, and the unknown status agrees with *suscripción* ("Desconocida").
+- Spanish: the health sensor is named "Estado del servidor" instead of "Salud" (entity IDs are generated from the English name and do not change).
 
 ### Maintenance
 - Screenshots workflow: fork-safe checkout, Playwright pinned to 1.64.1, retried Chromium download, explicit failure after three failed apt attempts, and runs when the workflow itself changes.
+- Screenshots workflow: after pushing refreshed screenshots, it re-runs Lint, Validate and HACS on the PR branch through `workflow_dispatch` (a push made with `GITHUB_TOKEN` does not trigger `pull_request` workflows); Lint can now be run manually.
 - README: refresh button behaviour and the mini card's "IPTV server unreachable" pill label.
 
 ## 3.20.0

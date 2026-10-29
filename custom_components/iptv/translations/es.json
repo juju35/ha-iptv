@@ -139,7 +139,7 @@
         "name": "Series"
       },
       "health": {
-        "name": "Salud",
+        "name": "Estado del servidor",
         "state": {
           "ok": "OK",
           "degraded": "Lento",
