@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.22.0
+
+### Changes
+- Sidebar panel: each account shows its username (or MAC address) and, for Xtream accounts, its password, masked until the eye button is clicked; both can be copied. The password is fetched on demand through the admin-only `iptv/get_credentials` command and kept in the page's memory only while shown (never in `iptv/accounts`).
+
 ## 3.21.0
 
 ### Changes

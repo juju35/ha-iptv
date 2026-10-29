@@ -9,7 +9,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_PANEL_VERSION = '3.21.0';
+var IPTV_PANEL_VERSION = '3.22.0';
 
 var IptvPanelI18n = {
   en: {
@@ -37,6 +37,13 @@ var IptvPanelI18n = {
     checking: 'Checking…',
     checked_ok: 'Server answered',
     checked_ko: 'Server not reachable',
+    cred_username: 'Username',
+    cred_mac: 'MAC address',
+    cred_password: 'Password',
+    cred_show: 'Show the password',
+    cred_hide: 'Hide the password',
+    cred_copy: 'Copy',
+    cred_copied: 'Copied',
     open_device: 'Device',
     open_integration: 'Devices & services',
     err_range: 'Value out of range',
@@ -73,6 +80,13 @@ var IptvPanelI18n = {
     checking: 'Vérification…',
     checked_ok: 'Le serveur répond',
     checked_ko: 'Serveur injoignable',
+    cred_username: 'Nom d’utilisateur',
+    cred_mac: 'Adresse MAC',
+    cred_password: 'Mot de passe',
+    cred_show: 'Afficher le mot de passe',
+    cred_hide: 'Masquer le mot de passe',
+    cred_copy: 'Copier',
+    cred_copied: 'Copié',
     open_device: 'Appareil',
     open_integration: 'Appareils et services',
     err_range: 'Valeur hors limites',
@@ -109,6 +123,13 @@ var IptvPanelI18n = {
     checking: 'Wird geprüft…',
     checked_ok: 'Server antwortet',
     checked_ko: 'Server nicht erreichbar',
+    cred_username: 'Benutzername',
+    cred_mac: 'MAC-Adresse',
+    cred_password: 'Passwort',
+    cred_show: 'Passwort anzeigen',
+    cred_hide: 'Passwort ausblenden',
+    cred_copy: 'Kopieren',
+    cred_copied: 'Kopiert',
     open_device: 'Gerät',
     open_integration: 'Geräte & Dienste',
     err_range: 'Wert außerhalb des Bereichs',
@@ -145,6 +166,13 @@ var IptvPanelI18n = {
     checking: 'Comprobando…',
     checked_ok: 'El servidor responde',
     checked_ko: 'Servidor inaccesible',
+    cred_username: 'Usuario',
+    cred_mac: 'Dirección MAC',
+    cred_password: 'Contraseña',
+    cred_show: 'Mostrar la contraseña',
+    cred_hide: 'Ocultar la contraseña',
+    cred_copy: 'Copiar',
+    cred_copied: 'Copiado',
     open_device: 'Dispositivo',
     open_integration: 'Dispositivos y servicios',
     err_range: 'Valor fuera de rango',
@@ -236,6 +264,16 @@ class IptvPanel extends HTMLElement {
     .act:hover:not([disabled]) { background:color-mix(in srgb, var(--primary-color) 22%, transparent); }
     .act.quiet { color:var(--primary-text-color); background:var(--secondary-background-color, rgba(127,127,127,.12)); }
     .act[disabled] { opacity:.5; cursor:default; }
+    .creds { display:flex; flex-direction:column; gap:2px; padding:6px 10px; border-radius:10px;
+             background:var(--secondary-background-color, rgba(127,127,127,.08)); }
+    .cred { display:flex; align-items:center; gap:10px; min-height:32px; }
+    .cred > span { width:130px; flex:none; font-size:12px; color:var(--secondary-text-color); }
+    .cred code { flex:1; min-width:0; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; user-select:all; }
+    .cred code.masked { letter-spacing:.15em; color:var(--secondary-text-color); user-select:none; }
+    .ico { border:0; background:none; cursor:pointer; color:var(--secondary-text-color); padding:5px; border-radius:50%; display:flex; --mdc-icon-size:18px; }
+    .ico:hover:not([disabled]) { background:color-mix(in srgb, var(--primary-color) 12%, transparent); color:var(--primary-color); }
+    .ico.done { color:var(--tone-good); }
+    .ico[disabled] { opacity:.4; cursor:default; }
   `;
 
   constructor() {
@@ -245,6 +283,8 @@ class IptvPanel extends HTMLElement {
     this._drafts = {};
     this._status = {};
     this._busy = {};
+    // Passwords revealed on request, kept in memory only while shown
+    this._secrets = {};
   }
 
   set hass(hass) {
@@ -271,6 +311,7 @@ class IptvPanel extends HTMLElement {
   }
 
   disconnectedCallback() {
+    this._secrets = {};
     if (this._unsub) {
       this._unsub.then((off) => off()).catch(() => {});
       this._unsub = null;
@@ -320,8 +361,10 @@ class IptvPanel extends HTMLElement {
       this._accounts = this._accounts || [];
     }
     var ids = new Set(this._accounts.map((a) => a.entry_id));
-    Object.keys(this._drafts).forEach((id) => {
-      if (!ids.has(id)) delete this._drafts[id];
+    [this._drafts, this._secrets].forEach((store) => {
+      Object.keys(store).forEach((id) => {
+        if (!ids.has(id)) delete store[id];
+      });
     });
     this._renderAccounts();
   }
@@ -395,6 +438,68 @@ class IptvPanel extends HTMLElement {
       </label>`;
   }
 
+  // Login and password of an account; the password is only fetched (iptv/get_credentials) when shown or copied
+  _credsHtml(acc) {
+    var esc = iptvPanelEsc;
+    var stalker = acc.provider === 'stalker';
+    var copy = (field) =>
+      `<button class="ico" data-copy="${field}" title="${esc(this._t('cred_copy'))}"${field === 'password' && !acc.device_id ? ' disabled' : ''}><ha-icon icon="mdi:content-copy"></ha-icon></button>`;
+    var login = `
+      <div class="cred">
+        <span>${esc(this._t(stalker ? 'cred_mac' : 'cred_username'))}</span>
+        <code>${esc(acc.login)}</code>
+        ${copy('login')}
+      </div>`;
+    if (stalker) return `<div class="creds">${login}</div>`;
+    var secret = this._secrets[acc.entry_id];
+    var shown = secret != null;
+    return `
+      <div class="creds">
+        ${login}
+        <div class="cred">
+          <span>${esc(this._t('cred_password'))}</span>
+          <code class="${shown ? '' : 'masked'}">${shown ? esc(secret) : '••••••••'}</code>
+          <button class="ico" data-reveal title="${esc(this._t(shown ? 'cred_hide' : 'cred_show'))}"${acc.device_id ? '' : ' disabled'}><ha-icon icon="${shown ? 'mdi:eye-off-outline' : 'mdi:eye-outline'}"></ha-icon></button>
+          ${copy('password')}
+        </div>
+      </div>`;
+  }
+
+  async _password(acc) {
+    var res = await this._hass.callWS({ type: 'iptv/get_credentials', device_id: acc.device_id });
+    if (!res?.ok) throw new Error(this._t(`err_${res?.error || 'generic'}`));
+    return res.password || '';
+  }
+
+  async _toggleSecret(acc) {
+    if (this._secrets[acc.entry_id] != null) {
+      delete this._secrets[acc.entry_id];
+    } else {
+      try {
+        this._secrets[acc.entry_id] = await this._password(acc);
+      } catch (err) {
+        this._status[acc.entry_id] = { tone: 'bad', text: err.message };
+      }
+    }
+    this._renderAccounts();
+  }
+
+  async _copy(acc, field, button) {
+    try {
+      var text = field === 'login' ? acc.login : (this._secrets[acc.entry_id] ?? (await this._password(acc)));
+      await navigator.clipboard.writeText(text);
+      button.classList.add('done');
+      button.title = this._t('cred_copied');
+      setTimeout(() => {
+        button.classList.remove('done');
+        button.title = this._t('cred_copy');
+      }, 1500);
+    } catch (err) {
+      this._status[acc.entry_id] = { tone: 'bad', text: err?.message || this._t('err_generic') };
+      this._renderAccounts();
+    }
+  }
+
   _accountHtml(acc) {
     var d = this._draft(acc);
     var esc = iptvPanelEsc;
@@ -409,10 +514,11 @@ class IptvPanel extends HTMLElement {
           <div class="avatar"><ha-icon icon="${icon}"></ha-icon></div>
           <div class="who">
             <div class="n">${esc(acc.title)}</div>
-            <div class="s">${esc(acc.provider === 'stalker' ? 'Stalker' : 'Xtream')} · ${esc(acc.login)} · ${esc(acc.url)}</div>
+            <div class="s">${esc(acc.provider === 'stalker' ? 'Stalker' : 'Xtream')} · ${esc(acc.url)}</div>
           </div>
           <span class="pill ${iptvPanelTone(acc.state)}">${esc(state)}</span>
         </div>
+        ${this._credsHtml(acc)}
         <div class="grid">
           <label class="ctl wide">
             <span>${esc(this._t('f_name'))}</span>
@@ -482,6 +588,10 @@ class IptvPanel extends HTMLElement {
     el.querySelector('ha-switch').addEventListener('change', (ev) => {
       draft.stream_check = !!ev.target.checked;
       this._refreshBar(acc, el);
+    });
+    el.querySelector('[data-reveal]')?.addEventListener('click', () => this._toggleSecret(acc));
+    el.querySelectorAll('[data-copy]').forEach((button) => {
+      button.addEventListener('click', () => this._copy(acc, button.dataset.copy, button));
     });
     el.querySelector('[data-do="save"]').addEventListener('click', () => this._save(acc));
     el.querySelector('[data-do="check"]').addEventListener('click', () => this._check(acc));
