@@ -1,7 +1,7 @@
 name: Release
 
 # Publishes a GitHub release whenever main carries a version that has no tag yet:
-# bump the version in manifest.json, const.py and the card, push, and the release follows.
+# bump the version in manifest.json, const.py, the card and the panel, push, and the release follows.
 on:
   push:
     branches: [main]
@@ -25,6 +25,7 @@ jobs:
           VERSION="$(jq -r .version custom_components/iptv/manifest.json)"
           grep -q "VERSION = \"$VERSION\"" custom_components/iptv/const.py
           grep -q "IPTV_CARD_VERSION = '$VERSION'" custom_components/iptv/frontend/iptv-card.js
+          grep -q "IPTV_PANEL_VERSION = '$VERSION'" custom_components/iptv/frontend/iptv-panel.js
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           if git rev-parse -q --verify "refs/tags/v$VERSION" >/dev/null; then
             echo "exists=true" >> "$GITHUB_OUTPUT"

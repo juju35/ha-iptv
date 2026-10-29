@@ -18,6 +18,8 @@ custom_components/iptv/
 ├── naming.py          # Automatic account title: the server name
 ├── notify_add.py      # Sends the connection details of a new account to a notify service
 ├── notify_expiry.py   # Persistent notification before the subscription expires
+├── panel.py           # Sidebar panel registration and its admin WebSocket commands
+│                      # iptv/accounts, iptv/update_account, iptv/check_account
 ├── services.py        # iptv.add_account / edit_account / remove_account / get_credentials services,
 │                      # and the card's admin WebSocket commands iptv/add_account, edit_account, get_credentials
 ├── registry_compat.py # Device registry calls for HA before / since 2026.8 (single config entry per device)
@@ -27,7 +29,8 @@ custom_components/iptv/
 ├── icons.json         # Entity and service icons
 ├── services.yaml / translations/{en,fr,de,es}.json
 ├── brand/             # Integration icon and logo
-└── frontend/iptv-card.js   # Vanilla JS cards (iptv-card, iptv-mini-card), no dependencies
+├── frontend/iptv-card.js   # Vanilla JS cards (iptv-card, iptv-mini-card), no dependencies
+└── frontend/iptv-panel.js  # Vanilla JS sidebar panel (iptv-panel), embeds iptv-card
 ```
 
 ## Card
@@ -36,6 +39,10 @@ custom_components/iptv/
 - Header icon (both cards): `mdi:television-play` in a round `.badge` (40 px, 32 px on the mini card) tinted with the worst state of the subscriptions shown (`iptvWorstState`: error, warning, ok; idle when there are none).
 - `iptv-mini-card` (`IptvMiniCard extends IptvCard`, same file): two lines (badge, title, global status pill; one chip per subscription), detail button (`zoom`, default true) rendering the full card's `_render()`, collapsed by an outside click (capture-phase document listener) except in a dialog or while a popup (`_modal`) is open, like ha-zoraxy and ha-room-card. Each element is defined under its own `customElements.get` guard, so an older copy already loaded on the page doesn't hide the mini card.
 - Add, view and edit go through the admin WebSocket commands (`hass.callWS({type: 'iptv/…'})`), never `callService`: a service call fires a `call_service` event with its raw data, which the recorder stores, password included. Remove still uses the `iptv.remove_account` service (no secret). The services stay for automations, with a recorder warning in the README and service descriptions.
+
+## Sidebar panel
+- Registered in `async_setup` (`panel_custom`, `require_admin`) at `/iptv-config` — its own path, not `/iptv`, so the frontend's panel route never shadows the files served under `/iptv/`. Module served from `/iptv/iptv-panel.js?v=VERSION`; `IPTV_PANEL_VERSION` is bumped with the others.
+- The panel imports the card and embeds `iptv-card` for the account list and add / view / edit / remove (no duplicated code: jscpd is blocking), and adds a settings form per account through `iptv/accounts` (no password), `iptv/update_account` (title first: renamed in place, then options: one reload; blank title = `auto_title`; same limits as the options flow via the `MIN_* / MAX_*` constants) and `iptv/check_account` (refresh + `health.async_check_now`, or a reload when the entry is not loaded). It follows `config_entries/subscribe` to reload the list when an account changes; drafts survive re-renders, and typing only refreshes the buttons.
 
 ## Health check
 - A Stalker client runs one operation at a time (asyncio lock; the coordinator and the health check share its token). The health latency is measured by the client once it holds the lock (`user_info_ms`), a tick is skipped while the previous check still runs, and the stream probe is skipped when the slots are all in use or, with unknown occupancy (Stalker), while a refresh holds or waits for the client (`busy`).

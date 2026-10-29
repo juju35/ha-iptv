@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.21.0
+
+### Changes
+- Sidebar panel **IPTV** (administrators only, `/iptv-config`): the subscriptions with the bundled card (add, view, edit, remove) and, for each account, a settings form (name, refresh interval, notification before expiration, health check interval, stream test) with a **Check now** action that refreshes the subscription and runs a health check. English, French, German and Spanish.
+- New admin-only WebSocket commands `iptv/accounts`, `iptv/update_account` and `iptv/check_account` behind the panel; none of them returns a password.
+
+### Maintenance
+- The option limits are shared constants used by both the options flow and the panel; the Release workflow also checks the panel version.
+
 ## 3.20.2
 
 ### Fixes
