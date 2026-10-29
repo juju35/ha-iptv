@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.20.2
+
+### Fixes
+- The card is added back to the dashboard resources when an account is added after the last one was removed, without restarting Home Assistant (dashboards showed "Custom element doesn't exist: iptv-card" until the next restart).
+
 ## 3.20.1
 
 ### Fixes
