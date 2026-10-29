@@ -8,7 +8,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_CARD_VERSION = '3.20.0';
+var IPTV_CARD_VERSION = '3.20.1';
 var IPTV_DOMAIN = 'iptv';
 
 // ── i18n ──────────────────────────────────────────────────────────────────────
@@ -304,7 +304,7 @@ var IptvCardI18n = {
     status_expired: 'Caducada',
     status_banned: 'Bloqueada',
     status_disabled: 'Desactivada',
-    status_unknown: 'Desconocido',
+    status_unknown: 'Desconocida',
     auth_failed: 'Credenciales no válidas',
     trial: 'Prueba',
     expiration: 'Caducidad',
@@ -355,6 +355,12 @@ function iptvT(lang, key, vars) {
   var s = strings[key] || IptvCardI18n.en[key] || key;
   if (vars) Object.keys(vars).forEach((k) => { s = s.replace(`{${k}}`, vars[k]); });
   return s;
+}
+
+// Message of a service error code; an unknown code (e.g. already_in_progress) falls back to err_generic
+function iptvErr(lang, code) {
+  var key = `err_${code || 'generic'}`;
+  return iptvT(lang, IptvCardI18n.en[key] ? key : 'err_generic');
 }
 
 // Worst state of the subscriptions shown (error, then warning, then ok), idle when there are none
@@ -517,6 +523,10 @@ class IptvCard extends HTMLElement {
     return iptvT(iptvLang(this._config, this._hass), key, vars);
   }
 
+  _err(code) {
+    return iptvErr(iptvLang(this._config, this._hass), code);
+  }
+
   // Devices to show: `devices` (list), the legacy `device`, or every IPTV device
   _wanted() {
     var c = this._config || {};
@@ -564,9 +574,16 @@ class IptvCard extends HTMLElement {
     ids = ids.filter(Boolean);
     if (!ids.length || this._loading) return;
     this._loading = true;
+    this._refreshFailed = false;
     this._render();
     try {
       await this._hass.callService('homeassistant', 'update_entity', { entity_id: ids });
+    } catch (err) {
+      // WebSocket down or server error: say so on the button instead of an unhandled rejection
+      console.error('iptv-card: refresh failed', err);
+      this._refreshFailed = true;
+      this._loading = false;
+      this._render();
     } finally {
       // A state change re-renders; stop the spinner anyway if nothing changed
       setTimeout(() => {
@@ -687,7 +704,7 @@ class IptvCard extends HTMLElement {
       v ? `<span class="chip ${v.state}" data-entity="status"><ha-icon icon="${iptvStateIcon(v.state)}"></ha-icon>${esc(v.statusLabel)}</span>` : '';
     // Trial, French and health pills of one subscription
     var infoChips = (v, h, fr) =>
-      `${v?.d.is_trial ? `<span class="chip idle">${this._t('trial')}</span>` : ''}${v ? frenchChip(fr) : ''}${healthChip(h, v)}`;
+      `${v?.d.is_trial ? `<span class="chip idle">${esc(this._t('trial'))}</span>` : ''}${v ? frenchChip(fr) : ''}${healthChip(h, v)}`;
     // Every pill of one subscription, in a row
     var chips = (v, h, fr) => (!v && !h ? '' : `<div class="chips">${statusChip(v)}${infoChips(v, h, fr)}</div>`);
 
@@ -797,7 +814,7 @@ class IptvCard extends HTMLElement {
           ${iptvBadge(iptvWorstState(states))}
           <div class="titles"><div class="title-row"><div class="name">${esc(title)}</div>${status}</div>${info}</div>
           ${admin ? `<button class="add" title="${esc(this._t('add_btn'))}"><ha-icon icon="mdi:plus"></ha-icon></button>` : ''}
-          <button class="refresh ${this._loading ? 'spin' : ''}" title="${esc(this._t('refresh'))}"><ha-icon icon="mdi:refresh"></ha-icon></button>
+          <button class="refresh ${this._loading ? 'spin' : ''}" title="${esc(this._t(this._refreshFailed ? 'err_generic' : 'refresh'))}"><ha-icon icon="mdi:refresh"></ha-icon></button>
         </div>
         ${body}
       </ha-card>`;
@@ -943,7 +960,7 @@ class IptvCard extends HTMLElement {
     }
     btn.removeAttribute('disabled');
     btn.textContent = this._t('del_delete');
-    errEl.textContent = this._t(`err_${out.error || 'generic'}`);
+    errEl.textContent = this._err(out.error);
   }
 
   // ── Add account popup ─────────────────────────────────────────────────────
@@ -1010,7 +1027,7 @@ class IptvCard extends HTMLElement {
     }
     btn.removeAttribute('disabled');
     btn.textContent = this._t('add_create');
-    errEl.textContent = this._t(`err_${out.error || 'generic'}`);
+    errEl.textContent = this._err(out.error);
   }
 
   // ── View credentials popup ────────────────────────────────────────────────
@@ -1041,7 +1058,7 @@ class IptvCard extends HTMLElement {
   // Error message in an open popup, with a close button
   _modalError(modal, titleKey, error) {
     var esc = iptvEsc;
-    modal.querySelector('.modal').innerHTML = `<h3>${esc(this._t(titleKey))}</h3><div class="err">${esc(this._t(`err_${error || 'generic'}`))}</div><div class="modal-actions"><button class="act cancel">${esc(this._t('edit_cancel'))}</button></div>`;
+    modal.querySelector('.modal').innerHTML = `<h3>${esc(this._t(titleKey))}</h3><div class="err">${esc(this._err(error))}</div><div class="modal-actions"><button class="act cancel">${esc(this._t('edit_cancel'))}</button></div>`;
     modal.querySelector('.cancel').addEventListener('click', () => this._closeEditor());
   }
 
@@ -1090,7 +1107,7 @@ class IptvCard extends HTMLElement {
     }
     primary.removeAttribute('disabled');
     primary.textContent = this._t('edit_save');
-    errEl.textContent = this._t(`err_${out.error || 'generic'}`);
+    errEl.textContent = this._err(out.error);
   }
 }
 

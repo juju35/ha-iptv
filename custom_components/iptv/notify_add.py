@@ -12,6 +12,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.util import dt as dt_util
 
 from .const import CONF_MAC, CONF_PROVIDER, PROVIDER_STALKER
+from .notify_expiry import DATE_FORMATS
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -40,7 +41,37 @@ TEXTS = {
         "french": "Catégories françaises",
         "kinds": {"live": "live", "vod": "VOD", "series": "séries"},
     },
+    "de": {
+        "title_new": "IPTV: Konto hinzugefügt",
+        "title_updated": "IPTV: Konto aktualisiert",
+        "provider": "Anbieter",
+        "server": "Server",
+        "username": "Benutzername",
+        "mac": "MAC-Adresse",
+        "expiration": "Ablauf",
+        "unlimited": "unbegrenzt",
+        "french": "Französische Kategorien",
+        "kinds": {"live": "Live", "vod": "VOD", "series": "Serien"},
+    },
+    "es": {
+        "title_new": "IPTV: cuenta añadida",
+        "title_updated": "IPTV: cuenta actualizada",
+        "provider": "Proveedor",
+        "server": "Servidor",
+        "username": "Usuario",
+        "mac": "Dirección MAC",
+        "expiration": "Caducidad",
+        "unlimited": "ilimitada",
+        "french": "Categorías francesas",
+        "kinds": {"live": "directo", "vod": "VOD", "series": "series"},
+    },
 }
+
+
+def text_language(language: str | None) -> str:
+    """Supported language of a Home Assistant language code (``de-CH`` → ``de``), English otherwise."""
+    lang = (language or "").split("-")[0].lower()
+    return lang if lang in TEXTS else "en"
 
 
 def notify_services(hass: HomeAssistant) -> list[str]:
@@ -57,8 +88,9 @@ def build_message(
     french: dict[str, Any] | None,
 ) -> str:
     """Connection details, one per line."""
-    t = TEXTS["fr" if lang.startswith("fr") else "en"]
-    sep = " : " if lang.startswith("fr") else ": "
+    lang = text_language(lang)
+    t = TEXTS[lang]
+    sep = " : " if lang == "fr" else ": "
     lines = [f"{t['provider']}{sep}{title}"]
     lines.append(f"{t['server']}{sep}{data[CONF_URL]}")
     if data.get(CONF_PROVIDER) == PROVIDER_STALKER:
@@ -70,9 +102,7 @@ def build_message(
         if validity == math.inf:
             expiration = t["unlimited"]
         else:
-            expiration = dt_util.as_local(datetime.fromtimestamp(validity, tz=UTC)).strftime(
-                "%d/%m/%Y" if lang.startswith("fr") else "%Y-%m-%d"
-            )
+            expiration = dt_util.as_local(datetime.fromtimestamp(validity, tz=UTC)).strftime(DATE_FORMATS[lang])
         lines.append(f"{t['expiration']}{sep}{expiration}")
     if french:
         counts = ", ".join(f"{t['kinds'][k]} {french[k]}" for k in ("live", "vod", "series") if french.get(k))
@@ -94,8 +124,8 @@ async def async_send(
     if domain != "notify" or not hass.services.has_service(domain, name):
         _LOGGER.warning("IPTV: notify service %s not found, connection details not sent", service)
         return
-    lang = hass.config.language or "en"
-    t = TEXTS["fr" if lang.startswith("fr") else "en"]
+    lang = text_language(hass.config.language)
+    t = TEXTS[lang]
     try:
         await hass.services.async_call(
             domain,

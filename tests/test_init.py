@@ -951,3 +951,90 @@ async def test_card_served(hass, aioclient_mock, entry, hass_client):
     assert f"IPTV_CARD_VERSION = '{VERSION}'" in text
     assert "customElements.define('iptv-card'" in text
     assert "if (!customElements.get('iptv-mini-card')) {\n  customElements.define('iptv-mini-card'" in text
+
+
+# ── review pass 2 regressions ───────────────────────────────────────────────
+
+
+async def test_trial_sensor_off_on_xtream(hass, aioclient_mock, entry):
+    await _setup(hass, aioclient_mock, entry)
+    assert hass.states.get("binary_sensor.provider_example_trial").state == "off"
+
+
+async def test_trial_sensor_unknown_on_stalker(hass, aioclient_mock, stalker_entry):
+    """Stalker portals do not report the trial flag: unknown, never "off"."""
+    _mock_stalker(aioclient_mock, {"json": {"js": {"phone": "2099-01-01"}}})
+    assert await async_setup_component(hass, "http", {})
+    assert await hass.config_entries.async_setup(stalker_entry.entry_id)
+    await hass.async_block_till_done()
+    assert hass.states.get("binary_sensor.portal_example_trial").state == "unknown"
+
+
+async def test_add_account_rejects_unknown_provider(hass, aioclient_mock, entry):
+    import voluptuous as vol
+
+    await _setup(hass, aioclient_mock, entry)
+    with pytest.raises(vol.Invalid):
+        await hass.services.async_call(
+            DOMAIN, "add_account", {CONF_PROVIDER: "foo", CONF_URL: SERVER}, blocking=True, return_response=True
+        )
+    assert len(hass.config_entries.async_entries(DOMAIN)) == 1
+
+
+async def test_xtream_invalidated_catalog_is_read_again_keeping_fallback():
+    calls: list[str | None] = []
+    client, get = _counting_xtream(calls)
+    with patch.object(client, "_get", side_effect=get):
+        await client.async_get_data()
+        client.invalidate_catalog()
+        data = await client.async_get_data()
+    assert calls.count("get_live_streams") == 2
+    assert data["channels"] == 1
+    assert client._catalog is not None  # noqa: SLF001 - last values kept as the fallback
+
+
+async def test_update_entity_invalidates_catalog(hass, aioclient_mock, entry):
+    """The card's refresh button (homeassistant.update_entity) re-reads the cached catalogue."""
+    await _setup(hass, aioclient_mock, entry)
+    assert await async_setup_component(hass, "homeassistant", {})
+    client = entry.runtime_data.client
+    with patch.object(client, "invalidate_catalog", wraps=client.invalidate_catalog) as invalidate:
+        await hass.services.async_call(
+            "homeassistant", "update_entity", {"entity_id": "sensor.provider_example_status"}, blocking=True
+        )
+        await hass.async_block_till_done()
+    assert invalidate.called
+
+
+@pytest.mark.parametrize(
+    ("lang", "word", "date"),
+    [
+        ("en", "Username", "2030-01-01"),
+        ("fr", "Identifiant", "01/01/2030"),
+        ("de", "Benutzername", "01.01.2030"),
+        ("de-CH", "Benutzername", "01.01.2030"),
+        ("es", "Usuario", "01/01/2030"),
+        ("it", "Username", "2030-01-01"),
+    ],
+)
+async def test_add_notification_languages(hass, lang, word, date):
+    validity = dt_util.as_utc(dt_util.parse_datetime("2030-01-01T12:00:00")).timestamp()
+    await hass.config.async_set_time_zone("UTC")
+    message = build_message(lang, "provider.example", DATA, validity, None)
+    assert word in message
+    assert date in message
+    assert PASSWORD not in message
+
+
+@pytest.mark.parametrize(
+    ("lang", "title"), [("de", "IPTV-Abonnement"), ("es", "Suscripción IPTV"), ("pt", "IPTV subscription")]
+)
+async def test_expiry_notification_languages(hass, lang, title):
+    from custom_components.iptv.notify_expiry import ExpiryNotifier
+
+    hass.config.language = lang
+    notifier = ExpiryNotifier(hass, "e1", "provider.example", {})
+    exp = int(dt_util.utcnow().timestamp()) + 2 * 86400
+    with patch("custom_components.iptv.notify_expiry.persistent_notification.async_create") as create:
+        notifier.update({"auth": True, "exp_date": exp})
+    assert create.call_args.kwargs["title"] == f"{title} provider.example"

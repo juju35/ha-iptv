@@ -289,6 +289,13 @@ class XtreamClient:
             raise IptvAuthError
         return info
 
+    def invalidate_catalog(self) -> None:
+        """Re-read the catalogue on the next refresh (manual refresh from the card).
+
+        The last values are kept as the fallback when that read fails.
+        """
+        self._catalog_at = float("-inf")
+
     async def _catalog_data(self) -> dict[str, Any]:
         """Counters and French summary, refreshed at most every CATALOG_MAX_AGE."""
         if self._catalog is not None and time.monotonic() - self._catalog_at < CATALOG_MAX_AGE:
@@ -634,6 +641,9 @@ class StalkerClient:
             return extract_count(await self._get(params))
         except IptvError:
             return None
+
+    def invalidate_catalog(self) -> None:
+        """No catalogue cache on a Stalker portal: every refresh reads it."""
 
     async def async_get_data(self) -> dict[str, Any]:
         """Return the account info plus live / VOD / series counts."""

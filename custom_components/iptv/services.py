@@ -46,6 +46,7 @@ from .const import (
     CONF_UPDATED_AT,
     DOMAIN,
     PROVIDER_STALKER,
+    PROVIDER_XTREAM,
 )
 from .registry_compat import entry_for_device
 
@@ -69,7 +70,7 @@ CREDENTIALS_SCHEMA = vol.Schema({vol.Required("device_id"): cv.string})
 
 ADD_SCHEMA = vol.Schema(
     {
-        vol.Required(CONF_PROVIDER): cv.string,
+        vol.Required(CONF_PROVIDER): vol.In([PROVIDER_XTREAM, PROVIDER_STALKER]),
         vol.Required(CONF_URL): cv.string,
         vol.Optional(CONF_USERNAME): cv.string,
         vol.Optional(CONF_PASSWORD): cv.string,
