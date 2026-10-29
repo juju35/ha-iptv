@@ -129,11 +129,12 @@ The notification names the account and its expiration date, is refreshed once a 
 The integration adds an **IPTV** entry to the sidebar, shown to administrators only (`/iptv-config`). It gathers on one page:
 
 - the subscriptions, with the bundled card: add, view, edit and remove accounts;
+- the credentials of each account: username (or MAC address) and password, masked until you click the eye, with a copy button;
 - one settings form per account: name (blank = the server name), refresh interval, notification before expiration, health check interval and stream test — the same options and limits as **Configure**;
 - **Check now**: refreshes the subscription and runs a health check right away (retries the setup of an account that failed to start);
 - links to the account's device and to **Devices & services**.
 
-Saving a new name renames the device and the expiration notification in place; changing an option reloads that account once. The panel never receives the passwords (viewing one still goes through the card's admin-only command). To hide the entry, long-press the sidebar title and hide **IPTV**, like any other panel.
+Saving a new name renames the device and the expiration notification in place; changing an option reloads that account once. The account list never carries the passwords: a password is fetched only when you show or copy it, through the admin-only `iptv/get_credentials` command, and forgotten when hidden or when you leave the page. To hide the entry, long-press the sidebar title and hide **IPTV**, like any other panel.
 
 ### Entities
 
