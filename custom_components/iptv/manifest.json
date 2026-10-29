@@ -3,11 +3,11 @@
   "name": "IPTV",
   "codeowners": ["@juju35"],
   "config_flow": true,
-  "dependencies": ["frontend", "http", "lovelace", "persistent_notification"],
+  "dependencies": ["frontend", "http", "lovelace", "panel_custom", "persistent_notification"],
   "documentation": "https://github.com/juju35/ha-iptv",
   "integration_type": "service",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/juju35/ha-iptv/issues",
   "requirements": [],
-  "version": "3.20.2"
+  "version": "3.21.0"
 }

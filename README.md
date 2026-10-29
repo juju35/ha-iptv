@@ -28,6 +28,7 @@ Home Assistant integration and Lovelace card that track one or several **IPTV su
 - French lists check: accounts without French categories are refused, and the card shows a French flag pill
 - Optional notification with the connection details when an account is added
 - Persistent notification a configurable number of days before expiration (7 by default)
+- **Sidebar panel** (administrators): every account and its settings on one page
 - Visual editor, refresh button
 - Fully compatible with Home Assistant dark mode
 - English, French, German and Spanish, auto-detected
@@ -122,6 +123,17 @@ The credentials are stored in the config entry together with the server URL (use
 The notification names the account and its expiration date, is refreshed once a day while the account is in that window (dismissing it silences it until the next day), also reports an expired account, and disappears once the subscription is renewed.
 
 > **Stalker portals** do not expose a start date, the connection counts or the trial flag, so those are shown as `—` (the expiration progress bar then assumes the shortest usual subscription length, 1, 3, 6 or 12 months, that covers the days left). Expiration and the live / VOD / series counts are read from the portal's `account_info` and `get_ordered_list` endpoints.
+
+### Sidebar panel
+
+The integration adds an **IPTV** entry to the sidebar, shown to administrators only (`/iptv-config`). It gathers on one page:
+
+- the subscriptions, with the bundled card: add, view, edit and remove accounts;
+- one settings form per account: name (blank = the server name), refresh interval, notification before expiration, health check interval and stream test — the same options and limits as **Configure**;
+- **Check now**: refreshes the subscription and runs a health check right away (retries the setup of an account that failed to start);
+- links to the account's device and to **Devices & services**.
+
+Saving a new name renames the device and the expiration notification in place; changing an option reloads that account once. The panel never receives the passwords (viewing one still goes through the card's admin-only command). To hide the entry, long-press the sidebar title and hide **IPTV**, like any other panel.
 
 ### Entities
 
@@ -218,6 +230,12 @@ While subscriptions reload, the card animates: the refresh button spins until th
 
 ![iptv-card with two providers](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/card-multi.png)
 
+**Sidebar panel** (light and dark themes):
+
+![IPTV sidebar panel](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/panel.png)
+
+![IPTV sidebar panel, dark theme](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/panel-dark.png)
+
 | Mini card | Zoomed in |
 |---|---|
 | ![iptv-mini-card](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/mini.png) | ![iptv-mini-card zoomed in](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/mini-zoom.png) |
@@ -242,7 +260,7 @@ The card is served by the integration at `/iptv/iptv-card.js` and registered in 
       event_types:
         - call_service
   ```
-- The reconfigure and re-authentication forms never send the current password to the browser: leave the field blank to keep it.
+- The reconfigure and re-authentication forms never send the current password to the browser: leave the field blank to keep it. The sidebar panel's commands (`iptv/accounts`, `iptv/update_account`, `iptv/check_account`) are admin-only and never return the password either.
 - Error messages (logs, the `error` attribute of the health sensor) give the HTTP status or the error type, never the request URL, which carries the Xtream credentials.
 - They are only sent to the Xtream server you configured, as `player_api.php` query parameters (that is how the Xtream API works, so prefer an `https://` URL when your provider offers one).
 
@@ -250,7 +268,7 @@ The card is served by the integration at `/iptv/iptv-card.js` and registered in 
 
 ```bash
 pip install playwright && playwright install chromium
-python scripts/screenshots.py   # renders the card PNGs and refreshing.gif (needs ffmpeg) with mock subscriptions
+python scripts/screenshots.py   # renders the card and panel PNGs and refreshing.gif (needs ffmpeg) with mock subscriptions
 ```
 
 The card is plain JavaScript (`custom_components/iptv/frontend/iptv-card.js`), served by the integration: no build step.

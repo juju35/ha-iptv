@@ -15,12 +15,13 @@ from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.typing import ConfigType
 
-from .const import CARD_URL, DOMAIN, LOGO_URL, VERSION
+from .const import CARD_URL, DOMAIN, LOGO_URL, PANEL_URL, VERSION
 from .coordinator import IptvConfigEntry, IptvCoordinator
 from .health import HealthMonitor
 from .migrate import LEGACY_DOMAIN, async_migrate_legacy, async_restore_snapshot
 from .naming import auto_title, is_auto_generated
 from .notify_expiry import ExpiryNotifier, notification_id
+from .panel import async_register_panel
 from .registry_compat import get_device
 from .services import async_register_services
 
@@ -33,14 +34,16 @@ CARD_LOADED = f"{DOMAIN}_card_loaded"
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
-    """Serve the card and its logo, and load the card on every dashboard."""
+    """Serve the card, its logo and the sidebar panel, and load the card on every dashboard."""
     base = Path(__file__).parent
     await hass.http.async_register_static_paths(
         [
             StaticPathConfig(CARD_URL, str(base / "frontend" / "iptv-card.js"), True),
             StaticPathConfig(LOGO_URL, str(base / "brand" / "icon@2x.png"), True),
+            StaticPathConfig(PANEL_URL, str(base / "frontend" / "iptv-panel.js"), True),
         ]
     )
+    await async_register_panel(hass)
 
     async def _register(_: Event | None = None) -> None:
         if not hass.data.get(CARD_LOADED):

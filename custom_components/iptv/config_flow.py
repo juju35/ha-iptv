@@ -60,6 +60,10 @@ from .const import (
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_STREAM_CHECK,
     DOMAIN,
+    MAX_HEALTH_INTERVAL,
+    MAX_NOTIFY_DAYS,
+    MAX_SCAN_INTERVAL,
+    MIN_HEALTH_INTERVAL,
     MIN_SCAN_INTERVAL,
     PROVIDER_STALKER,
     PROVIDER_XTREAM,
@@ -407,7 +411,7 @@ class IptvOptionsFlow(OptionsFlow):
                     ): NumberSelector(
                         NumberSelectorConfig(
                             min=MIN_SCAN_INTERVAL,
-                            max=1440,
+                            max=MAX_SCAN_INTERVAL,
                             step=1,
                             unit_of_measurement="min",
                             mode=NumberSelectorMode.BOX,
@@ -419,7 +423,7 @@ class IptvOptionsFlow(OptionsFlow):
                     ): NumberSelector(
                         NumberSelectorConfig(
                             min=0,
-                            max=60,
+                            max=MAX_NOTIFY_DAYS,
                             step=1,
                             unit_of_measurement="d",
                             mode=NumberSelectorMode.BOX,
@@ -430,8 +434,8 @@ class IptvOptionsFlow(OptionsFlow):
                         default=self.config_entry.options.get(CONF_HEALTH_INTERVAL, DEFAULT_HEALTH_INTERVAL),
                     ): NumberSelector(
                         NumberSelectorConfig(
-                            min=1,
-                            max=60,
+                            min=MIN_HEALTH_INTERVAL,
+                            max=MAX_HEALTH_INTERVAL,
                             step=1,
                             unit_of_measurement="min",
                             mode=NumberSelectorMode.BOX,
