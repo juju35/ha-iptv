@@ -145,6 +145,11 @@ class IptvSensor(IptvEntity, SensorEntity):
     def native_value(self) -> Any:
         return self.entity_description.value_fn(self.coordinator.data)
 
+    async def async_update(self) -> None:
+        """homeassistant.update_entity (the card's ⟳) also re-reads the cached catalogue."""
+        self.coordinator.client.invalidate_catalog()
+        await super().async_update()
+
 
 class _IptvHealthEntity(IptvEntity, SensorEntity):
     """Reads the health monitor; stays available when the server is down."""
