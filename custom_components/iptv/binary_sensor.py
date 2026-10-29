@@ -35,7 +35,10 @@ class IptvTrialSensor(IptvEntity, BinarySensorEntity):
     def is_on(self) -> bool | None:
         if not self.coordinator.data.get("auth"):
             return None
-        return str(self.coordinator.data.get("is_trial")) == "1"
+        # Stalker portals do not report the trial flag: unknown, not "off"
+        if (trial := self.coordinator.data.get("is_trial")) is None:
+            return None
+        return str(trial) == "1"
 
 
 class IptvFrenchListsSensor(IptvEntity, BinarySensorEntity):
