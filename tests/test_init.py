@@ -953,6 +953,71 @@ async def test_card_served(hass, aioclient_mock, entry, hass_client):
     assert "if (!customElements.get('iptv-mini-card')) {\n  customElements.define('iptv-mini-card'" in text
 
 
+def _readd(hass) -> MockConfigEntry:
+    """The same account added again (new config entry), e.g. to fix its credentials."""
+    entry = MockConfigEntry(
+        domain=DOMAIN, title="provider.example", data=DATA, unique_id=f"{SERVER}|{USERNAME}".lower()
+    )
+    entry.add_to_hass(hass)
+    return entry
+
+
+async def test_card_resource_restored_when_account_added_after_last_removed(hass, aioclient_mock, entry):
+    """Removing the last account drops the resource; adding one again without a restart must restore it."""
+    assert await async_setup_component(hass, "lovelace", {})
+    resources = hass.data["lovelace"].resources
+    hass.data["lovelace"] = _lovelace_data("resource_mode", "storage", resources)
+    await _setup(hass, aioclient_mock, entry)
+    assert await hass.config_entries.async_remove(entry.entry_id)
+    await hass.async_block_till_done()
+    assert resources.async_items() == []
+
+    new_entry = _readd(hass)
+    assert await hass.config_entries.async_setup(new_entry.entry_id)
+    await hass.async_block_till_done()
+    assert [item["url"] for item in resources.async_items()] == [f"/iptv/iptv-card.js?v={VERSION}"]
+
+
+async def test_card_resource_not_duplicated_by_second_account_or_reload(hass, aioclient_mock, entry):
+    """A second account and a reload keep a single resource, and a resource the user removed stays removed."""
+    assert await async_setup_component(hass, "lovelace", {})
+    resources = hass.data["lovelace"].resources
+    hass.data["lovelace"] = _lovelace_data("resource_mode", "storage", resources)
+    await _setup(hass, aioclient_mock, entry)
+    other_api = "http://other.example:8080/player_api.php"
+    _mock_server(aioclient_mock, api=other_api)
+    other = MockConfigEntry(
+        domain=DOMAIN,
+        title="other.example",
+        data={**DATA, CONF_URL: "http://other.example:8080"},
+        unique_id=f"http://other.example:8080|{USERNAME}".lower(),
+    )
+    other.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(other.entry_id)
+    await hass.async_block_till_done()
+    assert [item["url"] for item in resources.async_items()] == [f"/iptv/iptv-card.js?v={VERSION}"]
+
+    await resources.async_delete_item(resources.async_items()[0]["id"])
+    assert await hass.config_entries.async_reload(entry.entry_id)
+    await hass.async_block_till_done()
+    assert resources.async_items() == []
+
+
+async def test_card_yaml_mode_extra_js_added_once_after_readd(hass, aioclient_mock, entry, stub_frontend):
+    """YAML resources: removing and re-adding the only account does not add the card URL again."""
+    from homeassistant.components.lovelace.resources import ResourceYAMLCollection
+
+    assert await async_setup_component(hass, "lovelace", {})
+    hass.data["lovelace"] = _lovelace_data("resource_mode", "yaml", ResourceYAMLCollection([]))
+    await _setup(hass, aioclient_mock, entry)
+    assert await hass.config_entries.async_remove(entry.entry_id)
+    await hass.async_block_till_done()
+    new_entry = _readd(hass)
+    assert await hass.config_entries.async_setup(new_entry.entry_id)
+    await hass.async_block_till_done()
+    stub_frontend.assert_called_once_with(hass, f"/iptv/iptv-card.js?v={VERSION}")
+
+
 # ── review pass 2 regressions ───────────────────────────────────────────────
 
 
