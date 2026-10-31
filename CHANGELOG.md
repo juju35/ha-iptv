@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.22.1
+
+### Fixes
+- Sidebar panel: a password shown with the eye button is hidden again when the account's credentials change elsewhere (card edit button, `iptv.add_account`, Reconfigure), so the panel no longer shows or copies the old password.
+- Sidebar panel: a settings form now follows options changed elsewhere (Configure, another administrator) for the fields you have not edited; **Save** no longer turns on by itself and only sends back the values you changed, instead of reverting the others.
+
 ## 3.22.0
 
 ### Changes

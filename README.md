@@ -223,13 +223,18 @@ In the full view, a click anywhere outside the card also brings back the compact
 
 While subscriptions reload, the card animates: the refresh button spins until the check finishes. It settles to a still card once done.
 
-![refresh animation](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/refreshing.gif)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/refreshing-dark.gif">
+  <img alt="refresh animation" src="https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/refreshing.gif">
+</picture>
 
 ![iptv-card](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/card.png)
 
 ![iptv-card, dark theme](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/card-dark.png)
 
 ![iptv-card with two providers](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/card-multi.png)
+
+![iptv-card with two providers, dark theme](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/card-multi-dark.png)
 
 **Sidebar panel** (light and dark themes):
 
@@ -269,14 +274,14 @@ The card is served by the integration at `/iptv/iptv-card.js` and registered in 
 
 ```bash
 pip install playwright && playwright install chromium
-python scripts/screenshots.py   # renders the card and panel PNGs and refreshing.gif (needs ffmpeg) with mock subscriptions
+python scripts/screenshots.py   # renders the card and panel PNGs and refreshing(-dark).gif (needs ffmpeg), light and dark, with mock subscriptions
 ```
 
 The card is plain JavaScript (`custom_components/iptv/frontend/iptv-card.js`), served by the integration: no build step.
 
 ### Releasing
 
-1. Bump the version in `custom_components/iptv/manifest.json`, `VERSION` in `const.py` and `IPTV_CARD_VERSION` in `frontend/iptv-card.js`
+1. Bump the version in `custom_components/iptv/manifest.json`, `VERSION` in `const.py`, `IPTV_CARD_VERSION` in `frontend/iptv-card.js` and `IPTV_PANEL_VERSION` in `frontend/iptv-panel.js`
 2. Add a `## <version>` section at the top of [CHANGELOG.md](CHANGELOG.md)
 3. Push to `main`: the **Release** workflow creates the tag and the GitHub release with `iptv.zip` and the changelog section as notes
 

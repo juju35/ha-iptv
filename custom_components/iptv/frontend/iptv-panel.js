@@ -9,7 +9,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_PANEL_VERSION = '3.22.0';
+var IPTV_PANEL_VERSION = '3.22.1';
 
 var IptvPanelI18n = {
   en: {
@@ -280,10 +280,11 @@ class IptvPanel extends HTMLElement {
     super();
     this.attachShadow({ mode: 'open' });
     this._accounts = null;
+    // Fields the user edited, per account: the rest of a form always shows the stored values
     this._drafts = {};
     this._status = {};
     this._busy = {};
-    // Passwords revealed on request, kept in memory only while shown
+    // Passwords revealed on request ({password, updatedAt}), kept in memory only while shown
     this._secrets = {};
   }
 
@@ -360,11 +361,15 @@ class IptvPanel extends HTMLElement {
       console.error('IPTV panel: could not list the accounts', err);
       this._accounts = this._accounts || [];
     }
-    var ids = new Set(this._accounts.map((a) => a.entry_id));
+    var byId = new Map(this._accounts.map((a) => [a.entry_id, a]));
     [this._drafts, this._secrets].forEach((store) => {
       Object.keys(store).forEach((id) => {
-        if (!ids.has(id)) delete store[id];
+        if (!byId.has(id)) delete store[id];
       });
+    });
+    // Credentials changed since the password was shown (card edit, add_account, Reconfigure): forget it
+    Object.entries(this._secrets).forEach(([id, secret]) => {
+      if (secret.updatedAt !== byId.get(id).updated_at) delete this._secrets[id];
     });
     this._renderAccounts();
   }
@@ -397,15 +402,17 @@ class IptvPanel extends HTMLElement {
     this.shadowRoot.getElementById('card')?.appendChild(this._card);
   }
 
-  // Draft of an account's form: what the user typed, else the stored values
+  // An account's form: the fields the user typed over the stored values (so a change made elsewhere shows up)
   _draft(acc) {
-    if (!this._drafts[acc.entry_id]) {
-      this._drafts[acc.entry_id] = {
-        title: acc.title === acc.auto_title ? '' : acc.title,
-        ...acc.options,
-      };
-    }
-    return this._drafts[acc.entry_id];
+    return {
+      title: acc.title === acc.auto_title ? '' : acc.title,
+      ...acc.options,
+      ...this._drafts[acc.entry_id],
+    };
+  }
+
+  _edit(acc, key, value) {
+    this._drafts[acc.entry_id] = { ...this._drafts[acc.entry_id], [key]: value };
   }
 
   _changed(acc) {
@@ -451,7 +458,7 @@ class IptvPanel extends HTMLElement {
         ${copy('login')}
       </div>`;
     if (stalker) return `<div class="creds">${login}</div>`;
-    var secret = this._secrets[acc.entry_id];
+    var secret = this._secrets[acc.entry_id]?.password;
     var shown = secret != null;
     return `
       <div class="creds">
@@ -476,7 +483,7 @@ class IptvPanel extends HTMLElement {
       delete this._secrets[acc.entry_id];
     } else {
       try {
-        this._secrets[acc.entry_id] = await this._password(acc);
+        this._secrets[acc.entry_id] = { password: await this._password(acc), updatedAt: acc.updated_at };
       } catch (err) {
         this._status[acc.entry_id] = { tone: 'bad', text: err.message };
       }
@@ -486,7 +493,7 @@ class IptvPanel extends HTMLElement {
 
   async _copy(acc, field, button) {
     try {
-      var text = field === 'login' ? acc.login : (this._secrets[acc.entry_id] ?? (await this._password(acc)));
+      var text = field === 'login' ? acc.login : (this._secrets[acc.entry_id]?.password ?? (await this._password(acc)));
       await navigator.clipboard.writeText(text);
       button.classList.add('done');
       button.title = this._t('cred_copied');
@@ -574,10 +581,9 @@ class IptvPanel extends HTMLElement {
 
   _bind(acc, el) {
     if (!el) return;
-    var draft = this._draft(acc);
     el.querySelectorAll('input').forEach((input) => {
       input.addEventListener('input', () => {
-        draft[input.dataset.key] = input.value;
+        this._edit(acc, input.dataset.key, input.value);
         delete this._status[acc.entry_id];
         this._refreshBar(acc, el);
       });
@@ -586,7 +592,7 @@ class IptvPanel extends HTMLElement {
       });
     });
     el.querySelector('ha-switch').addEventListener('change', (ev) => {
-      draft.stream_check = !!ev.target.checked;
+      this._edit(acc, 'stream_check', !!ev.target.checked);
       this._refreshBar(acc, el);
     });
     el.querySelector('[data-reveal]')?.addEventListener('click', () => this._toggleSecret(acc));
