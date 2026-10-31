@@ -214,6 +214,7 @@ SHOTS = [
     {"file": "card", "theme": "light", "config": {"devices": ["iptv"]}},
     {"file": "card-dark", "theme": "dark", "config": {"devices": ["iptv"]}},
     {"file": "card-multi", "theme": "light", "config": {"devices": ["iptv", "iptv2"]}},
+    {"file": "card-multi-dark", "theme": "dark", "config": {"devices": ["iptv", "iptv2"]}},
     # The mini card, and the same card zoomed in (its detail button clicked).
     *[
         {
@@ -414,8 +415,9 @@ def main():
             )
             print(f"screenshots/{shot['file']}.png")
             page.close()
-        # The refresh button spinning while subscriptions reload.
-        animate(context, {"file": "refreshing", "theme": "light", "config": {"devices": ["iptv"]}})
+        # The refresh button spinning while subscriptions reload, light and dark twins of the same state.
+        for theme, dark in (("light", ""), ("dark", "-dark")):
+            animate(context, {"file": f"refreshing{dark}", "theme": theme, "config": {"devices": ["iptv"]}})
         browser.close()
 
 
