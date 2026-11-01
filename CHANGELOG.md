@@ -4,12 +4,18 @@
 
 ### Fixes
 - Card: in the Sections view, a new card now takes the full width of the section (12 columns, 6 at least) and the mini card half of it (6 columns), instead of 6 columns (4 at least), where the title disappeared and the figures were cut ("9…", "5…").
-- Card: on a narrow card the title always keeps a few characters and every button stays inside the card; the status pill shrinks first to its truncated text, then to its coloured icon (its label stays in the tooltip). The figure tiles drop their icon, then go two per row, instead of cutting 5-digit numbers; in a card with several subscriptions, the pills go under the subscription name instead of cutting it.
+- Card: on a narrow card the title always keeps a few characters and every button stays inside the card; the status pill keeps its whole label ("Ready" was cut to "Re…" at 320 px) and is only truncated when the room really runs out (its label stays in the tooltip). The figure tiles drop their icon, then go two per row, instead of cutting 5-digit numbers; in a card with several subscriptions, the pills go under the subscription name instead of cutting it.
+- Card: at phone width (6 columns of a section, about 160 to 180 px), the title and its status pill get a line of their own under the logo and buttons, the last check and its buttons wrap instead of pushing the remove button out of the card, and the mini card hides its logo and truncates a long subscription name rather than cut its chip at the card's edge.
+- Card: in a layout card, a button card or any container that sizes the card from its content (inline-block, grid `auto` column), the card no longer collapses to about 24 px wide; in a two-column grid it still shrinks to its column without spilling over.
+- Card: when the card moves the focus (into a popup, around it with Tab, or back to the detail button), the page no longer scrolls.
 - Card: the add, edit, view and remove popups no longer spill over the next card: the card grows to hold the popup while it is open, so a click outside the popup always closes it.
 - Card: the popups are dialogs for the keyboard and screen readers: the focus moves into the popup (first field, first copy button, or **Cancel** when removing an account), Tab stays inside it, Escape closes it, and the focus then returns to the button that opened it.
 - Card: the view, edit and remove buttons are 24 px, easier to hit on a phone.
 - Sidebar panel: on a phone, the credential labels only take their own width, so a MAC address is shown in full.
 - Serbian: the "Unknown" subscription status now agrees with "pretplata" (Непозната / Nepoznata), like the other statuses.
+
+### Maintenance
+- README screenshots are only rewritten when their pixels changed, not on every screenshots run.
 
 ## 3.22.4 - 2026-11-01
 
