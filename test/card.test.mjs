@@ -234,3 +234,215 @@ test('state-coloured text reaches 4.5:1 in light and dark themes', () => {
   assert.match(css, /\.modal button\.danger \{[^}]*[^-]color:var\(--iptv-crit-text\)/);
   assert.match(IptvMiniCard.CSS, /\.r\.warning, \.r\.error \{ color: var\(--ct\)/);
 });
+
+// --- Layout at the narrow widths of the Sections view (4 columns = 161 px, 6 = 246 px) ---------------------------
+
+test('the full card defaults to the full width of a section, the mini card to half (6 columns minimum)', () => {
+  const card = Object.create(IptvCard.prototype);
+  assert.deepEqual({ ...card.getGridOptions() }, { columns: 12, min_columns: 6, rows: 'auto' });
+  const mini = Object.create(IptvMiniCard.prototype);
+  mini._zoomed = false;
+  assert.deepEqual({ ...mini.getGridOptions() }, { columns: 6, min_columns: 6 });
+  // Zoomed in, the mini card shows the full card: same sizes
+  mini._zoomed = true;
+  assert.deepEqual({ ...mini.getGridOptions() }, { columns: 12, min_columns: 6, rows: 'auto' });
+});
+
+const rule = (css, selector) => {
+  const esc = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return [...css.matchAll(new RegExp(`(?:^|[\\s}])${esc} \\{([^}]*)\\}`, 'g'))].map((m) => m[1]).join(';');
+};
+
+test('a narrow header keeps the title readable and every button inside the card', () => {
+  for (const css of [IptvCard.CSS, IptvMiniCard.CSS]) {
+    assert.match(css, /ha-card \{[^}]*container-type: inline-size/, 'the card is a size container');
+    // The title block takes the room left and truncates, but keeps about 4 characters
+    assert.match(rule(css, '.titles'), /flex: 1 1 auto/);
+    assert.match(rule(css, '.titles'), /min-width: 0/);
+    assert.match(rule(css, '.name'), /min-width: \d+(\.\d+)?ch/);
+    assert.match(rule(css, '.name'), /text-overflow: ellipsis/);
+    // The status pill can shrink to half the line, its text truncated
+    const pill = rule(css, '.title-row > .chip');
+    assert.match(pill, /flex: 0 1 auto/);
+    assert.match(pill, /min-width: 0/);
+    assert.match(pill, /max-width: 50%/);
+    assert.match(rule(css, '.chip .tx'), /text-overflow: ellipsis/);
+    // Under the threshold, only its coloured icon is left
+    assert.match(css, /@container \(max-width: \d+px\) \{[^@]*\.title-row > \.chip \.tx[^{]*\{ display: none/);
+    // Icon buttons never shrink
+    assert.match(rule(css, '.header > button'), /flex: none/);
+  }
+  assert.match(rule(IptvMiniCard.CSS, '.head .chip'), /flex: 0 1 auto/);
+  assert.match(rule(IptvMiniCard.CSS, '.head .chip'), /max-width: 50%/);
+  assert.match(IptvMiniCard.CSS, /@container \(max-width: \d+px\) \{[^@]*\.head \.chip \.tx[^{]*\{ display: none/);
+});
+
+test('the figures are never cut: the tiles lose their icon, then go two by two, on a narrow card', () => {
+  const css = IptvCard.CSS;
+  assert.doesNotMatch(rule(css, '.num'), /text-overflow: ellipsis/);
+  assert.match(css, /@container \(max-width: 3\d\dpx\) \{[^@]*\.stat ha-icon \{ display: none/);
+  assert.match(css, /@container \(max-width: 2\d\dpx\) \{[^@]*\.stats \{ grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
+});
+
+test('the status pill text is in its own element, and its label stays available when only the icon shows', () => {
+  const card = Object.create(IptvCard.prototype);
+  card._config = { language: 'en', warning_days: 7 };
+  const html = card._statusChip({ state: 'ok', statusLabel: 'Active' });
+  assert.match(html, /<span class="tx">Active<\/span>/);
+  assert.match(html, /title="Active"/);
+  const mini = Object.create(IptvMiniCard.prototype);
+  mini._config = { language: 'en' };
+  const pill = mini._miniStatus([{ state: 'warning' }, { state: 'ok' }]);
+  assert.match(pill, /<span class="tx">1 expiring<\/span>/);
+  assert.match(pill, /title="1 expiring"/);
+  assert.match(pill, /aria-label="1 expiring"/);
+});
+
+test('the view, edit and remove buttons are at least 24 px (16 px icon, 4 px padding)', () => {
+  assert.match(rule(IptvCard.CSS, 'button.edit, button.del, button.view'), /padding:4px/);
+});
+
+test('Serbian: an unknown subscription status agrees with "pretplata" (feminine)', () => {
+  assert.equal(IptvCardI18n.sr.status_unknown, 'Непозната');
+  assert.equal(IptvCardI18n['sr-Latn'].status_unknown, 'Nepoznata');
+});
+
+// --- Popups: a modal dialog sized into the card, usable with the keyboard ----------------------------------------
+
+// A popup tree: querySelector gives the same fake child for a selector, the .modal box is 340 px high
+function popupDom(shadow) {
+  const make = (props = {}) => {
+    const children = {};
+    const el = fakeEl({
+      ...props,
+      querySelector: (sel) => {
+        if (!children[sel]) children[sel] = make({ className: sel.replace(/^[a-z]*\./, '') });
+        return children[sel];
+      },
+      querySelectorAll: () => [],
+      remove() {
+        el.removed = true;
+      },
+      focus() {
+        shadow.activeElement = el;
+      },
+      offsetHeight: 340,
+    });
+    return el;
+  };
+  return make;
+}
+
+function popupCard() {
+  const shadow = { activeElement: null, appended: [] };
+  const make = popupDom(shadow);
+  const add = make({ tagName: 'BUTTON', className: 'add' });
+  const refresh = make({ tagName: 'BUTTON', className: 'refresh' });
+  const card = Object.create(IptvCard.prototype);
+  card._config = { language: 'en', warning_days: 7 };
+  card._hass = { language: 'en' };
+  const style = {};
+  card.style = { setProperty: (k, v) => (style[k] = v), removeProperty: (k) => delete style[k] };
+  shadow.appendChild = (el) => shadow.appended.push(el);
+  card._root = { inert: false, contains: (el) => [add, refresh].includes(el), querySelectorAll: () => [add, refresh] };
+  Object.defineProperty(card, 'shadowRoot', { value: shadow });
+  context.document.createElement = () => make({ tagName: 'DIV' });
+  return { card, shadow, style, add, refresh };
+}
+
+test('a popup is a modal dialog named by its title, takes the focus, and makes the card inert', () => {
+  const { card, shadow, style, add } = popupCard();
+  add.focus();
+  card._openAdd();
+  const backdrop = card._modal;
+  assert.match(backdrop.innerHTML, /<div class="modal" role="dialog" aria-modal="true" aria-labelledby="iptv-dialog-title" tabindex="-1">/);
+  assert.match(backdrop.innerHTML, /<h3 id="iptv-dialog-title">Add account<\/h3>/);
+  assert.equal(shadow.activeElement, backdrop.querySelector('.prov'), 'the provider field has the focus');
+  assert.equal(card._root.inert, true, 'Tab no longer goes through the card under the veil');
+  // The card grows to hold the popup (340 px + 12 px above and below)
+  assert.equal(style['--iptv-modal-h'], '364px');
+});
+
+test('Escape closes a popup and gives the focus back to the button that opened it', () => {
+  const { card, shadow, style, add } = popupCard();
+  add.focus();
+  card._openAdd();
+  const backdrop = card._modal;
+  let stopped = false;
+  backdrop.listeners.keydown({ key: 'a', stopPropagation() {} });
+  assert.equal(card._modal, backdrop, 'another key does nothing');
+  backdrop.listeners.keydown({ key: 'Escape', stopPropagation: () => (stopped = true) });
+  assert.ok(backdrop.removed);
+  assert.equal(card._modal, null);
+  assert.ok(stopped, 'Escape does not also close a Home Assistant dialog around the card');
+  assert.equal(card._root.inert, false);
+  assert.equal(style['--iptv-modal-h'], undefined, 'the card gets its own height back');
+  assert.equal(shadow.activeElement, add);
+});
+
+test('the remove popup focuses Cancel, the view popup its first copy button, an error its close button', async () => {
+  const { card, shadow } = popupCard();
+  card._confirmDelete({ name: 'Provider', device: 'd1' });
+  assert.equal(shadow.activeElement, card._modal.querySelector('.cancel'));
+  card._ws = () => Promise.resolve({ ok: true, provider: 'xtream', url: 'http://x', username: 'u', password: 'p' });
+  await card._openView({ device: 'd1' });
+  assert.equal(shadow.activeElement, card._modal.querySelector('button.copy'));
+  card._ws = () => Promise.resolve({ ok: false, error: 'not_found' });
+  await card._openView({ device: 'd1' });
+  assert.equal(shadow.activeElement, card._modal.querySelector('.cancel'));
+});
+
+test('closing a popup whose button is gone (account removed) focuses nothing and does not throw', () => {
+  const { card, shadow, add } = popupCard();
+  add.focus();
+  card._confirmDelete({ name: 'Provider', device: 'd1' });
+  card._root.querySelectorAll = () => []; // re-rendered without this subscription
+  shadow.activeElement = null;
+  card._closeEditor();
+  assert.equal(shadow.activeElement, null);
+  assert.equal(card._root.inert, false);
+  // Closing again (backdrop click after Escape) is harmless
+  card._closeEditor();
+});
+
+test('Tab and Shift+Tab stay in the popup', () => {
+  const { card, shadow } = popupCard();
+  card._confirmDelete({ name: 'Provider', device: 'd1' });
+  const backdrop = card._modal;
+  const cancel = backdrop.querySelector('.cancel');
+  const remove = backdrop.querySelector('.danger');
+  backdrop.querySelectorAll = () => [cancel, remove];
+  const key = (shiftKey) => {
+    let prevented = false;
+    backdrop.listeners.keydown({ key: 'Tab', shiftKey, preventDefault: () => (prevented = true), stopPropagation() {} });
+    return prevented;
+  };
+  assert.equal(shadow.activeElement, cancel);
+  assert.ok(key(true), 'Shift+Tab on the first control');
+  assert.equal(shadow.activeElement, remove, 'goes round to the last one');
+  assert.ok(key(false));
+  assert.equal(shadow.activeElement, cancel, 'Tab on the last control goes back to the first');
+  shadow.activeElement = cancel;
+  assert.equal(key(false), false, 'between two controls, the browser moves the focus');
+  assert.equal(card._modal, backdrop, 'Tab does not close the popup');
+});
+
+test('mini pill counts: 1 is singular in every language, Polish and Serbian put the count after a colon above 1', () => {
+  const mini = Object.create(IptvMiniCard.prototype);
+  const label = (lang, n) => {
+    mini._config = { language: lang };
+    const views = Array.from({ length: n }, () => ({ state: 'warning' }));
+    return mini._miniStatus(views).match(/<span class="tx">([^<]*)<\/span>/)[1];
+  };
+  assert.equal(label('en', 1), '1 expiring');
+  assert.equal(label('fr', 1), '1 expire bientôt');
+  assert.equal(label('fr', 2), '2 expirent bientôt');
+  assert.equal(label('de', 1), '1 läuft bald ab');
+  assert.equal(label('es', 21), '21 caducan pronto');
+  for (const n of [2, 5, 21, 22]) {
+    assert.equal(label('pl', n), `Wkrótce wygasa: ${n}`);
+    assert.equal(label('sr', n), `Ускоро истиче: ${n}`);
+    assert.equal(label('sr-Latn', n), `Uskoro ističe: ${n}`);
+  }
+  assert.equal(label('sr-Latn', 1), '1 uskoro ističe');
+});

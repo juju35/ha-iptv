@@ -714,7 +714,7 @@ var IptvCardI18n = {
     status_expired: 'Истекла',
     status_banned: 'Блокирана',
     status_disabled: 'Онемогућена',
-    status_unknown: 'Непознато',
+    status_unknown: 'Непозната',
     auth_failed: 'Неважећи подаци за пријаву',
     trial: 'Пробни период',
     expiration: 'Истек',
@@ -796,7 +796,7 @@ var IptvCardI18n = {
     status_expired: 'Istekla',
     status_banned: 'Blokirana',
     status_disabled: 'Onemogućena',
-    status_unknown: 'Nepoznato',
+    status_unknown: 'Nepoznata',
     auth_failed: 'Nevažeći podaci za prijavu',
     trial: 'Probni period',
     expiration: 'Istek',
@@ -920,24 +920,32 @@ class IptvCard extends HTMLElement {
     :host { display: block; position: relative; --iptv-ok: var(--success-color, #43a047); --iptv-warn: var(--warning-color, #ffa600); --iptv-crit: var(--error-color, #db4437);
             /* Text in a state colour: half-way to the text colour, so it stays readable (4.5:1) in light and dark themes */
             --iptv-crit-text: color-mix(in srgb, var(--iptv-crit) 50%, var(--primary-text-color)); }
-    ha-card { padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+    /* A size container for the narrow layouts below; while a popup is open, the card grows to hold it */
+    ha-card { padding: 12px; display: flex; flex-direction: column; gap: 6px; container-type: inline-size;
+              box-sizing: border-box; min-height: var(--iptv-modal-h, 0px); }
     .ok { --c: var(--iptv-ok); } .warning { --c: var(--iptv-warn); } .error { --c: var(--iptv-crit); } .idle { --c: var(--secondary-text-color); }
     .ok, .warning, .error, .idle { --ct: color-mix(in srgb, var(--c) 50%, var(--primary-text-color)); }
     /* 8 px to the body (the card gap is 6 px); the status pill ends the title line, before the buttons */
     .header { display: flex; align-items: center; gap: 10px; margin-bottom: 2px; }
     .header > button:last-child:not(.zoom) { margin-right: -4px; }
+    /* Icon buttons never shrink: the title and the status pill give way */
+    .header > button { flex: none; }
     .badge { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; flex: none;
              background: color-mix(in srgb, var(--c) 16%, transparent); color: var(--c); --mdc-icon-size: 24px; }
     .badge ha-icon { display: inline-flex; }
-    .titles { flex: 1; min-width: 0; }
+    .titles { flex: 1 1 auto; min-width: 0; }
     .title-row { display: flex; align-items: center; gap: 10px; }
-    .title-row .name { flex: 1; min-width: 0; }
-    .title-row > .chip { flex: none; }
-    .name { font-size: 16px; font-weight: 500; line-height: 1.25; color: var(--primary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    /* The title gives way first (down to its 4 characters), then the pill */
+    .title-row .name { flex: 1 100 auto; }
+    /* The status pill shrinks to half the line at most, its text truncated (whole text in its tooltip) */
+    .title-row > .chip { flex: 0 1 auto; min-width: 0; max-width: 50%; }
+    /* At least about 4 characters of the title stay visible */
+    .name { font-size: 16px; font-weight: 500; line-height: 1.25; color: var(--primary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 4.5ch; }
     .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
-    .chip { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px 1px 5px; border-radius: 12px; font-size: 11px; font-weight: 500;
+    .chip { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px 1px 5px; border-radius: 12px; font-size: 11px; font-weight: 500; max-width: 100%; box-sizing: border-box;
             color: var(--ct); background: color-mix(in srgb, var(--c) 15%, transparent); --mdc-icon-size: 14px; }
-    .chip ha-icon { color: var(--c); }
+    .chip ha-icon { color: var(--c); flex: none; }
+    .chip .tx { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .chip.idle { padding-left: 10px; }
     .chip.fr { padding-left: 6px; gap: 5px; }
     .checked { display: flex; align-items: center; gap: 4px; color: var(--secondary-text-color); font-size: 11px; --mdc-icon-size: 13px; }
@@ -946,10 +954,11 @@ class IptvCard extends HTMLElement {
     .flag.off { filter: grayscale(1); opacity: .6; }
     .sect { display: flex; flex-direction: column; gap: 5px; }
     .sect.multi + .sect.multi { border-top: 1px solid var(--divider-color, rgba(127,127,127,.25)); padding-top: 6px; }
-    .sect-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    /* Narrow: the pills go under the subscription name rather than cutting it */
+    .sect-head { display: flex; align-items: center; justify-content: space-between; gap: 4px 8px; flex-wrap: wrap; }
     .sect-head .chips { margin-top: 0; flex: 0 1 auto; flex-wrap: wrap; justify-content: flex-end; }
     .sect-name { font-size: 14px; font-weight: 500; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .sect-head .sect-name { flex: 1 1 0; min-width: 2em; }
+    .sect-head .sect-name { flex: 1 1 0; min-width: min(10ch, 100%); }
     button { background:none; border:none; cursor:pointer; color:var(--secondary-text-color); padding:8px; border-radius:50%; align-self: flex-start; display: flex; }
     button:hover { background: var(--secondary-background-color); }
     button.spin ha-icon { animation: spin 1s linear infinite; }
@@ -966,7 +975,7 @@ class IptvCard extends HTMLElement {
     .stat { display:flex; align-items:center; gap:5px; padding:3px 7px; border-radius:8px; min-width: 0;
             background: var(--secondary-background-color, rgba(127,127,127,.08)); }
     .stat ha-icon { color: var(--primary-color); --mdc-icon-size: 15px; flex: none; }
-    .num { font-size: 14px; font-weight: 500; line-height: 1.2; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .num { font-size: 14px; font-weight: 500; line-height: 1.2; white-space:nowrap; }
     .msg { color: var(--secondary-text-color); padding:8px 0; }
     .msg.err { color: var(--iptv-crit-text); }
     [data-entity] { cursor:pointer; }
@@ -974,9 +983,10 @@ class IptvCard extends HTMLElement {
     .stat:hover { filter: brightness(0.95); }
     .foot { display:flex; align-items:center; justify-content:space-between; gap:8px; min-height:20px; }
     .foot-actions { display:flex; align-items:center; gap:8px; }
-    button.edit, button.del, button.view { padding:3px; margin:0; align-self:center; --mdc-icon-size:16px; }
+    button.edit, button.del, button.view { padding:4px; margin:0; align-self:center; --mdc-icon-size:16px; }
     button.del:hover { color:var(--iptv-crit); background:color-mix(in srgb, var(--iptv-crit) 12%, transparent); }
     .backdrop { position:absolute; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:flex-start; justify-content:center; padding-top:12px; box-sizing:border-box; z-index:9; border-radius:var(--ha-card-border-radius, 12px); }
+    .modal:focus { outline: none; }
     .modal { background:var(--card-background-color, #1c1c1c); color:var(--primary-text-color); width:min(92%, 340px); border-radius:14px; padding:16px; box-shadow:0 8px 30px rgba(0,0,0,.4); display:flex; flex-direction:column; gap:10px; }
     .modal h3 { margin:0; font-size:16px; font-weight:500; }
     .field { display:flex; flex-direction:column; gap:3px; }
@@ -997,6 +1007,18 @@ class IptvCard extends HTMLElement {
     .view-v { flex:1; min-width:0; font-size:13px; font-family:monospace; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; user-select:all; }
     .modal button.copy { padding:4px; --mdc-icon-size:16px; width:auto; height:auto; background:none; color:var(--secondary-text-color); }
     .modal button.copy.ok { color:var(--iptv-ok); }
+    /* Narrow card (inner width; 6 columns of a section = 220 px): the figures keep their room (no icon, then two tiles a row), the status pill keeps its icon only */
+    @container (max-width: 340px) {
+      .stat { justify-content: center; }
+      .stat ha-icon { display: none; }
+    }
+    @container (max-width: 260px) {
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .title-row > .chip .tx, .titles .chips .chip:not(.fr):not(.idle) .tx { display: none; }
+      .title-row > .chip, .titles .chips .chip:not(.fr):not(.idle) { padding: 1px 5px; }
+      .header, .title-row { gap: 6px; }
+      .header > button:not(.zoom) { padding: 6px; }
+    }
     /* Reduced motion: no spinning or sliding; the refresh button stays dimmed while it works */
     @media (prefers-reduced-motion: reduce) {
       button.spin ha-icon { animation: none; opacity: .5; }
@@ -1060,7 +1082,8 @@ class IptvCard extends HTMLElement {
   }
 
   getGridOptions() {
-    return { columns: 6, min_columns: 4, rows: 'auto' };
+    // Full width of a section by default; below 6 columns (246 px) the figures no longer fit
+    return { columns: 12, min_columns: 6, rows: 'auto' };
   }
 
   getCardSize() {
@@ -1217,6 +1240,13 @@ class IptvCard extends HTMLElement {
     return { exp: exp, daysLeft: daysLeft, state: state, statusLabel: statusLabel, pct: pct, d: d };
   }
 
+  // Status pill of one subscription; on a narrow card only its icon shows, the label stays in its tooltip
+  _statusChip(v) {
+    if (!v) return '';
+    var label = iptvEsc(v.statusLabel);
+    return `<span class="chip ${v.state}" data-entity="status" title="${label}"><ha-icon icon="${iptvStateIcon(v.state)}"></ha-icon><span class="tx">${label}</span></span>`;
+  }
+
   _render() {
     if (!this.shadowRoot || !this._config) return;
     var lang = iptvLang(this._config, this._hass);
@@ -1239,21 +1269,19 @@ class IptvCard extends HTMLElement {
       var cls = { ok: 'ok', degraded: 'warning' }[h.status] || 'error';
       var icon = { ok: 'mdi:lan-connect', degraded: 'mdi:speedometer-slow', stream_ko: 'mdi:television-off' }[h.status] || 'mdi:lan-disconnect';
       var label = this._t(`health_${h.status}`) + (h.ms != null && h.status !== 'unreachable' ? ` · ${fmtMs(h.ms)}` : '');
-      return `<span class="chip ${cls}" data-entity="health"><ha-icon icon="${icon}"></ha-icon>${esc(label)}</span>`;
+      return `<span class="chip ${cls}" data-entity="health" title="${esc(label)}"><ha-icon icon="${icon}"></ha-icon><span class="tx">${esc(label)}</span></span>`;
     };
 
     // French flag pill: French lists found (green) or not (red)
     var frenchChip = (fr) =>
       fr === null || fr === undefined
         ? ''
-        : `<span class="chip ${fr ? 'ok' : 'error'} fr" data-entity="french_lists" title="${esc(this._t('french_title'))}"><span class="flag${fr ? '' : ' off'}"></span>${esc(this._t(fr ? 'french_on' : 'french_off'))}</span>`;
+        : `<span class="chip ${fr ? 'ok' : 'error'} fr" data-entity="french_lists" title="${esc(this._t('french_title'))}"><span class="flag${fr ? '' : ' off'}"></span><span class="tx">${esc(this._t(fr ? 'french_on' : 'french_off'))}</span></span>`;
 
-    // Status pill of one subscription
-    var statusChip = (v) =>
-      v ? `<span class="chip ${v.state}" data-entity="status"><ha-icon icon="${iptvStateIcon(v.state)}"></ha-icon>${esc(v.statusLabel)}</span>` : '';
+    var statusChip = (v) => this._statusChip(v);
     // Trial, French and health pills of one subscription
     var infoChips = (v, h, fr) =>
-      `${v?.d.is_trial ? `<span class="chip idle">${esc(this._t('trial'))}</span>` : ''}${v ? frenchChip(fr) : ''}${healthChip(h, v)}`;
+      `${v?.d.is_trial ? `<span class="chip idle"><span class="tx">${esc(this._t('trial'))}</span></span>` : ''}${v ? frenchChip(fr) : ''}${healthChip(h, v)}`;
     // Every pill of one subscription, in a row
     var chips = (v, h, fr) => (!v && !h ? '' : `<div class="chips">${statusChip(v)}${infoChips(v, h, fr)}</div>`);
 
@@ -1414,7 +1442,7 @@ class IptvCard extends HTMLElement {
   // ── Edit credentials popup ────────────────────────────────────────────────
   async _openEditor(sub) {
     var esc = iptvEsc;
-    var modal = this._openModal(`<h3>${esc(this._t('edit_title'))}</h3><div class="hint">${esc(this._t('edit_saving'))}</div>`);
+    var modal = this._openModal(`<h3 id="iptv-dialog-title">${esc(this._t('edit_title'))}</h3><div class="hint">${esc(this._t('edit_saving'))}</div>`);
     this._editDevice = sub.device;
 
     var prefill = await this._ws('edit_account', { device_id: sub.device });
@@ -1435,7 +1463,7 @@ class IptvCard extends HTMLElement {
         ? field('url', 'text', prefill.url) + field('mac', 'text', prefill.mac)
         : field('url', 'text', prefill.url) + field('username', 'text', prefill.username) + field('password', 'password', '');
     modal.querySelector('.modal').innerHTML = `
-      <h3>${esc(this._t('edit_title'))}</h3>
+      <h3 id="iptv-dialog-title">${esc(this._t('edit_title'))}</h3>
       ${fields}
       <div class="err"></div>
       <div class="modal-actions">
@@ -1447,12 +1475,20 @@ class IptvCard extends HTMLElement {
     modal.querySelectorAll('input').forEach((el) => {
       el.addEventListener('keydown', (e) => { if (e.key === 'Enter') this._submitEditor(); });
     });
-    var firstInput = modal.querySelector('input');
-    if (firstInput) firstInput.focus();
+    this._focusModal(modal, 'input');
   }
 
+  // Close the open popup: the card gets its height and keyboard back, the focus returns to the button that opened it
   _closeEditor() {
-    if (this._modal) { this._modal.remove(); this._modal = null; }
+    if (!this._modal) return;
+    this._modal.remove();
+    this._modal = null;
+    this._modalObserver?.disconnect();
+    this._modalObserver = null;
+    this.style.removeProperty('--iptv-modal-h');
+    if (this._root) this._root.inert = false;
+    iptvRefocus(this._root, this._modalOpener);
+    this._modalOpener = null;
   }
 
   // Call an iptv service that returns a response; {} or {ok:false} on failure
@@ -1475,22 +1511,62 @@ class IptvCard extends HTMLElement {
     }
   }
 
-  // Open a modal with the given inner HTML (wrapped in .modal) and return it
+  // Open a modal with the given inner HTML (wrapped in .modal) and return it. It is a modal dialog named by
+  // its <h3 id="iptv-dialog-title">: the card under the veil is inert, Escape closes it, and the card grows
+  // to hold it instead of letting it cover the next card.
   _openModal(innerHtml) {
     this._closeEditor();
+    this._modalOpener = iptvFocusOf(this.shadowRoot, this._root);
     var modal = document.createElement('div');
     modal.className = 'backdrop';
-    modal.innerHTML = `<div class="modal">${innerHtml}</div>`;
+    modal.innerHTML = `<div class="modal" role="dialog" aria-modal="true" aria-labelledby="iptv-dialog-title" tabindex="-1">${innerHtml}</div>`;
     modal.addEventListener('click', (e) => { if (e.target === modal) this._closeEditor(); });
+    modal.addEventListener('keydown', (e) => {
+      if (e.key === 'Tab') this._trapTab(e, modal);
+      if (e.key !== 'Escape') return;
+      // Only this popup: not a Home Assistant dialog the card is in
+      e.stopPropagation();
+      this._closeEditor();
+    });
     this.shadowRoot.appendChild(modal);
     this._modal = modal;
+    if (this._root) this._root.inert = true;
+    var box = modal.querySelector('.modal');
+    // 12 px above and below the popup; its height changes with its content (loading, fields, errors)
+    var fit = () => this.style.setProperty('--iptv-modal-h', `${Math.ceil(box.offsetHeight) + 24}px`);
+    if (typeof ResizeObserver === 'function') {
+      this._modalObserver = new ResizeObserver(fit);
+      this._modalObserver.observe(box);
+    }
+    fit();
+    box.focus();
     return modal;
+  }
+
+  // Tab and Shift+Tab go round the popup's controls instead of leaving it for the page
+  _trapTab(e, modal) {
+    var items = [...modal.querySelectorAll('input, select, button:not([disabled])')];
+    if (!items.length) return;
+    var active = this.shadowRoot.activeElement;
+    var last = items[items.length - 1];
+    if (e.shiftKey && (active === items[0] || !items.includes(active))) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && (active === last || !items.includes(active))) {
+      e.preventDefault();
+      items[0].focus();
+    }
+  }
+
+  // Focus the first control of a popup matching the selector (the popup itself keeps it otherwise)
+  _focusModal(modal, selector) {
+    modal.querySelector(selector)?.focus();
   }
 
   _confirmDelete(sub) {
     var esc = iptvEsc;
     var modal = this._openModal(`
-        <h3>${esc(this._t('del_title'))}</h3>
+        <h3 id="iptv-dialog-title">${esc(this._t('del_title'))}</h3>
         <div class="hint">${esc(sub.name)} — ${esc(this._t('del_confirm'))}</div>
         <div class="err"></div>
         <div class="modal-actions">
@@ -1501,6 +1577,8 @@ class IptvCard extends HTMLElement {
     this._delDevice = sub.device;
     modal.querySelector('.cancel').addEventListener('click', () => this._closeEditor());
     modal.querySelector('.danger').addEventListener('click', () => this._deleteAccount());
+    // Cancel, not Remove: Enter right after opening does not delete the account
+    this._focusModal(modal, '.cancel');
   }
 
   async _deleteAccount() {
@@ -1527,7 +1605,7 @@ class IptvCard extends HTMLElement {
   _openAdd() {
     var esc = iptvEsc;
     var modal = this._openModal(`
-        <h3>${esc(this._t('add_title'))}</h3>
+        <h3 id="iptv-dialog-title">${esc(this._t('add_title'))}</h3>
         <div class="field">
           <label>${esc(this._t('add_provider'))}</label>
           <select class="prov">
@@ -1558,6 +1636,7 @@ class IptvCard extends HTMLElement {
     renderFields();
     modal.querySelector('.cancel').addEventListener('click', () => this._closeEditor());
     modal.querySelector('.primary').addEventListener('click', () => this._submitAdd());
+    this._focusModal(modal, '.prov');
   }
 
   async _submitAdd() {
@@ -1593,7 +1672,7 @@ class IptvCard extends HTMLElement {
   // ── View credentials popup ────────────────────────────────────────────────
   async _openView(sub) {
     var esc = iptvEsc;
-    var modal = this._openModal(`<h3>${esc(this._t('view_title'))}</h3><div class="hint">${esc(this._t('edit_saving'))}</div>`);
+    var modal = this._openModal(`<h3 id="iptv-dialog-title">${esc(this._t('view_title'))}</h3><div class="hint">${esc(this._t('edit_saving'))}</div>`);
     var creds = await this._ws('get_credentials', { device_id: sub.device });
     if (this._modal !== modal) return;
     if (!creds.ok) return this._modalError(modal, 'view_title', creds.error);
@@ -1607,19 +1686,21 @@ class IptvCard extends HTMLElement {
         <div class="view-v">${esc(r[1])}</div>
         <button class="copy" title="${esc(this._t('copy'))}"><ha-icon icon="mdi:content-copy"></ha-icon></button>
       </div>`).join('');
-    modal.querySelector('.modal').innerHTML = `<h3>${esc(this._t('view_title'))}</h3>${rowsHtml}${close}`;
+    modal.querySelector('.modal').innerHTML = `<h3 id="iptv-dialog-title">${esc(this._t('view_title'))}</h3>${rowsHtml}${close}`;
     // The value stays in a closure: the password is never written into the DOM
     modal.querySelectorAll('button.copy').forEach((el, i) => {
       el.addEventListener('click', () => this._copy(el, rows[i][1]));
     });
     modal.querySelector('.cancel').addEventListener('click', () => this._closeEditor());
+    this._focusModal(modal, 'button.copy');
   }
 
   // Error message in an open popup, with a close button
   _modalError(modal, titleKey, error) {
     var esc = iptvEsc;
-    modal.querySelector('.modal').innerHTML = `<h3>${esc(this._t(titleKey))}</h3><div class="err">${esc(this._err(error))}</div><div class="modal-actions"><button class="act cancel">${esc(this._t('edit_cancel'))}</button></div>`;
+    modal.querySelector('.modal').innerHTML = `<h3 id="iptv-dialog-title">${esc(this._t(titleKey))}</h3><div class="err">${esc(this._err(error))}</div><div class="modal-actions"><button class="act cancel">${esc(this._t('edit_cancel'))}</button></div>`;
     modal.querySelector('.cancel').addEventListener('click', () => this._closeEditor());
+    this._focusModal(modal, '.cancel');
   }
 
   async _copy(el, text) {
@@ -1683,8 +1764,9 @@ class IptvMiniCard extends IptvCard {
     .mini .badge { width: 32px; height: 32px; --mdc-icon-size: 20px; align-self: flex-start; }
     .body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
     .head { display: flex; align-items: center; gap: 8px; min-width: 0; }
-    .mini .name { flex: 0 1 auto; }
-    .head .chip { flex: none; margin-left: auto; }
+    /* The title gives way first (down to its 4 characters), then the pill */
+    .mini .name { flex: 0 100 auto; }
+    .head .chip { flex: 0 1 auto; min-width: 0; max-width: 50%; margin-left: auto; }
     .rs { display: flex; flex-wrap: wrap; gap: 2px 4px; margin-left: -4px; }
     .mini .msg { padding: 0; font-size: 12px; }
     button.r { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; padding: 0 6px 0 4px; border-radius: 999px;
@@ -1701,6 +1783,11 @@ class IptvMiniCard extends IptvCard {
     .zoom:hover { background: color-mix(in srgb, var(--secondary-text-color) 16%, transparent); color: var(--primary-text-color); }
     .zoom:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 1px; }
     .header .zoom { align-self: flex-start; margin: 2px -4px 0 -6px; }
+    /* Narrower than its 6 columns (e.g. a phone in masonry view): the global pill keeps its icon only */
+    @container (max-width: 200px) {
+      .head .chip .tx { display: none; }
+      .head .chip { padding: 1px 5px; }
+    }
   `;
 
   static getConfigElement() {
@@ -1737,6 +1824,11 @@ class IptvMiniCard extends IptvCard {
     return this._zoomed ? super.getCardSize() : 2;
   }
 
+  // Half a section (zoomed in: the full card's sizes)
+  getGridOptions() {
+    return this._zoomed ? super.getGridOptions() : { columns: 6, min_columns: 6 };
+  }
+
   _render() {
     if (!this.shadowRoot || !this._config) return;
     var focus = iptvFocusOf(this.shadowRoot, this._root);
@@ -1759,7 +1851,8 @@ class IptvMiniCard extends IptvCard {
       [state, label] = ['error', expired === count('error') ? n('mini_expired', expired) : n('mini_error', count('error'))];
     } else if (count('warning')) [state, label] = ['warning', n('mini_expiring', count('warning'))];
     else [state, label] = ['ok', views.length > 1 ? this._t('mini_all_active') : this._t('status_active')];
-    return `<span class="chip ${state}"><ha-icon icon="${iptvStateIcon(state)}"></ha-icon>${iptvEsc(label)}</span>`;
+    label = iptvEsc(label);
+    return `<span class="chip ${state}" title="${label}" aria-label="${label}"><ha-icon icon="${iptvStateIcon(state)}"></ha-icon><span class="tx">${label}</span></span>`;
   }
 
   // One chip per subscription: its name and days left (or why it is not active);
