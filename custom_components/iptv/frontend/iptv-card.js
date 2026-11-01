@@ -405,7 +405,7 @@ var IptvCardI18n = {
     health_ok: 'Online',
     health_degraded: 'Lento',
     health_unreachable: 'Non raggiungibile',
-    health_stream_ko: 'Stream non funzionante',
+    health_stream_ko: 'Stream KO',
     health_auth_failed: 'Credenziali rifiutate',
     ed_title: 'Titolo',
     ed_devices: 'Abbonamenti (tutti se vuoto)',
@@ -470,7 +470,7 @@ var IptvCardI18n = {
     status_disabled: 'Uitgeschakeld',
     status_unknown: 'Onbekend',
     auth_failed: 'Ongeldige inloggegevens',
-    trial: 'Proefperiode',
+    trial: 'Proef',
     expiration: 'Vervaldatum',
     never: 'Nooit',
     unlimited: 'Onbeperkt',
@@ -487,7 +487,7 @@ var IptvCardI18n = {
     health_ok: 'Online',
     health_degraded: 'Traag',
     health_unreachable: 'Onbereikbaar',
-    health_stream_ko: 'Stream werkt niet',
+    health_stream_ko: 'Geen stream',
     health_auth_failed: 'Inloggegevens geweigerd',
     ed_title: 'Titel',
     ed_devices: 'Abonnementen (alle indien leeg)',
@@ -497,8 +497,8 @@ var IptvCardI18n = {
     zoom_in: 'Volledige kaart tonen',
     zoom_out: 'Terug naar de compacte weergave',
     mini_all_active: 'Alle actief',
-    mini_expiring: '{n} verloopt binnenkort',
-    mini_expiring_plural: '{n} verlopen binnenkort',
+    mini_expiring: '{n} bijna verlopen',
+    mini_expiring_plural: '{n} bijna verlopen',
     mini_expired: '{n} verlopen',
     mini_expired_plural: '{n} verlopen',
     mini_error: '{n} met fout',
@@ -550,7 +550,7 @@ var IptvCardI18n = {
     status_expired: 'Expirada',
     status_banned: 'Banida',
     status_disabled: 'Desativada',
-    status_unknown: 'Desconhecido',
+    status_unknown: 'Desconhecida',
     auth_failed: 'Credenciais inválidas',
     trial: 'Teste',
     expiration: 'Expiração',
@@ -569,7 +569,7 @@ var IptvCardI18n = {
     health_ok: 'Online',
     health_degraded: 'Lento',
     health_unreachable: 'Inacessível',
-    health_stream_ko: 'Stream indisponível',
+    health_stream_ko: 'Sem stream',
     health_auth_failed: 'Credenciais recusadas',
     ed_title: 'Título',
     ed_devices: 'Subscrições (todas se vazio)',
@@ -632,9 +632,9 @@ var IptvCardI18n = {
     status_expired: 'Wygasła',
     status_banned: 'Zablokowana',
     status_disabled: 'Wyłączona',
-    status_unknown: 'Nieznany',
+    status_unknown: 'Nieznana',
     auth_failed: 'Nieprawidłowe dane logowania',
-    trial: 'Okres próbny',
+    trial: 'Próbny',
     expiration: 'Wygaśnięcie',
     never: 'Nigdy',
     unlimited: 'Bez limitu',
@@ -649,9 +649,9 @@ var IptvCardI18n = {
     french_title: 'Listy francuskie',
     last_check: 'Ostatnie sprawdzenie',
     health_ok: 'Online',
-    health_degraded: 'Wolno',
+    health_degraded: 'Wolny',
     health_unreachable: 'Nieosiągalny',
-    health_stream_ko: 'Strumień nie działa',
+    health_stream_ko: 'Brak streamu',
     health_auth_failed: 'Dane logowania odrzucone',
     ed_title: 'Tytuł',
     ed_devices: 'Subskrypcje (wszystkie, jeśli puste)',
@@ -937,8 +937,9 @@ class IptvCard extends HTMLElement {
     .sect { display: flex; flex-direction: column; gap: 5px; }
     .sect.multi + .sect.multi { border-top: 1px solid var(--divider-color, rgba(127,127,127,.25)); padding-top: 6px; }
     .sect-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-    .sect-head .chips { margin-top: 0; flex: none; justify-content: flex-end; }
+    .sect-head .chips { margin-top: 0; flex: 0 1 auto; flex-wrap: wrap; justify-content: flex-end; }
     .sect-name { font-size: 14px; font-weight: 500; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sect-head .sect-name { flex: 1 1 0; min-width: 2em; }
     button { background:none; border:none; cursor:pointer; color:var(--secondary-text-color); padding:8px; border-radius:50%; align-self: flex-start; display: flex; }
     button:hover { background: var(--secondary-background-color); }
     button.spin ha-icon { animation: spin 1s linear infinite; }
@@ -1013,7 +1014,7 @@ class IptvCard extends HTMLElement {
           { value: 'es', label: 'Español' },
           { value: 'it', label: 'Italiano' },
           { value: 'nl', label: 'Nederlands' },
-          { value: 'pt', label: 'Português' },
+          { value: 'pt', label: 'Português (Portugal)' },
           { value: 'pl', label: 'Polski' },
           { value: 'sr', label: 'Српски' },
           { value: 'sr-Latn', label: 'Srpski (latinica)' },

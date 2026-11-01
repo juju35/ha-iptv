@@ -3,7 +3,7 @@
 ## 3.22.4 - 2026-11-01
 
 ### Changes
-- Added Italian, Dutch, European Portuguese and Polish translations: integration (`it`, `nl`, `pt`, `pl`), card, sidebar panel and notifications; the card editor offers **Italiano**, **Nederlands**, **Português** and **Polski**. Brazilian Portuguese (`pt-BR`) uses the European Portuguese texts.
+- Added Italian, Dutch, European Portuguese and Polish translations: integration (`it`, `nl`, `pt`, `pl`), card, sidebar panel and notifications; the card editor offers **Italiano**, **Nederlands**, **Português (Portugal)** and **Polski**. Brazilian Portuguese (`pt-BR`) uses the European Portuguese texts (the integration ships `pt-BR.json`, a copy of `pt.json`).
 
 ### Fixes
 - Sidebar panel: a Home Assistant language without a table (e.g. `ja`) now resolves to English, like the card and the notifications.

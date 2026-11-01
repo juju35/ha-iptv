@@ -97,7 +97,7 @@
         "data_description": {
           "notify_days": "Notifica persistente questo numero di giorni prima della scadenza dell’abbonamento (0 per disattivare)",
           "health_interval": "Frequenza con cui il server viene controllato con una richiesta leggera (solo informazioni dell’account)",
-          "stream_check": "A ogni controllo del server, apre brevemente un canale per verificare che venga riprodotto (occupa una connessione). In caso di errore lo stato diventa Stream non funzionante."
+          "stream_check": "A ogni controllo del server, apre brevemente un canale per verificare che venga riprodotto (occupa una connessione). In caso di errore lo stato diventa Stream KO."
         }
       }
     }
@@ -145,7 +145,7 @@
           "degraded": "Lento",
           "auth_failed": "Credenziali rifiutate",
           "unreachable": "Non raggiungibile",
-          "stream_ko": "Stream non funzionante"
+          "stream_ko": "Stream KO"
         }
       },
       "response_time": {

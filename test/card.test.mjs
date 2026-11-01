@@ -81,7 +81,7 @@ test('the editor offers every language of the card, Serbian in Cyrillic and Lati
   assert.deepEqual(options.slice(-6), [
     ['it', 'Italiano'],
     ['nl', 'Nederlands'],
-    ['pt', 'Português'],
+    ['pt', 'Português (Portugal)'],
     ['pl', 'Polski'],
     ['sr', 'Српски'],
     ['sr-Latn', 'Srpski (latinica)'],

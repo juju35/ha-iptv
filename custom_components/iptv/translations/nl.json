@@ -97,7 +97,7 @@
         "data_description": {
           "notify_days": "Blijvende melding zoveel dagen voordat het abonnement verloopt (0 om uit te schakelen)",
           "health_interval": "Hoe vaak de server wordt gecontroleerd met een lichte aanvraag (alleen accountinformatie)",
-          "stream_check": "Opent bij elke servercontrole kort een zender om te controleren of die afspeelt (bezet één verbinding). Bij een fout toont de status Stream werkt niet."
+          "stream_check": "Opent bij elke servercontrole kort een zender om te controleren of die afspeelt (bezet één verbinding). Bij een fout toont de status Geen stream."
         }
       }
     }
@@ -145,7 +145,7 @@
           "degraded": "Traag",
           "auth_failed": "Inloggegevens geweigerd",
           "unreachable": "Onbereikbaar",
-          "stream_ko": "Stream werkt niet"
+          "stream_ko": "Geen stream"
         }
       },
       "response_time": {

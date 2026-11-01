@@ -35,7 +35,7 @@ def _load(lang: str) -> dict[str, str]:
     return _strings(json.loads((TRANSLATIONS / f"{lang}.json").read_text(encoding="utf-8")))
 
 
-@pytest.mark.parametrize("lang", ["fr", "de", "es", "it", "nl", "pt", "pl", "sr", "sr-Latn"])
+@pytest.mark.parametrize("lang", ["fr", "de", "es", "it", "nl", "pt", "pt-BR", "pl", "sr", "sr-Latn"])
 def test_translation_keys_match_english(lang: str) -> None:
     """The translation exists and has the same keys and placeholders as en.json."""
     english = _keys(json.loads((TRANSLATIONS / "en.json").read_text(encoding="utf-8")))
@@ -44,6 +44,15 @@ def test_translation_keys_match_english(lang: str) -> None:
     en_strings, strings = _load("en"), _load(lang)
     for key, text in en_strings.items():
         assert sorted(PLACEHOLDER.findall(strings[key])) == sorted(PLACEHOLDER.findall(text)), f"{lang}: {key}"
+
+
+def test_brazilian_portuguese_is_european_portuguese() -> None:
+    """pt-BR.json is an exact copy of pt.json: Brazilian Portuguese uses the European Portuguese texts."""
+    assert (TRANSLATIONS / "pt-BR.json").read_bytes() == (TRANSLATIONS / "pt.json").read_bytes()
+
+
+# Languages that only copy another file; the notifications resolve them to their base (pt-BR → pt)
+_ALIASES = {"pt-BR"}
 
 
 # Serbian Cyrillic letter by letter, then its Latin spelling (љ, њ and џ take two letters).
@@ -111,7 +120,7 @@ def test_notification_texts_cover_every_language() -> None:
     from custom_components.iptv.notify_add import TEXTS
     from custom_components.iptv.notify_expiry import DATE_FORMATS, MESSAGES
 
-    languages = {path.stem for path in TRANSLATIONS.glob("*.json")}
+    languages = {path.stem for path in TRANSLATIONS.glob("*.json")} - _ALIASES
     for texts in (TEXTS, MESSAGES, DATE_FORMATS):
         assert set(texts) == languages
     for texts in (TEXTS, MESSAGES):

@@ -297,7 +297,7 @@ The integration and the card auto-detect the language from your Home Assistant s
 | Español | `es` |
 | Italiano | `it` |
 | Nederlands | `nl` |
-| Português (European; also used for `pt-BR`) | `pt` |
+| Português (Portugal); pt-BR uses the European Portuguese texts | `pt`, `pt-BR` |
 | Polski | `pl` |
 | Српски | `sr` |
 | Srpski (latinica) | `sr-Latn` |

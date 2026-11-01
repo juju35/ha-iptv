@@ -97,7 +97,7 @@
         "data_description": {
           "notify_days": "Notificação persistente este número de dias antes de a subscrição expirar (0 para desativar)",
           "health_interval": "Com que frequência o servidor é verificado com um pedido leve (apenas informações da conta)",
-          "stream_check": "Em cada verificação do servidor, abre brevemente um canal para confirmar que é reproduzido (ocupa uma ligação). Em caso de falha, o estado mostra Stream indisponível."
+          "stream_check": "Em cada verificação do servidor, abre brevemente um canal para confirmar que é reproduzido (ocupa uma ligação). Em caso de falha, o estado mostra Sem stream."
         }
       }
     }
@@ -145,7 +145,7 @@
           "degraded": "Lento",
           "auth_failed": "Credenciais recusadas",
           "unreachable": "Inacessível",
-          "stream_ko": "Stream indisponível"
+          "stream_ko": "Sem stream"
         }
       },
       "response_time": {

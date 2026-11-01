@@ -97,7 +97,7 @@
         "data_description": {
           "notify_days": "Trwałe powiadomienie na tyle dni przed wygaśnięciem subskrypcji (0, aby wyłączyć)",
           "health_interval": "Jak często serwer jest sprawdzany lekkim zapytaniem (tylko informacje o koncie)",
-          "stream_check": "Przy każdym sprawdzaniu serwera na chwilę otwiera kanał, aby potwierdzić, że się odtwarza (zajmuje jedno połączenie). W razie błędu stan pokazuje Strumień nie działa."
+          "stream_check": "Przy każdym sprawdzaniu serwera na chwilę otwiera kanał, aby potwierdzić, że się odtwarza (zajmuje jedno połączenie). W razie błędu stan pokazuje Brak streamu."
         }
       }
     }
@@ -121,7 +121,7 @@
         "name": "Pozostałe dni"
       },
       "created": {
-        "name": "Utworzono"
+        "name": "Data utworzenia"
       },
       "active_connections": {
         "name": "Aktywne połączenia"
@@ -142,10 +142,10 @@
         "name": "Stan serwera",
         "state": {
           "ok": "OK",
-          "degraded": "Wolno",
+          "degraded": "Wolny",
           "auth_failed": "Dane logowania odrzucone",
           "unreachable": "Nieosiągalny",
-          "stream_ko": "Strumień nie działa"
+          "stream_ko": "Brak streamu"
         }
       },
       "response_time": {
@@ -155,10 +155,10 @@
         "name": "Ostatnie sprawdzenie"
       },
       "added": {
-        "name": "Dodano"
+        "name": "Data dodania"
       },
       "updated": {
-        "name": "Zaktualizowano"
+        "name": "Data aktualizacji"
       }
     },
     "binary_sensor": {
