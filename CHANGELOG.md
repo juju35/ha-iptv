@@ -1,5 +1,17 @@
 # Changelog
 
+## 3.22.2
+
+### Fixes
+- Sidebar panel: typing in an account's settings no longer loses the focus (and the following keystrokes) when another account changes state, for example while Home Assistant retries an unreachable server, or during **Save** / **Check now** on another account; the caret stays where it was, and a focused **Check now** button gets the focus back when the check is over.
+- Sidebar panel: the bundled card now switches language with Home Assistant, like the rest of the panel, instead of keeping the language it opened with.
+- Card: the chips, days left and expiration figures that open an entity can be reached with Tab and opened with Enter or Space, and keep the focus when the card refreshes.
+- Card and panel: text in a state colour (status chips, days left, error messages, account state, save and check messages) is darkened in light themes and lightened in dark themes to stay readable (at least 4.5:1); icons and backgrounds keep the state colour.
+- Card: with "reduce motion" turned on in the system, the refresh icon no longer spins (it is dimmed while refreshing) and the expiration bar no longer slides.
+
+### Maintenance
+- The README refresh GIF is only rewritten when the animation really changed, not on every screenshots run; the Ruff and Biome versions used by the CI are read from `.pre-commit-config.yaml`.
+
 ## 3.22.1
 
 ### Fixes
