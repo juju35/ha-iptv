@@ -1,8 +1,10 @@
-"""Compare two GIF animations frame by frame, ignoring the noise of a re-render (needs ffmpeg).
+"""Compare two screenshots (GIF animations frame by frame, or PNG images) by their decoded pixels, ignoring the noise
+of a re-render (needs ffmpeg).
 
 Rendering the same card twice gives a few pixels of different anti-aliasing on the spinning icon, and a per-clip
-palette then shifts a little: the GIF bytes change although nothing visible did. `replace_if_changed` only writes the
-new GIF when the animation really changed, so the screenshots job does not commit a "refreshed" GIF on every run.
+palette then shifts a little: the GIF bytes change although nothing visible did; PNG bytes can change the same way.
+`replace_if_changed` only writes the new file when the picture really changed, so the screenshots job does not commit
+"refreshed" screenshots on every run.
 """
 
 import json
@@ -66,7 +68,7 @@ def same_frames(a, b, width, height, *, delta=DELTA, tolerance=TOLERANCE):
 
 
 def replace_if_changed(new, out):
-    """Move the GIF `new` onto `out` unless `out` already shows the same animation; return True when written.
+    """Move the GIF or PNG `new` onto `out` unless `out` already shows the same picture; return True when written.
 
     SCREENSHOTS_FORCE=1 always writes it.
     """

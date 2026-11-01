@@ -336,6 +336,17 @@ def mount_panel(context, shot):
     return page
 
 
+def save_png(page, out, clip):
+    """Capture the clip to screenshots/<file>.png, rewriting the file only when its pixels changed beyond render noise
+    (the PNG bytes change from one run to the next although nothing visible did), so the screenshots job does not
+    commit unchanged screenshots."""
+    with tempfile.TemporaryDirectory() as tmp:
+        new = f"{tmp}/new.png"
+        page.screenshot(path=new, clip=clip, animations="disabled")
+        written = replace_if_changed(new, out)
+    print(f"screenshots/{out.name}{'' if written else ' (unchanged)'}")
+
+
 def animate(context, shot, *, fps=20, seconds=2):
     """Record the refresh spinner as a looping screenshots/<file>.gif (needs ffmpeg). Every animation is paused and
     stepped frame by frame, so the GIF is the same whatever the machine's speed; it is only rewritten when it changed
@@ -402,24 +413,19 @@ def main():
             width = shot.get("width", WIDTH)
             # The card with 16 px of theme background around it
             box = page.locator("#root").bounding_box()
-            page.screenshot(
-                path=str(out_dir / f"{shot['file']}.png"),
-                clip={"x": 0, "y": 0, "width": width + 32, "height": int(box["height"] + 0.999) + 32},
-                animations="disabled",
-            )
-            print(f"screenshots/{shot['file']}.png")
+            clip = {"x": 0, "y": 0, "width": width + 32, "height": int(box["height"] + 0.999) + 32}
+            save_png(page, out_dir / f"{shot['file']}.png", clip)
             page.close()
         # The sidebar panel, full width
         for shot in PANEL_SHOTS:
             page = mount_panel(context, shot)
             page.wait_for_timeout(300)
             box = page.locator("#root").bounding_box()
-            page.screenshot(
-                path=str(out_dir / f"{shot['file']}.png"),
-                clip={"x": 0, "y": 0, "width": PANEL_WIDTH, "height": int(box["height"] + 0.999)},
-                animations="disabled",
+            save_png(
+                page,
+                out_dir / f"{shot['file']}.png",
+                {"x": 0, "y": 0, "width": PANEL_WIDTH, "height": int(box["height"] + 0.999)},
             )
-            print(f"screenshots/{shot['file']}.png")
             page.close()
         # The refresh button spinning while subscriptions reload, light and dark twins of the same state.
         for theme, dark in (("light", ""), ("dark", "-dark")):

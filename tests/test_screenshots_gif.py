@@ -99,3 +99,38 @@ def test_a_missing_gif_is_written(tmp_path):
     out = tmp_path / "out.gif"
     assert gif_frames.replace_if_changed(new, out) is True
     assert out.exists()
+
+
+def _png(src, dst, *args):
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(src), *args, str(dst)], check=True)
+
+
+@needs_ffmpeg
+def test_keep_existing_png_when_only_the_bytes_differ(tmp_path):
+    existing = tmp_path / "card.png"
+    shutil.copy(ROOT / "screenshots" / "card.png", existing)
+    before = existing.read_bytes()
+    new = tmp_path / "new.png"
+    _png(existing, new, "-compression_level", "1")  # same pixels, other bytes
+    assert new.read_bytes() != before
+    assert gif_frames.replace_if_changed(new, existing) is False
+    assert existing.read_bytes() == before
+
+
+@needs_ffmpeg
+def test_replace_the_png_when_its_pixels_changed(tmp_path):
+    existing = tmp_path / "card.png"
+    shutil.copy(ROOT / "screenshots" / "card.png", existing)
+    new = tmp_path / "new.png"
+    _png(existing, new, "-vf", "negate")
+    expected = new.read_bytes()
+    assert gif_frames.replace_if_changed(new, existing) is True
+    assert existing.read_bytes() == expected
+
+
+def test_screenshots_script_writes_every_png_through_the_pixel_comparison():
+    source = (ROOT / "scripts" / "screenshots.py").read_text()
+    # Each page.screenshot goes to a temporary file (a PNG to compare, or a GIF frame), never straight to screenshots/
+    assert "path=str(out_dir" not in source
+    assert source.count("save_png(page, out_dir /") == 2
+    assert "written = replace_if_changed(new, out)" in source.split("def save_png", 1)[1].split("def animate", 1)[0]
