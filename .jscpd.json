@@ -10,7 +10,8 @@
     "**/tests/**",
     "**/test/**",
     "**/.git/**",
-    "**/*.min.js"
+    "**/*.min.js",
+    "**/translations/**"
   ],
   "reporters": [
     "console",

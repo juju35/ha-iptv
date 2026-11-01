@@ -1079,7 +1079,11 @@ async def test_update_entity_invalidates_catalog(hass, aioclient_mock, entry):
         ("de", "Benutzername", "01.01.2030"),
         ("de-CH", "Benutzername", "01.01.2030"),
         ("es", "Usuario", "01/01/2030"),
-        ("it", "Username", "2030-01-01"),
+        ("it", "Nome utente", "01/01/2030"),
+        ("nl", "Gebruikersnaam", "01-01-2030"),
+        ("pt-BR", "Nome de utilizador", "01/01/2030"),
+        ("pl", "Nazwa użytkownika", "01.01.2030"),
+        ("ja", "Username", "2030-01-01"),
     ],
 )
 async def test_add_notification_languages(hass, lang, word, date):
@@ -1092,7 +1096,16 @@ async def test_add_notification_languages(hass, lang, word, date):
 
 
 @pytest.mark.parametrize(
-    ("lang", "title"), [("de", "IPTV-Abonnement"), ("es", "Suscripción IPTV"), ("pt", "IPTV subscription")]
+    ("lang", "title"),
+    [
+        ("de", "IPTV-Abonnement"),
+        ("es", "Suscripción IPTV"),
+        ("it", "Abbonamento IPTV"),
+        ("nl", "IPTV-abonnement"),
+        ("pt", "Subscrição IPTV"),
+        ("pl", "Subskrypcja IPTV"),
+        ("ja", "IPTV subscription"),
+    ],
 )
 async def test_expiry_notification_languages(hass, lang, title):
     from custom_components.iptv.notify_expiry import ExpiryNotifier

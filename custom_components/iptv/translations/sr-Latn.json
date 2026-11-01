@@ -1,0 +1,247 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "IPTV pretplata",
+        "description": "Izaberite tip provajdera.",
+        "menu_options": {
+          "xtream": "Xtream Codes (korisničko ime / lozinka)",
+          "stalker": "Stalker / Ministra (MAC adresa)"
+        }
+      },
+      "xtream": {
+        "title": "Xtream Codes",
+        "description": "Home Assistant šalje upite Xtream Codes API-ju vašeg provajdera.",
+        "data": {
+          "url": "URL Xtream servera",
+          "username": "Korisničko ime",
+          "password": "Lozinka",
+          "notify_service": "Pošalji podatke za povezivanje na"
+        },
+        "data_description": {
+          "url": "Sa portom, npr. http://server:8080",
+          "notify_service": "Opciono: usluga obaveštavanja (npr. notify.mobile_app_phone) koja prima server, korisničko ime (ili MAC adresu) i datum isteka, nikada lozinku, kada se nalog doda"
+        }
+      },
+      "stalker": {
+        "title": "IPTV Stalker (MAC adresa)",
+        "description": "Home Assistant šalje upite Stalker/Ministra portalu vašeg provajdera sa MAC adresom.",
+        "data": {
+          "url": "URL portala",
+          "mac": "MAC adresa",
+          "notify_service": "Pošalji podatke za povezivanje na"
+        },
+        "data_description": {
+          "url": "Sa portom, npr. http://portal:80",
+          "mac": "Format AA:BB:CC:DD:EE:FF",
+          "notify_service": "Opciono: usluga obaveštavanja (npr. notify.mobile_app_phone) koja prima server, korisničko ime (ili MAC adresu) i datum isteka, nikada lozinku, kada se nalog doda"
+        }
+      },
+      "reconfigure": {
+        "title": "IPTV pretplata",
+        "data": {
+          "url": "URL servera ili portala",
+          "username": "Korisničko ime",
+          "password": "Lozinka",
+          "mac": "MAC adresa"
+        },
+        "data_description": {
+          "url": "Sa portom, npr. http://server:8080",
+          "mac": "Format AA:BB:CC:DD:EE:FF",
+          "password": "Ostavite prazno da zadržite trenutnu lozinku"
+        }
+      },
+      "reauth_confirm": {
+        "title": "IPTV pretplata",
+        "data": {
+          "url": "URL servera ili portala",
+          "username": "Korisničko ime",
+          "password": "Lozinka",
+          "mac": "MAC adresa"
+        },
+        "data_description": {
+          "url": "Sa portom, npr. http://server:8080",
+          "mac": "Format AA:BB:CC:DD:EE:FF",
+          "password": "Ostavite prazno da zadržite trenutnu lozinku"
+        },
+        "description": "Server je odbio podatke za prijavu naloga {name}. Unesite nove."
+      }
+    },
+    "error": {
+      "cannot_connect": "IPTV server nije dostupan",
+      "invalid_auth": "Server je odbio podatke za prijavu",
+      "invalid_mac": "Nevažeća MAC adresa (format AA:BB:CC:DD:EE:FF)",
+      "no_french_lists": "Kod ovog provajdera nije pronađena nijedna francuska lista (kategorije uživo, VOD ili serije): nalog nije dodat.",
+      "french_unknown": "Nije moguće pročitati kategorije ovog provajdera radi provere francuskih lista.",
+      "stream_ko": "Video strim test kanala se ne reprodukuje: nalog nije dodat.",
+      "empty_catalogue": "Provajder nema upotrebljiv katalog kanala / filmova / serija: nalog nije dodat."
+    },
+    "abort": {
+      "already_configured": "Ovaj nalog je već konfigurisan",
+      "reconfigure_successful": "Ponovna konfiguracija je uspela",
+      "reauth_successful": "Ponovna autentifikacija je uspela",
+      "migrated": "Nalozi nekadašnje integracije IPTV Xtream premešteni u IPTV, sa istim entitetima: {count}. Obrišite stari direktorijum custom_components/iptv_xtream ako još postoji i ponovo pokrenite Home Assistant.",
+      "account_updated": "{title} je na istom serveru: novi nalog važi duže ({new} umesto {current}), pa {title} sada koristi nove podatke za prijavu.",
+      "existing_longer": "{title} je na istom serveru i važi jednako dugo ili duže ({current}, novi nalog: {new}): ništa nije promenjeno."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Interval osvežavanja",
+          "notify_days": "Obavesti pre isteka",
+          "health_interval": "Interval provere servera",
+          "stream_check": "Testiraj video strim kanala"
+        },
+        "data_description": {
+          "notify_days": "Trajno obaveštenje ovaj broj dana pre isteka pretplate (0 za isključivanje)",
+          "health_interval": "Koliko često se server proverava laganim zahtevom (samo podaci o nalogu)",
+          "stream_check": "Pri svakoj proveri servera nakratko otvara kanal da potvrdi da se reprodukuje (zauzima jednu vezu). Stanje prikazuje Strim ne radi ako provera ne uspe."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "status": {
+        "name": "Status",
+        "state": {
+          "active": "Aktivan",
+          "expired": "Istekao",
+          "banned": "Blokiran",
+          "disabled": "Onemogućen",
+          "invalid_auth": "Nevažeći podaci za prijavu"
+        }
+      },
+      "expiration": {
+        "name": "Istek"
+      },
+      "days_left": {
+        "name": "Preostali dani"
+      },
+      "created": {
+        "name": "Kreiran"
+      },
+      "active_connections": {
+        "name": "Aktivne veze"
+      },
+      "max_connections": {
+        "name": "Najviše veza"
+      },
+      "channels": {
+        "name": "Kanali uživo"
+      },
+      "movies": {
+        "name": "Filmovi"
+      },
+      "series": {
+        "name": "Serije"
+      },
+      "health": {
+        "name": "Stanje",
+        "state": {
+          "ok": "OK",
+          "degraded": "Sporo",
+          "auth_failed": "Podaci za prijavu odbijeni",
+          "unreachable": "Nedostupno",
+          "stream_ko": "Strim ne radi"
+        }
+      },
+      "response_time": {
+        "name": "Vreme odziva"
+      },
+      "last_check": {
+        "name": "Poslednja provera"
+      },
+      "added": {
+        "name": "Dodat"
+      },
+      "updated": {
+        "name": "Ažuriran"
+      }
+    },
+    "binary_sensor": {
+      "trial": {
+        "name": "Probni period"
+      },
+      "french_lists": {
+        "name": "Francuske liste"
+      }
+    }
+  },
+  "services": {
+    "edit_account": {
+      "name": "Izmeni nalog",
+      "description": "Menja podatke za prijavu ili MAC adresu naloga, uz iste provere kao pri dodavanju. Recorder čuva podatke poziva usluge (događaj call_service), zajedno sa lozinkom: bolje koristite karticu.",
+      "fields": {
+        "device_id": {
+          "name": "Nalog",
+          "description": "IPTV nalog koji se menja."
+        },
+        "url": {
+          "name": "URL servera",
+          "description": "Novi URL servera; izostavite da zadržite trenutni."
+        },
+        "username": {
+          "name": "Korisničko ime",
+          "description": "Novo korisničko ime (Xtream Codes)."
+        },
+        "password": {
+          "name": "Lozinka",
+          "description": "Nova lozinka (Xtream Codes); izostavite da zadržite trenutnu."
+        },
+        "mac": {
+          "name": "MAC adresa",
+          "description": "Nova MAC adresa (Stalker portal)."
+        }
+      }
+    },
+    "remove_account": {
+      "name": "Ukloni nalog",
+      "description": "Uklanja IPTV nalog i njegove entitete.",
+      "fields": {
+        "device_id": {
+          "name": "Nalog",
+          "description": "IPTV nalog koji se uklanja."
+        }
+      }
+    },
+    "add_account": {
+      "name": "Dodaj nalog",
+      "description": "Dodaje novi IPTV nalog uz iste provere kao u korisničkom interfejsu. Recorder čuva podatke poziva usluge (događaj call_service), zajedno sa lozinkom: bolje koristite karticu.",
+      "fields": {
+        "provider": {
+          "name": "Tip provajdera",
+          "description": "xtream ili stalker"
+        },
+        "url": {
+          "name": "URL servera",
+          "description": "Sa portom, npr. http://server:8080."
+        },
+        "username": {
+          "name": "Korisničko ime",
+          "description": "Samo Xtream Codes."
+        },
+        "password": {
+          "name": "Lozinka",
+          "description": "Samo Xtream Codes."
+        },
+        "mac": {
+          "name": "MAC adresa",
+          "description": "Samo Stalker portal, format AA:BB:CC:DD:EE:FF."
+        }
+      }
+    },
+    "get_credentials": {
+      "name": "Prikaži podatke za prijavu",
+      "description": "Vraća URL servera i podatke za prijavu naloga radi prikaza.",
+      "fields": {
+        "device_id": {
+          "name": "Nalog",
+          "description": ""
+        }
+      }
+    }
+  }
+}

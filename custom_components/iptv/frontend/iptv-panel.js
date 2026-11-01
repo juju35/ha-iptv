@@ -9,7 +9,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_PANEL_VERSION = '3.22.1';
+var IPTV_PANEL_VERSION = '3.22.4';
 
 var IptvPanelI18n = {
   en: {
@@ -184,6 +184,264 @@ var IptvPanelI18n = {
     st_not_loaded: 'Detenida',
     st_other: 'No disponible',
   },
+  it: {
+    title: 'IPTV',
+    accounts: 'Abbonamenti',
+    settings: 'Impostazioni',
+    none: 'Ancora nessun account: aggiungine uno con il pulsante + della scheda.',
+    loading: 'Caricamento…',
+    f_name: 'Nome',
+    f_name_hint: 'Lascia vuoto per usare il nome del server',
+    f_scan: 'Intervallo di aggiornamento',
+    f_scan_hint: 'Aggiornamento dell’abbonamento, {min}–{max} min',
+    f_notify: 'Avviso di scadenza',
+    f_notify_hint: 'Giorni prima della scadenza, 0 = disattivato',
+    f_health: 'Intervallo del controllo del server',
+    f_health_hint: 'Richiesta leggera al server, {min}–{max} min',
+    f_stream: 'Prova lo stream di un canale durante il controllo',
+    f_stream_hint: 'Occupa una connessione per qualche secondo',
+    u_min: 'min',
+    u_days: 'giorni',
+    save: 'Salva',
+    saving: 'Salvataggio…',
+    saved: 'Salvato',
+    check: 'Controlla ora',
+    checking: 'Verifica…',
+    checked_ok: 'Il server ha risposto',
+    checked_ko: 'Server non raggiungibile',
+    cred_username: 'Nome utente',
+    cred_mac: 'Indirizzo MAC',
+    cred_password: 'Password',
+    cred_show: 'Mostra la password',
+    cred_hide: 'Nascondi la password',
+    cred_copy: 'Copia',
+    cred_copied: 'Copiato',
+    open_device: 'Dispositivo',
+    open_integration: 'Dispositivi e servizi',
+    err_range: 'Valore fuori intervallo',
+    err_not_found: 'Account non trovato',
+    err_generic: 'Si è verificato un errore',
+    st_loaded: 'In esecuzione',
+    st_setup_retry: 'Nuovo tentativo',
+    st_setup_error: 'Configurazione non riuscita',
+    st_not_loaded: 'Arrestato',
+    st_other: 'Non disponibile',
+  },
+  nl: {
+    title: 'IPTV',
+    accounts: 'Abonnementen',
+    settings: 'Instellingen',
+    none: 'Nog geen account: voeg er een toe met de knop + van de kaart.',
+    loading: 'Laden…',
+    f_name: 'Naam',
+    f_name_hint: 'Leeg laten om de servernaam te gebruiken',
+    f_scan: 'Bevragingsinterval',
+    f_scan_hint: 'Vernieuwen van het abonnement, {min}–{max} min',
+    f_notify: 'Melding bij verlopen',
+    f_notify_hint: 'Dagen voor het verlopen, 0 = uit',
+    f_health: 'Interval van de servercontrole',
+    f_health_hint: 'Lichte aanvraag aan de server, {min}–{max} min',
+    f_stream: 'Stream van een zender testen tijdens de controle',
+    f_stream_hint: 'Gebruikt enkele seconden één verbinding',
+    u_min: 'min',
+    u_days: 'dagen',
+    save: 'Opslaan',
+    saving: 'Opslaan…',
+    saved: 'Opgeslagen',
+    check: 'Nu controleren',
+    checking: 'Controleren…',
+    checked_ok: 'Server heeft geantwoord',
+    checked_ko: 'Server onbereikbaar',
+    cred_username: 'Gebruikersnaam',
+    cred_mac: 'MAC-adres',
+    cred_password: 'Wachtwoord',
+    cred_show: 'Wachtwoord tonen',
+    cred_hide: 'Wachtwoord verbergen',
+    cred_copy: 'Kopiëren',
+    cred_copied: 'Gekopieerd',
+    open_device: 'Apparaat',
+    open_integration: 'Apparaten & diensten',
+    err_range: 'Waarde buiten bereik',
+    err_not_found: 'Account niet gevonden',
+    err_generic: 'Er is iets misgegaan',
+    st_loaded: 'Actief',
+    st_setup_retry: 'Nieuwe poging',
+    st_setup_error: 'Instellen mislukt',
+    st_not_loaded: 'Gestopt',
+    st_other: 'Niet beschikbaar',
+  },
+  pt: {
+    title: 'IPTV',
+    accounts: 'Subscrições',
+    settings: 'Definições',
+    none: 'Ainda não há contas: adicione uma com o botão + do cartão.',
+    loading: 'A carregar…',
+    f_name: 'Nome',
+    f_name_hint: 'Deixe em branco para usar o nome do servidor',
+    f_scan: 'Intervalo de consulta',
+    f_scan_hint: 'Atualização da subscrição, {min}–{max} min',
+    f_notify: 'Aviso de expiração',
+    f_notify_hint: 'Dias antes da expiração, 0 = desativado',
+    f_health: 'Intervalo da verificação do servidor',
+    f_health_hint: 'Pedido leve ao servidor, {min}–{max} min',
+    f_stream: 'Testar o stream de um canal durante a verificação',
+    f_stream_hint: 'Ocupa uma ligação durante alguns segundos',
+    u_min: 'min',
+    u_days: 'dias',
+    save: 'Guardar',
+    saving: 'A guardar…',
+    saved: 'Guardado',
+    check: 'Verificar agora',
+    checking: 'A verificar…',
+    checked_ok: 'O servidor respondeu',
+    checked_ko: 'Servidor inacessível',
+    cred_username: 'Nome de utilizador',
+    cred_mac: 'Endereço MAC',
+    cred_password: 'Palavra-passe',
+    cred_show: 'Mostrar a palavra-passe',
+    cred_hide: 'Ocultar a palavra-passe',
+    cred_copy: 'Copiar',
+    cred_copied: 'Copiado',
+    open_device: 'Dispositivo',
+    open_integration: 'Dispositivos e serviços',
+    err_range: 'Valor fora do intervalo',
+    err_not_found: 'Conta não encontrada',
+    err_generic: 'Ocorreu um erro',
+    st_loaded: 'Em execução',
+    st_setup_retry: 'Nova tentativa',
+    st_setup_error: 'Falha na configuração',
+    st_not_loaded: 'Parado',
+    st_other: 'Indisponível',
+  },
+  pl: {
+    title: 'IPTV',
+    accounts: 'Subskrypcje',
+    settings: 'Ustawienia',
+    none: 'Brak kont: dodaj konto przyciskiem + na karcie.',
+    loading: 'Ładowanie…',
+    f_name: 'Nazwa',
+    f_name_hint: 'Pozostaw puste, aby użyć nazwy serwera',
+    f_scan: 'Interwał odpytywania',
+    f_scan_hint: 'Odświeżanie subskrypcji, {min}–{max} min',
+    f_notify: 'Powiadomienie o wygaśnięciu',
+    f_notify_hint: 'Dni przed wygaśnięciem, 0 = wyłączone',
+    f_health: 'Interwał sprawdzania serwera',
+    f_health_hint: 'Lekkie zapytanie do serwera, {min}–{max} min',
+    f_stream: 'Testuj strumień kanału podczas sprawdzania',
+    f_stream_hint: 'Zajmuje jedno połączenie na kilka sekund',
+    u_min: 'min',
+    u_days: 'dni',
+    save: 'Zapisz',
+    saving: 'Zapisywanie…',
+    saved: 'Zapisano',
+    check: 'Sprawdź teraz',
+    checking: 'Sprawdzanie…',
+    checked_ok: 'Serwer odpowiedział',
+    checked_ko: 'Serwer jest nieosiągalny',
+    cred_username: 'Nazwa użytkownika',
+    cred_mac: 'Adres MAC',
+    cred_password: 'Hasło',
+    cred_show: 'Pokaż hasło',
+    cred_hide: 'Ukryj hasło',
+    cred_copy: 'Kopiuj',
+    cred_copied: 'Skopiowano',
+    open_device: 'Urządzenie',
+    open_integration: 'Urządzenia oraz usługi',
+    err_range: 'Wartość poza zakresem',
+    err_not_found: 'Nie znaleziono konta',
+    err_generic: 'Coś poszło nie tak',
+    st_loaded: 'Działa',
+    st_setup_retry: 'Ponowna próba',
+    st_setup_error: 'Konfiguracja nie powiodła się',
+    st_not_loaded: 'Zatrzymano',
+    st_other: 'Niedostępne',
+  },
+  sr: {
+    title: 'IPTV',
+    accounts: 'Претплате',
+    settings: 'Подешавања',
+    none: 'Још нема налога: додајте га дугметом + на картици.',
+    loading: 'Учитавање…',
+    f_name: 'Назив',
+    f_name_hint: 'Оставите празно да се користи назив сервера',
+    f_scan: 'Интервал освежавања',
+    f_scan_hint: 'Освежавање претплате, {min}–{max} мин',
+    f_notify: 'Обавештење о истеку',
+    f_notify_hint: 'Дана пре истека, 0 = искључено',
+    f_health: 'Интервал провере сервера',
+    f_health_hint: 'Лаган захтев серверу, {min}–{max} мин',
+    f_stream: 'Тестирај стрим канала током провере сервера',
+    f_stream_hint: 'Заузима једну везу на неколико секунди',
+    u_min: 'мин',
+    u_days: 'дана',
+    save: 'Сачувај',
+    saving: 'Чување…',
+    saved: 'Сачувано',
+    check: 'Провери сада',
+    checking: 'Провера…',
+    checked_ok: 'Сервер је одговорио',
+    checked_ko: 'Сервер није доступан',
+    cred_username: 'Корисничко име',
+    cred_mac: 'MAC адреса',
+    cred_password: 'Лозинка',
+    cred_show: 'Прикажи лозинку',
+    cred_hide: 'Сакриј лозинку',
+    cred_copy: 'Копирај',
+    cred_copied: 'Копирано',
+    open_device: 'Уређај',
+    open_integration: 'Уређаји и услуге',
+    err_range: 'Вредност је ван опсега',
+    err_not_found: 'Налог није пронађен',
+    err_generic: 'Дошло је до грешке',
+    st_loaded: 'Ради',
+    st_setup_retry: 'Поновни покушај',
+    st_setup_error: 'Подешавање није успело',
+    st_not_loaded: 'Заустављено',
+    st_other: 'Недоступно',
+  },
+  'sr-Latn': {
+    title: 'IPTV',
+    accounts: 'Pretplate',
+    settings: 'Podešavanja',
+    none: 'Još nema naloga: dodajte ga dugmetom + na kartici.',
+    loading: 'Učitavanje…',
+    f_name: 'Naziv',
+    f_name_hint: 'Ostavite prazno da se koristi naziv servera',
+    f_scan: 'Interval osvežavanja',
+    f_scan_hint: 'Osvežavanje pretplate, {min}–{max} min',
+    f_notify: 'Obaveštenje o isteku',
+    f_notify_hint: 'Dana pre isteka, 0 = isključeno',
+    f_health: 'Interval provere servera',
+    f_health_hint: 'Lagan zahtev serveru, {min}–{max} min',
+    f_stream: 'Testiraj strim kanala tokom provere servera',
+    f_stream_hint: 'Zauzima jednu vezu na nekoliko sekundi',
+    u_min: 'min',
+    u_days: 'dana',
+    save: 'Sačuvaj',
+    saving: 'Čuvanje…',
+    saved: 'Sačuvano',
+    check: 'Proveri sada',
+    checking: 'Provera…',
+    checked_ok: 'Server je odgovorio',
+    checked_ko: 'Server nije dostupan',
+    cred_username: 'Korisničko ime',
+    cred_mac: 'MAC adresa',
+    cred_password: 'Lozinka',
+    cred_show: 'Prikaži lozinku',
+    cred_hide: 'Sakrij lozinku',
+    cred_copy: 'Kopiraj',
+    cred_copied: 'Kopirano',
+    open_device: 'Uređaj',
+    open_integration: 'Uređaji i usluge',
+    err_range: 'Vrednost je van opsega',
+    err_not_found: 'Nalog nije pronađen',
+    err_generic: 'Došlo je do greške',
+    st_loaded: 'Radi',
+    st_setup_retry: 'Ponovni pokušaj',
+    st_setup_error: 'Podešavanje nije uspelo',
+    st_not_loaded: 'Zaustavljeno',
+    st_other: 'Nedostupno',
+  },
 };
 
 // Same limits as the options flow (const.py)
@@ -236,8 +494,10 @@ class IptvPanel extends HTMLElement {
     .who { flex:1; min-width:0; }
     .who .n { font-size:16px; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .who .s { font-size:12px; color:var(--secondary-text-color); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-family:monospace; }
-    .pill { flex:none; font-size:11px; font-weight:500; padding:2px 10px; border-radius:12px; color:var(--tone); background:color-mix(in srgb, var(--tone) 15%, transparent); }
+    .pill { flex:none; font-size:11px; font-weight:500; padding:2px 10px; border-radius:12px; color:var(--tone-text); background:color-mix(in srgb, var(--tone) 15%, transparent); }
     .good { --tone:var(--tone-good); } .warn { --tone:var(--tone-warn); } .bad { --tone:var(--tone-bad); }
+    /* Text in a state colour: half-way to the text colour, so it stays readable (4.5:1) in light and dark themes */
+    .good, .warn, .bad { --tone-text: color-mix(in srgb, var(--tone) 50%, var(--primary-text-color)); }
     .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(190px, 1fr)); gap:10px 14px; }
     .wide { grid-column:1 / -1; }
     .ctl { display:flex; flex-direction:column; gap:4px; min-width:0; }
@@ -257,7 +517,7 @@ class IptvPanel extends HTMLElement {
                     padding:4px 8px; border-radius:8px; --mdc-icon-size:15px; }
     .bar .links a:hover { background:var(--secondary-background-color); color:var(--primary-text-color); }
     .msg { font-size:12px; color:var(--secondary-text-color); }
-    .msg.good, .msg.bad { color:var(--tone); }
+    .msg.good, .msg.bad { color:var(--tone-text); }
     .act { display:inline-flex; align-items:center; gap:6px; border:0; cursor:pointer; font:inherit; font-size:13px; font-weight:500;
            padding:7px 12px; border-radius:8px; --mdc-icon-size:16px; color:var(--primary-color);
            background:color-mix(in srgb, var(--primary-color) 14%, transparent); }
@@ -319,8 +579,12 @@ class IptvPanel extends HTMLElement {
     }
   }
 
+  // Full code when it has a table (sr-Latn), else its base (de-AT → de), else English
   _lang() {
-    return (this._hass?.language || 'en').split('-')[0];
+    var code = this._hass?.language || 'en';
+    if (IptvPanelI18n[code]) return code;
+    var base = code.split('-')[0];
+    return IptvPanelI18n[base] ? base : 'en';
   }
 
   _t(key, vars) {
@@ -397,7 +661,8 @@ class IptvPanel extends HTMLElement {
   _mountCard() {
     if (!customElements.get('iptv-card')) return;
     this._card = document.createElement('iptv-card');
-    this._card.setConfig({ language: IptvPanelI18n[this._lang()] ? this._lang() : 'en' });
+    // No `language`: the card follows hass.language, so it switches language with the panel
+    this._card.setConfig({});
     this._card.hass = this._hass;
     this.shadowRoot.getElementById('card')?.appendChild(this._card);
   }
@@ -562,10 +827,53 @@ class IptvPanel extends HTMLElement {
       box.innerHTML = `<ha-card class="note">${iptvPanelEsc(this._t('none'))}</ha-card>`;
       return;
     }
+    var focus = this._focusOf(box);
     box.innerHTML = this._accounts.map((acc) => this._accountHtml(acc)).join('');
     this._accounts.forEach((acc) => {
       this._bind(acc, box.querySelector(`ha-card[data-id="${CSS.escape(acc.entry_id)}"]`));
     });
+    this._refocus(box, focus);
+  }
+
+  // The focused field or button of a form (account, attribute, caret), so a re-render can give the focus back.
+  // A button disabled meanwhile (Check now while it runs) gets it back on the next render that enables it again.
+  _focusOf(box) {
+    var el = this.shadowRoot.activeElement;
+    if (!el || !box.contains(el)) {
+      var pending = this._pendingFocus;
+      return pending && !el ? pending : null;
+    }
+    var id = el.closest?.('ha-card[data-id]')?.dataset.id;
+    var attr = ['key', 'do', 'copy', 'reveal'].find((a) => el.dataset?.[a] != null);
+    if (id == null || !attr) return null;
+    var focus = { id, attr: `data-${attr}`, value: el.dataset[attr], range: null };
+    try {
+      // Number inputs have no selection (null, or an exception in some browsers)
+      if (el.selectionStart != null) focus.range = [el.selectionStart, el.selectionEnd, el.selectionDirection];
+    } catch (_err) {
+      focus.range = null;
+    }
+    return focus;
+  }
+
+  _refocus(box, focus) {
+    this._pendingFocus = null;
+    if (!focus) return;
+    var card = box.querySelector(`ha-card[data-id="${CSS.escape(focus.id)}"]`);
+    var el = card?.querySelector(focus.value ? `[${focus.attr}="${CSS.escape(focus.value)}"]` : `[${focus.attr}]`);
+    if (!el) return;
+    if (el.disabled) {
+      // Only while the account is busy: a Save left disabled after saving must not grab the focus later
+      if (this._busy[focus.id]) this._pendingFocus = focus;
+      return;
+    }
+    el.focus({ preventScroll: true });
+    if (!focus.range) return;
+    try {
+      el.setSelectionRange(...focus.range);
+    } catch (_err) {
+      // the caret cannot be set on this field type
+    }
   }
 
   // Refresh only the buttons of one account, so typing keeps the focus
