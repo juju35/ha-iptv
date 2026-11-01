@@ -33,15 +33,39 @@ MESSAGES = {
         "soon": "La suscripción **{name}** caduca el {date}: quedan {days} día(s).",
         "expired": "La suscripción **{name}** caducó el {date}.",
     },
+    "sr": {
+        "title": "IPTV претплата {name}",
+        "soon": "Претплата **{name}** истиче {date} (преостало дана: {days}).",
+        "expired": "Претплата **{name}** је истекла {date}.",
+    },
+    "sr-Latn": {
+        "title": "IPTV pretplata {name}",
+        "soon": "Pretplata **{name}** ističe {date} (preostalo dana: {days}).",
+        "expired": "Pretplata **{name}** je istekla {date}.",
+    },
 }
 
-DATE_FORMATS = {"en": "%Y-%m-%d", "fr": "%d/%m/%Y", "de": "%d.%m.%Y", "es": "%d/%m/%Y"}
+DATE_FORMATS = {
+    "en": "%Y-%m-%d",
+    "fr": "%d/%m/%Y",
+    "de": "%d.%m.%Y",
+    "es": "%d/%m/%Y",
+    "sr": "%d.%m.%Y.",
+    "sr-Latn": "%d.%m.%Y.",
+}
+
+
+def supported_language(language: str | None, table: dict[str, Any]) -> str:
+    """The full code when ``table`` has it (``sr-Latn``), else its base (``de-CH`` → ``de``), else English."""
+    if language in table:
+        return language
+    lang = (language or "").split("-")[0].lower()
+    return lang if lang in table else "en"
 
 
 def message_language(language: str | None) -> str:
-    """Supported language of a Home Assistant language code (``de-CH`` → ``de``), English otherwise."""
-    lang = (language or "").split("-")[0].lower()
-    return lang if lang in MESSAGES else "en"
+    """Supported language of a Home Assistant code (``sr-Latn`` as is, ``de-CH`` → ``de``), English otherwise."""
+    return supported_language(language, MESSAGES)
 
 
 OFF = (0, 0)

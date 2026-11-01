@@ -9,7 +9,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_PANEL_VERSION = '3.22.2';
+var IPTV_PANEL_VERSION = '3.22.3';
 
 var IptvPanelI18n = {
   en: {
@@ -184,6 +184,92 @@ var IptvPanelI18n = {
     st_not_loaded: 'Detenida',
     st_other: 'No disponible',
   },
+  sr: {
+    title: 'IPTV',
+    accounts: 'Претплате',
+    settings: 'Подешавања',
+    none: 'Још нема налога: додајте га дугметом + на картици.',
+    loading: 'Учитавање…',
+    f_name: 'Назив',
+    f_name_hint: 'Оставите празно да се користи назив сервера',
+    f_scan: 'Интервал освежавања',
+    f_scan_hint: 'Освежавање претплате, {min}–{max} мин',
+    f_notify: 'Обавештење о истеку',
+    f_notify_hint: 'Дана пре истека, 0 = искључено',
+    f_health: 'Интервал провере сервера',
+    f_health_hint: 'Лаган захтев серверу, {min}–{max} мин',
+    f_stream: 'Тестирај стрим канала током провере сервера',
+    f_stream_hint: 'Заузима једну везу на неколико секунди',
+    u_min: 'мин',
+    u_days: 'дана',
+    save: 'Сачувај',
+    saving: 'Чување…',
+    saved: 'Сачувано',
+    check: 'Провери сада',
+    checking: 'Провера…',
+    checked_ok: 'Сервер је одговорио',
+    checked_ko: 'Сервер није доступан',
+    cred_username: 'Корисничко име',
+    cred_mac: 'MAC адреса',
+    cred_password: 'Лозинка',
+    cred_show: 'Прикажи лозинку',
+    cred_hide: 'Сакриј лозинку',
+    cred_copy: 'Копирај',
+    cred_copied: 'Копирано',
+    open_device: 'Уређај',
+    open_integration: 'Уређаји и услуге',
+    err_range: 'Вредност је ван опсега',
+    err_not_found: 'Налог није пронађен',
+    err_generic: 'Дошло је до грешке',
+    st_loaded: 'Ради',
+    st_setup_retry: 'Поновни покушај',
+    st_setup_error: 'Подешавање није успело',
+    st_not_loaded: 'Заустављено',
+    st_other: 'Недоступно',
+  },
+  'sr-Latn': {
+    title: 'IPTV',
+    accounts: 'Pretplate',
+    settings: 'Podešavanja',
+    none: 'Još nema naloga: dodajte ga dugmetom + na kartici.',
+    loading: 'Učitavanje…',
+    f_name: 'Naziv',
+    f_name_hint: 'Ostavite prazno da se koristi naziv servera',
+    f_scan: 'Interval osvežavanja',
+    f_scan_hint: 'Osvežavanje pretplate, {min}–{max} min',
+    f_notify: 'Obaveštenje o isteku',
+    f_notify_hint: 'Dana pre isteka, 0 = isključeno',
+    f_health: 'Interval provere servera',
+    f_health_hint: 'Lagan zahtev serveru, {min}–{max} min',
+    f_stream: 'Testiraj strim kanala tokom provere servera',
+    f_stream_hint: 'Zauzima jednu vezu na nekoliko sekundi',
+    u_min: 'min',
+    u_days: 'dana',
+    save: 'Sačuvaj',
+    saving: 'Čuvanje…',
+    saved: 'Sačuvano',
+    check: 'Proveri sada',
+    checking: 'Provera…',
+    checked_ok: 'Server je odgovorio',
+    checked_ko: 'Server nije dostupan',
+    cred_username: 'Korisničko ime',
+    cred_mac: 'MAC adresa',
+    cred_password: 'Lozinka',
+    cred_show: 'Prikaži lozinku',
+    cred_hide: 'Sakrij lozinku',
+    cred_copy: 'Kopiraj',
+    cred_copied: 'Kopirano',
+    open_device: 'Uređaj',
+    open_integration: 'Uređaji i usluge',
+    err_range: 'Vrednost je van opsega',
+    err_not_found: 'Nalog nije pronađen',
+    err_generic: 'Došlo je do greške',
+    st_loaded: 'Radi',
+    st_setup_retry: 'Ponovni pokušaj',
+    st_setup_error: 'Podešavanje nije uspelo',
+    st_not_loaded: 'Zaustavljeno',
+    st_other: 'Nedostupno',
+  },
 };
 
 // Same limits as the options flow (const.py)
@@ -321,8 +407,10 @@ class IptvPanel extends HTMLElement {
     }
   }
 
+  // Full code when it has a table (sr-Latn), else its base (de-AT → de); iptvPanelT falls back to English
   _lang() {
-    return (this._hass?.language || 'en').split('-')[0];
+    var code = this._hass?.language || 'en';
+    return IptvPanelI18n[code] ? code : code.split('-')[0];
   }
 
   _t(key, vars) {

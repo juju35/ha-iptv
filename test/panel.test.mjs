@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import vm from 'node:vm';
 import { checkTextContrast } from './contrast.mjs';
+import { checkSerbianTables } from './serbian.mjs';
 
 const source = readFileSync(new URL('../custom_components/iptv/frontend/iptv-panel.js', import.meta.url), 'utf8');
 // attachShadow returns a root without elements: rendering is skipped (see _renderAccounts)
@@ -28,8 +29,8 @@ const placeholders = (s) => [...String(s).matchAll(/\{\w+\}/g)].map((m) => m[0])
 
 test('panel i18n parity: every language has exactly the English keys and placeholders', () => {
   const en = IptvPanelI18n.en;
-  assert.deepEqual(Object.keys(IptvPanelI18n).sort(), ['de', 'en', 'es', 'fr']);
-  for (const lang of ['fr', 'de', 'es']) {
+  assert.deepEqual(Object.keys(IptvPanelI18n).sort(), ['de', 'en', 'es', 'fr', 'sr', 'sr-Latn']);
+  for (const lang of ['fr', 'de', 'es', 'sr', 'sr-Latn']) {
     const strings = IptvPanelI18n[lang];
     assert.deepEqual(Object.keys(strings).sort(), Object.keys(en).sort(), `keys of ${lang}`);
     for (const key of Object.keys(en)) {
@@ -42,6 +43,26 @@ test('panel i18n parity: every language has exactly the English keys and placeho
 test('iptvPanelT fills placeholders and falls back to English', () => {
   assert.equal(iptvPanelT('fr', 'f_scan_hint', { min: 5, max: 1440 }), 'Rafraîchissement de l’abonnement, 5–1440 min');
   assert.equal(iptvPanelT('it', 'save'), 'Save');
+});
+
+test('panel i18n Serbian: the Latin table is the Cyrillic one letter for letter, each in its own script', () => {
+  checkSerbianTables(IptvPanelI18n);
+});
+
+test('the panel keeps a full code that has a table (sr-Latn), else its base, else English', () => {
+  const panel = Object.create(IptvPanel.prototype);
+  const lang = (language) => {
+    panel._hass = { language };
+    return panel._lang();
+  };
+  assert.equal(lang('fr-FR'), 'fr');
+  assert.equal(lang('sr-Latn'), 'sr-Latn');
+  assert.equal(lang('sr'), 'sr');
+  assert.equal(panel._t('save'), 'Сачувај');
+  lang('sr-Latn');
+  assert.equal(panel._t('save'), 'Sačuvaj');
+  lang('pt-BR');
+  assert.equal(panel._t('save'), 'Save');
 });
 
 test('panel limits match the options flow (const.py)', () => {
