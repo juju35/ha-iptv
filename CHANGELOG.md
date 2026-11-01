@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.22.3 - 2026-11-01
+
+### Changes
+- Added Serbian (Cyrillic and Latin) translations: integration (`sr`, `sr-Latn`), card, sidebar panel and notifications. With Home Assistant in `sr-Latn`, the card, the panel and the notifications pick the Latin script; the card editor offers **Српски** and **Srpski (latinica)**.
+
 ## 3.22.2
 
 ### Fixes

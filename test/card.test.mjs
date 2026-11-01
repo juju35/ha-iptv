@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import vm from 'node:vm';
 import { checkTextContrast } from './contrast.mjs';
+import { checkSerbianTables } from './serbian.mjs';
 
 const source = readFileSync(new URL('../custom_components/iptv/frontend/iptv-card.js', import.meta.url), 'utf8');
 const context = {
@@ -23,8 +24,8 @@ const placeholders = (s) => [...String(s).matchAll(/\{\w+\}/g)].map((m) => m[0])
 
 test('I18N parity: every language has exactly the English keys and placeholders', () => {
   const en = IptvCardI18n.en;
-  assert.deepEqual(Object.keys(IptvCardI18n).sort(), ['de', 'en', 'es', 'fr']);
-  for (const lang of ['fr', 'de', 'es']) {
+  assert.deepEqual(Object.keys(IptvCardI18n).sort(), ['de', 'en', 'es', 'fr', 'sr', 'sr-Latn']);
+  for (const lang of ['fr', 'de', 'es', 'sr', 'sr-Latn']) {
     const strings = IptvCardI18n[lang];
     assert.deepEqual(Object.keys(strings).sort(), Object.keys(en).sort(), `keys of ${lang}`);
     for (const key of Object.keys(en)) {
@@ -38,6 +39,37 @@ test('iptvLang follows the config, then the Home Assistant language', () => {
   assert.equal(iptvLang({ language: 'es' }, { language: 'fr' }), 'es');
   assert.equal(iptvLang({}, { language: 'de-AT' }), 'de');
   assert.equal(iptvLang({}, { language: 'es-419' }), 'es');
+});
+
+test('iptvLang keeps a full code that has a table (sr-Latn), else its base, else English', () => {
+  assert.equal(iptvLang({}, { language: 'fr-FR' }), 'fr');
+  assert.equal(iptvLang({}, { language: 'sr-Latn' }), 'sr-Latn');
+  assert.equal(iptvLang({}, { language: 'sr' }), 'sr');
+  assert.equal(iptvLang({}, { language: 'pt-BR' }), 'en');
+  assert.equal(iptvLang({ language: 'sr-Latn' }, { language: 'fr' }), 'sr-Latn');
+  assert.equal(iptvT('sr-Latn', 'edit_password'), 'Lozinka');
+});
+
+test('I18N Serbian: the Latin card is the Cyrillic one letter for letter, each in its own script', () => {
+  checkSerbianTables(IptvCardI18n);
+});
+
+test('dates in sr-Latn are written in Latin script, in sr in Cyrillic', () => {
+  // The card formats dates with the Home Assistant locale (hass.locale.language), e.g. sr-Latn
+  const date = new Date(2026, 10, 1);
+  const options = { day: 'numeric', month: 'long', year: 'numeric' };
+  assert.match(date.toLocaleDateString('sr-Latn', options), /novembar/);
+  assert.match(date.toLocaleDateString('sr', options), /новембар/);
+});
+
+test('the editor offers Serbian in Cyrillic and Latin script', () => {
+  context.document.querySelector = () => null;
+  const language = IptvCard.getConfigForm().schema.find((s) => s.name === 'language');
+  const options = Array.from(language.selector.select.options, (o) => [o.value, o.label]);
+  assert.deepEqual(options.slice(-2), [
+    ['sr', 'Српски'],
+    ['sr-Latn', 'Srpski (latinica)'],
+  ]);
 });
 
 test('iptvT falls back to English for an unsupported language', () => {
