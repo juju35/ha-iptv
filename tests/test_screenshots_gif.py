@@ -5,6 +5,7 @@ GIF each time made the screenshots job commit "refreshed" GIFs on every pull req
 """
 
 import importlib.util
+import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -132,5 +133,5 @@ def test_screenshots_script_writes_every_png_through_the_pixel_comparison():
     source = (ROOT / "scripts" / "screenshots.py").read_text()
     # Each page.screenshot goes to a temporary file (a PNG to compare, or a GIF frame), never straight to screenshots/
     assert "path=str(out_dir" not in source
-    assert source.count("save_png(page, out_dir /") == 2
+    assert len(re.findall(r"save_png\(\s*page,\s*out_dir /", source)) == 2
     assert "written = replace_if_changed(new, out)" in source.split("def save_png", 1)[1].split("def animate", 1)[0]
