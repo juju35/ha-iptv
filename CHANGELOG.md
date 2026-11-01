@@ -15,7 +15,7 @@
 - Serbian: the "Unknown" subscription status now agrees with "pretplata" (Непозната / Nepoznata), like the other statuses.
 
 ### Maintenance
-- README screenshots are only rewritten when their pixels changed, not on every screenshots run.
+- README screenshots are rewritten whenever any of their pixels changed (a figure, an icon, a shade of colour), and only then, not on every screenshots run. The refresh GIF is now rendered deterministically: its spinner, inside the card's shadow root, was not paused and turned at random from one frame to the next.
 
 ## 3.22.4 - 2026-11-01
 
