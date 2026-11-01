@@ -10,6 +10,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+from gif_frames import replace_if_changed  # scripts/, on sys.path when run as `python scripts/screenshots.py`
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -337,7 +338,8 @@ def mount_panel(context, shot):
 
 def animate(context, shot, *, fps=20, seconds=2):
     """Record the refresh spinner as a looping screenshots/<file>.gif (needs ffmpeg). Every animation is paused and
-    stepped frame by frame, so the GIF is identical whatever the machine's speed."""
+    stepped frame by frame, so the GIF is the same whatever the machine's speed; it is only rewritten when it changed
+    beyond render noise (scripts/gif_frames.py)."""
     page = mount(context, shot)
     # Hold the refresh spinner: set the loading flag and re-render, with no service call or stop timer to clear it.
     page.evaluate(
@@ -356,7 +358,8 @@ def animate(context, shot, *, fps=20, seconds=2):
             )
             page.screenshot(path=f"{frame_dir}/f{i:03d}.png", clip=clip)
         page.close()
-        out = str(ROOT / "screenshots" / f"{shot['file']}.gif")
+        out = ROOT / "screenshots" / f"{shot['file']}.gif"
+        new = f"{frame_dir}/new.gif"
         # Halve the retina capture and build a per-clip palette: the colours stay clean and the file stays small.
         subprocess.run(
             [
@@ -372,11 +375,14 @@ def animate(context, shot, *, fps=20, seconds=2):
                 f"scale={clip['width']}:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=128[p];[b][p]paletteuse=dither=bayer:bayer_scale=4",
                 "-loop",
                 "0",
-                out,
+                new,
             ],
             check=True,
         )
-    print(f"screenshots/{shot['file']}.gif")
+        # Re-rendering the same animation gives slightly different anti-aliasing and palette: keep the committed GIF
+        # unless the animation really changed, so the screenshots job does not commit a new GIF on every run.
+        written = replace_if_changed(new, out)
+    print(f"screenshots/{shot['file']}.gif{'' if written else ' (unchanged)'}")
 
 
 def main():
