@@ -423,3 +423,12 @@ test('state-coloured text of the panel reaches 4.5:1 in light and dark themes', 
   assert.match(IptvPanel.STYLE, /\.pill \{[^}]*[^-]color:var\(--tone-text\)/);
   assert.match(IptvPanel.STYLE, /\.msg\.good, \.msg\.bad \{ color:var\(--tone-text\)/);
 });
+
+test('on a phone the credential label shrinks to its text, so a MAC address is not cut', () => {
+  const css = IptvPanel.STYLE;
+  // Wide: a 130 px column so the values line up
+  assert.match(css, /\.cred > span \{ width:130px;/);
+  const narrow = css.match(/@media \(max-width: 4\d\dpx\) \{([^@]*?)\n {4}\}/)?.[1] || '';
+  assert.match(narrow, /\.cred > span \{[^}]*width:auto/);
+  assert.match(narrow, /\.cred > span \{[^}]*max-width:40%/);
+});
