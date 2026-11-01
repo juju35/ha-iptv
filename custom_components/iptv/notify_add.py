@@ -12,7 +12,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.util import dt as dt_util
 
 from .const import CONF_MAC, CONF_PROVIDER, PROVIDER_STALKER
-from .notify_expiry import DATE_FORMATS
+from .notify_expiry import DATE_FORMATS, supported_language
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -65,13 +65,84 @@ TEXTS = {
         "french": "Categorías francesas",
         "kinds": {"live": "directo", "vod": "VOD", "series": "series"},
     },
+    "it": {
+        "title_new": "IPTV: account aggiunto",
+        "title_updated": "IPTV: account aggiornato",
+        "provider": "Fornitore",
+        "server": "Server",
+        "username": "Nome utente",
+        "mac": "Indirizzo MAC",
+        "expiration": "Scadenza",
+        "unlimited": "illimitato",
+        "french": "Categorie francesi",
+        "kinds": {"live": "live", "vod": "VOD", "series": "serie"},
+    },
+    "nl": {
+        "title_new": "IPTV: account toegevoegd",
+        "title_updated": "IPTV: account bijgewerkt",
+        "provider": "Provider",
+        "server": "Server",
+        "username": "Gebruikersnaam",
+        "mac": "MAC-adres",
+        "expiration": "Vervaldatum",
+        "unlimited": "onbeperkt",
+        "french": "Franse categorieën",
+        "kinds": {"live": "live", "vod": "VOD", "series": "series"},
+    },
+    "pt": {
+        "title_new": "IPTV: conta adicionada",
+        "title_updated": "IPTV: conta atualizada",
+        "provider": "Fornecedor",
+        "server": "Servidor",
+        "username": "Nome de utilizador",
+        "mac": "Endereço MAC",
+        "expiration": "Expiração",
+        "unlimited": "ilimitada",
+        "french": "Categorias francesas",
+        "kinds": {"live": "em direto", "vod": "VOD", "series": "séries"},
+    },
+    "pl": {
+        "title_new": "IPTV: dodano konto",
+        "title_updated": "IPTV: zaktualizowano konto",
+        "provider": "Dostawca",
+        "server": "Serwer",
+        "username": "Nazwa użytkownika",
+        "mac": "Adres MAC",
+        "expiration": "Wygaśnięcie",
+        "unlimited": "bez limitu",
+        "french": "Kategorie francuskie",
+        "kinds": {"live": "na żywo", "vod": "VOD", "series": "seriale"},
+    },
+    "sr": {
+        "title_new": "IPTV: налог је додат",
+        "title_updated": "IPTV: налог је ажуриран",
+        "provider": "Провајдер",
+        "server": "Сервер",
+        "username": "Корисничко име",
+        "mac": "MAC адреса",
+        "expiration": "Истек",
+        "unlimited": "неограничено",
+        "french": "Француске категорије",
+        "kinds": {"live": "уживо", "vod": "VOD", "series": "серије"},
+    },
+    "sr-Latn": {
+        "title_new": "IPTV: nalog je dodat",
+        "title_updated": "IPTV: nalog je ažuriran",
+        "provider": "Provajder",
+        "server": "Server",
+        "username": "Korisničko ime",
+        "mac": "MAC adresa",
+        "expiration": "Istek",
+        "unlimited": "neograničeno",
+        "french": "Francuske kategorije",
+        "kinds": {"live": "uživo", "vod": "VOD", "series": "serije"},
+    },
 }
 
 
 def text_language(language: str | None) -> str:
-    """Supported language of a Home Assistant language code (``de-CH`` → ``de``), English otherwise."""
-    lang = (language or "").split("-")[0].lower()
-    return lang if lang in TEXTS else "en"
+    """Supported language of a Home Assistant code (``sr-Latn`` as is, ``de-CH`` → ``de``), English otherwise."""
+    return supported_language(language, TEXTS)
 
 
 def notify_services(hass: HomeAssistant) -> list[str]:

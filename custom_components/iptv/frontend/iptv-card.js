@@ -8,7 +8,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_CARD_VERSION = '3.22.1';
+var IPTV_CARD_VERSION = '3.22.4';
 var IPTV_DOMAIN = 'iptv';
 
 // ── i18n ──────────────────────────────────────────────────────────────────────
@@ -341,13 +341,520 @@ var IptvCardI18n = {
     mini_error_plural: '{n} con errores',
     mini_days: '{n} d',
   },
+  it: {
+    default_title: 'Abbonamento IPTV',
+    default_title_multi: 'Abbonamenti IPTV',
+    loading: 'Caricamento…',
+    no_device: 'Nessun abbonamento IPTV: aggiungi l’integrazione IPTV in Impostazioni → Dispositivi e servizi.',
+    unavailable: 'Server IPTV non raggiungibile',
+    refresh: 'Aggiorna',
+    edit_btn: 'Modifica le credenziali',
+    edit_title: 'Modifica l’account',
+    edit_url: 'URL del server',
+    edit_username: 'Nome utente',
+    edit_password: 'Password',
+    edit_password_keep: 'Lascia vuoto per mantenerla',
+    edit_mac: 'Indirizzo MAC',
+    edit_save: 'Salva',
+    edit_cancel: 'Annulla',
+    edit_saving: 'Verifica…',
+    err_invalid_auth: 'Credenziali rifiutate',
+    err_cannot_connect: 'Impossibile raggiungere il server',
+    err_invalid_mac: 'Indirizzo MAC non valido',
+    err_no_french_lists: 'Nessuna lista francese presso questo fornitore',
+    err_french_unknown: 'Impossibile leggere le categorie',
+    err_stream_ko: 'Il canale di prova non viene riprodotto',
+    err_already_configured: 'Un altro account usa già queste credenziali',
+    err_not_found: 'Account non trovato',
+    err_generic: 'Aggiornamento non riuscito',
+    del_btn: 'Rimuovi l’account',
+    del_title: 'Rimuovi l’account',
+    del_confirm: 'L’account e le sue entità verranno rimossi.',
+    del_delete: 'Elimina',
+    add_btn: 'Aggiungi un account',
+    add_title: 'Aggiungi un account',
+    add_provider: 'Tipo di fornitore',
+    add_xtream: 'Xtream Codes',
+    add_stalker: 'Stalker / Ministra',
+    add_create: 'Aggiungi',
+    err_existing_longer: 'Su questo server esiste già un account valido più a lungo',
+    err_empty_catalogue: 'Il fornitore non ha un catalogo utilizzabile',
+    view_btn: 'Mostra le credenziali',
+    view_title: 'Credenziali',
+    copy: 'Copia',
+    status_active: 'Attivo',
+    status_expired: 'Scaduto',
+    status_banned: 'Bloccato',
+    status_disabled: 'Disattivato',
+    status_unknown: 'Sconosciuto',
+    auth_failed: 'Credenziali non valide',
+    trial: 'Prova',
+    expiration: 'Scadenza',
+    never: 'Mai',
+    unlimited: 'Illimitato',
+    day_left: '{n} giorno rimanente',
+    days_left: '{n} giorni rimanenti',
+    channels: 'canali',
+    movies: 'film',
+    series: 'serie',
+    connections: 'connessioni',
+    french_on: 'FR',
+    french_off: 'Niente FR',
+    french_title: 'Liste francesi',
+    last_check: 'Ultimo controllo',
+    health_ok: 'Online',
+    health_degraded: 'Lento',
+    health_unreachable: 'Non raggiungibile',
+    health_stream_ko: 'Stream KO',
+    health_auth_failed: 'Credenziali rifiutate',
+    ed_title: 'Titolo',
+    ed_devices: 'Abbonamenti (tutti se vuoto)',
+    ed_warning_days: 'Avviso prima della scadenza',
+    ed_language: 'Lingua',
+    ed_zoom: 'Pulsante dettagli',
+    zoom_in: 'Mostra la scheda completa',
+    zoom_out: 'Torna alla vista compatta',
+    mini_all_active: 'Tutti attivi',
+    mini_expiring: '{n} in scadenza',
+    mini_expiring_plural: '{n} in scadenza',
+    mini_expired: '{n} scaduto',
+    mini_expired_plural: '{n} scaduti',
+    mini_error: '{n} in errore',
+    mini_error_plural: '{n} in errore',
+    mini_days: '{n} g',
+  },
+  nl: {
+    default_title: 'IPTV-abonnement',
+    default_title_multi: 'IPTV-abonnementen',
+    loading: 'Laden…',
+    no_device: 'Geen IPTV-abonnement gevonden: voeg de IPTV-integratie toe via Instellingen → Apparaten & diensten.',
+    unavailable: 'IPTV-server onbereikbaar',
+    refresh: 'Vernieuwen',
+    edit_btn: 'Inloggegevens bewerken',
+    edit_title: 'Account bewerken',
+    edit_url: 'Server-URL',
+    edit_username: 'Gebruikersnaam',
+    edit_password: 'Wachtwoord',
+    edit_password_keep: 'Leeg laten om te behouden',
+    edit_mac: 'MAC-adres',
+    edit_save: 'Opslaan',
+    edit_cancel: 'Annuleren',
+    edit_saving: 'Controleren…',
+    err_invalid_auth: 'Inloggegevens geweigerd',
+    err_cannot_connect: 'Kan de server niet bereiken',
+    err_invalid_mac: 'Ongeldig MAC-adres',
+    err_no_french_lists: 'Geen Franse lijst bij deze provider',
+    err_french_unknown: 'Kon de categorieën niet lezen',
+    err_stream_ko: 'Het testkanaal speelt niet af',
+    err_already_configured: 'Een ander account gebruikt deze inloggegevens al',
+    err_not_found: 'Account niet gevonden',
+    err_generic: 'Bijwerken mislukt',
+    del_btn: 'Account verwijderen',
+    del_title: 'Account verwijderen',
+    del_confirm: 'Het account en zijn entiteiten worden verwijderd.',
+    del_delete: 'Verwijderen',
+    add_btn: 'Account toevoegen',
+    add_title: 'Account toevoegen',
+    add_provider: 'Type provider',
+    add_xtream: 'Xtream Codes',
+    add_stalker: 'Stalker / Ministra',
+    add_create: 'Toevoegen',
+    err_existing_longer: 'Op deze server staat al een account dat langer geldig is',
+    err_empty_catalogue: 'De provider heeft geen bruikbare catalogus',
+    view_btn: 'Inloggegevens bekijken',
+    view_title: 'Inloggegevens',
+    copy: 'Kopiëren',
+    status_active: 'Actief',
+    status_expired: 'Verlopen',
+    status_banned: 'Geblokkeerd',
+    status_disabled: 'Uitgeschakeld',
+    status_unknown: 'Onbekend',
+    auth_failed: 'Ongeldige inloggegevens',
+    trial: 'Proef',
+    expiration: 'Vervaldatum',
+    never: 'Nooit',
+    unlimited: 'Onbeperkt',
+    day_left: 'Nog {n} dag',
+    days_left: 'Nog {n} dagen',
+    channels: 'zenders',
+    movies: 'films',
+    series: 'series',
+    connections: 'verbindingen',
+    french_on: 'FR',
+    french_off: 'Geen FR',
+    french_title: 'Franse lijsten',
+    last_check: 'Laatste controle',
+    health_ok: 'Online',
+    health_degraded: 'Traag',
+    health_unreachable: 'Onbereikbaar',
+    health_stream_ko: 'Geen stream',
+    health_auth_failed: 'Inloggegevens geweigerd',
+    ed_title: 'Titel',
+    ed_devices: 'Abonnementen (alle indien leeg)',
+    ed_warning_days: 'Waarschuwen voor het verlopen',
+    ed_language: 'Taal',
+    ed_zoom: 'Detailknop',
+    zoom_in: 'Volledige kaart tonen',
+    zoom_out: 'Terug naar de compacte weergave',
+    mini_all_active: 'Alle actief',
+    mini_expiring: '{n} bijna verlopen',
+    mini_expiring_plural: '{n} bijna verlopen',
+    mini_expired: '{n} verlopen',
+    mini_expired_plural: '{n} verlopen',
+    mini_error: '{n} met fout',
+    mini_error_plural: '{n} met fout',
+    mini_days: '{n} d',
+  },
+  pt: {
+    default_title: 'Subscrição IPTV',
+    default_title_multi: 'Subscrições IPTV',
+    loading: 'A carregar…',
+    no_device: 'Nenhuma subscrição IPTV: adicione a integração IPTV em Definições → Dispositivos e serviços.',
+    unavailable: 'Servidor IPTV inacessível',
+    refresh: 'Atualizar',
+    edit_btn: 'Editar as credenciais',
+    edit_title: 'Editar a conta',
+    edit_url: 'URL do servidor',
+    edit_username: 'Nome de utilizador',
+    edit_password: 'Palavra-passe',
+    edit_password_keep: 'Deixe em branco para manter',
+    edit_mac: 'Endereço MAC',
+    edit_save: 'Guardar',
+    edit_cancel: 'Cancelar',
+    edit_saving: 'A verificar…',
+    err_invalid_auth: 'Credenciais recusadas',
+    err_cannot_connect: 'Não é possível contactar o servidor',
+    err_invalid_mac: 'Endereço MAC inválido',
+    err_no_french_lists: 'Nenhuma lista francesa neste fornecedor',
+    err_french_unknown: 'Não foi possível ler as categorias',
+    err_stream_ko: 'O canal de teste não é reproduzido',
+    err_already_configured: 'Outra conta já utiliza estas credenciais',
+    err_not_found: 'Conta não encontrada',
+    err_generic: 'Falha na atualização',
+    del_btn: 'Remover a conta',
+    del_title: 'Remover a conta',
+    del_confirm: 'A conta e as suas entidades serão removidas.',
+    del_delete: 'Eliminar',
+    add_btn: 'Adicionar conta',
+    add_title: 'Adicionar conta',
+    add_provider: 'Tipo de fornecedor',
+    add_xtream: 'Xtream Codes',
+    add_stalker: 'Stalker / Ministra',
+    add_create: 'Adicionar',
+    err_existing_longer: 'Já existe neste servidor uma conta válida durante mais tempo',
+    err_empty_catalogue: 'O fornecedor não tem um catálogo utilizável',
+    view_btn: 'Ver as credenciais',
+    view_title: 'Credenciais',
+    copy: 'Copiar',
+    status_active: 'Ativa',
+    status_expired: 'Expirada',
+    status_banned: 'Banida',
+    status_disabled: 'Desativada',
+    status_unknown: 'Desconhecida',
+    auth_failed: 'Credenciais inválidas',
+    trial: 'Teste',
+    expiration: 'Expiração',
+    never: 'Nunca',
+    unlimited: 'Ilimitada',
+    day_left: 'Falta {n} dia',
+    days_left: 'Faltam {n} dias',
+    channels: 'canais',
+    movies: 'filmes',
+    series: 'séries',
+    connections: 'ligações',
+    french_on: 'FR',
+    french_off: 'Sem FR',
+    french_title: 'Listas francesas',
+    last_check: 'Última verificação',
+    health_ok: 'Online',
+    health_degraded: 'Lento',
+    health_unreachable: 'Inacessível',
+    health_stream_ko: 'Sem stream',
+    health_auth_failed: 'Credenciais recusadas',
+    ed_title: 'Título',
+    ed_devices: 'Subscrições (todas se vazio)',
+    ed_warning_days: 'Aviso antes da expiração',
+    ed_language: 'Idioma',
+    ed_zoom: 'Botão de detalhe',
+    zoom_in: 'Mostrar o cartão completo',
+    zoom_out: 'Voltar à vista compacta',
+    mini_all_active: 'Todas ativas',
+    mini_expiring: '{n} a expirar',
+    mini_expiring_plural: '{n} a expirar',
+    mini_expired: '{n} expirada',
+    mini_expired_plural: '{n} expiradas',
+    mini_error: '{n} com erro',
+    mini_error_plural: '{n} com erro',
+    mini_days: '{n} d',
+  },
+  pl: {
+    default_title: 'Subskrypcja IPTV',
+    default_title_multi: 'Subskrypcje IPTV',
+    loading: 'Ładowanie…',
+    no_device: 'Nie znaleziono subskrypcji IPTV: dodaj integrację IPTV w Ustawienia → Urządzenia oraz usługi.',
+    unavailable: 'Serwer IPTV jest nieosiągalny',
+    refresh: 'Odśwież',
+    edit_btn: 'Edytuj dane logowania',
+    edit_title: 'Edytuj konto',
+    edit_url: 'URL serwera',
+    edit_username: 'Nazwa użytkownika',
+    edit_password: 'Hasło',
+    edit_password_keep: 'Pozostaw puste, aby zachować',
+    edit_mac: 'Adres MAC',
+    edit_save: 'Zapisz',
+    edit_cancel: 'Anuluj',
+    edit_saving: 'Sprawdzanie…',
+    err_invalid_auth: 'Dane logowania odrzucone',
+    err_cannot_connect: 'Nie można połączyć się z serwerem',
+    err_invalid_mac: 'Nieprawidłowy adres MAC',
+    err_no_french_lists: 'Ten dostawca nie ma francuskiej listy',
+    err_french_unknown: 'Nie udało się odczytać kategorii',
+    err_stream_ko: 'Kanał testowy się nie odtwarza',
+    err_already_configured: 'Inne konto używa już tych danych logowania',
+    err_not_found: 'Nie znaleziono konta',
+    err_generic: 'Aktualizacja nie powiodła się',
+    del_btn: 'Usuń konto',
+    del_title: 'Usuń konto',
+    del_confirm: 'Konto i jego encje zostaną usunięte.',
+    del_delete: 'Usuń',
+    add_btn: 'Dodaj konto',
+    add_title: 'Dodaj konto',
+    add_provider: 'Typ dostawcy',
+    add_xtream: 'Xtream Codes',
+    add_stalker: 'Stalker / Ministra',
+    add_create: 'Dodaj',
+    err_existing_longer: 'Na tym serwerze istnieje już konto ważne dłużej',
+    err_empty_catalogue: 'Dostawca nie ma użytecznego katalogu',
+    view_btn: 'Pokaż dane logowania',
+    view_title: 'Dane logowania',
+    copy: 'Kopiuj',
+    status_active: 'Aktywna',
+    status_expired: 'Wygasła',
+    status_banned: 'Zablokowana',
+    status_disabled: 'Wyłączona',
+    status_unknown: 'Nieznana',
+    auth_failed: 'Nieprawidłowe dane logowania',
+    trial: 'Próbny',
+    expiration: 'Wygaśnięcie',
+    never: 'Nigdy',
+    unlimited: 'Bez limitu',
+    day_left: 'Pozostało dni: {n}',
+    days_left: 'Pozostało dni: {n}',
+    channels: 'kanały',
+    movies: 'filmy',
+    series: 'seriale',
+    connections: 'połączenia',
+    french_on: 'FR',
+    french_off: 'Bez FR',
+    french_title: 'Listy francuskie',
+    last_check: 'Ostatnie sprawdzenie',
+    health_ok: 'Online',
+    health_degraded: 'Wolny',
+    health_unreachable: 'Nieosiągalny',
+    health_stream_ko: 'Brak streamu',
+    health_auth_failed: 'Dane logowania odrzucone',
+    ed_title: 'Tytuł',
+    ed_devices: 'Subskrypcje (wszystkie, jeśli puste)',
+    ed_warning_days: 'Ostrzeżenie przed wygaśnięciem',
+    ed_language: 'Język',
+    ed_zoom: 'Przycisk szczegółów',
+    zoom_in: 'Pokaż pełną kartę',
+    zoom_out: 'Wróć do widoku kompaktowego',
+    mini_all_active: 'Wszystkie aktywne',
+    mini_expiring: 'Wkrótce wygasa: {n}',
+    mini_expiring_plural: 'Wkrótce wygasa: {n}',
+    mini_expired: 'Wygasło: {n}',
+    mini_expired_plural: 'Wygasło: {n}',
+    mini_error: 'Z błędem: {n}',
+    mini_error_plural: 'Z błędem: {n}',
+    mini_days: '{n} d',
+  },
+  sr: {
+    default_title: 'IPTV претплата',
+    default_title_multi: 'IPTV претплате',
+    loading: 'Учитавање…',
+    no_device: 'Није пронађена ниједна IPTV претплата: додајте интеграцију IPTV у Подешавања → Уређаји и услуге.',
+    unavailable: 'IPTV сервер није доступан',
+    refresh: 'Освежи',
+    edit_btn: 'Измени податке за пријаву',
+    edit_title: 'Измени налог',
+    edit_url: 'URL сервера',
+    edit_username: 'Корисничко име',
+    edit_password: 'Лозинка',
+    edit_password_keep: 'Оставите празно да задржите',
+    edit_mac: 'MAC адреса',
+    edit_save: 'Сачувај',
+    edit_cancel: 'Откажи',
+    edit_saving: 'Провера…',
+    err_invalid_auth: 'Подаци за пријаву су одбијени',
+    err_cannot_connect: 'Сервер није доступан',
+    err_invalid_mac: 'Неважећа MAC адреса',
+    err_no_french_lists: 'Овај провајдер нема ниједну француску листу',
+    err_french_unknown: 'Није могуће прочитати категорије',
+    err_stream_ko: 'Тест канал се не репродукује',
+    err_already_configured: 'Други налог већ користи ове податке за пријаву',
+    err_not_found: 'Налог није пронађен',
+    err_generic: 'Ажурирање није успело',
+    del_btn: 'Уклони налог',
+    del_title: 'Уклони налог',
+    del_confirm: 'Налог и његови ентитети биће уклоњени.',
+    del_delete: 'Обриши',
+    add_btn: 'Додај налог',
+    add_title: 'Додај налог',
+    add_provider: 'Тип провајдера',
+    add_xtream: 'Xtream Codes',
+    add_stalker: 'Stalker / Ministra',
+    add_create: 'Додај',
+    err_existing_longer: 'На овом серверу већ постоји налог који важи дуже',
+    err_empty_catalogue: 'Провајдер нема употребљив каталог',
+    view_btn: 'Прикажи податке за пријаву',
+    view_title: 'Подаци за пријаву',
+    copy: 'Копирај',
+    status_active: 'Активна',
+    status_expired: 'Истекла',
+    status_banned: 'Блокирана',
+    status_disabled: 'Онемогућена',
+    status_unknown: 'Непознато',
+    auth_failed: 'Неважећи подаци за пријаву',
+    trial: 'Пробни период',
+    expiration: 'Истек',
+    never: 'Никад',
+    unlimited: 'Неограничено',
+    day_left: 'Преостао {n} дан',
+    days_left: 'Преостало дана: {n}',
+    channels: 'канали',
+    movies: 'филмови',
+    series: 'серије',
+    connections: 'везе',
+    french_on: 'FR',
+    french_off: 'Без FR',
+    french_title: 'Француске листе',
+    last_check: 'Последња провера',
+    health_ok: 'На мрежи',
+    health_degraded: 'Споро',
+    health_unreachable: 'Недоступно',
+    health_stream_ko: 'Стрим не ради',
+    health_auth_failed: 'Подаци за пријаву одбијени',
+    ed_title: 'Наслов',
+    ed_devices: 'Претплате (све ако је празно)',
+    ed_warning_days: 'Упозорење пре истека',
+    ed_language: 'Језик',
+    ed_zoom: 'Дугме за детаље',
+    zoom_in: 'Прикажи целу картицу',
+    zoom_out: 'Назад на компактни приказ',
+    mini_all_active: 'Све активне',
+    mini_expiring: '{n} ускоро истиче',
+    mini_expiring_plural: 'Ускоро истиче: {n}',
+    mini_expired: '{n} истекла',
+    mini_expired_plural: 'Истекло: {n}',
+    mini_error: '{n} са грешком',
+    mini_error_plural: 'Са грешком: {n}',
+    mini_days: '{n} д',
+  },
+  'sr-Latn': {
+    default_title: 'IPTV pretplata',
+    default_title_multi: 'IPTV pretplate',
+    loading: 'Učitavanje…',
+    no_device: 'Nije pronađena nijedna IPTV pretplata: dodajte integraciju IPTV u Podešavanja → Uređaji i usluge.',
+    unavailable: 'IPTV server nije dostupan',
+    refresh: 'Osveži',
+    edit_btn: 'Izmeni podatke za prijavu',
+    edit_title: 'Izmeni nalog',
+    edit_url: 'URL servera',
+    edit_username: 'Korisničko ime',
+    edit_password: 'Lozinka',
+    edit_password_keep: 'Ostavite prazno da zadržite',
+    edit_mac: 'MAC adresa',
+    edit_save: 'Sačuvaj',
+    edit_cancel: 'Otkaži',
+    edit_saving: 'Provera…',
+    err_invalid_auth: 'Podaci za prijavu su odbijeni',
+    err_cannot_connect: 'Server nije dostupan',
+    err_invalid_mac: 'Nevažeća MAC adresa',
+    err_no_french_lists: 'Ovaj provajder nema nijednu francusku listu',
+    err_french_unknown: 'Nije moguće pročitati kategorije',
+    err_stream_ko: 'Test kanal se ne reprodukuje',
+    err_already_configured: 'Drugi nalog već koristi ove podatke za prijavu',
+    err_not_found: 'Nalog nije pronađen',
+    err_generic: 'Ažuriranje nije uspelo',
+    del_btn: 'Ukloni nalog',
+    del_title: 'Ukloni nalog',
+    del_confirm: 'Nalog i njegovi entiteti biće uklonjeni.',
+    del_delete: 'Obriši',
+    add_btn: 'Dodaj nalog',
+    add_title: 'Dodaj nalog',
+    add_provider: 'Tip provajdera',
+    add_xtream: 'Xtream Codes',
+    add_stalker: 'Stalker / Ministra',
+    add_create: 'Dodaj',
+    err_existing_longer: 'Na ovom serveru već postoji nalog koji važi duže',
+    err_empty_catalogue: 'Provajder nema upotrebljiv katalog',
+    view_btn: 'Prikaži podatke za prijavu',
+    view_title: 'Podaci za prijavu',
+    copy: 'Kopiraj',
+    status_active: 'Aktivna',
+    status_expired: 'Istekla',
+    status_banned: 'Blokirana',
+    status_disabled: 'Onemogućena',
+    status_unknown: 'Nepoznato',
+    auth_failed: 'Nevažeći podaci za prijavu',
+    trial: 'Probni period',
+    expiration: 'Istek',
+    never: 'Nikad',
+    unlimited: 'Neograničeno',
+    day_left: 'Preostao {n} dan',
+    days_left: 'Preostalo dana: {n}',
+    channels: 'kanali',
+    movies: 'filmovi',
+    series: 'serije',
+    connections: 'veze',
+    french_on: 'FR',
+    french_off: 'Bez FR',
+    french_title: 'Francuske liste',
+    last_check: 'Poslednja provera',
+    health_ok: 'Na mreži',
+    health_degraded: 'Sporo',
+    health_unreachable: 'Nedostupno',
+    health_stream_ko: 'Strim ne radi',
+    health_auth_failed: 'Podaci za prijavu odbijeni',
+    ed_title: 'Naslov',
+    ed_devices: 'Pretplate (sve ako je prazno)',
+    ed_warning_days: 'Upozorenje pre isteka',
+    ed_language: 'Jezik',
+    ed_zoom: 'Dugme za detalje',
+    zoom_in: 'Prikaži celu karticu',
+    zoom_out: 'Nazad na kompaktni prikaz',
+    mini_all_active: 'Sve aktivne',
+    mini_expiring: '{n} uskoro ističe',
+    mini_expiring_plural: 'Uskoro ističe: {n}',
+    mini_expired: '{n} istekla',
+    mini_expired_plural: 'Isteklo: {n}',
+    mini_error: '{n} sa greškom',
+    mini_error_plural: 'Sa greškom: {n}',
+    mini_days: '{n} d',
+  },
 };
 
+// A language of the card: the full code when it has a table (sr-Latn), else its base (de-AT → de), else English
+function iptvSupported(code) {
+  if (!code) return null;
+  if (IptvCardI18n[code]) return code;
+  var base = code.split('-')[0];
+  return IptvCardI18n[base] ? base : 'en';
+}
+
 function iptvLang(config, hass) {
-  if (config?.language) return config.language;
-  if (hass?.language) return hass.language.split('-')[0];
-  var docLang = document.documentElement.lang;
-  return docLang ? docLang.split('-')[0] : 'en';
+  return iptvSupported(config?.language || hass?.language || document.documentElement.lang) || 'en';
+}
+
+// Locale for Intl / toLocale*: the full Home Assistant locale when its language is the card's (fr-CA, de-CH),
+// else the card language (the language option wins); a bare pt is European Portuguese (pt-PT), not Brazilian
+function iptvLocale(lang, hass) {
+  var full = hass?.locale?.language || hass?.language || '';
+  var latn = (c) => /-Latn/i.test(c);
+  var same = full && full.split('-')[0] === lang.split('-')[0] && (lang.split('-')[0] !== 'sr' || latn(full) === latn(lang));
+  var locale = same ? full : lang;
+  return locale === 'pt' ? 'pt-PT' : locale;
 }
 
 function iptvT(lang, key, vars) {
@@ -361,6 +868,31 @@ function iptvT(lang, key, vars) {
 function iptvErr(lang, code) {
   var key = `err_${code || 'generic'}`;
   return iptvT(lang, IptvCardI18n.en[key] ? key : 'err_generic');
+}
+
+// Controls of a card that can hold the focus, in document order
+var IPTV_FOCUSABLE = 'button, [data-entity][tabindex]';
+
+// What identifies a control across re-renders: its tag, classes (but the transient spin), entity and subscription
+function iptvFocusSig(el) {
+  var cls = String(el.className || '').split(/\s+/).filter((c) => c && c !== 'spin').join('.');
+  var sub = el.dataset?.sub ?? el.closest?.('[data-sub]')?.dataset.sub ?? '';
+  return [el.tagName, cls, el.dataset?.entity ?? '', sub].join('|');
+}
+
+// The focused control of a card rendered with innerHTML, so the next render can give the focus back
+function iptvFocusOf(shadow, root) {
+  var el = shadow?.activeElement;
+  if (!el || !root?.contains(el)) return null;
+  var list = [...root.querySelectorAll(IPTV_FOCUSABLE)];
+  var index = list.indexOf(el);
+  return index < 0 ? null : { index, sig: iptvFocusSig(el) };
+}
+
+function iptvRefocus(root, focus) {
+  if (!focus || !root) return;
+  var el = [...root.querySelectorAll(IPTV_FOCUSABLE)][focus.index];
+  if (el && iptvFocusSig(el) === focus.sig) el.focus({ preventScroll: true });
 }
 
 // Worst state of the subscriptions shown (error, then warning, then ok), idle when there are none
@@ -385,9 +917,12 @@ function iptvEsc(x) {
 // ── iptv-card ─────────────────────────────────────────────────────────────────
 class IptvCard extends HTMLElement {
   static CSS = `
-    :host { display: block; position: relative; --iptv-ok: var(--success-color, #43a047); --iptv-warn: var(--warning-color, #ffa600); --iptv-crit: var(--error-color, #db4437); }
+    :host { display: block; position: relative; --iptv-ok: var(--success-color, #43a047); --iptv-warn: var(--warning-color, #ffa600); --iptv-crit: var(--error-color, #db4437);
+            /* Text in a state colour: half-way to the text colour, so it stays readable (4.5:1) in light and dark themes */
+            --iptv-crit-text: color-mix(in srgb, var(--iptv-crit) 50%, var(--primary-text-color)); }
     ha-card { padding: 12px; display: flex; flex-direction: column; gap: 6px; }
     .ok { --c: var(--iptv-ok); } .warning { --c: var(--iptv-warn); } .error { --c: var(--iptv-crit); } .idle { --c: var(--secondary-text-color); }
+    .ok, .warning, .error, .idle { --ct: color-mix(in srgb, var(--c) 50%, var(--primary-text-color)); }
     /* 8 px to the body (the card gap is 6 px); the status pill ends the title line, before the buttons */
     .header { display: flex; align-items: center; gap: 10px; margin-bottom: 2px; }
     .header > button:last-child:not(.zoom) { margin-right: -4px; }
@@ -401,7 +936,8 @@ class IptvCard extends HTMLElement {
     .name { font-size: 16px; font-weight: 500; line-height: 1.25; color: var(--primary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
     .chip { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px 1px 5px; border-radius: 12px; font-size: 11px; font-weight: 500;
-            color: var(--c); background: color-mix(in srgb, var(--c) 15%, transparent); --mdc-icon-size: 14px; }
+            color: var(--ct); background: color-mix(in srgb, var(--c) 15%, transparent); --mdc-icon-size: 14px; }
+    .chip ha-icon { color: var(--c); }
     .chip.idle { padding-left: 10px; }
     .chip.fr { padding-left: 6px; gap: 5px; }
     .checked { display: flex; align-items: center; gap: 4px; color: var(--secondary-text-color); font-size: 11px; --mdc-icon-size: 13px; }
@@ -411,8 +947,9 @@ class IptvCard extends HTMLElement {
     .sect { display: flex; flex-direction: column; gap: 5px; }
     .sect.multi + .sect.multi { border-top: 1px solid var(--divider-color, rgba(127,127,127,.25)); padding-top: 6px; }
     .sect-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-    .sect-head .chips { margin-top: 0; flex: none; justify-content: flex-end; }
+    .sect-head .chips { margin-top: 0; flex: 0 1 auto; flex-wrap: wrap; justify-content: flex-end; }
     .sect-name { font-size: 14px; font-weight: 500; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sect-head .sect-name { flex: 1 1 0; min-width: 2em; }
     button { background:none; border:none; cursor:pointer; color:var(--secondary-text-color); padding:8px; border-radius:50%; align-self: flex-start; display: flex; }
     button:hover { background: var(--secondary-background-color); }
     button.spin ha-icon { animation: spin 1s linear infinite; }
@@ -423,7 +960,7 @@ class IptvCard extends HTMLElement {
     .val { font-weight:500; font-size: 14px; }
     .bar { height:4px; border-radius:3px; background: var(--divider-color, rgba(127,127,127,.25)); margin-top:4px; overflow:hidden; }
     .rem { font-weight:400; font-size:12px; color: var(--secondary-text-color); }
-    .rem.warning, .rem.error { color: var(--c); }
+    .rem.warning, .rem.error { color: var(--ct); }
     .fill { height:100%; border-radius:3px; background: var(--c, var(--iptv-ok)); transition: width .6s ease; }
     .stats { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:5px; }
     .stat { display:flex; align-items:center; gap:5px; padding:3px 7px; border-radius:8px; min-width: 0;
@@ -431,8 +968,9 @@ class IptvCard extends HTMLElement {
     .stat ha-icon { color: var(--primary-color); --mdc-icon-size: 15px; flex: none; }
     .num { font-size: 14px; font-weight: 500; line-height: 1.2; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .msg { color: var(--secondary-text-color); padding:8px 0; }
-    .msg.err { color: var(--iptv-crit); }
+    .msg.err { color: var(--iptv-crit-text); }
     [data-entity] { cursor:pointer; }
+    [data-entity][tabindex]:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 2px; }
     .stat:hover { filter: brightness(0.95); }
     .foot { display:flex; align-items:center; justify-content:space-between; gap:8px; min-height:20px; }
     .foot-actions { display:flex; align-items:center; gap:8px; }
@@ -445,20 +983,25 @@ class IptvCard extends HTMLElement {
     .field label { font-size:11px; color:var(--secondary-text-color); }
     .field input, .field select { font:inherit; font-size:14px; padding:8px 10px; border-radius:8px; border:1px solid var(--divider-color, rgba(127,127,127,.3)); background:var(--secondary-background-color, rgba(127,127,127,.08)); color:var(--primary-text-color); }
     .field .hint { font-size:10px; color:var(--secondary-text-color); }
-    .modal .err { color:var(--iptv-crit); font-size:12px; min-height:14px; }
+    .modal .err { color:var(--iptv-crit-text); font-size:12px; min-height:14px; }
     .modal-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:2px; }
     .modal button.act { border-radius:8px; padding:8px 14px; font:inherit; font-size:13px; font-weight:500; width:auto; height:auto; }
     .modal button.cancel { background:var(--secondary-background-color, rgba(127,127,127,.12)); color:var(--primary-text-color); }
     .modal button.primary { background:color-mix(in srgb, var(--primary-color, #03a9f4) 16%, transparent); color:var(--primary-color, #03a9f4); }
     .modal button.primary:hover:not([disabled]) { background:color-mix(in srgb, var(--primary-color, #03a9f4) 24%, transparent); }
     .modal button.primary[disabled], .modal button.danger[disabled] { opacity:.6; cursor:default; }
-    .modal button.danger { background:color-mix(in srgb, var(--iptv-crit) 16%, transparent); color:var(--iptv-crit); }
+    .modal button.danger { background:color-mix(in srgb, var(--iptv-crit) 16%, transparent); color:var(--iptv-crit-text); }
     .modal button.danger:hover:not([disabled]) { background:color-mix(in srgb, var(--iptv-crit) 24%, transparent); }
     .view-row { display:flex; align-items:center; gap:8px; }
     .view-k { font-size:11px; color:var(--secondary-text-color); width:96px; flex:none; }
     .view-v { flex:1; min-width:0; font-size:13px; font-family:monospace; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; user-select:all; }
     .modal button.copy { padding:4px; --mdc-icon-size:16px; width:auto; height:auto; background:none; color:var(--secondary-text-color); }
     .modal button.copy.ok { color:var(--iptv-ok); }
+    /* Reduced motion: no spinning or sliding; the refresh button stays dimmed while it works */
+    @media (prefers-reduced-motion: reduce) {
+      button.spin ha-icon { animation: none; opacity: .5; }
+      .fill { transition: none; }
+    }
   `;
 
   static getStubConfig() {
@@ -479,6 +1022,12 @@ class IptvCard extends HTMLElement {
           { value: 'fr', label: 'Français' },
           { value: 'de', label: 'Deutsch' },
           { value: 'es', label: 'Español' },
+          { value: 'it', label: 'Italiano' },
+          { value: 'nl', label: 'Nederlands' },
+          { value: 'pt', label: 'Português (Portugal)' },
+          { value: 'pl', label: 'Polski' },
+          { value: 'sr', label: 'Српски' },
+          { value: 'sr-Latn', label: 'Srpski (latinica)' },
         ] } } },
       ],
       computeLabel: (schema) => iptvT(lang, `ed_${schema.name}`),
@@ -671,7 +1220,7 @@ class IptvCard extends HTMLElement {
   _render() {
     if (!this.shadowRoot || !this._config) return;
     var lang = iptvLang(this._config, this._hass);
-    var locale = (this._hass?.locale?.language) || lang;
+    var locale = iptvLocale(lang, this._hass);
     var fmtDate = (ms) =>
       new Date(ms).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' });
     var nf = new Intl.NumberFormat(locale);
@@ -807,6 +1356,7 @@ class IptvCard extends HTMLElement {
     }
 
     if (!this._root) { this._root = document.createElement('div'); this.shadowRoot.appendChild(this._root); }
+    var focus = iptvFocusOf(this.shadowRoot, this._root);
     this._root.innerHTML = `
       <style>${this.constructor.CSS}</style>
       <ha-card>
@@ -833,6 +1383,7 @@ class IptvCard extends HTMLElement {
       if (sub) el.addEventListener('click', () => this._openView(sub));
     });
     this._bindMoreInfo(subs);
+    iptvRefocus(this._root, focus);
   }
 
   // [data-entity] elements open their subscription's entity; header pills (single
@@ -842,7 +1393,16 @@ class IptvCard extends HTMLElement {
       var sect = el.closest('[data-sub]');
       var sub = subs[sect ? Number(sect.dataset.sub) : 0];
       var entityId = sub?.ids[el.dataset.entity];
-      if (entityId) el.addEventListener('click', () => this._moreInfo(entityId));
+      if (!entityId) return;
+      // A button for the keyboard and screen readers too: Tab to reach it, Enter or Space to open it
+      el.setAttribute('role', 'button');
+      el.setAttribute('tabindex', '0');
+      el.addEventListener('click', () => this._moreInfo(entityId));
+      el.addEventListener('keydown', (ev) => {
+        if (ev.key !== 'Enter' && ev.key !== ' ') return;
+        ev.preventDefault();
+        this._moreInfo(entityId);
+      });
     });
   }
 
@@ -1131,7 +1691,7 @@ class IptvMiniCard extends IptvCard {
                font-size: 12px; font-weight: 500; line-height: 18px; white-space: nowrap; color: var(--primary-text-color); --mdc-icon-size: 13px; }
     .r ha-icon { color: var(--c); display: inline-flex; }
     .r .fig { font-weight: 400; color: var(--secondary-text-color); }
-    .r.warning, .r.error { color: var(--c); background: color-mix(in srgb, var(--c) 14%, transparent); }
+    .r.warning, .r.error { color: var(--ct); background: color-mix(in srgb, var(--c) 14%, transparent); }
     .r.warning .fig, .r.error .fig { color: inherit; }
     .r:hover { background: color-mix(in srgb, var(--c) 20%, var(--secondary-background-color, transparent)); }
     .r:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 2px; }
@@ -1179,9 +1739,11 @@ class IptvMiniCard extends IptvCard {
 
   _render() {
     if (!this.shadowRoot || !this._config) return;
+    var focus = iptvFocusOf(this.shadowRoot, this._root);
     if (this._zoomed) super._render();
     else this._renderMini();
     this._addZoom();
+    iptvRefocus(this._root, focus);
   }
 
   // Global pill: the worst state of the subscriptions, with how many are in it
