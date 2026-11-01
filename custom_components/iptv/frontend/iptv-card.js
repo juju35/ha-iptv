@@ -914,6 +914,11 @@ function iptvEsc(x) {
   return String(x == null ? '' : x).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 }
 
+// The card is a size container (for its narrow layouts), which a parent sizing it from its content (inline-block,
+// flex row, grid auto column of a layout card or a button card) sees as 0 px wide. This empty, zero-height SVG
+// asks such a parent for 400 px, while its max-width: 100% lets it shrink to any room.
+var IPTV_SIZER = '<svg class="sizer" aria-hidden="true" focusable="false"></svg>';
+
 // ── iptv-card ─────────────────────────────────────────────────────────────────
 class IptvCard extends HTMLElement {
   static CSS = `
@@ -923,6 +928,8 @@ class IptvCard extends HTMLElement {
     /* A size container for the narrow layouts below; while a popup is open, the card grows to hold it */
     ha-card { padding: 12px; display: flex; flex-direction: column; gap: 6px; container-type: inline-size;
               box-sizing: border-box; min-height: var(--iptv-modal-h, 0px); }
+    /* See IPTV_SIZER: a replaced element with max-width: 100% adds width only to a parent that has none to give */
+    .sizer { display: block; width: 400px; max-width: 100%; height: 0; }
     .ok { --c: var(--iptv-ok); } .warning { --c: var(--iptv-warn); } .error { --c: var(--iptv-crit); } .idle { --c: var(--secondary-text-color); }
     .ok, .warning, .error, .idle { --ct: color-mix(in srgb, var(--c) 50%, var(--primary-text-color)); }
     /* 8 px to the body (the card gap is 6 px); the status pill ends the title line, before the buttons */
@@ -933,14 +940,15 @@ class IptvCard extends HTMLElement {
     .badge { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; flex: none;
              background: color-mix(in srgb, var(--c) 16%, transparent); color: var(--c); --mdc-icon-size: 24px; }
     .badge ha-icon { display: inline-flex; }
-    .titles { flex: 1 1 auto; min-width: 0; }
+    /* The title block takes the room the badge and buttons leave (from 0, not from its text width) */
+    .titles { flex: 1 1 0; min-width: 6ch; }
     .title-row { display: flex; align-items: center; gap: 10px; }
     /* The title gives way first (down to its 4 characters), then the pill */
-    .title-row .name { flex: 1 100 auto; }
-    /* The status pill shrinks to half the line at most, its text truncated (whole text in its tooltip) */
-    .title-row > .chip { flex: 0 1 auto; min-width: 0; max-width: 50%; }
+    .title-row .name { flex: 1 1 0; }
+    /* The status pill keeps its whole text while it fits; truncated only when the room really runs out (whole text in its tooltip) */
+    .title-row > .chip { flex: 0 1 auto; min-width: 0; }
     /* At least about 4 characters of the title stay visible */
-    .name { font-size: 16px; font-weight: 500; line-height: 1.25; color: var(--primary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 4.5ch; }
+    .name { font-size: 16px; font-weight: 500; line-height: 1.25; color: var(--primary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 6ch; }
     .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
     .chip { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px 1px 5px; border-radius: 12px; font-size: 11px; font-weight: 500; max-width: 100%; box-sizing: border-box;
             color: var(--ct); background: color-mix(in srgb, var(--c) 15%, transparent); --mdc-icon-size: 14px; }
@@ -963,7 +971,8 @@ class IptvCard extends HTMLElement {
     button:hover { background: var(--secondary-background-color); }
     button.spin ha-icon { animation: spin 1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .row { display:flex; justify-content:space-between; align-items:baseline; gap: 8px; }
+    /* Label and date share the line, the date goes under it when they no longer fit */
+    .row { display:flex; flex-wrap: wrap; justify-content:space-between; align-items:baseline; gap: 0 8px; }
     .lbl { color: var(--secondary-text-color); font-size: 11px; }
     .exp .lbl { font-size: 12px; }
     .val { font-weight:500; font-size: 14px; }
@@ -981,8 +990,9 @@ class IptvCard extends HTMLElement {
     [data-entity] { cursor:pointer; }
     [data-entity][tabindex]:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 2px; }
     .stat:hover { filter: brightness(0.95); }
-    .foot { display:flex; align-items:center; justify-content:space-between; gap:8px; min-height:20px; }
-    .foot-actions { display:flex; align-items:center; gap:8px; }
+    /* Narrow: the buttons go under the last check (still on the right) rather than out of the card */
+    .foot { display:flex; flex-wrap: wrap; align-items:center; justify-content:space-between; gap:4px 8px; min-height:20px; }
+    .foot-actions { display:flex; align-items:center; gap:8px; margin-left: auto; }
     button.edit, button.del, button.view { padding:4px; margin:0; align-self:center; --mdc-icon-size:16px; }
     button.del:hover { color:var(--iptv-crit); background:color-mix(in srgb, var(--iptv-crit) 12%, transparent); }
     .backdrop { position:absolute; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:flex-start; justify-content:center; padding-top:12px; box-sizing:border-box; z-index:9; border-radius:var(--ha-card-border-radius, 12px); }
@@ -1007,17 +1017,32 @@ class IptvCard extends HTMLElement {
     .view-v { flex:1; min-width:0; font-size:13px; font-family:monospace; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; user-select:all; }
     .modal button.copy { padding:4px; --mdc-icon-size:16px; width:auto; height:auto; background:none; color:var(--secondary-text-color); }
     .modal button.copy.ok { color:var(--iptv-ok); }
-    /* Narrow card (inner width; 6 columns of a section = 220 px): the figures keep their room (no icon, then two tiles a row), the status pill keeps its icon only */
+    /* Narrow card (inner width; 6 columns of a section = 132 to 220 px): the figures keep their room (no icon, then two tiles a row) */
     @container (max-width: 340px) {
       .stat { justify-content: center; }
       .stat ha-icon { display: none; }
     }
+    /* Narrower (6 columns of a section, a phone at 156 px): the title and its pills get a line of their own,
+       under the badge and the buttons, so the title and the pill text stay whole */
     @container (max-width: 260px) {
       .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .title-row > .chip .tx, .titles .chips .chip:not(.fr):not(.idle) .tx { display: none; }
-      .title-row > .chip, .titles .chips .chip:not(.fr):not(.idle) { padding: 1px 5px; }
+      .header { flex-wrap: wrap; row-gap: 6px; }
+      .titles { order: 1; flex-basis: 100%; }
+      .header > .titles + button { margin-left: auto; }
       .header, .title-row { gap: 6px; }
       .header > button:not(.zoom) { padding: 6px; }
+      /* The pill goes under the title rather than leave it fewer than 4 characters */
+      .title-row { flex-wrap: wrap; row-gap: 4px; }
+    }
+    /* Phone width: a smaller badge and buttons keep them (and the mini card's detail button) on one line */
+    @container (max-width: 200px) {
+      .header > .badge { width: 32px; height: 32px; --mdc-icon-size: 20px; }
+      .header > button:not(.zoom) { padding: 4px; }
+    }
+    /* Last resort (narrower than any section column): the status pills keep their icon only */
+    @container (max-width: 120px) {
+      .title-row > .chip .tx, .titles .chips .chip:not(.fr):not(.idle) .tx { display: none; }
+      .title-row > .chip, .titles .chips .chip:not(.fr):not(.idle) { padding: 1px 5px; }
     }
     /* Reduced motion: no spinning or sliding; the refresh button stays dimmed while it works */
     @media (prefers-reduced-motion: reduce) {
@@ -1395,7 +1420,7 @@ class IptvCard extends HTMLElement {
           <button class="refresh ${this._loading ? 'spin' : ''}" title="${esc(this._t(this._refreshFailed ? 'err_generic' : 'refresh'))}"><ha-icon icon="mdi:refresh"></ha-icon></button>
         </div>
         ${body}
-      </ha-card>`;
+      </ha-card>${IPTV_SIZER}`;
     this._root.querySelector('button.refresh').addEventListener('click', () => this._refresh());
     this._root.querySelector('button.add')?.addEventListener('click', () => this._openAdd());
     this._root.querySelectorAll('button.edit').forEach((el) => {
@@ -1539,7 +1564,7 @@ class IptvCard extends HTMLElement {
       this._modalObserver.observe(box);
     }
     fit();
-    box.focus();
+    box.focus({ preventScroll: true });
     return modal;
   }
 
@@ -1551,16 +1576,17 @@ class IptvCard extends HTMLElement {
     var last = items[items.length - 1];
     if (e.shiftKey && (active === items[0] || !items.includes(active))) {
       e.preventDefault();
-      last.focus();
+      last.focus({ preventScroll: true });
     } else if (!e.shiftKey && (active === last || !items.includes(active))) {
       e.preventDefault();
-      items[0].focus();
+      items[0].focus({ preventScroll: true });
     }
   }
 
-  // Focus the first control of a popup matching the selector (the popup itself keeps it otherwise)
+  // Focus the first control of a popup matching the selector (the popup itself keeps it otherwise);
+  // never scrolls the page: the popup opens where the user just clicked
   _focusModal(modal, selector) {
-    modal.querySelector(selector)?.focus();
+    modal.querySelector(selector)?.focus({ preventScroll: true });
   }
 
   _confirmDelete(sub) {
@@ -1765,14 +1791,18 @@ class IptvMiniCard extends IptvCard {
     .body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
     .head { display: flex; align-items: center; gap: 8px; min-width: 0; }
     /* The title gives way first (down to its 4 characters), then the pill */
-    .mini .name { flex: 0 100 auto; }
-    .head .chip { flex: 0 1 auto; min-width: 0; max-width: 50%; margin-left: auto; }
+    .mini .name { flex: 1 1 0; min-width: 4.5ch; }
+    .head .chip { flex: 0 1 auto; min-width: 0; margin-left: auto; }
     .rs { display: flex; flex-wrap: wrap; gap: 2px 4px; margin-left: -4px; }
     .mini .msg { padding: 0; font-size: 12px; }
+    /* A chip never goes past the card: its name is truncated (whole in its tooltip), its figure stays whole */
     button.r { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; padding: 0 6px 0 4px; border-radius: 999px;
-               font-size: 12px; font-weight: 500; line-height: 18px; white-space: nowrap; color: var(--primary-text-color); --mdc-icon-size: 13px; }
-    .r ha-icon { color: var(--c); display: inline-flex; }
-    .r .fig { font-weight: 400; color: var(--secondary-text-color); }
+               font-size: 12px; font-weight: 500; line-height: 18px; white-space: nowrap; color: var(--primary-text-color); --mdc-icon-size: 13px;
+               box-sizing: border-box; max-width: 100%; min-width: 0; }
+    .r ha-icon { color: var(--c); display: inline-flex; flex: none; }
+    .r .rn { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+    /* The figure only gives way when it alone is wider than the card */
+    .r .fig { font-weight: 400; color: var(--secondary-text-color); flex: none; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
     .r.warning, .r.error { color: var(--ct); background: color-mix(in srgb, var(--c) 14%, transparent); }
     .r.warning .fig, .r.error .fig { color: inherit; }
     .r:hover { background: color-mix(in srgb, var(--c) 20%, var(--secondary-background-color, transparent)); }
@@ -1783,8 +1813,14 @@ class IptvMiniCard extends IptvCard {
     .zoom:hover { background: color-mix(in srgb, var(--secondary-text-color) 16%, transparent); color: var(--primary-text-color); }
     .zoom:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 1px; }
     .header .zoom { align-self: flex-start; margin: 2px -4px 0 -6px; }
-    /* Narrower than its 6 columns (e.g. a phone in masonry view): the global pill keeps its icon only */
+    /* 6 columns of a 500 px section: the title, the pill (whole) and the detail button share a tighter line */
+    @container (max-width: 240px) {
+      .head { gap: 4px; }
+    }
+    /* Phone width (its 6 columns: 156 to 178 px): no badge (the pill and chips carry the state), so the
+       subscription chips keep their figures whole; the global pill keeps its icon only */
     @container (max-width: 200px) {
+      .mini .badge { display: none; }
       .head .chip .tx { display: none; }
       .head .chip { padding: 1px 5px; }
     }
@@ -1865,7 +1901,7 @@ class IptvMiniCard extends IptvCard {
     else if (v.expired) fig = this._t('status_expired');
     else fig = v.daysLeft === null ? this._t('unlimited') : this._t('mini_days', { n: v.daysLeft });
     var title = `${sub.name} · ${fig}`;
-    return `<button class="r ${v.state}" data-sub="${i}" data-entity="${entity}" title="${iptvEsc(title)}"><ha-icon icon="${iptvStateIcon(v.state)}"></ha-icon>${iptvEsc(sub.name)} <span class="fig">${iptvEsc(fig)}</span></button>`;
+    return `<button class="r ${v.state}" data-sub="${i}" data-entity="${entity}" title="${iptvEsc(title)}"><ha-icon icon="${iptvStateIcon(v.state)}"></ha-icon><span class="rn">${iptvEsc(sub.name)}</span><span class="fig">${iptvEsc(fig)}</span></button>`;
   }
 
   _renderMini() {
@@ -1893,7 +1929,7 @@ class IptvMiniCard extends IptvCard {
             <div class="rs">${line}</div>
           </div>
         </div>
-      </ha-card>`;
+      </ha-card>${IPTV_SIZER}`;
     this._bindMoreInfo(subs);
   }
 
@@ -1911,7 +1947,7 @@ class IptvMiniCard extends IptvCard {
       this._zoomed = !this._zoomed;
       this._render();
       // Keyboard use (Enter / Space: no click count) keeps the focus on the new button
-      if (ev.detail === 0) this._root.querySelector('button.zoom')?.focus();
+      if (ev.detail === 0) this._root.querySelector('button.zoom')?.focus({ preventScroll: true });
     });
     head.appendChild(button);
   }

@@ -256,16 +256,16 @@ const rule = (css, selector) => {
 test('a narrow header keeps the title readable and every button inside the card', () => {
   for (const css of [IptvCard.CSS, IptvMiniCard.CSS]) {
     assert.match(css, /ha-card \{[^}]*container-type: inline-size/, 'the card is a size container');
-    // The title block takes the room left and truncates, but keeps about 4 characters
-    assert.match(rule(css, '.titles'), /flex: 1 1 auto/);
-    assert.match(rule(css, '.titles'), /min-width: 0/);
+    // The title block takes the room left (from 0, not from its text width) and truncates, but keeps about 4 characters
+    assert.match(rule(css, '.titles'), /flex: 1 1 0;/);
+    assert.match(rule(css, '.titles'), /min-width: \d+(\.\d+)?ch/);
+    assert.match(rule(css, '.title-row .name'), /flex: 1 1 0;/);
     assert.match(rule(css, '.name'), /min-width: \d+(\.\d+)?ch/);
     assert.match(rule(css, '.name'), /text-overflow: ellipsis/);
-    // The status pill can shrink to half the line, its text truncated
+    // The status pill shrinks only when the room runs out, its text truncated
     const pill = rule(css, '.title-row > .chip');
     assert.match(pill, /flex: 0 1 auto/);
     assert.match(pill, /min-width: 0/);
-    assert.match(pill, /max-width: 50%/);
     assert.match(rule(css, '.chip .tx'), /text-overflow: ellipsis/);
     // Under the threshold, only its coloured icon is left
     assert.match(css, /@container \(max-width: \d+px\) \{[^@]*\.title-row > \.chip \.tx[^{]*\{ display: none/);
@@ -273,7 +273,7 @@ test('a narrow header keeps the title readable and every button inside the card'
     assert.match(rule(css, '.header > button'), /flex: none/);
   }
   assert.match(rule(IptvMiniCard.CSS, '.head .chip'), /flex: 0 1 auto/);
-  assert.match(rule(IptvMiniCard.CSS, '.head .chip'), /max-width: 50%/);
+  assert.match(rule(IptvMiniCard.CSS, '.mini .name'), /flex: 1 1 0;/);
   assert.match(IptvMiniCard.CSS, /@container \(max-width: \d+px\) \{[^@]*\.head \.chip \.tx[^{]*\{ display: none/);
 });
 
@@ -445,4 +445,116 @@ test('mini pill counts: 1 is singular in every language, Polish and Serbian put 
     assert.equal(label('sr-Latn', n), `Uskoro ističe: ${n}`);
   }
   assert.equal(label('sr-Latn', 1), '1 uskoro ističe');
+});
+
+// --- Phone widths (6 columns of a section on a phone: 156 to 178 px) ---------------------------------------------
+
+// Rules inside the @container (max-width: Npx) block, N given
+const containerBlock = (css, px) => {
+  const start = css.indexOf(`@container (max-width: ${px}px) {`);
+  if (start < 0) return '';
+  return css.slice(start, css.indexOf('\n    }', start));
+};
+
+test('the status pill keeps its whole text: no half-line cap that cuts "Ready" to "Re…" at 320 px', () => {
+  for (const css of [IptvCard.CSS, IptvMiniCard.CSS]) {
+    assert.doesNotMatch(rule(css, '.title-row > .chip'), /max-width/);
+  }
+  assert.doesNotMatch(rule(IptvMiniCard.CSS, '.head .chip'), /max-width/);
+  // The mini title shares its line with the pill and the detail button: it keeps 4 characters (4.5ch), not more,
+  // so "Z błędem: 1" / "1 sa greškom" stay whole at 245 px (6ch cut them to 55 of 58 / 67 px)
+  const miniName = rule(IptvMiniCard.CSS, '.mini .name').match(/min-width: ([\d.]+)ch/);
+  assert.ok(miniName && Number(miniName[1]) >= 4 && Number(miniName[1]) <= 4.5, `mini title min-width ${miniName?.[1]}ch`);
+  // ...and at 245 px its line is tighter, so the 4 characters really fit next to the whole Serbian pill
+  assert.match(containerBlock(IptvMiniCard.CSS, 240), /\.head \{ gap: 4px; \}/);
+  // Only its icon left: below any section column (6 columns on the smallest phone: 156 px, 132 px inside)
+  const thresholds = [...IptvCard.CSS.matchAll(/@container \(max-width: (\d+)px\) \{[^@]*\.title-row > \.chip \.tx[^{]*\{ display: none/g)].map((m) => Number(m[1]));
+  assert.ok(thresholds.length && thresholds.every((px) => px < 132), `icon-only below ${thresholds}`);
+});
+
+test('a phone-narrow header puts the title and its pill on a line of their own, buttons on the right', () => {
+  for (const css of [IptvCard.CSS, IptvMiniCard.CSS]) {
+    const narrow = containerBlock(css, 260);
+    assert.match(narrow, /\.header \{ flex-wrap: wrap/);
+    assert.match(narrow, /\.titles \{ order: 1; flex-basis: 100%/);
+    assert.match(narrow, /\.header > \.titles \+ button \{ margin-left: auto/);
+  }
+});
+
+test('a phone-narrow footer and expiry line wrap instead of pushing the buttons out of the card', () => {
+  const css = IptvCard.CSS;
+  assert.match(rule(css, '.foot'), /flex-wrap: wrap/);
+  assert.match(rule(css, '.foot-actions'), /margin-left: auto/);
+  assert.match(rule(css, '.row'), /flex-wrap: wrap/);
+});
+
+test('a mini card chip never goes past the card: its name is truncated, its figure kept', () => {
+  const css = IptvMiniCard.CSS;
+  assert.match(rule(css, 'button.r'), /max-width: 100%/);
+  assert.match(rule(css, 'button.r'), /min-width: 0/);
+  assert.match(rule(css, '.r .rn'), /text-overflow: ellipsis/);
+  assert.match(rule(css, '.r .fig'), /flex: none/, 'the name gives way, not the figure');
+  const mini = Object.create(IptvMiniCard.prototype);
+  mini._config = { language: 'en' };
+  const html = mini._miniChip({ name: 'Provider D', ids: { days_left: 'x' } }, { state: 'error', expired: true }, 0);
+  assert.match(html, /<span class="rn">Provider D<\/span><span class="fig">Expired<\/span>/);
+  assert.match(html, /title="Provider D · Expired"/, 'the whole text stays in the tooltip');
+});
+
+test('a focus moved by the card never scrolls the page (popups, Tab trap, detail button)', () => {
+  // Every .focus( call in the card passes { preventScroll: true }
+  const calls = [...source.matchAll(/\.focus\(([^)]*)\)/g)].map((m) => m[1]);
+  assert.ok(calls.length >= 5);
+  for (const args of calls) assert.match(args, /preventScroll: true/);
+  // And in use: opening the popups and Tab round them
+  const { card, shadow } = popupCard();
+  const seen = [];
+  const watch = (el) => {
+    const focus = el.focus;
+    el.focus = (opts) => {
+      seen.push(opts);
+      focus.call(el, opts);
+    };
+  };
+  const real = context.document.createElement;
+  context.document.createElement = () => {
+    const el = real();
+    const qs = el.querySelector;
+    el.querySelector = (sel) => {
+      const child = qs(sel);
+      if (!child.watched) {
+        child.watched = true;
+        watch(child);
+      }
+      return child;
+    };
+    return el;
+  };
+  card._confirmDelete({ name: 'Provider', device: 'd1' });
+  card._closeEditor();
+  card._openAdd();
+  const backdrop = card._modal;
+  const first = backdrop.querySelector('.prov');
+  const last = backdrop.querySelector('.cancel');
+  backdrop.querySelectorAll = () => [first, last];
+  shadow.activeElement = last;
+  backdrop.listeners.keydown({ key: 'Tab', shiftKey: false, preventDefault() {}, stopPropagation() {} });
+  assert.ok(seen.length >= 4, `${seen.length} focus calls`);
+  for (const opts of seen) assert.deepEqual({ ...opts }, { preventScroll: true });
+});
+
+test('a parent that sizes the card from its content (inline-block, flex row, auto grid column) does not squeeze it to 0', () => {
+  for (const css of [IptvCard.CSS, IptvMiniCard.CSS]) {
+    // ha-card stays a size container (narrow layouts)...
+    assert.match(css, /ha-card \{[^}]*container-type: inline-size/);
+    // ...and an empty replaced element asks for 400 px, shrinking to any room there is (max-width: 100%)
+    const sizer = rule(css, '.sizer');
+    assert.match(sizer, /display: block/);
+    assert.match(sizer, /width: 400px/);
+    assert.match(sizer, /max-width: 100%/);
+    assert.match(sizer, /height: 0/);
+  }
+  // Next to the ha-card of the full card and of the mini card
+  assert.equal(source.split('</ha-card>${IPTV_SIZER}`').length - 1, 2);
+  assert.match(source, /IPTV_SIZER = '<svg class="sizer" aria-hidden="true" focusable="false"><\/svg>'/);
 });
