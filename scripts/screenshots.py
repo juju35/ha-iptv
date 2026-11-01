@@ -6,11 +6,13 @@ background around the card (full card 460 px wide, mini card 380 px, 460 px zoom
 """
 
 import os
-import subprocess
 import tempfile
 from pathlib import Path
 
-from gif_frames import replace_if_changed  # scripts/, on sys.path when run as `python scripts/screenshots.py`
+from gif_frames import (  # scripts/, on sys.path when run as `python scripts/screenshots.py`
+    encode_gif,
+    replace_if_changed,
+)
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -336,10 +338,21 @@ def mount_panel(context, shot):
     return page
 
 
+# Pause every animation, in the document and in every (nested) shadow root, at `t` ms. document.getAnimations()
+# alone misses the card's shadow root, where the refresh spinner turns.
+FREEZE_ANIMATIONS = """(t) => {
+  const walk = (root) => {
+    for (const a of root.getAnimations()) { a.pause(); a.currentTime = t; }
+    for (const el of root.querySelectorAll("*")) if (el.shadowRoot) walk(el.shadowRoot);
+  };
+  walk(document);
+}"""
+
+
 def save_png(page, out, clip):
-    """Capture the clip to screenshots/<file>.png, rewriting the file only when its pixels changed beyond render noise
-    (the PNG bytes change from one run to the next although nothing visible did), so the screenshots job does not
-    commit unchanged screenshots."""
+    """Capture the clip to screenshots/<file>.png, rewriting the file only when its decoded pixels changed (compared
+    exactly: the PNG bytes may change from one encoder to another although no pixel did), so the screenshots job
+    commits every real change and nothing else."""
     with tempfile.TemporaryDirectory() as tmp:
         new = f"{tmp}/new.png"
         page.screenshot(path=new, clip=clip, animations="disabled")
@@ -349,8 +362,8 @@ def save_png(page, out, clip):
 
 def animate(context, shot, *, fps=20, seconds=2):
     """Record the refresh spinner as a looping screenshots/<file>.gif (needs ffmpeg). Every animation is paused and
-    stepped frame by frame, so the GIF is the same whatever the machine's speed; it is only rewritten when it changed
-    beyond render noise (scripts/gif_frames.py)."""
+    stepped frame by frame (shadow roots included), so the GIF is the same whatever the machine's speed; it is only
+    rewritten when its decoded pixels changed (scripts/gif_frames.py)."""
     page = mount(context, shot)
     # Hold the refresh spinner: set the loading flag and re-render, with no service call or stop timer to clear it.
     page.evaluate(
@@ -363,35 +376,14 @@ def animate(context, shot, *, fps=20, seconds=2):
     frames = round(fps * seconds)
     with tempfile.TemporaryDirectory() as frame_dir:
         for i in range(frames):
-            page.evaluate(
-                "(t) => { for (const a of document.getAnimations()) { a.pause(); a.currentTime = t; } }",
-                (i * 1000) / fps,
-            )
+            page.evaluate(FREEZE_ANIMATIONS, (i * 1000) / fps)
             page.screenshot(path=f"{frame_dir}/f{i:03d}.png", clip=clip)
         page.close()
         out = ROOT / "screenshots" / f"{shot['file']}.gif"
         new = f"{frame_dir}/new.gif"
-        # Halve the retina capture and build a per-clip palette: the colours stay clean and the file stays small.
-        subprocess.run(
-            [
-                "ffmpeg",
-                "-y",
-                "-loglevel",
-                "error",
-                "-framerate",
-                str(fps),
-                "-i",
-                f"{frame_dir}/f%03d.png",
-                "-vf",
-                f"scale={clip['width']}:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=128[p];[b][p]paletteuse=dither=bayer:bayer_scale=4",
-                "-loop",
-                "0",
-                new,
-            ],
-            check=True,
-        )
-        # Re-rendering the same animation gives slightly different anti-aliasing and palette: keep the committed GIF
-        # unless the animation really changed, so the screenshots job does not commit a new GIF on every run.
+        # Halve the retina capture with a palette built from the frames: clean colours, small file, same frames give
+        # the same GIF, so it is only rewritten (and committed) when the animation really changed.
+        encode_gif(frame_dir, fps, clip["width"], new)
         written = replace_if_changed(new, out)
     print(f"screenshots/{shot['file']}.gif{'' if written else ' (unchanged)'}")
 
