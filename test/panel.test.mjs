@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import vm from 'node:vm';
+import { checkTextContrast } from './contrast.mjs';
 
 const source = readFileSync(new URL('../custom_components/iptv/frontend/iptv-panel.js', import.meta.url), 'utf8');
 // attachShadow returns a root without elements: rendering is skipped (see _renderAccounts)
@@ -16,6 +17,7 @@ const context = {
   },
   customElements: { get: () => true, define() {} },
   structuredClone,
+  CSS: { escape: (s) => String(s) },
   console,
 };
 vm.createContext(context);
@@ -188,4 +190,198 @@ test('a form edit is kept per account (two accounts)', async () => {
   const [a, b] = panel._accounts;
   assert.equal(panel._draft(a).title, 'Renamed');
   assert.equal(panel._changed(b), false);
+});
+
+// --- Re-rendering the account forms (fake shadow DOM) ----------------------------------------------------------
+// A minimal shadow root: each innerHTML of #accounts replaces every element (like the browser does), the focused
+// element is dropped when it leaves the tree, and focus()/setSelectionRange() are recorded.
+function fakeShadow() {
+  const root = { activeElement: null, generation: 0 };
+  const make = (props) => {
+    const el = {
+      gen: root.generation,
+      listeners: {},
+      dataset: {},
+      disabled: false,
+      value: '',
+      parentElement: { classList: { toggle() {} } },
+      ...props,
+      get isConnected() {
+        return this.gen === root.generation;
+      },
+      addEventListener(type, fn) {
+        this.listeners[type] = fn;
+      },
+      focus() {
+        if (!this.disabled && this.isConnected) root.activeElement = this;
+      },
+      setSelectionRange(start, end, dir) {
+        this.selection = [start, end, dir];
+      },
+    };
+    return el;
+  };
+  const box = {
+    cards: [],
+    contains: (el) => !!el && el.gen === root.generation,
+    querySelector(sel) {
+      const id = sel.match(/data-id="([^"]+)"/)?.[1];
+      return this.cards.find((c) => c.dataset.id === id) || null;
+    },
+    set innerHTML(html) {
+      root.generation += 1;
+      if (root.activeElement && !root.activeElement.isConnected) root.activeElement = null;
+      this.html = html;
+      this.cards = [...html.matchAll(/<ha-card class="account" data-id="([^"]+)">([\s\S]*?)<\/ha-card>/g)].map(
+        ([, id, body]) => {
+          const card = make({ dataset: { id } });
+          const attr = (name) =>
+            [...body.matchAll(new RegExp(`<(\\w[\\w-]*)([^>]*?)\\s${name}(?:="([^"]*)")?([^>]*)>`, 'g'))].map((m) =>
+              make({
+                tag: m[1],
+                attrs: m[2] + m[4],
+                dataset: { [name.slice(5).replace(/-(\w)/g, (_, c) => c.toUpperCase())]: m[3] ?? '' },
+                disabled: /\sdisabled/.test(m[2] + m[4]),
+                value: (m[2] + m[4]).match(/value="([^"]*)"/)?.[1] ?? '',
+                closest: () => card,
+              }),
+            );
+          card.parts = [...attr('data-key'), ...attr('data-do'), ...attr('data-copy'), ...attr('data-reveal')];
+          card.querySelectorAll = (sel) =>
+            card.parts.filter(
+              (p) => p.tag === 'input' && (sel === 'input' || (sel === 'input[type="number"]' && /type="number"/.test(p.attrs))),
+            );
+          card.querySelector = (sel) => {
+            if (sel === 'ha-switch') return card.parts.find((p) => p.tag === 'ha-switch');
+            const m = sel.match(/^\[(data-[\w-]+)(?:="([^"]*)")?\]$/);
+            if (!m) return null;
+            const key = m[1].slice(5).replace(/-(\w)/g, (_, c) => c.toUpperCase());
+            return card.parts.find((p) => key in p.dataset && (m[2] == null || p.dataset[key] === m[2])) || null;
+          };
+          return card;
+        },
+      );
+    },
+  };
+  root.getElementById = (id) => (id === 'accounts' ? box : null);
+  return { root, box };
+}
+
+function renderedPanel(server) {
+  const { panel, calls } = panelWith(server);
+  const { root, box } = fakeShadow();
+  panel.shadowRoot = root;
+  return { panel, calls, root, box };
+}
+
+const field = (box, id, key) => box.querySelector(`ha-card[data-id="${id}"]`).querySelector(`[data-key="${key}"]`);
+
+test('typing in a form keeps the focus and the caret when another account changes state', async () => {
+  const server = { accounts: [account(), account({ entry_id: 'e2', title: 'Provider B', auto_title: 'b.example' })] };
+  const { panel, root, box } = renderedPanel(server);
+  await panel._load();
+  const input = field(box, 'e1', 'scan_interval');
+  input.focus();
+  input.value = '3';
+  input.selectionStart = 1;
+  input.selectionEnd = 1;
+  input.listeners.input();
+  // The other account is retried by Home Assistant (setup_retry): config_entries/subscribe reloads the list
+  server.accounts[1].state = 'setup_retry';
+  await panel._load();
+  const now = field(box, 'e1', 'scan_interval');
+  assert.equal(root.activeElement, now, 'the field being typed in is focused again');
+  assert.equal(now.value, '3', 'the typed value is kept');
+  assert.deepEqual(now.selection?.slice(0, 2), [1, 1], 'the caret is put back');
+});
+
+test('a number field whose selection cannot be read still gets the focus back', async () => {
+  const { panel, root, box } = renderedPanel({ accounts: [account()] });
+  await panel._load();
+  const input = field(box, 'e1', 'notify_days');
+  Object.defineProperty(input, 'selectionStart', {
+    get() {
+      throw new Error('InvalidStateError');
+    },
+  });
+  input.focus();
+  panel._renderAccounts();
+  assert.equal(root.activeElement, field(box, 'e1', 'notify_days'));
+});
+
+test('typing in account B is not interrupted by Check now on account A', async () => {
+  const server = { accounts: [account(), account({ entry_id: 'e2', title: 'Provider B', auto_title: 'b.example' })] };
+  const { panel, root, box } = renderedPanel(server);
+  await panel._load();
+  field(box, 'e2', 'title').focus();
+  await panel._check(panel._accounts[0]);
+  assert.equal(root.activeElement, field(box, 'e2', 'title'));
+});
+
+test('the focused Check now button gets the focus back once the check is over', async () => {
+  const { panel, root, box } = renderedPanel({ accounts: [account()] });
+  await panel._load();
+  box.querySelector('ha-card[data-id="e1"]').querySelector('[data-do="check"]').focus();
+  await panel._check(panel._accounts[0]);
+  const button = box.querySelector('ha-card[data-id="e1"]').querySelector('[data-do="check"]');
+  assert.equal(button.disabled, false);
+  assert.equal(root.activeElement, button);
+});
+
+test('nothing is focused by a re-render when the focus was elsewhere', async () => {
+  const { panel, root } = renderedPanel({ accounts: [account()] });
+  await panel._load();
+  await panel._load();
+  assert.equal(root.activeElement, null);
+});
+
+test('a removed account does not break the focus restore', async () => {
+  const server = { accounts: [account()] };
+  const { panel, root, box } = renderedPanel(server);
+  await panel._load();
+  field(box, 'e1', 'title').focus();
+  server.accounts = [];
+  await panel._load();
+  assert.equal(root.activeElement, null);
+});
+
+// --- Language of the bundled card ----------------------------------------------------------------------------
+
+test('the bundled card follows a change of the Home Assistant language', () => {
+  const configs = [];
+  const card = {
+    setConfig: (c) => configs.push({ ...c }),
+  };
+  context.document = { createElement: () => card };
+  const panel = new IptvPanel();
+  panel._render = () => {};
+  panel._start = () => {};
+  panel.hass = { language: 'fr' };
+  panel._mountCard();
+  panel.hass = { language: 'de' };
+  // The card picks config.language first, then hass.language (iptvLang in iptv-card.js)
+  const lang = configs.at(-1).language || card.hass.language;
+  assert.equal(lang, 'de');
+});
+
+test('a Save button disabled after saving does not grab the focus on a later render', async () => {
+  const server = { accounts: [account()] };
+  const { panel, root, box } = renderedPanel(server);
+  await panel._load();
+  const input = field(box, 'e1', 'notify_days');
+  input.value = '10';
+  input.listeners.input();
+  box.querySelector('ha-card[data-id="e1"]').querySelector('[data-do="save"]').focus();
+  server.accounts = [account({ options: { ...account().options, notify_days: 10 } })];
+  await panel._save(panel._accounts[0]);
+  assert.equal(root.activeElement, null, 'the disabled Save button cannot keep the focus');
+  await panel._load();
+  assert.equal(root.activeElement, null);
+  assert.ok(!panel._pendingFocus, "no focus is left waiting for the button");
+});
+
+test('state-coloured text of the panel reaches 4.5:1 in light and dark themes', () => {
+  checkTextContrast(IptvPanel.STYLE, '--tone-text', 0.15);
+  assert.match(IptvPanel.STYLE, /\.pill \{[^}]*[^-]color:var\(--tone-text\)/);
+  assert.match(IptvPanel.STYLE, /\.msg\.good, \.msg\.bad \{ color:var\(--tone-text\)/);
 });
