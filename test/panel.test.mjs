@@ -29,8 +29,8 @@ const placeholders = (s) => [...String(s).matchAll(/\{\w+\}/g)].map((m) => m[0])
 
 test('panel i18n parity: every language has exactly the English keys and placeholders', () => {
   const en = IptvPanelI18n.en;
-  assert.deepEqual(Object.keys(IptvPanelI18n).sort(), ['de', 'en', 'es', 'fr', 'sr', 'sr-Latn']);
-  for (const lang of ['fr', 'de', 'es', 'sr', 'sr-Latn']) {
+  assert.deepEqual(Object.keys(IptvPanelI18n).sort(), ['de', 'en', 'es', 'fr', 'it', 'nl', 'pl', 'pt', 'sr', 'sr-Latn']);
+  for (const lang of ['fr', 'de', 'es', 'it', 'nl', 'pt', 'pl', 'sr', 'sr-Latn']) {
     const strings = IptvPanelI18n[lang];
     assert.deepEqual(Object.keys(strings).sort(), Object.keys(en).sort(), `keys of ${lang}`);
     for (const key of Object.keys(en)) {
@@ -42,7 +42,7 @@ test('panel i18n parity: every language has exactly the English keys and placeho
 
 test('iptvPanelT fills placeholders and falls back to English', () => {
   assert.equal(iptvPanelT('fr', 'f_scan_hint', { min: 5, max: 1440 }), 'Rafraîchissement de l’abonnement, 5–1440 min');
-  assert.equal(iptvPanelT('it', 'save'), 'Save');
+  assert.equal(iptvPanelT('ja', 'save'), 'Save');
 });
 
 test('panel i18n Serbian: the Latin table is the Cyrillic one letter for letter, each in its own script', () => {
@@ -61,8 +61,25 @@ test('the panel keeps a full code that has a table (sr-Latn), else its base, els
   assert.equal(panel._t('save'), 'Сачувај');
   lang('sr-Latn');
   assert.equal(panel._t('save'), 'Sačuvaj');
-  lang('pt-BR');
+  lang('ja');
   assert.equal(panel._t('save'), 'Save');
+});
+
+test('the panel resolves Italian, Dutch, Portuguese and Polish codes', () => {
+  const panel = Object.create(IptvPanel.prototype);
+  const lang = (language) => {
+    panel._hass = { language };
+    return panel._lang();
+  };
+  assert.equal(lang('it-IT'), 'it');
+  assert.equal(lang('nl-BE'), 'nl');
+  assert.equal(lang('pt'), 'pt');
+  // Brazilian Portuguese falls back to the European Portuguese table on purpose
+  assert.equal(lang('pt-BR'), 'pt');
+  assert.equal(panel._t('settings'), 'Definições');
+  assert.equal(lang('pl-PL'), 'pl');
+  assert.equal(lang('sr-Latn'), 'sr-Latn');
+  assert.equal(lang('ja'), 'en');
 });
 
 test('panel limits match the options flow (const.py)', () => {

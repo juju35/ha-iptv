@@ -17,15 +17,15 @@ const context = {
   setTimeout: () => 0,
 };
 vm.createContext(context);
-vm.runInContext(`${source}\nthis.iptv = { IptvCard, IptvMiniCard, IptvCardI18n, iptvErr, iptvLang, iptvT, iptvFocusOf, iptvRefocus };`, context);
-const { IptvCard, IptvMiniCard, IptvCardI18n, iptvErr, iptvLang, iptvT, iptvFocusOf, iptvRefocus } = context.iptv;
+vm.runInContext(`${source}\nthis.iptv = { IptvCard, IptvMiniCard, IptvCardI18n, iptvErr, iptvLang, iptvLocale, iptvT, iptvFocusOf, iptvRefocus };`, context);
+const { IptvCard, IptvMiniCard, IptvCardI18n, iptvErr, iptvLang, iptvLocale, iptvT, iptvFocusOf, iptvRefocus } = context.iptv;
 
 const placeholders = (s) => [...String(s).matchAll(/\{\w+\}/g)].map((m) => m[0]).sort();
 
 test('I18N parity: every language has exactly the English keys and placeholders', () => {
   const en = IptvCardI18n.en;
-  assert.deepEqual(Object.keys(IptvCardI18n).sort(), ['de', 'en', 'es', 'fr', 'sr', 'sr-Latn']);
-  for (const lang of ['fr', 'de', 'es', 'sr', 'sr-Latn']) {
+  assert.deepEqual(Object.keys(IptvCardI18n).sort(), ['de', 'en', 'es', 'fr', 'it', 'nl', 'pl', 'pt', 'sr', 'sr-Latn']);
+  for (const lang of ['fr', 'de', 'es', 'it', 'nl', 'pt', 'pl', 'sr', 'sr-Latn']) {
     const strings = IptvCardI18n[lang];
     assert.deepEqual(Object.keys(strings).sort(), Object.keys(en).sort(), `keys of ${lang}`);
     for (const key of Object.keys(en)) {
@@ -45,9 +45,35 @@ test('iptvLang keeps a full code that has a table (sr-Latn), else its base, else
   assert.equal(iptvLang({}, { language: 'fr-FR' }), 'fr');
   assert.equal(iptvLang({}, { language: 'sr-Latn' }), 'sr-Latn');
   assert.equal(iptvLang({}, { language: 'sr' }), 'sr');
-  assert.equal(iptvLang({}, { language: 'pt-BR' }), 'en');
+  assert.equal(iptvLang({}, { language: 'ja' }), 'en');
   assert.equal(iptvLang({ language: 'sr-Latn' }, { language: 'fr' }), 'sr-Latn');
   assert.equal(iptvT('sr-Latn', 'edit_password'), 'Lozinka');
+});
+
+test('iptvLang resolves Italian, Dutch, Portuguese and Polish codes', () => {
+  assert.equal(iptvLang({}, { language: 'it-IT' }), 'it');
+  assert.equal(iptvLang({}, { language: 'nl-BE' }), 'nl');
+  assert.equal(iptvLang({}, { language: 'pt' }), 'pt');
+  // Brazilian Portuguese falls back to the European Portuguese table on purpose
+  assert.equal(iptvLang({}, { language: 'pt-BR' }), 'pt');
+  assert.equal(iptvLang({}, { language: 'pl-PL' }), 'pl');
+  assert.equal(iptvLang({}, { language: 'sr-Latn' }), 'sr-Latn');
+  assert.equal(iptvLang({}, { language: 'ja' }), 'en');
+  assert.equal(iptvT('pt', 'edit_password'), 'Palavra-passe');
+});
+
+test('iptvLocale formats pt as European Portuguese and keeps the language option first', () => {
+  const loc = (config, hass) => iptvLocale(iptvLang(config, hass), hass);
+  assert.equal(loc({}, { language: 'pt', locale: { language: 'pt' } }), 'pt-PT');
+  assert.equal(loc({}, { language: 'pt' }), 'pt-PT');
+  assert.equal(loc({}, { language: 'pt-BR', locale: { language: 'pt-BR' } }), 'pt-BR');
+  assert.equal(loc({}, { language: 'fr', locale: { language: 'fr-CA' } }), 'fr-CA');
+  assert.equal(loc({ language: 'de' }, { language: 'fr', locale: { language: 'fr' } }), 'de');
+  assert.equal(loc({ language: 'pt' }, { language: 'en', locale: { language: 'en' } }), 'pt-PT');
+  assert.equal(loc({ language: 'sr-Latn' }, { language: 'sr', locale: { language: 'sr' } }), 'sr-Latn');
+  assert.equal(loc({}, { language: 'sr-Latn', locale: { language: 'sr-Latn' } }), 'sr-Latn');
+  // pt alone gives the Brazilian formats (12.345); pt-PT groups thousands with a space
+  assert.notEqual(new Intl.NumberFormat(loc({}, { language: 'pt' })).format(12345), '12.345');
 });
 
 test('I18N Serbian: the Latin card is the Cyrillic one letter for letter, each in its own script', () => {
@@ -62,14 +88,19 @@ test('dates in sr-Latn are written in Latin script, in sr in Cyrillic', () => {
   assert.match(date.toLocaleDateString('sr', options), /новембар/);
 });
 
-test('the editor offers Serbian in Cyrillic and Latin script', () => {
+test('the editor offers every language of the card, Serbian in Cyrillic and Latin script', () => {
   context.document.querySelector = () => null;
   const language = IptvCard.getConfigForm().schema.find((s) => s.name === 'language');
   const options = Array.from(language.selector.select.options, (o) => [o.value, o.label]);
-  assert.deepEqual(options.slice(-2), [
+  assert.deepEqual(options.slice(-6), [
+    ['it', 'Italiano'],
+    ['nl', 'Nederlands'],
+    ['pt', 'Português (Portugal)'],
+    ['pl', 'Polski'],
     ['sr', 'Српски'],
     ['sr-Latn', 'Srpski (latinica)'],
   ]);
+  assert.deepEqual(options.map((o) => o[0]).filter(Boolean).sort(), Object.keys(IptvCardI18n).sort());
 });
 
 test('iptvT falls back to English for an unsupported language', () => {
