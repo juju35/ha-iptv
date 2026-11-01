@@ -35,7 +35,7 @@ def _load(lang: str) -> dict[str, str]:
     return _strings(json.loads((TRANSLATIONS / f"{lang}.json").read_text(encoding="utf-8")))
 
 
-@pytest.mark.parametrize("lang", ["fr", "de", "es", "sr", "sr-Latn"])
+@pytest.mark.parametrize("lang", ["fr", "de", "es", "it", "nl", "pt", "pl", "sr", "sr-Latn"])
 def test_translation_keys_match_english(lang: str) -> None:
     """The translation exists and has the same keys and placeholders as en.json."""
     english = _keys(json.loads((TRANSLATIONS / "en.json").read_text(encoding="utf-8")))
@@ -83,7 +83,19 @@ def test_serbian_notification_texts_match() -> None:
 
 @pytest.mark.parametrize(
     ("language", "expected"),
-    [("fr-FR", "fr"), ("sr-Latn", "sr-Latn"), ("sr", "sr"), ("pt-BR", "en"), ("de-CH", "de"), (None, "en")],
+    [
+        ("fr-FR", "fr"),
+        ("sr-Latn", "sr-Latn"),
+        ("sr", "sr"),
+        ("de-CH", "de"),
+        ("it-IT", "it"),
+        ("nl-BE", "nl"),
+        ("pt", "pt"),
+        ("pt-BR", "pt"),  # Brazilian Portuguese falls back to European Portuguese on purpose
+        ("pl-PL", "pl"),
+        ("ja", "en"),
+        (None, "en"),
+    ],
 )
 def test_notification_language(language: str | None, expected: str) -> None:
     """The full code when it has texts (sr-Latn), else its base, else English."""
@@ -105,3 +117,16 @@ def test_notification_texts_cover_every_language() -> None:
     for texts in (TEXTS, MESSAGES):
         for lang, strings in texts.items():
             assert _keys(strings) == _keys(texts["en"]), lang
+
+
+def test_notification_texts_have_english_placeholders() -> None:
+    """Every notification text is filled in and keeps the English placeholders."""
+    from custom_components.iptv.notify_add import TEXTS
+    from custom_components.iptv.notify_expiry import MESSAGES
+
+    for texts in (TEXTS, MESSAGES):
+        english = _strings(texts["en"])
+        for lang, strings in texts.items():
+            for key, text in _strings(strings).items():
+                assert text, f"{lang}: {key}"
+                assert sorted(PLACEHOLDER.findall(text)) == sorted(PLACEHOLDER.findall(english[key])), f"{lang}: {key}"

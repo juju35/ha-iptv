@@ -33,6 +33,26 @@ MESSAGES = {
         "soon": "La suscripción **{name}** caduca el {date}: quedan {days} día(s).",
         "expired": "La suscripción **{name}** caducó el {date}.",
     },
+    "it": {
+        "title": "Abbonamento IPTV {name}",
+        "soon": "L’abbonamento **{name}** scade il {date} (giorni rimanenti: {days}).",
+        "expired": "L’abbonamento **{name}** è scaduto il {date}.",
+    },
+    "nl": {
+        "title": "IPTV-abonnement {name}",
+        "soon": "Het abonnement **{name}** verloopt op {date}: nog {days} dag(en).",
+        "expired": "Het abonnement **{name}** is verlopen op {date}.",
+    },
+    "pt": {
+        "title": "Subscrição IPTV {name}",
+        "soon": "A subscrição **{name}** expira a {date}: faltam {days} dia(s).",
+        "expired": "A subscrição **{name}** expirou a {date}.",
+    },
+    "pl": {
+        "title": "Subskrypcja IPTV {name}",
+        "soon": "Subskrypcja **{name}** wygasa {date} (pozostało dni: {days}).",
+        "expired": "Subskrypcja **{name}** wygasła {date}.",
+    },
     "sr": {
         "title": "IPTV претплата {name}",
         "soon": "Претплата **{name}** истиче {date} (преостало дана: {days}).",
@@ -50,6 +70,10 @@ DATE_FORMATS = {
     "fr": "%d/%m/%Y",
     "de": "%d.%m.%Y",
     "es": "%d/%m/%Y",
+    "it": "%d/%m/%Y",
+    "nl": "%d-%m-%Y",
+    "pt": "%d/%m/%Y",
+    "pl": "%d.%m.%Y",
     "sr": "%d.%m.%Y.",
     "sr-Latn": "%d.%m.%Y.",
 }

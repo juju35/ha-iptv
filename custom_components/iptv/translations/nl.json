@@ -1,0 +1,247 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "IPTV-abonnement",
+        "description": "Kies het type provider.",
+        "menu_options": {
+          "xtream": "Xtream Codes (gebruikersnaam / wachtwoord)",
+          "stalker": "Stalker / Ministra (MAC-adres)"
+        }
+      },
+      "xtream": {
+        "title": "Xtream Codes",
+        "description": "Home Assistant bevraagt de Xtream Codes-API van je provider.",
+        "data": {
+          "url": "URL van de Xtream-server",
+          "username": "Gebruikersnaam",
+          "password": "Wachtwoord",
+          "notify_service": "Verbindingsgegevens sturen naar"
+        },
+        "data_description": {
+          "url": "Inclusief de poort, bijv. http://server:8080",
+          "notify_service": "Optioneel: notificatiedienst (bijv. notify.mobile_app_phone) die de server, de gebruikersnaam (of het MAC-adres) en de vervaldatum ontvangt, nooit het wachtwoord zodra het account is toegevoegd"
+        }
+      },
+      "stalker": {
+        "title": "IPTV Stalker (MAC-adres)",
+        "description": "Home Assistant bevraagt het Stalker/Ministra-portaal van je provider met een MAC-adres.",
+        "data": {
+          "url": "URL van het portaal",
+          "mac": "MAC-adres",
+          "notify_service": "Verbindingsgegevens sturen naar"
+        },
+        "data_description": {
+          "url": "Inclusief de poort, bijv. http://portal:80",
+          "mac": "Formaat AA:BB:CC:DD:EE:FF",
+          "notify_service": "Optioneel: notificatiedienst (bijv. notify.mobile_app_phone) die de server, de gebruikersnaam (of het MAC-adres) en de vervaldatum ontvangt, nooit het wachtwoord zodra het account is toegevoegd"
+        }
+      },
+      "reconfigure": {
+        "title": "IPTV-abonnement",
+        "data": {
+          "url": "URL van de server of het portaal",
+          "username": "Gebruikersnaam",
+          "password": "Wachtwoord",
+          "mac": "MAC-adres"
+        },
+        "data_description": {
+          "url": "Inclusief de poort, bijv. http://server:8080",
+          "mac": "Formaat AA:BB:CC:DD:EE:FF",
+          "password": "Leeg laten om het huidige wachtwoord te behouden"
+        }
+      },
+      "reauth_confirm": {
+        "title": "IPTV-abonnement",
+        "data": {
+          "url": "URL van de server of het portaal",
+          "username": "Gebruikersnaam",
+          "password": "Wachtwoord",
+          "mac": "MAC-adres"
+        },
+        "data_description": {
+          "url": "Inclusief de poort, bijv. http://server:8080",
+          "mac": "Formaat AA:BB:CC:DD:EE:FF",
+          "password": "Leeg laten om het huidige wachtwoord te behouden"
+        },
+        "description": "De server heeft de inloggegevens van {name} geweigerd. Voer de nieuwe in."
+      }
+    },
+    "error": {
+      "cannot_connect": "Kan de IPTV-server niet bereiken",
+      "invalid_auth": "Inloggegevens geweigerd door de server",
+      "invalid_mac": "Ongeldig MAC-adres (formaat AA:BB:CC:DD:EE:FF)",
+      "no_french_lists": "Geen Franse lijst gevonden bij deze provider (categorieën live, VOD of series): het account wordt niet toegevoegd.",
+      "french_unknown": "Kon de categorieën van deze provider niet lezen om naar Franse lijsten te zoeken.",
+      "stream_ko": "De videostream van het testkanaal speelt niet af: het account wordt niet toegevoegd.",
+      "empty_catalogue": "De provider heeft geen bruikbare catalogus met zenders / films / series: het account wordt niet toegevoegd."
+    },
+    "abort": {
+      "already_configured": "Dit account is al geconfigureerd",
+      "reconfigure_successful": "Herconfiguratie geslaagd",
+      "reauth_successful": "Herauthenticatie geslaagd",
+      "migrated": "Accounts van de vroegere integratie IPTV Xtream verplaatst naar IPTV, met dezelfde entiteiten: {count}. Verwijder de oude map custom_components/iptv_xtream als die er nog is en herstart Home Assistant.",
+      "account_updated": "{title} staat op dezelfde server: het nieuwe account is langer geldig ({new} in plaats van {current}), dus {title} gebruikt nu de nieuwe inloggegevens.",
+      "existing_longer": "{title} staat op dezelfde server en is even lang of langer geldig ({current}, nieuw account: {new}): er is niets gewijzigd."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Vernieuwingsinterval",
+          "notify_days": "Melding vóór vervaldatum",
+          "health_interval": "Interval servercontrole",
+          "stream_check": "Videostream van een zender testen"
+        },
+        "data_description": {
+          "notify_days": "Blijvende melding zoveel dagen voordat het abonnement verloopt (0 om uit te schakelen)",
+          "health_interval": "Hoe vaak de server wordt gecontroleerd met een lichte aanvraag (alleen accountinformatie)",
+          "stream_check": "Opent bij elke servercontrole kort een zender om te controleren of die afspeelt (bezet één verbinding). Bij een fout toont de status Stream werkt niet."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "status": {
+        "name": "Status",
+        "state": {
+          "active": "Actief",
+          "expired": "Verlopen",
+          "banned": "Geblokkeerd",
+          "disabled": "Uitgeschakeld",
+          "invalid_auth": "Ongeldige inloggegevens"
+        }
+      },
+      "expiration": {
+        "name": "Vervaldatum"
+      },
+      "days_left": {
+        "name": "Resterende dagen"
+      },
+      "created": {
+        "name": "Aangemaakt"
+      },
+      "active_connections": {
+        "name": "Actieve verbindingen"
+      },
+      "max_connections": {
+        "name": "Max. verbindingen"
+      },
+      "channels": {
+        "name": "Livezenders"
+      },
+      "movies": {
+        "name": "Films"
+      },
+      "series": {
+        "name": "Series"
+      },
+      "health": {
+        "name": "Serverstatus",
+        "state": {
+          "ok": "OK",
+          "degraded": "Traag",
+          "auth_failed": "Inloggegevens geweigerd",
+          "unreachable": "Onbereikbaar",
+          "stream_ko": "Stream werkt niet"
+        }
+      },
+      "response_time": {
+        "name": "Reactietijd"
+      },
+      "last_check": {
+        "name": "Laatste controle"
+      },
+      "added": {
+        "name": "Toegevoegd"
+      },
+      "updated": {
+        "name": "Bijgewerkt"
+      }
+    },
+    "binary_sensor": {
+      "trial": {
+        "name": "Proefperiode"
+      },
+      "french_lists": {
+        "name": "Franse lijsten"
+      }
+    }
+  },
+  "services": {
+    "edit_account": {
+      "name": "Account bewerken",
+      "description": "Wijzigt de inloggegevens of het MAC-adres van een account na dezelfde controles als bij het toevoegen. De gegevens van serviceaanroepen worden door de recorder opgeslagen (gebeurtenis call_service), inclusief het wachtwoord: gebruik bij voorkeur de kaart.",
+      "fields": {
+        "device_id": {
+          "name": "Account",
+          "description": "Het IPTV-account dat bewerkt moet worden."
+        },
+        "url": {
+          "name": "Server-URL",
+          "description": "Nieuwe server-URL; weglaten om de huidige te behouden."
+        },
+        "username": {
+          "name": "Gebruikersnaam",
+          "description": "Nieuwe gebruikersnaam (Xtream Codes)."
+        },
+        "password": {
+          "name": "Wachtwoord",
+          "description": "Nieuw wachtwoord (Xtream Codes); weglaten om het huidige te behouden."
+        },
+        "mac": {
+          "name": "MAC-adres",
+          "description": "Nieuw MAC-adres (Stalker-portaal)."
+        }
+      }
+    },
+    "remove_account": {
+      "name": "Account verwijderen",
+      "description": "Verwijdert een IPTV-account en de bijbehorende entiteiten.",
+      "fields": {
+        "device_id": {
+          "name": "Account",
+          "description": "Het IPTV-account dat verwijderd moet worden."
+        }
+      }
+    },
+    "add_account": {
+      "name": "Account toevoegen",
+      "description": "Voegt een nieuw IPTV-account toe met dezelfde controles als de interface. De gegevens van serviceaanroepen worden door de recorder opgeslagen (gebeurtenis call_service), inclusief het wachtwoord: gebruik bij voorkeur de kaart.",
+      "fields": {
+        "provider": {
+          "name": "Type provider",
+          "description": "xtream of stalker"
+        },
+        "url": {
+          "name": "Server-URL",
+          "description": "Inclusief de poort, bijv. http://server:8080."
+        },
+        "username": {
+          "name": "Gebruikersnaam",
+          "description": "Alleen Xtream Codes."
+        },
+        "password": {
+          "name": "Wachtwoord",
+          "description": "Alleen Xtream Codes."
+        },
+        "mac": {
+          "name": "MAC-adres",
+          "description": "Alleen Stalker-portaal, formaat AA:BB:CC:DD:EE:FF."
+        }
+      }
+    },
+    "get_credentials": {
+      "name": "Inloggegevens ophalen",
+      "description": "Geeft de server-URL en de inloggegevens van een account terug om ze te bekijken.",
+      "fields": {
+        "device_id": {
+          "name": "Account",
+          "description": ""
+        }
+      }
+    }
+  }
+}

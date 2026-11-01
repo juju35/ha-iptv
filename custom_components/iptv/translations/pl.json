@@ -1,0 +1,247 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Subskrypcja IPTV",
+        "description": "Wybierz typ dostawcy.",
+        "menu_options": {
+          "xtream": "Xtream Codes (nazwa użytkownika / hasło)",
+          "stalker": "Stalker / Ministra (adres MAC)"
+        }
+      },
+      "xtream": {
+        "title": "Xtream Codes",
+        "description": "Home Assistant odpytuje API Xtream Codes Twojego dostawcy.",
+        "data": {
+          "url": "URL serwera Xtream",
+          "username": "Nazwa użytkownika",
+          "password": "Hasło",
+          "notify_service": "Wyślij dane połączenia do"
+        },
+        "data_description": {
+          "url": "Razem z portem, np. http://server:8080",
+          "notify_service": "Opcjonalnie: usługa powiadomień (np. notify.mobile_app_phone), która otrzymuje serwer, nazwę użytkownika (lub adres MAC) i datę wygaśnięcia, nigdy hasła po dodaniu konta"
+        }
+      },
+      "stalker": {
+        "title": "IPTV Stalker (adres MAC)",
+        "description": "Home Assistant odpytuje portal Stalker/Ministra Twojego dostawcy za pomocą adresu MAC.",
+        "data": {
+          "url": "URL portalu",
+          "mac": "Adres MAC",
+          "notify_service": "Wyślij dane połączenia do"
+        },
+        "data_description": {
+          "url": "Razem z portem, np. http://portal:80",
+          "mac": "Format AA:BB:CC:DD:EE:FF",
+          "notify_service": "Opcjonalnie: usługa powiadomień (np. notify.mobile_app_phone), która otrzymuje serwer, nazwę użytkownika (lub adres MAC) i datę wygaśnięcia, nigdy hasła po dodaniu konta"
+        }
+      },
+      "reconfigure": {
+        "title": "Subskrypcja IPTV",
+        "data": {
+          "url": "URL serwera lub portalu",
+          "username": "Nazwa użytkownika",
+          "password": "Hasło",
+          "mac": "Adres MAC"
+        },
+        "data_description": {
+          "url": "Razem z portem, np. http://server:8080",
+          "mac": "Format AA:BB:CC:DD:EE:FF",
+          "password": "Pozostaw puste, aby zachować obecne hasło"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Subskrypcja IPTV",
+        "data": {
+          "url": "URL serwera lub portalu",
+          "username": "Nazwa użytkownika",
+          "password": "Hasło",
+          "mac": "Adres MAC"
+        },
+        "data_description": {
+          "url": "Razem z portem, np. http://server:8080",
+          "mac": "Format AA:BB:CC:DD:EE:FF",
+          "password": "Pozostaw puste, aby zachować obecne hasło"
+        },
+        "description": "Serwer odrzucił dane logowania {name}. Wprowadź nowe."
+      }
+    },
+    "error": {
+      "cannot_connect": "Nie można połączyć się z serwerem IPTV",
+      "invalid_auth": "Serwer odrzucił dane logowania",
+      "invalid_mac": "Nieprawidłowy adres MAC (format AA:BB:CC:DD:EE:FF)",
+      "no_french_lists": "Nie znaleziono francuskiej listy u tego dostawcy (kategorie na żywo, VOD lub seriale): konto nie zostanie dodane.",
+      "french_unknown": "Nie udało się odczytać kategorii tego dostawcy, aby sprawdzić francuskie listy.",
+      "stream_ko": "Strumień wideo kanału testowego nie odtwarza się: konto nie zostanie dodane.",
+      "empty_catalogue": "Dostawca nie ma użytecznego katalogu kanałów / filmów / seriali: konto nie zostanie dodane."
+    },
+    "abort": {
+      "already_configured": "To konto jest już skonfigurowane",
+      "reconfigure_successful": "Ponowna konfiguracja zakończona pomyślnie",
+      "reauth_successful": "Ponowne uwierzytelnienie zakończone pomyślnie",
+      "migrated": "Konta dawnej integracji IPTV Xtream przeniesione do IPTV, z tymi samymi encjami: {count}. Usuń stary folder custom_components/iptv_xtream, jeśli nadal istnieje, i uruchom ponownie Home Assistant.",
+      "account_updated": "{title} jest na tym samym serwerze: nowe konto jest ważne dłużej ({new} zamiast {current}), więc {title} używa teraz nowych danych logowania.",
+      "existing_longer": "{title} jest na tym samym serwerze i jest ważne tak samo długo lub dłużej ({current}, nowe konto: {new}): nic nie zmieniono."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Interwał odświeżania",
+          "notify_days": "Powiadom przed wygaśnięciem",
+          "health_interval": "Interwał sprawdzania serwera",
+          "stream_check": "Testuj strumień wideo kanału"
+        },
+        "data_description": {
+          "notify_days": "Trwałe powiadomienie na tyle dni przed wygaśnięciem subskrypcji (0, aby wyłączyć)",
+          "health_interval": "Jak często serwer jest sprawdzany lekkim zapytaniem (tylko informacje o koncie)",
+          "stream_check": "Przy każdym sprawdzaniu serwera na chwilę otwiera kanał, aby potwierdzić, że się odtwarza (zajmuje jedno połączenie). W razie błędu stan pokazuje Strumień nie działa."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "status": {
+        "name": "Stan",
+        "state": {
+          "active": "Aktywna",
+          "expired": "Wygasła",
+          "banned": "Zablokowana",
+          "disabled": "Wyłączona",
+          "invalid_auth": "Nieprawidłowe dane logowania"
+        }
+      },
+      "expiration": {
+        "name": "Wygaśnięcie"
+      },
+      "days_left": {
+        "name": "Pozostałe dni"
+      },
+      "created": {
+        "name": "Utworzono"
+      },
+      "active_connections": {
+        "name": "Aktywne połączenia"
+      },
+      "max_connections": {
+        "name": "Maks. połączeń"
+      },
+      "channels": {
+        "name": "Kanały na żywo"
+      },
+      "movies": {
+        "name": "Filmy"
+      },
+      "series": {
+        "name": "Seriale"
+      },
+      "health": {
+        "name": "Stan serwera",
+        "state": {
+          "ok": "OK",
+          "degraded": "Wolno",
+          "auth_failed": "Dane logowania odrzucone",
+          "unreachable": "Nieosiągalny",
+          "stream_ko": "Strumień nie działa"
+        }
+      },
+      "response_time": {
+        "name": "Czas odpowiedzi"
+      },
+      "last_check": {
+        "name": "Ostatnie sprawdzenie"
+      },
+      "added": {
+        "name": "Dodano"
+      },
+      "updated": {
+        "name": "Zaktualizowano"
+      }
+    },
+    "binary_sensor": {
+      "trial": {
+        "name": "Okres próbny"
+      },
+      "french_lists": {
+        "name": "Listy francuskie"
+      }
+    }
+  },
+  "services": {
+    "edit_account": {
+      "name": "Edytuj konto",
+      "description": "Zmienia dane logowania lub adres MAC konta po tych samych sprawdzeniach co przy dodawaniu. Dane wywołań usług są zapisywane przez recorder (zdarzenie call_service), łącznie z hasłem: lepiej używać karty.",
+      "fields": {
+        "device_id": {
+          "name": "Konto",
+          "description": "Konto IPTV do edycji."
+        },
+        "url": {
+          "name": "URL serwera",
+          "description": "Nowy URL serwera; pomiń, aby zachować obecny."
+        },
+        "username": {
+          "name": "Nazwa użytkownika",
+          "description": "Nowa nazwa użytkownika (Xtream Codes)."
+        },
+        "password": {
+          "name": "Hasło",
+          "description": "Nowe hasło (Xtream Codes); pomiń, aby zachować obecne."
+        },
+        "mac": {
+          "name": "Adres MAC",
+          "description": "Nowy adres MAC (portal Stalker)."
+        }
+      }
+    },
+    "remove_account": {
+      "name": "Usuń konto",
+      "description": "Usuwa konto IPTV i jego encje.",
+      "fields": {
+        "device_id": {
+          "name": "Konto",
+          "description": "Konto IPTV do usunięcia."
+        }
+      }
+    },
+    "add_account": {
+      "name": "Dodaj konto",
+      "description": "Dodaje nowe konto IPTV z tymi samymi sprawdzeniami co interfejs. Dane wywołań usług są zapisywane przez recorder (zdarzenie call_service), łącznie z hasłem: lepiej używać karty.",
+      "fields": {
+        "provider": {
+          "name": "Typ dostawcy",
+          "description": "xtream lub stalker"
+        },
+        "url": {
+          "name": "URL serwera",
+          "description": "Razem z portem, np. http://server:8080."
+        },
+        "username": {
+          "name": "Nazwa użytkownika",
+          "description": "Tylko Xtream Codes."
+        },
+        "password": {
+          "name": "Hasło",
+          "description": "Tylko Xtream Codes."
+        },
+        "mac": {
+          "name": "Adres MAC",
+          "description": "Tylko portal Stalker, format AA:BB:CC:DD:EE:FF."
+        }
+      }
+    },
+    "get_credentials": {
+      "name": "Pobierz dane logowania",
+      "description": "Zwraca URL serwera i dane logowania konta do wyświetlenia.",
+      "fields": {
+        "device_id": {
+          "name": "Konto",
+          "description": ""
+        }
+      }
+    }
+  }
+}
