@@ -847,6 +847,16 @@ function iptvLang(config, hass) {
   return iptvSupported(config?.language || hass?.language || document.documentElement.lang) || 'en';
 }
 
+// Locale for Intl / toLocale*: the full Home Assistant locale when its language is the card's (fr-CA, de-CH),
+// else the card language (the language option wins); a bare pt is European Portuguese (pt-PT), not Brazilian
+function iptvLocale(lang, hass) {
+  var full = hass?.locale?.language || hass?.language || '';
+  var latn = (c) => /-Latn/i.test(c);
+  var same = full && full.split('-')[0] === lang.split('-')[0] && (lang.split('-')[0] !== 'sr' || latn(full) === latn(lang));
+  var locale = same ? full : lang;
+  return locale === 'pt' ? 'pt-PT' : locale;
+}
+
 function iptvT(lang, key, vars) {
   var strings = IptvCardI18n[lang] || IptvCardI18n.en;
   var s = strings[key] || IptvCardI18n.en[key] || key;
@@ -1210,7 +1220,7 @@ class IptvCard extends HTMLElement {
   _render() {
     if (!this.shadowRoot || !this._config) return;
     var lang = iptvLang(this._config, this._hass);
-    var locale = (this._hass?.locale?.language) || lang;
+    var locale = iptvLocale(lang, this._hass);
     var fmtDate = (ms) =>
       new Date(ms).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' });
     var nf = new Intl.NumberFormat(locale);

@@ -17,8 +17,8 @@ const context = {
   setTimeout: () => 0,
 };
 vm.createContext(context);
-vm.runInContext(`${source}\nthis.iptv = { IptvCard, IptvMiniCard, IptvCardI18n, iptvErr, iptvLang, iptvT, iptvFocusOf, iptvRefocus };`, context);
-const { IptvCard, IptvMiniCard, IptvCardI18n, iptvErr, iptvLang, iptvT, iptvFocusOf, iptvRefocus } = context.iptv;
+vm.runInContext(`${source}\nthis.iptv = { IptvCard, IptvMiniCard, IptvCardI18n, iptvErr, iptvLang, iptvLocale, iptvT, iptvFocusOf, iptvRefocus };`, context);
+const { IptvCard, IptvMiniCard, IptvCardI18n, iptvErr, iptvLang, iptvLocale, iptvT, iptvFocusOf, iptvRefocus } = context.iptv;
 
 const placeholders = (s) => [...String(s).matchAll(/\{\w+\}/g)].map((m) => m[0]).sort();
 
@@ -60,6 +60,20 @@ test('iptvLang resolves Italian, Dutch, Portuguese and Polish codes', () => {
   assert.equal(iptvLang({}, { language: 'sr-Latn' }), 'sr-Latn');
   assert.equal(iptvLang({}, { language: 'ja' }), 'en');
   assert.equal(iptvT('pt', 'edit_password'), 'Palavra-passe');
+});
+
+test('iptvLocale formats pt as European Portuguese and keeps the language option first', () => {
+  const loc = (config, hass) => iptvLocale(iptvLang(config, hass), hass);
+  assert.equal(loc({}, { language: 'pt', locale: { language: 'pt' } }), 'pt-PT');
+  assert.equal(loc({}, { language: 'pt' }), 'pt-PT');
+  assert.equal(loc({}, { language: 'pt-BR', locale: { language: 'pt-BR' } }), 'pt-BR');
+  assert.equal(loc({}, { language: 'fr', locale: { language: 'fr-CA' } }), 'fr-CA');
+  assert.equal(loc({ language: 'de' }, { language: 'fr', locale: { language: 'fr' } }), 'de');
+  assert.equal(loc({ language: 'pt' }, { language: 'en', locale: { language: 'en' } }), 'pt-PT');
+  assert.equal(loc({ language: 'sr-Latn' }, { language: 'sr', locale: { language: 'sr' } }), 'sr-Latn');
+  assert.equal(loc({}, { language: 'sr-Latn', locale: { language: 'sr-Latn' } }), 'sr-Latn');
+  // pt alone gives the Brazilian formats (12.345); pt-PT groups thousands with a space
+  assert.notEqual(new Intl.NumberFormat(loc({}, { language: 'pt' })).format(12345), '12.345');
 });
 
 test('I18N Serbian: the Latin card is the Cyrillic one letter for letter, each in its own script', () => {
