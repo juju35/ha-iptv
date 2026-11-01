@@ -363,6 +363,31 @@ function iptvErr(lang, code) {
   return iptvT(lang, IptvCardI18n.en[key] ? key : 'err_generic');
 }
 
+// Controls of a card that can hold the focus, in document order
+var IPTV_FOCUSABLE = 'button, [data-entity][tabindex]';
+
+// What identifies a control across re-renders: its tag, classes (but the transient spin), entity and subscription
+function iptvFocusSig(el) {
+  var cls = String(el.className || '').split(/\s+/).filter((c) => c && c !== 'spin').join('.');
+  var sub = el.dataset?.sub ?? el.closest?.('[data-sub]')?.dataset.sub ?? '';
+  return [el.tagName, cls, el.dataset?.entity ?? '', sub].join('|');
+}
+
+// The focused control of a card rendered with innerHTML, so the next render can give the focus back
+function iptvFocusOf(shadow, root) {
+  var el = shadow?.activeElement;
+  if (!el || !root?.contains(el)) return null;
+  var list = [...root.querySelectorAll(IPTV_FOCUSABLE)];
+  var index = list.indexOf(el);
+  return index < 0 ? null : { index, sig: iptvFocusSig(el) };
+}
+
+function iptvRefocus(root, focus) {
+  if (!focus || !root) return;
+  var el = [...root.querySelectorAll(IPTV_FOCUSABLE)][focus.index];
+  if (el && iptvFocusSig(el) === focus.sig) el.focus({ preventScroll: true });
+}
+
 // Worst state of the subscriptions shown (error, then warning, then ok), idle when there are none
 function iptvWorstState(states) {
   return ['error', 'warning', 'ok'].find((s) => states.includes(s)) || 'idle';
@@ -385,9 +410,12 @@ function iptvEsc(x) {
 // ── iptv-card ─────────────────────────────────────────────────────────────────
 class IptvCard extends HTMLElement {
   static CSS = `
-    :host { display: block; position: relative; --iptv-ok: var(--success-color, #43a047); --iptv-warn: var(--warning-color, #ffa600); --iptv-crit: var(--error-color, #db4437); }
+    :host { display: block; position: relative; --iptv-ok: var(--success-color, #43a047); --iptv-warn: var(--warning-color, #ffa600); --iptv-crit: var(--error-color, #db4437);
+            /* Text in a state colour: half-way to the text colour, so it stays readable (4.5:1) in light and dark themes */
+            --iptv-crit-text: color-mix(in srgb, var(--iptv-crit) 50%, var(--primary-text-color)); }
     ha-card { padding: 12px; display: flex; flex-direction: column; gap: 6px; }
     .ok { --c: var(--iptv-ok); } .warning { --c: var(--iptv-warn); } .error { --c: var(--iptv-crit); } .idle { --c: var(--secondary-text-color); }
+    .ok, .warning, .error, .idle { --ct: color-mix(in srgb, var(--c) 50%, var(--primary-text-color)); }
     /* 8 px to the body (the card gap is 6 px); the status pill ends the title line, before the buttons */
     .header { display: flex; align-items: center; gap: 10px; margin-bottom: 2px; }
     .header > button:last-child:not(.zoom) { margin-right: -4px; }
@@ -401,7 +429,8 @@ class IptvCard extends HTMLElement {
     .name { font-size: 16px; font-weight: 500; line-height: 1.25; color: var(--primary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
     .chip { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px 1px 5px; border-radius: 12px; font-size: 11px; font-weight: 500;
-            color: var(--c); background: color-mix(in srgb, var(--c) 15%, transparent); --mdc-icon-size: 14px; }
+            color: var(--ct); background: color-mix(in srgb, var(--c) 15%, transparent); --mdc-icon-size: 14px; }
+    .chip ha-icon { color: var(--c); }
     .chip.idle { padding-left: 10px; }
     .chip.fr { padding-left: 6px; gap: 5px; }
     .checked { display: flex; align-items: center; gap: 4px; color: var(--secondary-text-color); font-size: 11px; --mdc-icon-size: 13px; }
@@ -423,7 +452,7 @@ class IptvCard extends HTMLElement {
     .val { font-weight:500; font-size: 14px; }
     .bar { height:4px; border-radius:3px; background: var(--divider-color, rgba(127,127,127,.25)); margin-top:4px; overflow:hidden; }
     .rem { font-weight:400; font-size:12px; color: var(--secondary-text-color); }
-    .rem.warning, .rem.error { color: var(--c); }
+    .rem.warning, .rem.error { color: var(--ct); }
     .fill { height:100%; border-radius:3px; background: var(--c, var(--iptv-ok)); transition: width .6s ease; }
     .stats { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:5px; }
     .stat { display:flex; align-items:center; gap:5px; padding:3px 7px; border-radius:8px; min-width: 0;
@@ -431,8 +460,9 @@ class IptvCard extends HTMLElement {
     .stat ha-icon { color: var(--primary-color); --mdc-icon-size: 15px; flex: none; }
     .num { font-size: 14px; font-weight: 500; line-height: 1.2; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .msg { color: var(--secondary-text-color); padding:8px 0; }
-    .msg.err { color: var(--iptv-crit); }
+    .msg.err { color: var(--iptv-crit-text); }
     [data-entity] { cursor:pointer; }
+    [data-entity][tabindex]:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 2px; }
     .stat:hover { filter: brightness(0.95); }
     .foot { display:flex; align-items:center; justify-content:space-between; gap:8px; min-height:20px; }
     .foot-actions { display:flex; align-items:center; gap:8px; }
@@ -445,20 +475,25 @@ class IptvCard extends HTMLElement {
     .field label { font-size:11px; color:var(--secondary-text-color); }
     .field input, .field select { font:inherit; font-size:14px; padding:8px 10px; border-radius:8px; border:1px solid var(--divider-color, rgba(127,127,127,.3)); background:var(--secondary-background-color, rgba(127,127,127,.08)); color:var(--primary-text-color); }
     .field .hint { font-size:10px; color:var(--secondary-text-color); }
-    .modal .err { color:var(--iptv-crit); font-size:12px; min-height:14px; }
+    .modal .err { color:var(--iptv-crit-text); font-size:12px; min-height:14px; }
     .modal-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:2px; }
     .modal button.act { border-radius:8px; padding:8px 14px; font:inherit; font-size:13px; font-weight:500; width:auto; height:auto; }
     .modal button.cancel { background:var(--secondary-background-color, rgba(127,127,127,.12)); color:var(--primary-text-color); }
     .modal button.primary { background:color-mix(in srgb, var(--primary-color, #03a9f4) 16%, transparent); color:var(--primary-color, #03a9f4); }
     .modal button.primary:hover:not([disabled]) { background:color-mix(in srgb, var(--primary-color, #03a9f4) 24%, transparent); }
     .modal button.primary[disabled], .modal button.danger[disabled] { opacity:.6; cursor:default; }
-    .modal button.danger { background:color-mix(in srgb, var(--iptv-crit) 16%, transparent); color:var(--iptv-crit); }
+    .modal button.danger { background:color-mix(in srgb, var(--iptv-crit) 16%, transparent); color:var(--iptv-crit-text); }
     .modal button.danger:hover:not([disabled]) { background:color-mix(in srgb, var(--iptv-crit) 24%, transparent); }
     .view-row { display:flex; align-items:center; gap:8px; }
     .view-k { font-size:11px; color:var(--secondary-text-color); width:96px; flex:none; }
     .view-v { flex:1; min-width:0; font-size:13px; font-family:monospace; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; user-select:all; }
     .modal button.copy { padding:4px; --mdc-icon-size:16px; width:auto; height:auto; background:none; color:var(--secondary-text-color); }
     .modal button.copy.ok { color:var(--iptv-ok); }
+    /* Reduced motion: no spinning or sliding; the refresh button stays dimmed while it works */
+    @media (prefers-reduced-motion: reduce) {
+      button.spin ha-icon { animation: none; opacity: .5; }
+      .fill { transition: none; }
+    }
   `;
 
   static getStubConfig() {
@@ -807,6 +842,7 @@ class IptvCard extends HTMLElement {
     }
 
     if (!this._root) { this._root = document.createElement('div'); this.shadowRoot.appendChild(this._root); }
+    var focus = iptvFocusOf(this.shadowRoot, this._root);
     this._root.innerHTML = `
       <style>${this.constructor.CSS}</style>
       <ha-card>
@@ -833,6 +869,7 @@ class IptvCard extends HTMLElement {
       if (sub) el.addEventListener('click', () => this._openView(sub));
     });
     this._bindMoreInfo(subs);
+    iptvRefocus(this._root, focus);
   }
 
   // [data-entity] elements open their subscription's entity; header pills (single
@@ -842,7 +879,16 @@ class IptvCard extends HTMLElement {
       var sect = el.closest('[data-sub]');
       var sub = subs[sect ? Number(sect.dataset.sub) : 0];
       var entityId = sub?.ids[el.dataset.entity];
-      if (entityId) el.addEventListener('click', () => this._moreInfo(entityId));
+      if (!entityId) return;
+      // A button for the keyboard and screen readers too: Tab to reach it, Enter or Space to open it
+      el.setAttribute('role', 'button');
+      el.setAttribute('tabindex', '0');
+      el.addEventListener('click', () => this._moreInfo(entityId));
+      el.addEventListener('keydown', (ev) => {
+        if (ev.key !== 'Enter' && ev.key !== ' ') return;
+        ev.preventDefault();
+        this._moreInfo(entityId);
+      });
     });
   }
 
@@ -1131,7 +1177,7 @@ class IptvMiniCard extends IptvCard {
                font-size: 12px; font-weight: 500; line-height: 18px; white-space: nowrap; color: var(--primary-text-color); --mdc-icon-size: 13px; }
     .r ha-icon { color: var(--c); display: inline-flex; }
     .r .fig { font-weight: 400; color: var(--secondary-text-color); }
-    .r.warning, .r.error { color: var(--c); background: color-mix(in srgb, var(--c) 14%, transparent); }
+    .r.warning, .r.error { color: var(--ct); background: color-mix(in srgb, var(--c) 14%, transparent); }
     .r.warning .fig, .r.error .fig { color: inherit; }
     .r:hover { background: color-mix(in srgb, var(--c) 20%, var(--secondary-background-color, transparent)); }
     .r:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 2px; }
@@ -1179,9 +1225,11 @@ class IptvMiniCard extends IptvCard {
 
   _render() {
     if (!this.shadowRoot || !this._config) return;
+    var focus = iptvFocusOf(this.shadowRoot, this._root);
     if (this._zoomed) super._render();
     else this._renderMini();
     this._addZoom();
+    iptvRefocus(this._root, focus);
   }
 
   // Global pill: the worst state of the subscriptions, with how many are in it
