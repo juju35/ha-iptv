@@ -1,5 +1,16 @@
 # Changelog
 
+## 3.22.5 - 2026-11-01
+
+### Fixes
+- Card: in the Sections view, a new card now takes the full width of the section (12 columns, 6 at least) and the mini card half of it (6 columns), instead of 6 columns (4 at least), where the title disappeared and the figures were cut ("9…", "5…").
+- Card: on a narrow card the title always keeps a few characters and every button stays inside the card; the status pill shrinks first to its truncated text, then to its coloured icon (its label stays in the tooltip). The figure tiles drop their icon, then go two per row, instead of cutting 5-digit numbers; in a card with several subscriptions, the pills go under the subscription name instead of cutting it.
+- Card: the add, edit, view and remove popups no longer spill over the next card: the card grows to hold the popup while it is open, so a click outside the popup always closes it.
+- Card: the popups are dialogs for the keyboard and screen readers: the focus moves into the popup (first field, first copy button, or **Cancel** when removing an account), Tab stays inside it, Escape closes it, and the focus then returns to the button that opened it.
+- Card: the view, edit and remove buttons are 24 px, easier to hit on a phone.
+- Sidebar panel: on a phone, the credential labels only take their own width, so a MAC address is shown in full.
+- Serbian: the "Unknown" subscription status now agrees with "pretplata" (Непозната / Nepoznata), like the other statuses.
+
 ## 3.22.4 - 2026-11-01
 
 ### Changes
