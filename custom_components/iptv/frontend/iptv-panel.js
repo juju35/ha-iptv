@@ -236,8 +236,10 @@ class IptvPanel extends HTMLElement {
     .who { flex:1; min-width:0; }
     .who .n { font-size:16px; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .who .s { font-size:12px; color:var(--secondary-text-color); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-family:monospace; }
-    .pill { flex:none; font-size:11px; font-weight:500; padding:2px 10px; border-radius:12px; color:var(--tone); background:color-mix(in srgb, var(--tone) 15%, transparent); }
+    .pill { flex:none; font-size:11px; font-weight:500; padding:2px 10px; border-radius:12px; color:var(--tone-text); background:color-mix(in srgb, var(--tone) 15%, transparent); }
     .good { --tone:var(--tone-good); } .warn { --tone:var(--tone-warn); } .bad { --tone:var(--tone-bad); }
+    /* Text in a state colour: half-way to the text colour, so it stays readable (4.5:1) in light and dark themes */
+    .good, .warn, .bad { --tone-text: color-mix(in srgb, var(--tone) 50%, var(--primary-text-color)); }
     .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(190px, 1fr)); gap:10px 14px; }
     .wide { grid-column:1 / -1; }
     .ctl { display:flex; flex-direction:column; gap:4px; min-width:0; }
@@ -257,7 +259,7 @@ class IptvPanel extends HTMLElement {
                     padding:4px 8px; border-radius:8px; --mdc-icon-size:15px; }
     .bar .links a:hover { background:var(--secondary-background-color); color:var(--primary-text-color); }
     .msg { font-size:12px; color:var(--secondary-text-color); }
-    .msg.good, .msg.bad { color:var(--tone); }
+    .msg.good, .msg.bad { color:var(--tone-text); }
     .act { display:inline-flex; align-items:center; gap:6px; border:0; cursor:pointer; font:inherit; font-size:13px; font-weight:500;
            padding:7px 12px; border-radius:8px; --mdc-icon-size:16px; color:var(--primary-color);
            background:color-mix(in srgb, var(--primary-color) 14%, transparent); }
@@ -397,7 +399,8 @@ class IptvPanel extends HTMLElement {
   _mountCard() {
     if (!customElements.get('iptv-card')) return;
     this._card = document.createElement('iptv-card');
-    this._card.setConfig({ language: IptvPanelI18n[this._lang()] ? this._lang() : 'en' });
+    // No `language`: the card follows hass.language, so it switches language with the panel
+    this._card.setConfig({});
     this._card.hass = this._hass;
     this.shadowRoot.getElementById('card')?.appendChild(this._card);
   }
@@ -562,10 +565,53 @@ class IptvPanel extends HTMLElement {
       box.innerHTML = `<ha-card class="note">${iptvPanelEsc(this._t('none'))}</ha-card>`;
       return;
     }
+    var focus = this._focusOf(box);
     box.innerHTML = this._accounts.map((acc) => this._accountHtml(acc)).join('');
     this._accounts.forEach((acc) => {
       this._bind(acc, box.querySelector(`ha-card[data-id="${CSS.escape(acc.entry_id)}"]`));
     });
+    this._refocus(box, focus);
+  }
+
+  // The focused field or button of a form (account, attribute, caret), so a re-render can give the focus back.
+  // A button disabled meanwhile (Check now while it runs) gets it back on the next render that enables it again.
+  _focusOf(box) {
+    var el = this.shadowRoot.activeElement;
+    if (!el || !box.contains(el)) {
+      var pending = this._pendingFocus;
+      return pending && !el ? pending : null;
+    }
+    var id = el.closest?.('ha-card[data-id]')?.dataset.id;
+    var attr = ['key', 'do', 'copy', 'reveal'].find((a) => el.dataset?.[a] != null);
+    if (id == null || !attr) return null;
+    var focus = { id, attr: `data-${attr}`, value: el.dataset[attr], range: null };
+    try {
+      // Number inputs have no selection (null, or an exception in some browsers)
+      if (el.selectionStart != null) focus.range = [el.selectionStart, el.selectionEnd, el.selectionDirection];
+    } catch (_err) {
+      focus.range = null;
+    }
+    return focus;
+  }
+
+  _refocus(box, focus) {
+    this._pendingFocus = null;
+    if (!focus) return;
+    var card = box.querySelector(`ha-card[data-id="${CSS.escape(focus.id)}"]`);
+    var el = card?.querySelector(focus.value ? `[${focus.attr}="${CSS.escape(focus.value)}"]` : `[${focus.attr}]`);
+    if (!el) return;
+    if (el.disabled) {
+      // Only while the account is busy: a Save left disabled after saving must not grab the focus later
+      if (this._busy[focus.id]) this._pendingFocus = focus;
+      return;
+    }
+    el.focus({ preventScroll: true });
+    if (!focus.range) return;
+    try {
+      el.setSelectionRange(...focus.range);
+    } catch (_err) {
+      // the caret cannot be set on this field type
+    }
   }
 
   // Refresh only the buttons of one account, so typing keeps the focus
