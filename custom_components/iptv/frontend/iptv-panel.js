@@ -9,7 +9,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_PANEL_VERSION = '3.22.4';
+var IPTV_PANEL_VERSION = '3.22.5';
 
 var IptvPanelI18n = {
   en: {
@@ -529,6 +529,10 @@ class IptvPanel extends HTMLElement {
     .cred { display:flex; align-items:center; gap:10px; min-height:32px; }
     .cred > span { width:130px; flex:none; font-size:12px; color:var(--secondary-text-color); }
     .cred code { flex:1; min-width:0; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; user-select:all; }
+    /* Phone: the label takes only its own width, the value (a MAC address) the rest */
+    @media (max-width: 420px) {
+      .cred > span { width:auto; max-width:40%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    }
     .cred code.masked { letter-spacing:.15em; color:var(--secondary-text-color); user-select:none; }
     .ico { border:0; background:none; cursor:pointer; color:var(--secondary-text-color); padding:5px; border-radius:50%; display:flex; --mdc-icon-size:18px; }
     .ico:hover:not([disabled]) { background:color-mix(in srgb, var(--primary-color) 12%, transparent); color:var(--primary-color); }
