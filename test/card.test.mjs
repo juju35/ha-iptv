@@ -277,6 +277,12 @@ test('a narrow header keeps the title readable and every button inside the card'
   assert.match(IptvMiniCard.CSS, /@container \(max-width: \d+px\) \{[^@]*\.head \.chip \.tx[^{]*\{ display: none/);
 });
 
+test('the mini card keeps the full card badge (40 px, 24 px icon): only a width breakpoint touches it', () => {
+  assert.match(rule(IptvMiniCard.CSS, '.badge'), /width: 40px; height: 40px;.*--mdc-icon-size: 24px;/s);
+  assert.match(rule(IptvMiniCard.CSS, '.mini .badge'), /align-self: flex-start/);
+  assert.doesNotMatch(rule(IptvMiniCard.CSS, '.mini .badge'), /width|height|--mdc-icon-size/);
+});
+
 test('the figures are never cut: the tiles lose their icon, then go two by two, on a narrow card', () => {
   const css = IptvCard.CSS;
   assert.doesNotMatch(rule(css, '.num'), /text-overflow: ellipsis/);

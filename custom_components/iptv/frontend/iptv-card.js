@@ -1786,8 +1786,9 @@ class IptvCard extends HTMLElement {
 class IptvMiniCard extends IptvCard {
   static CSS = `${IptvCard.CSS}
     .mini { display: flex; align-items: center; gap: 10px; }
-    /* Top-aligned: 12 px from the card's top edge, like the other cards (the two lines are taller than the badge) */
-    .mini .badge { width: 32px; height: 32px; --mdc-icon-size: 20px; align-self: flex-start; }
+    /* The full card's badge (40 px), top-aligned: 12 px from the card's top edge, like the other cards (the two
+       lines are taller than the badge) */
+    .mini .badge { align-self: flex-start; }
     .body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
     .head { display: flex; align-items: center; gap: 8px; min-width: 0; }
     /* The title gives way first (down to its 4 characters), then the pill */
