@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 3.22.6 - 2026-11-02
 
 ### Fixes
 - Mini card: the header badge keeps its full size (40 px) in the compact view, like the full card.
