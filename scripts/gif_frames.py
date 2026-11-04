@@ -12,6 +12,7 @@ real change (a digit, an icon, a shade of colour). Both hold once the renders ar
 
 import json
 import os
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -94,5 +95,7 @@ def replace_if_changed(new, out):
         if (w1, h1) == (w2, h2) and same_frames(a, b, w1, h1):
             new.unlink()
             return False
-    new.replace(out)
+    # shutil.move: the render sits in a temporary directory, possibly on another filesystem, where Path.replace
+    # fails (EXDEV)
+    shutil.move(new, out)
     return True
