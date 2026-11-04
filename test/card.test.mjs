@@ -24,8 +24,8 @@ const placeholders = (s) => [...String(s).matchAll(/\{\w+\}/g)].map((m) => m[0])
 
 test('I18N parity: every language has exactly the English keys and placeholders', () => {
   const en = IptvCardI18n.en;
-  assert.deepEqual(Object.keys(IptvCardI18n).sort(), ['bg', 'cs', 'da', 'de', 'el', 'en', 'es', 'fr', 'ga', 'hu', 'it', 'lv', 'mt', 'nl', 'pl', 'pt', 'ro', 'ru', 'sk', 'sl', 'sr', 'sr-Latn', 'sv', 'uk']);
-  for (const lang of ['fr', 'de', 'es', 'it', 'nl', 'pt', 'pl', 'ro', 'da', 'sv', 'bg', 'ru', 'uk', 'hu', 'ga', 'sk', 'cs', 'sl', 'mt', 'lv', 'el', 'sr', 'sr-Latn']) {
+  assert.deepEqual(Object.keys(IptvCardI18n).sort(), ['bg', 'cs', 'da', 'de', 'el', 'en', 'es', 'fr', 'hu', 'it', 'lv', 'nl', 'pl', 'pt', 'ro', 'ru', 'sk', 'sl', 'sr', 'sr-Latn', 'sv', 'uk']);
+  for (const lang of ['fr', 'de', 'es', 'it', 'nl', 'pt', 'pl', 'ro', 'da', 'sv', 'bg', 'ru', 'uk', 'hu', 'sk', 'cs', 'sl', 'lv', 'el', 'sr', 'sr-Latn']) {
     const strings = IptvCardI18n[lang];
     assert.deepEqual(Object.keys(strings).sort(), Object.keys(en).sort(), `keys of ${lang}`);
     for (const key of Object.keys(en)) {
@@ -62,8 +62,8 @@ test('iptvLang resolves Italian, Dutch, Portuguese and Polish codes', () => {
   assert.equal(iptvT('pt', 'edit_password'), 'Palavra-passe');
 });
 
-test('iptvLang resolves Romanian, Danish, Swedish, Bulgarian, Russian, Ukrainian, Hungarian, Irish, Slovak, Czech, Slovenian, Maltese, Latvian and Greek codes', () => {
-  for (const code of ['ro', 'da', 'sv', 'bg', 'ru', 'uk', 'hu', 'ga', 'sk', 'cs', 'sl', 'mt', 'lv', 'el']) {
+test('iptvLang resolves Romanian, Danish, Swedish, Bulgarian, Russian, Ukrainian, Hungarian, Slovak, Czech, Slovenian, Latvian and Greek codes', () => {
+  for (const code of ['ro', 'da', 'sv', 'bg', 'ru', 'uk', 'hu', 'sk', 'cs', 'sl', 'lv', 'el']) {
     assert.equal(iptvLang({}, { language: code }), code);
   }
   assert.equal(iptvLang({}, { language: 'ro-MD' }), 'ro');
@@ -104,7 +104,7 @@ test('the editor offers every language of the card, Serbian in Cyrillic and Lati
   context.document.querySelector = () => null;
   const language = IptvCard.getConfigForm().schema.find((s) => s.name === 'language');
   const options = Array.from(language.selector.select.options, (o) => [o.value, o.label]);
-  assert.deepEqual(options.slice(-20), [
+  assert.deepEqual(options.slice(-18), [
     ['it', 'Italiano'],
     ['nl', 'Nederlands'],
     ['pt', 'Português (Portugal)'],
@@ -116,11 +116,9 @@ test('the editor offers every language of the card, Serbian in Cyrillic and Lati
     ['ru', 'Русский'],
     ['uk', 'Українська'],
     ['hu', 'Magyar'],
-    ['ga', 'Gaeilge'],
     ['sk', 'Slovenčina'],
     ['cs', 'Čeština'],
     ['sl', 'Slovenščina'],
-    ['mt', 'Malti'],
     ['lv', 'Latviešu'],
     ['el', 'Ελληνικά'],
     ['sr', 'Српски'],

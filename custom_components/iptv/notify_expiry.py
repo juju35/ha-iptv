@@ -88,11 +88,6 @@ MESSAGES = {
         "soon": "A(z) **{name}** előfizetés lejár: {date} (hátralévő napok: {days}).",
         "expired": "A(z) **{name}** előfizetés lejárt: {date}.",
     },
-    "ga": {
-        "title": "Síntiús IPTV {name}",
-        "soon": "Rachaidh an síntiús **{name}** in éag ar {date} (laethanta fágtha: {days}).",
-        "expired": "Chuaigh an síntiús **{name}** in éag ar {date}.",
-    },
     "sk": {
         "title": "Predplatné IPTV {name}",
         "soon": "Predplatné **{name}** vyprší {date} (zostávajúce dni: {days}).",
@@ -107,11 +102,6 @@ MESSAGES = {
         "title": "Naročnina IPTV {name}",
         "soon": "Naročnina **{name}** poteče {date} (preostali dnevi: {days}).",
         "expired": "Naročnina **{name}** je potekla {date}.",
-    },
-    "mt": {
-        "title": "Abbonament IPTV {name}",
-        "soon": "L-abbonament **{name}** jiskadi fil-{date} (jiem fadal: {days}).",
-        "expired": "L-abbonament **{name}** skada fil-{date}.",
     },
     "lv": {
         "title": "IPTV abonements {name}",
@@ -151,11 +141,9 @@ DATE_FORMATS = {
     "ru": "%d.%m.%Y",
     "uk": "%d.%m.%Y",
     "hu": "%Y.%m.%d.",
-    "ga": "%d/%m/%Y",
     "sk": "%d. %m. %Y",
     "cs": "%d. %m. %Y",
     "sl": "%d. %m. %Y",
-    "mt": "%d/%m/%Y",
     "lv": "%d.%m.%Y.",
     "el": "%d/%m/%Y",
     "sr": "%d.%m.%Y.",
