@@ -71,7 +71,7 @@ test('iptvLang resolves Romanian, Danish, Swedish, Bulgarian, Russian, Ukrainian
   assert.equal(iptvLang({}, { language: 'el-CY' }), 'el');
   assert.equal(iptvLang({ language: 'uk' }, { language: 'ru' }), 'uk');
   assert.equal(iptvT('cs', 'edit_password'), 'Heslo');
-  assert.equal(iptvT('el', 'edit_password'), 'Κωδικός πρόσβασης');
+  assert.equal(iptvT('el', 'edit_password'), 'Κωδικός');
 });
 
 test('iptvLocale formats pt as European Portuguese and keeps the language option first', () => {

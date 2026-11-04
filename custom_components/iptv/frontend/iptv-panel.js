@@ -856,7 +856,7 @@ var IptvPanelI18n = {
     checked_ko: 'Ο διακομιστής δεν είναι προσβάσιμος',
     cred_username: 'Όνομα χρήστη',
     cred_mac: 'Διεύθυνση MAC',
-    cred_password: 'Κωδικός πρόσβασης',
+    cred_password: 'Κωδικός',
     cred_show: 'Εμφάνιση κωδικού πρόσβασης',
     cred_hide: 'Απόκρυψη κωδικού πρόσβασης',
     cred_copy: 'Αντιγραφή',
