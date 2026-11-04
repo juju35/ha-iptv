@@ -7,6 +7,7 @@
 [![Validate](https://github.com/juju35/ha-iptv/actions/workflows/validate.yml/badge.svg)](https://github.com/juju35/ha-iptv/actions/workflows/validate.yml)
 [![Release](https://img.shields.io/github/v/release/juju35/ha-iptv)](https://github.com/juju35/ha-iptv/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/julienstep9)
 
 Home Assistant integration and Lovelace card that track one or several **IPTV subscriptions** using the **Xtream Codes API** or a **Stalker / Ministra portal** (MAC address): status, expiration date, days left, number of live channels, movies and series, and connections.
 
