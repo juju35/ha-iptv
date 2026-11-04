@@ -226,27 +226,27 @@ While subscriptions reload, the card animates: the refresh button spins until th
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/refreshing-dark.gif">
-  <img alt="refresh animation" src="https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/refreshing.gif">
+  <img alt="refresh animation" src="https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/refreshing.gif" width="400">
 </picture>
 
-![iptv-card](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/card.png)
+<img src="https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/card.png" alt="iptv-card" width="400">
 
-![iptv-card, dark theme](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/card-dark.png)
+<img src="https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/card-dark.png" alt="iptv-card, dark theme" width="400">
 
-![iptv-card with two providers](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/card-multi.png)
+<img src="https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/card-multi.png" alt="iptv-card with two providers" width="400">
 
-![iptv-card with two providers, dark theme](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/card-multi-dark.png)
+<img src="https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/card-multi-dark.png" alt="iptv-card with two providers, dark theme" width="400">
 
 **Sidebar panel** (light and dark themes):
 
-![IPTV sidebar panel](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/panel.png)
+<img src="https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/panel.png" alt="IPTV sidebar panel" width="606">
 
-![IPTV sidebar panel, dark theme](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/panel-dark.png)
+<img src="https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/panel-dark.png" alt="IPTV sidebar panel, dark theme" width="606">
 
 | Mini card | Zoomed in |
 |---|---|
-| ![iptv-mini-card](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/mini.png) | ![iptv-mini-card zoomed in](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/mini-zoom.png) |
-| ![iptv-mini-card, dark theme](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/mini-dark.png) | ![iptv-mini-card zoomed in, dark theme](https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/mini-zoom-dark.png) |
+| <img src="https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/mini.png" alt="iptv-mini-card" width="400"> | <img src="https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/mini-zoom.png" alt="iptv-mini-card zoomed in" width="400"> |
+| <img src="https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/mini-dark.png" alt="iptv-mini-card, dark theme" width="400"> | <img src="https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/mini-zoom-dark.png" alt="iptv-mini-card zoomed in, dark theme" width="400"> |
 
 ## How it works
 
