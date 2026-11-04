@@ -35,7 +35,35 @@ def _load(lang: str) -> dict[str, str]:
     return _strings(json.loads((TRANSLATIONS / f"{lang}.json").read_text(encoding="utf-8")))
 
 
-@pytest.mark.parametrize("lang", ["fr", "de", "es", "it", "nl", "pt", "pt-BR", "pl", "sr", "sr-Latn"])
+@pytest.mark.parametrize(
+    "lang",
+    [
+        "fr",
+        "de",
+        "es",
+        "it",
+        "nl",
+        "pt",
+        "pt-BR",
+        "pl",
+        "ro",
+        "da",
+        "sv",
+        "bg",
+        "ru",
+        "uk",
+        "hu",
+        "ga",
+        "sk",
+        "cs",
+        "sl",
+        "mt",
+        "lv",
+        "el",
+        "sr",
+        "sr-Latn",
+    ],
+)
 def test_translation_keys_match_english(lang: str) -> None:
     """The translation exists and has the same keys and placeholders as en.json."""
     english = _keys(json.loads((TRANSLATIONS / "en.json").read_text(encoding="utf-8")))
@@ -102,6 +130,20 @@ def test_serbian_notification_texts_match() -> None:
         ("pt", "pt"),
         ("pt-BR", "pt"),  # Brazilian Portuguese falls back to European Portuguese on purpose
         ("pl-PL", "pl"),
+        ("ro", "ro"),
+        ("da", "da"),
+        ("sv-FI", "sv"),
+        ("bg", "bg"),
+        ("ru", "ru"),
+        ("uk", "uk"),
+        ("hu", "hu"),
+        ("ga", "ga"),
+        ("sk", "sk"),
+        ("cs", "cs"),
+        ("sl", "sl"),
+        ("mt", "mt"),
+        ("lv", "lv"),
+        ("el-CY", "el"),
         ("ja", "en"),
         (None, "en"),
     ],

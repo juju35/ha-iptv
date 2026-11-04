@@ -1,0 +1,247 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "IPTV-abonnemang",
+        "description": "Välj leverantörstyp.",
+        "menu_options": {
+          "xtream": "Xtream Codes (användarnamn / lösenord)",
+          "stalker": "Stalker / Ministra (MAC-adress)"
+        }
+      },
+      "xtream": {
+        "title": "Xtream Codes",
+        "description": "Home Assistant frågar din leverantörs Xtream Codes-API.",
+        "data": {
+          "url": "Xtream-serverns URL",
+          "username": "Användarnamn",
+          "password": "Lösenord",
+          "notify_service": "Skicka anslutningsuppgifterna till"
+        },
+        "data_description": {
+          "url": "Inklusive porten, t.ex. http://server:8080",
+          "notify_service": "Valfritt: aviseringstjänst (t.ex. notify.mobile_app_phone) som får servern, användarnamnet (eller MAC-adressen) och utgångsdatumet, aldrig lösenordet, när kontot har lagts till"
+        }
+      },
+      "stalker": {
+        "title": "IPTV Stalker (MAC-adress)",
+        "description": "Home Assistant frågar din leverantörs Stalker/Ministra-portal med en MAC-adress.",
+        "data": {
+          "url": "Portalens URL",
+          "mac": "MAC-adress",
+          "notify_service": "Skicka anslutningsuppgifterna till"
+        },
+        "data_description": {
+          "url": "Inklusive porten, t.ex. http://portal:80",
+          "mac": "Format AA:BB:CC:DD:EE:FF",
+          "notify_service": "Valfritt: aviseringstjänst (t.ex. notify.mobile_app_phone) som får servern, användarnamnet (eller MAC-adressen) och utgångsdatumet, aldrig lösenordet, när kontot har lagts till"
+        }
+      },
+      "reconfigure": {
+        "title": "IPTV-abonnemang",
+        "data": {
+          "url": "Server- eller portal-URL",
+          "username": "Användarnamn",
+          "password": "Lösenord",
+          "mac": "MAC-adress"
+        },
+        "data_description": {
+          "url": "Inklusive porten, t.ex. http://server:8080",
+          "mac": "Format AA:BB:CC:DD:EE:FF",
+          "password": "Lämna tomt för att behålla det nuvarande lösenordet"
+        }
+      },
+      "reauth_confirm": {
+        "title": "IPTV-abonnemang",
+        "data": {
+          "url": "Server- eller portal-URL",
+          "username": "Användarnamn",
+          "password": "Lösenord",
+          "mac": "MAC-adress"
+        },
+        "data_description": {
+          "url": "Inklusive porten, t.ex. http://server:8080",
+          "mac": "Format AA:BB:CC:DD:EE:FF",
+          "password": "Lämna tomt för att behålla det nuvarande lösenordet"
+        },
+        "description": "Servern nekade inloggningsuppgifterna för {name}. Ange de nya."
+      }
+    },
+    "error": {
+      "cannot_connect": "Kan inte nå IPTV-servern",
+      "invalid_auth": "Servern nekade inloggningsuppgifterna",
+      "invalid_mac": "Ogiltig MAC-adress (format AA:BB:CC:DD:EE:FF)",
+      "no_french_lists": "Ingen fransk lista hittades hos den här leverantören (live-, VOD- eller seriekategorier): kontot läggs inte till.",
+      "french_unknown": "Kunde inte läsa den här leverantörens kategorier för att söka efter franska listor.",
+      "stream_ko": "Testkanalens videostream spelas inte upp: kontot läggs inte till.",
+      "empty_catalogue": "Leverantören har ingen användbar katalog med kanaler / filmer / serier: kontot läggs inte till."
+    },
+    "abort": {
+      "already_configured": "Det här kontot är redan konfigurerat",
+      "reconfigure_successful": "Omkonfigurationen lyckades",
+      "reauth_successful": "Omautentiseringen lyckades",
+      "migrated": "Konton från den tidigare IPTV Xtream-integrationen flyttade till IPTV, med samma entiteter: {count}. Radera den gamla mappen custom_components/iptv_xtream om den fortfarande finns och starta om Home Assistant.",
+      "account_updated": "{title} finns på samma server: det nya kontot gäller längre ({new} i stället för {current}), så {title} använder nu de nya inloggningsuppgifterna.",
+      "existing_longer": "{title} finns på samma server och gäller lika länge eller längre ({current}, nytt konto: {new}): inget har ändrats."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Uppdateringsintervall",
+          "notify_days": "Avisera före utgång",
+          "health_interval": "Intervall för serverkontroll",
+          "stream_check": "Testa en kanals videostream"
+        },
+        "data_description": {
+          "notify_days": "Beständig avisering så många dagar innan abonnemanget går ut (0 för att stänga av)",
+          "health_interval": "Hur ofta servern kontrolleras med en lätt förfrågan (endast kontoinformation)",
+          "stream_check": "Vid varje serverkontroll öppnas en kanal kort för att bekräfta att den spelas upp (upptar en anslutning). Serverstatus visar Stream nere om det misslyckas."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "status": {
+        "name": "Status",
+        "state": {
+          "active": "Aktivt",
+          "expired": "Utgånget",
+          "banned": "Spärrat",
+          "disabled": "Inaktiverat",
+          "invalid_auth": "Ogiltiga inloggningsuppgifter"
+        }
+      },
+      "expiration": {
+        "name": "Utgång"
+      },
+      "days_left": {
+        "name": "Dagar kvar"
+      },
+      "created": {
+        "name": "Skapat"
+      },
+      "active_connections": {
+        "name": "Aktiva anslutningar"
+      },
+      "max_connections": {
+        "name": "Max anslutningar"
+      },
+      "channels": {
+        "name": "Livekanaler"
+      },
+      "movies": {
+        "name": "Filmer"
+      },
+      "series": {
+        "name": "Serier"
+      },
+      "health": {
+        "name": "Serverstatus",
+        "state": {
+          "ok": "OK",
+          "degraded": "Långsam",
+          "auth_failed": "Inloggningsuppgifterna nekades",
+          "unreachable": "Går inte att nå",
+          "stream_ko": "Stream nere"
+        }
+      },
+      "response_time": {
+        "name": "Svarstid"
+      },
+      "last_check": {
+        "name": "Senaste kontroll"
+      },
+      "added": {
+        "name": "Tillagt"
+      },
+      "updated": {
+        "name": "Uppdaterat"
+      }
+    },
+    "binary_sensor": {
+      "trial": {
+        "name": "Provperiod"
+      },
+      "french_lists": {
+        "name": "Franska listor"
+      }
+    }
+  },
+  "services": {
+    "edit_account": {
+      "name": "Redigera konto",
+      "description": "Ändrar ett kontos inloggningsuppgifter eller MAC-adress efter samma kontroller som när det läggs till. Data från tjänsteanrop lagras av recorder (händelsen call_service), inklusive lösenordet: använd hellre kortet.",
+      "fields": {
+        "device_id": {
+          "name": "Konto",
+          "description": "IPTV-kontot som ska redigeras."
+        },
+        "url": {
+          "name": "Server-URL",
+          "description": "Ny server-URL; utelämna för att behålla den nuvarande."
+        },
+        "username": {
+          "name": "Användarnamn",
+          "description": "Nytt användarnamn (Xtream Codes)."
+        },
+        "password": {
+          "name": "Lösenord",
+          "description": "Nytt lösenord (Xtream Codes); utelämna för att behålla det nuvarande."
+        },
+        "mac": {
+          "name": "MAC-adress",
+          "description": "Ny MAC-adress (Stalker-portal)."
+        }
+      }
+    },
+    "remove_account": {
+      "name": "Ta bort konto",
+      "description": "Tar bort ett IPTV-konto och dess entiteter.",
+      "fields": {
+        "device_id": {
+          "name": "Konto",
+          "description": "IPTV-kontot som ska tas bort."
+        }
+      }
+    },
+    "add_account": {
+      "name": "Lägg till konto",
+      "description": "Lägger till ett nytt IPTV-konto med samma kontroller som gränssnittet. Data från tjänsteanrop lagras av recorder (händelsen call_service), inklusive lösenordet: använd hellre kortet.",
+      "fields": {
+        "provider": {
+          "name": "Leverantörstyp",
+          "description": "xtream eller stalker"
+        },
+        "url": {
+          "name": "Server-URL",
+          "description": "Inklusive porten, t.ex. http://server:8080."
+        },
+        "username": {
+          "name": "Användarnamn",
+          "description": "Endast Xtream Codes."
+        },
+        "password": {
+          "name": "Lösenord",
+          "description": "Endast Xtream Codes."
+        },
+        "mac": {
+          "name": "MAC-adress",
+          "description": "Endast Stalker-portal, format AA:BB:CC:DD:EE:FF."
+        }
+      }
+    },
+    "get_credentials": {
+      "name": "Hämta inloggningsuppgifter",
+      "description": "Returnerar ett kontos server-URL och inloggningsuppgifter för visning.",
+      "fields": {
+        "device_id": {
+          "name": "Konto",
+          "description": ""
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,247 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Síntiús IPTV",
+        "description": "Roghnaigh an cineál soláthraí.",
+        "menu_options": {
+          "xtream": "Xtream Codes (ainm úsáideora / pasfhocal)",
+          "stalker": "Stalker / Ministra (seoladh MAC)"
+        }
+      },
+      "xtream": {
+        "title": "Xtream Codes",
+        "description": "Ceistíonn Home Assistant API Xtream Codes do sholáthraí.",
+        "data": {
+          "url": "URL an fhreastalaí Xtream",
+          "username": "Ainm úsáideora",
+          "password": "Pasfhocal",
+          "notify_service": "Seol na sonraí ceangail chuig"
+        },
+        "data_description": {
+          "url": "An port san áireamh, m.sh. http://server:8080",
+          "notify_service": "Roghnach: seirbhís fógraí (m.sh. notify.mobile_app_phone) a fhaigheann an freastalaí, an t-ainm úsáideora (nó an seoladh MAC) agus an dáta éaga, ach riamh an pasfhocal, nuair a chuirtear an cuntas leis"
+        }
+      },
+      "stalker": {
+        "title": "IPTV Stalker (seoladh MAC)",
+        "description": "Ceistíonn Home Assistant tairseach Stalker/Ministra do sholáthraí le seoladh MAC.",
+        "data": {
+          "url": "URL na tairsí",
+          "mac": "Seoladh MAC",
+          "notify_service": "Seol na sonraí ceangail chuig"
+        },
+        "data_description": {
+          "url": "An port san áireamh, m.sh. http://portal:80",
+          "mac": "Formáid AA:BB:CC:DD:EE:FF",
+          "notify_service": "Roghnach: seirbhís fógraí (m.sh. notify.mobile_app_phone) a fhaigheann an freastalaí, an t-ainm úsáideora (nó an seoladh MAC) agus an dáta éaga, ach riamh an pasfhocal, nuair a chuirtear an cuntas leis"
+        }
+      },
+      "reconfigure": {
+        "title": "Síntiús IPTV",
+        "data": {
+          "url": "URL an fhreastalaí nó na tairsí",
+          "username": "Ainm úsáideora",
+          "password": "Pasfhocal",
+          "mac": "Seoladh MAC"
+        },
+        "data_description": {
+          "url": "An port san áireamh, m.sh. http://server:8080",
+          "mac": "Formáid AA:BB:CC:DD:EE:FF",
+          "password": "Fág bán é chun an pasfhocal reatha a choinneáil"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Síntiús IPTV",
+        "data": {
+          "url": "URL an fhreastalaí nó na tairsí",
+          "username": "Ainm úsáideora",
+          "password": "Pasfhocal",
+          "mac": "Seoladh MAC"
+        },
+        "data_description": {
+          "url": "An port san áireamh, m.sh. http://server:8080",
+          "mac": "Formáid AA:BB:CC:DD:EE:FF",
+          "password": "Fág bán é chun an pasfhocal reatha a choinneáil"
+        },
+        "description": "Dhiúltaigh an freastalaí do dhintiúir {name}. Cuir isteach na cinn nua."
+      }
+    },
+    "error": {
+      "cannot_connect": "Ní féidir an freastalaí IPTV a bhaint amach",
+      "invalid_auth": "Dhiúltaigh an freastalaí do na dintiúir",
+      "invalid_mac": "Seoladh MAC neamhbhailí (formáid AA:BB:CC:DD:EE:FF)",
+      "no_french_lists": "Níor aimsíodh liosta Fraincise ag an soláthraí seo (catagóirí beo, VOD nó sraitheanna): ní chuirtear an cuntas leis.",
+      "french_unknown": "Níorbh fhéidir catagóirí an tsoláthraí seo a léamh chun liostaí Fraincise a sheiceáil.",
+      "stream_ko": "Ní sheinneann sruth físe an chainéil tástála: ní chuirtear an cuntas leis.",
+      "empty_catalogue": "Níl catalóg inúsáidte cainéal / scannán / sraitheanna ag an soláthraí: ní chuirtear an cuntas leis."
+    },
+    "abort": {
+      "already_configured": "Tá an cuntas seo cumraithe cheana",
+      "reconfigure_successful": "D’éirigh leis an athchumrú",
+      "reauth_successful": "D’éirigh leis an athfhíordheimhniú",
+      "migrated": "Cuntais ón seanchomhtháthú IPTV Xtream a aistríodh go IPTV, leis na haonáin chéanna: {count}. Scrios an seanfhillteán custom_components/iptv_xtream má tá sé ann fós agus atosaigh Home Assistant.",
+      "account_updated": "Tá {title} ar an bhfreastalaí céanna: tá an cuntas nua bailí níos faide ({new} in ionad {current}), mar sin úsáideann {title} na dintiúir nua anois.",
+      "existing_longer": "Tá {title} ar an bhfreastalaí céanna agus tá sé bailí chomh fada nó níos faide ({current}, cuntas nua: {new}): níor athraíodh aon rud."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Eatramh athnuachana",
+          "notify_days": "Tabhair fógra roimh dhul in éag",
+          "health_interval": "Eatramh seiceála freastalaí",
+          "stream_check": "Tástáil sruth físe cainéil"
+        },
+        "data_description": {
+          "notify_days": "Fógra buan an líon seo laethanta sula rachaidh an síntiús in éag (0 chun é a mhúchadh)",
+          "health_interval": "Cé chomh minic a sheiceáiltear an freastalaí le hiarratas éadrom (faisnéis chuntais amháin)",
+          "stream_check": "Le linn gach seiceála, osclaítear cainéal ar feadh tamaill ghearr chun a dheimhniú go seinneann sé (úsáideann sé nasc amháin). Taispeánann staid an fhreastalaí Sruth as feidhm má theipeann air."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "status": {
+        "name": "Stádas",
+        "state": {
+          "active": "Gníomhach",
+          "expired": "Imithe in éag",
+          "banned": "Coiscthe",
+          "disabled": "Díchumasaithe",
+          "invalid_auth": "Dintiúir neamhbhailí"
+        }
+      },
+      "expiration": {
+        "name": "Dul in éag"
+      },
+      "days_left": {
+        "name": "Laethanta fágtha"
+      },
+      "created": {
+        "name": "Cruthaithe"
+      },
+      "active_connections": {
+        "name": "Naisc ghníomhacha"
+      },
+      "max_connections": {
+        "name": "Uasmhéid nasc"
+      },
+      "channels": {
+        "name": "Cainéil bheo"
+      },
+      "movies": {
+        "name": "Scannáin"
+      },
+      "series": {
+        "name": "Sraitheanna"
+      },
+      "health": {
+        "name": "Staid an fhreastalaí",
+        "state": {
+          "ok": "OK",
+          "degraded": "Mall",
+          "auth_failed": "Diúltaíodh do na dintiúir",
+          "unreachable": "Do-aimsithe",
+          "stream_ko": "Sruth as feidhm"
+        }
+      },
+      "response_time": {
+        "name": "Am freagartha"
+      },
+      "last_check": {
+        "name": "Seiceáil dheireanach"
+      },
+      "added": {
+        "name": "Curtha leis"
+      },
+      "updated": {
+        "name": "Nuashonraithe"
+      }
+    },
+    "binary_sensor": {
+      "trial": {
+        "name": "Tréimhse thrialach"
+      },
+      "french_lists": {
+        "name": "Liostaí Fraincise"
+      }
+    }
+  },
+  "services": {
+    "edit_account": {
+      "name": "Cuir cuntas in eagar",
+      "description": "Athraíonn sé dintiúir nó seoladh MAC cuntais tar éis na seiceálacha céanna agus a dhéantar nuair a chuirtear ceann leis. Stórálann recorder sonraí glaonna seirbhíse (imeacht call_service), an pasfhocal san áireamh: is fearr an cárta a úsáid.",
+      "fields": {
+        "device_id": {
+          "name": "Cuntas",
+          "description": "An cuntas IPTV le cur in eagar."
+        },
+        "url": {
+          "name": "URL an fhreastalaí",
+          "description": "URL nua an fhreastalaí; fág ar lár é chun an ceann reatha a choinneáil."
+        },
+        "username": {
+          "name": "Ainm úsáideora",
+          "description": "Ainm úsáideora nua (Xtream Codes)."
+        },
+        "password": {
+          "name": "Pasfhocal",
+          "description": "Pasfhocal nua (Xtream Codes); fág ar lár é chun an ceann reatha a choinneáil."
+        },
+        "mac": {
+          "name": "Seoladh MAC",
+          "description": "Seoladh MAC nua (tairseach Stalker)."
+        }
+      }
+    },
+    "remove_account": {
+      "name": "Bain cuntas",
+      "description": "Baineann sé cuntas IPTV agus a aonáin.",
+      "fields": {
+        "device_id": {
+          "name": "Cuntas",
+          "description": "An cuntas IPTV le baint."
+        }
+      }
+    },
+    "add_account": {
+      "name": "Cuir cuntas leis",
+      "description": "Cuireann sé cuntas IPTV nua leis leis na seiceálacha céanna leis an gcomhéadan. Stórálann recorder sonraí glaonna seirbhíse (imeacht call_service), an pasfhocal san áireamh: is fearr an cárta a úsáid.",
+      "fields": {
+        "provider": {
+          "name": "Cineál soláthraí",
+          "description": "xtream nó stalker"
+        },
+        "url": {
+          "name": "URL an fhreastalaí",
+          "description": "An port san áireamh, m.sh. http://server:8080."
+        },
+        "username": {
+          "name": "Ainm úsáideora",
+          "description": "Xtream Codes amháin."
+        },
+        "password": {
+          "name": "Pasfhocal",
+          "description": "Xtream Codes amháin."
+        },
+        "mac": {
+          "name": "Seoladh MAC",
+          "description": "Tairseach Stalker amháin, formáid AA:BB:CC:DD:EE:FF."
+        }
+      }
+    },
+    "get_credentials": {
+      "name": "Faigh na dintiúir",
+      "description": "Tugann sé URL an fhreastalaí agus dintiúir cuntais ar ais lena dtaispeáint.",
+      "fields": {
+        "device_id": {
+          "name": "Cuntas",
+          "description": ""
+        }
+      }
+    }
+  }
+}

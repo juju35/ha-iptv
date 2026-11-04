@@ -1,0 +1,247 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Předplatné IPTV",
+        "description": "Vyberte typ poskytovatele.",
+        "menu_options": {
+          "xtream": "Xtream Codes (uživatelské jméno / heslo)",
+          "stalker": "Stalker / Ministra (MAC adresa)"
+        }
+      },
+      "xtream": {
+        "title": "Xtream Codes",
+        "description": "Home Assistant se dotazuje na Xtream Codes API vašeho poskytovatele.",
+        "data": {
+          "url": "URL serveru Xtream",
+          "username": "Uživatelské jméno",
+          "password": "Heslo",
+          "notify_service": "Odeslat údaje o připojení do"
+        },
+        "data_description": {
+          "url": "Včetně portu, např. http://server:8080",
+          "notify_service": "Volitelné: služba oznámení (např. notify.mobile_app_phone), která po přidání účtu obdrží server, uživatelské jméno (nebo MAC adresu) a datum vypršení, nikdy heslo"
+        }
+      },
+      "stalker": {
+        "title": "IPTV Stalker (MAC adresa)",
+        "description": "Home Assistant se dotazuje na portál Stalker/Ministra vašeho poskytovatele pomocí MAC adresy.",
+        "data": {
+          "url": "URL portálu",
+          "mac": "MAC adresa",
+          "notify_service": "Odeslat údaje o připojení do"
+        },
+        "data_description": {
+          "url": "Včetně portu, např. http://portal:80",
+          "mac": "Formát AA:BB:CC:DD:EE:FF",
+          "notify_service": "Volitelné: služba oznámení (např. notify.mobile_app_phone), která po přidání účtu obdrží server, uživatelské jméno (nebo MAC adresu) a datum vypršení, nikdy heslo"
+        }
+      },
+      "reconfigure": {
+        "title": "Předplatné IPTV",
+        "data": {
+          "url": "URL serveru nebo portálu",
+          "username": "Uživatelské jméno",
+          "password": "Heslo",
+          "mac": "MAC adresa"
+        },
+        "data_description": {
+          "url": "Včetně portu, např. http://server:8080",
+          "mac": "Formát AA:BB:CC:DD:EE:FF",
+          "password": "Chcete-li zachovat současné heslo, nechte prázdné"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Předplatné IPTV",
+        "data": {
+          "url": "URL serveru nebo portálu",
+          "username": "Uživatelské jméno",
+          "password": "Heslo",
+          "mac": "MAC adresa"
+        },
+        "data_description": {
+          "url": "Včetně portu, např. http://server:8080",
+          "mac": "Formát AA:BB:CC:DD:EE:FF",
+          "password": "Chcete-li zachovat současné heslo, nechte prázdné"
+        },
+        "description": "Server odmítl přihlašovací údaje pro {name}. Zadejte nové."
+      }
+    },
+    "error": {
+      "cannot_connect": "Nelze se připojit k serveru IPTV",
+      "invalid_auth": "Server odmítl přihlašovací údaje",
+      "invalid_mac": "Neplatná MAC adresa (formát AA:BB:CC:DD:EE:FF)",
+      "no_french_lists": "U tohoto poskytovatele nebyl nalezen žádný francouzský seznam (kategorie živého vysílání, VOD nebo seriálů): účet nebude přidán.",
+      "french_unknown": "Kategorie tohoto poskytovatele se nepodařilo načíst pro kontrolu francouzských seznamů.",
+      "stream_ko": "Videostream testovacího kanálu se nepřehrává: účet nebude přidán.",
+      "empty_catalogue": "Poskytovatel nemá použitelný katalog kanálů / filmů / seriálů: účet nebude přidán."
+    },
+    "abort": {
+      "already_configured": "Tento účet je již nastaven",
+      "reconfigure_successful": "Opětovné nastavení proběhlo úspěšně",
+      "reauth_successful": "Opětovné ověření proběhlo úspěšně",
+      "migrated": "Účty z dřívější integrace IPTV Xtream přesunuté do IPTV se stejnými entitami: {count}. Pokud ještě existuje stará složka custom_components/iptv_xtream, smažte ji a restartujte Home Assistant.",
+      "account_updated": "{title} je na stejném serveru: nový účet platí déle ({new} místo {current}), takže {title} nyní používá nové přihlašovací údaje.",
+      "existing_longer": "{title} je na stejném serveru a platí stejně dlouho nebo déle ({current}, nový účet: {new}): nic se nezměnilo."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Interval obnovení",
+          "notify_days": "Upozornit před vypršením",
+          "health_interval": "Interval kontroly serveru",
+          "stream_check": "Otestovat videostream kanálu"
+        },
+        "data_description": {
+          "notify_days": "Trvalé oznámení tolik dní před vypršením předplatného (0 pro vypnutí)",
+          "health_interval": "Jak často se server kontroluje lehkým požadavkem (pouze informace o účtu)",
+          "stream_check": "Při každé kontrole serveru se nakrátko otevře kanál pro ověření, že se přehrává (obsadí jedno připojení). Pokud to selže, stav serveru ukáže Stream nefunguje."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "status": {
+        "name": "Stav",
+        "state": {
+          "active": "Aktivní",
+          "expired": "Vypršelo",
+          "banned": "Zablokováno",
+          "disabled": "Deaktivováno",
+          "invalid_auth": "Neplatné přihlašovací údaje"
+        }
+      },
+      "expiration": {
+        "name": "Platnost do"
+      },
+      "days_left": {
+        "name": "Zbývající dny"
+      },
+      "created": {
+        "name": "Vytvořeno"
+      },
+      "active_connections": {
+        "name": "Aktivní připojení"
+      },
+      "max_connections": {
+        "name": "Max. připojení"
+      },
+      "channels": {
+        "name": "Živé kanály"
+      },
+      "movies": {
+        "name": "Filmy"
+      },
+      "series": {
+        "name": "Seriály"
+      },
+      "health": {
+        "name": "Stav serveru",
+        "state": {
+          "ok": "OK",
+          "degraded": "Pomalý",
+          "auth_failed": "Přihlašovací údaje byly odmítnuty",
+          "unreachable": "Nedostupný",
+          "stream_ko": "Stream nefunguje"
+        }
+      },
+      "response_time": {
+        "name": "Doba odezvy"
+      },
+      "last_check": {
+        "name": "Poslední kontrola"
+      },
+      "added": {
+        "name": "Přidáno"
+      },
+      "updated": {
+        "name": "Aktualizováno"
+      }
+    },
+    "binary_sensor": {
+      "trial": {
+        "name": "Zkušební období"
+      },
+      "french_lists": {
+        "name": "Francouzské seznamy"
+      }
+    }
+  },
+  "services": {
+    "edit_account": {
+      "name": "Upravit účet",
+      "description": "Změní přihlašovací údaje nebo MAC adresu účtu po stejných kontrolách jako při přidání. Data volání služeb ukládá recorder (událost call_service) včetně hesla: raději použijte kartu.",
+      "fields": {
+        "device_id": {
+          "name": "Účet",
+          "description": "Účet IPTV, který se má upravit."
+        },
+        "url": {
+          "name": "URL serveru",
+          "description": "Nová URL serveru; vynechte pro zachování současné."
+        },
+        "username": {
+          "name": "Uživatelské jméno",
+          "description": "Nové uživatelské jméno (Xtream Codes)."
+        },
+        "password": {
+          "name": "Heslo",
+          "description": "Nové heslo (Xtream Codes); vynechte pro zachování současného."
+        },
+        "mac": {
+          "name": "MAC adresa",
+          "description": "Nová MAC adresa (portál Stalker)."
+        }
+      }
+    },
+    "remove_account": {
+      "name": "Odebrat účet",
+      "description": "Odebere účet IPTV a jeho entity.",
+      "fields": {
+        "device_id": {
+          "name": "Účet",
+          "description": "Účet IPTV, který se má odebrat."
+        }
+      }
+    },
+    "add_account": {
+      "name": "Přidat účet",
+      "description": "Přidá nový účet IPTV se stejnými kontrolami jako v rozhraní. Data volání služeb ukládá recorder (událost call_service) včetně hesla: raději použijte kartu.",
+      "fields": {
+        "provider": {
+          "name": "Typ poskytovatele",
+          "description": "xtream nebo stalker"
+        },
+        "url": {
+          "name": "URL serveru",
+          "description": "Včetně portu, např. http://server:8080."
+        },
+        "username": {
+          "name": "Uživatelské jméno",
+          "description": "Pouze Xtream Codes."
+        },
+        "password": {
+          "name": "Heslo",
+          "description": "Pouze Xtream Codes."
+        },
+        "mac": {
+          "name": "MAC adresa",
+          "description": "Pouze portál Stalker, formát AA:BB:CC:DD:EE:FF."
+        }
+      }
+    },
+    "get_credentials": {
+      "name": "Získat přihlašovací údaje",
+      "description": "Vrátí URL serveru a přihlašovací údaje účtu k zobrazení.",
+      "fields": {
+        "device_id": {
+          "name": "Účet",
+          "description": ""
+        }
+      }
+    }
+  }
+}

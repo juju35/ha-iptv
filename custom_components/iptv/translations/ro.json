@@ -1,0 +1,247 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Abonament IPTV",
+        "description": "Alege tipul de furnizor.",
+        "menu_options": {
+          "xtream": "Xtream Codes (nume de utilizator / parolă)",
+          "stalker": "Stalker / Ministra (adresă MAC)"
+        }
+      },
+      "xtream": {
+        "title": "Xtream Codes",
+        "description": "Home Assistant interoghează API-ul Xtream Codes al furnizorului tău.",
+        "data": {
+          "url": "URL server Xtream",
+          "username": "Nume de utilizator",
+          "password": "Parolă",
+          "notify_service": "Trimite datele de conectare către"
+        },
+        "data_description": {
+          "url": "Inclusiv portul, de ex. http://server:8080",
+          "notify_service": "Opțional: serviciu de notificare (de ex. notify.mobile_app_phone) care primește serverul, numele de utilizator (sau adresa MAC) și data expirării, niciodată parola, după adăugarea contului"
+        }
+      },
+      "stalker": {
+        "title": "IPTV Stalker (adresă MAC)",
+        "description": "Home Assistant interoghează portalul Stalker/Ministra al furnizorului tău cu o adresă MAC.",
+        "data": {
+          "url": "URL portal",
+          "mac": "Adresă MAC",
+          "notify_service": "Trimite datele de conectare către"
+        },
+        "data_description": {
+          "url": "Inclusiv portul, de ex. http://portal:80",
+          "mac": "Format AA:BB:CC:DD:EE:FF",
+          "notify_service": "Opțional: serviciu de notificare (de ex. notify.mobile_app_phone) care primește serverul, numele de utilizator (sau adresa MAC) și data expirării, niciodată parola, după adăugarea contului"
+        }
+      },
+      "reconfigure": {
+        "title": "Abonament IPTV",
+        "data": {
+          "url": "URL server sau portal",
+          "username": "Nume de utilizator",
+          "password": "Parolă",
+          "mac": "Adresă MAC"
+        },
+        "data_description": {
+          "url": "Inclusiv portul, de ex. http://server:8080",
+          "mac": "Format AA:BB:CC:DD:EE:FF",
+          "password": "Lasă gol pentru a păstra parola actuală"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Abonament IPTV",
+        "data": {
+          "url": "URL server sau portal",
+          "username": "Nume de utilizator",
+          "password": "Parolă",
+          "mac": "Adresă MAC"
+        },
+        "data_description": {
+          "url": "Inclusiv portul, de ex. http://server:8080",
+          "mac": "Format AA:BB:CC:DD:EE:FF",
+          "password": "Lasă gol pentru a păstra parola actuală"
+        },
+        "description": "Serverul a respins datele de autentificare pentru {name}. Introdu-le pe cele noi."
+      }
+    },
+    "error": {
+      "cannot_connect": "Serverul IPTV nu poate fi accesat",
+      "invalid_auth": "Date de autentificare respinse de server",
+      "invalid_mac": "Adresă MAC nevalidă (format AA:BB:CC:DD:EE:FF)",
+      "no_french_lists": "Nicio listă franceză găsită la acest furnizor (categorii live, VOD sau seriale): contul nu este adăugat.",
+      "french_unknown": "Categoriile acestui furnizor nu au putut fi citite pentru a verifica listele franceze.",
+      "stream_ko": "Fluxul video al canalului de test nu pornește: contul nu este adăugat.",
+      "empty_catalogue": "Furnizorul nu are un catalog utilizabil de canale / filme / seriale: contul nu este adăugat."
+    },
+    "abort": {
+      "already_configured": "Acest cont este deja configurat",
+      "reconfigure_successful": "Reconfigurare reușită",
+      "reauth_successful": "Reautentificare reușită",
+      "migrated": "Conturi mutate din fosta integrare IPTV Xtream în IPTV, cu aceleași entități: {count}. Șterge vechiul dosar custom_components/iptv_xtream dacă mai există și repornește Home Assistant.",
+      "account_updated": "{title} este pe același server: noul cont este valabil mai mult timp ({new} în loc de {current}), așa că {title} folosește acum noile date de autentificare.",
+      "existing_longer": "{title} este pe același server și este valabil cel puțin la fel de mult ({current}, cont nou: {new}): nu s-a schimbat nimic."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Interval de reîmprospătare",
+          "notify_days": "Notifică înainte de expirare",
+          "health_interval": "Interval de verificare a serverului",
+          "stream_check": "Testează fluxul video al unui canal"
+        },
+        "data_description": {
+          "notify_days": "Notificare persistentă cu atâtea zile înainte de expirarea abonamentului (0 pentru a dezactiva)",
+          "health_interval": "Cât de des este verificat serverul printr-o cerere ușoară (doar informațiile contului)",
+          "stream_check": "La fiecare verificare, deschide scurt un canal pentru a confirma că pornește (ocupă o conexiune). Dacă eșuează, starea serverului arată Flux oprit."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "status": {
+        "name": "Stare",
+        "state": {
+          "active": "Activ",
+          "expired": "Expirat",
+          "banned": "Blocat",
+          "disabled": "Dezactivat",
+          "invalid_auth": "Date de autentificare nevalide"
+        }
+      },
+      "expiration": {
+        "name": "Expirare"
+      },
+      "days_left": {
+        "name": "Zile rămase"
+      },
+      "created": {
+        "name": "Creat"
+      },
+      "active_connections": {
+        "name": "Conexiuni active"
+      },
+      "max_connections": {
+        "name": "Conexiuni maxime"
+      },
+      "channels": {
+        "name": "Canale live"
+      },
+      "movies": {
+        "name": "Filme"
+      },
+      "series": {
+        "name": "Seriale"
+      },
+      "health": {
+        "name": "Starea serverului",
+        "state": {
+          "ok": "OK",
+          "degraded": "Lent",
+          "auth_failed": "Date de autentificare respinse",
+          "unreachable": "Inaccesibil",
+          "stream_ko": "Flux oprit"
+        }
+      },
+      "response_time": {
+        "name": "Timp de răspuns"
+      },
+      "last_check": {
+        "name": "Ultima verificare"
+      },
+      "added": {
+        "name": "Adăugat"
+      },
+      "updated": {
+        "name": "Actualizat"
+      }
+    },
+    "binary_sensor": {
+      "trial": {
+        "name": "Probă"
+      },
+      "french_lists": {
+        "name": "Liste franceze"
+      }
+    }
+  },
+  "services": {
+    "edit_account": {
+      "name": "Editează contul",
+      "description": "Modifică datele de autentificare sau adresa MAC ale unui cont, după aceleași verificări ca la adăugare. Datele apelurilor de servicii sunt stocate de recorder (evenimentul call_service), inclusiv parola: folosește de preferință cardul.",
+      "fields": {
+        "device_id": {
+          "name": "Cont",
+          "description": "Contul IPTV de editat."
+        },
+        "url": {
+          "name": "URL server",
+          "description": "Noul URL al serverului; omite-l pentru a-l păstra pe cel actual."
+        },
+        "username": {
+          "name": "Nume de utilizator",
+          "description": "Noul nume de utilizator (Xtream Codes)."
+        },
+        "password": {
+          "name": "Parolă",
+          "description": "Noua parolă (Xtream Codes); omite-o pentru a o păstra pe cea actuală."
+        },
+        "mac": {
+          "name": "Adresă MAC",
+          "description": "Noua adresă MAC (portal Stalker)."
+        }
+      }
+    },
+    "remove_account": {
+      "name": "Elimină contul",
+      "description": "Elimină un cont IPTV și entitățile sale.",
+      "fields": {
+        "device_id": {
+          "name": "Cont",
+          "description": "Contul IPTV de eliminat."
+        }
+      }
+    },
+    "add_account": {
+      "name": "Adaugă un cont",
+      "description": "Adaugă un cont IPTV nou, cu aceleași verificări ca interfața. Datele apelurilor de servicii sunt stocate de recorder (evenimentul call_service), inclusiv parola: folosește de preferință cardul.",
+      "fields": {
+        "provider": {
+          "name": "Tip de furnizor",
+          "description": "xtream sau stalker"
+        },
+        "url": {
+          "name": "URL server",
+          "description": "Inclusiv portul, de ex. http://server:8080."
+        },
+        "username": {
+          "name": "Nume de utilizator",
+          "description": "Doar Xtream Codes."
+        },
+        "password": {
+          "name": "Parolă",
+          "description": "Doar Xtream Codes."
+        },
+        "mac": {
+          "name": "Adresă MAC",
+          "description": "Doar portal Stalker, format AA:BB:CC:DD:EE:FF."
+        }
+      }
+    },
+    "get_credentials": {
+      "name": "Obține datele de autentificare",
+      "description": "Returnează URL-ul serverului și datele de autentificare ale unui cont, pentru afișare.",
+      "fields": {
+        "device_id": {
+          "name": "Cont",
+          "description": ""
+        }
+      }
+    }
+  }
+}

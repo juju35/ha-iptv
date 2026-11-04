@@ -1,0 +1,247 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "IPTV-előfizetés",
+        "description": "Válaszd ki a szolgáltató típusát.",
+        "menu_options": {
+          "xtream": "Xtream Codes (felhasználónév / jelszó)",
+          "stalker": "Stalker / Ministra (MAC-cím)"
+        }
+      },
+      "xtream": {
+        "title": "Xtream Codes",
+        "description": "A Home Assistant a szolgáltató Xtream Codes API-ját kérdezi le.",
+        "data": {
+          "url": "Xtream-szerver URL",
+          "username": "Felhasználónév",
+          "password": "Jelszó",
+          "notify_service": "Kapcsolati adatok küldése ide"
+        },
+        "data_description": {
+          "url": "A porttal együtt, pl. http://server:8080",
+          "notify_service": "Opcionális: értesítési szolgáltatás (pl. notify.mobile_app_phone), amely a fiók hozzáadása után megkapja a szervert, a felhasználónevet (vagy MAC-címet) és a lejáratot, a jelszót soha"
+        }
+      },
+      "stalker": {
+        "title": "IPTV Stalker (MAC-cím)",
+        "description": "A Home Assistant a szolgáltató Stalker/Ministra portálját kérdezi le egy MAC-címmel.",
+        "data": {
+          "url": "Portál URL",
+          "mac": "MAC-cím",
+          "notify_service": "Kapcsolati adatok küldése ide"
+        },
+        "data_description": {
+          "url": "A porttal együtt, pl. http://portal:80",
+          "mac": "Formátum: AA:BB:CC:DD:EE:FF",
+          "notify_service": "Opcionális: értesítési szolgáltatás (pl. notify.mobile_app_phone), amely a fiók hozzáadása után megkapja a szervert, a felhasználónevet (vagy MAC-címet) és a lejáratot, a jelszót soha"
+        }
+      },
+      "reconfigure": {
+        "title": "IPTV-előfizetés",
+        "data": {
+          "url": "Szerver vagy portál URL",
+          "username": "Felhasználónév",
+          "password": "Jelszó",
+          "mac": "MAC-cím"
+        },
+        "data_description": {
+          "url": "A porttal együtt, pl. http://server:8080",
+          "mac": "Formátum: AA:BB:CC:DD:EE:FF",
+          "password": "Hagyd üresen a jelenlegi jelszó megtartásához"
+        }
+      },
+      "reauth_confirm": {
+        "title": "IPTV-előfizetés",
+        "data": {
+          "url": "Szerver vagy portál URL",
+          "username": "Felhasználónév",
+          "password": "Jelszó",
+          "mac": "MAC-cím"
+        },
+        "data_description": {
+          "url": "A porttal együtt, pl. http://server:8080",
+          "mac": "Formátum: AA:BB:CC:DD:EE:FF",
+          "password": "Hagyd üresen a jelenlegi jelszó megtartásához"
+        },
+        "description": "A szerver elutasította {name} hitelesítő adatait. Add meg az újakat."
+      }
+    },
+    "error": {
+      "cannot_connect": "Az IPTV-szerver nem érhető el",
+      "invalid_auth": "A szerver elutasította a hitelesítő adatokat",
+      "invalid_mac": "Érvénytelen MAC-cím (formátum: AA:BB:CC:DD:EE:FF)",
+      "no_french_lists": "Ennél a szolgáltatónál nem található francia lista (élő, VOD vagy sorozat kategóriák): a fiók nem lett hozzáadva.",
+      "french_unknown": "Nem sikerült beolvasni a szolgáltató kategóriáit a francia listák ellenőrzéséhez.",
+      "stream_ko": "A tesztcsatorna videostreamje nem játszható le: a fiók nem lett hozzáadva.",
+      "empty_catalogue": "A szolgáltatónak nincs használható csatorna- / film- / sorozatkatalógusa: a fiók nem lett hozzáadva."
+    },
+    "abort": {
+      "already_configured": "Ez a fiók már konfigurálva van",
+      "reconfigure_successful": "Az újrakonfigurálás sikeres",
+      "reauth_successful": "Az újrahitelesítés sikeres",
+      "migrated": "A korábbi IPTV Xtream integrációból az IPTV-be áthelyezett fiókok, ugyanazokkal az entitásokkal: {count}. Töröld a régi custom_components/iptv_xtream mappát, ha még megvan, és indítsd újra a Home Assistantot.",
+      "account_updated": "{title} ugyanazon a szerveren van: az új fiók tovább érvényes ({new} a(z) {current} helyett), ezért {title} mostantól az új hitelesítő adatokat használja.",
+      "existing_longer": "{title} ugyanazon a szerveren van, és legalább ugyanolyan sokáig érvényes ({current}, új fiók: {new}): nem változott semmi."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Frissítési időköz",
+          "notify_days": "Értesítés lejárat előtt",
+          "health_interval": "Szerverellenőrzés időköze",
+          "stream_check": "Egy csatorna videostreamjének tesztelése"
+        },
+        "data_description": {
+          "notify_days": "Tartós értesítés ennyi nappal az előfizetés lejárata előtt (0 a kikapcsoláshoz)",
+          "health_interval": "Milyen gyakran ellenőrizze a szervert egy könnyű lekérdezéssel (csak fiókadatok)",
+          "stream_check": "Minden szerverellenőrzéskor rövid időre megnyit egy csatornát, hogy meggyőződjön a lejátszásról (lefoglal egy kapcsolatot). Sikertelenség esetén az állapot Stream leállt lesz."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "status": {
+        "name": "Állapot",
+        "state": {
+          "active": "Aktív",
+          "expired": "Lejárt",
+          "banned": "Letiltva",
+          "disabled": "Kikapcsolva",
+          "invalid_auth": "Érvénytelen hitelesítő adatok"
+        }
+      },
+      "expiration": {
+        "name": "Lejárat"
+      },
+      "days_left": {
+        "name": "Hátralévő napok"
+      },
+      "created": {
+        "name": "Létrehozva"
+      },
+      "active_connections": {
+        "name": "Aktív kapcsolatok"
+      },
+      "max_connections": {
+        "name": "Max. kapcsolatok"
+      },
+      "channels": {
+        "name": "Élő csatornák"
+      },
+      "movies": {
+        "name": "Filmek"
+      },
+      "series": {
+        "name": "Sorozatok"
+      },
+      "health": {
+        "name": "Szerverállapot",
+        "state": {
+          "ok": "OK",
+          "degraded": "Lassú",
+          "auth_failed": "Elutasított hitelesítő adatok",
+          "unreachable": "Nem érhető el",
+          "stream_ko": "Stream leállt"
+        }
+      },
+      "response_time": {
+        "name": "Válaszidő"
+      },
+      "last_check": {
+        "name": "Utolsó ellenőrzés"
+      },
+      "added": {
+        "name": "Hozzáadva"
+      },
+      "updated": {
+        "name": "Frissítve"
+      }
+    },
+    "binary_sensor": {
+      "trial": {
+        "name": "Próbaidőszak"
+      },
+      "french_lists": {
+        "name": "Francia listák"
+      }
+    }
+  },
+  "services": {
+    "edit_account": {
+      "name": "Fiók szerkesztése",
+      "description": "Módosítja egy fiók hitelesítő adatait vagy MAC-címét, a hozzáadással azonos ellenőrzések után. A szolgáltatáshívások adatait a recorder tárolja (call_service esemény), a jelszóval együtt: inkább a kártyát használd.",
+      "fields": {
+        "device_id": {
+          "name": "Fiók",
+          "description": "A szerkesztendő IPTV-fiók."
+        },
+        "url": {
+          "name": "Szerver URL",
+          "description": "Új szerver URL; hagyd ki a jelenlegi megtartásához."
+        },
+        "username": {
+          "name": "Felhasználónév",
+          "description": "Új felhasználónév (Xtream Codes)."
+        },
+        "password": {
+          "name": "Jelszó",
+          "description": "Új jelszó (Xtream Codes); hagyd ki a jelenlegi megtartásához."
+        },
+        "mac": {
+          "name": "MAC-cím",
+          "description": "Új MAC-cím (Stalker portál)."
+        }
+      }
+    },
+    "remove_account": {
+      "name": "Fiók eltávolítása",
+      "description": "Eltávolít egy IPTV-fiókot és az entitásait.",
+      "fields": {
+        "device_id": {
+          "name": "Fiók",
+          "description": "Az eltávolítandó IPTV-fiók."
+        }
+      }
+    },
+    "add_account": {
+      "name": "Fiók hozzáadása",
+      "description": "Új IPTV-fiókot ad hozzá a felülettel azonos ellenőrzésekkel. A szolgáltatáshívások adatait a recorder tárolja (call_service esemény), a jelszóval együtt: inkább a kártyát használd.",
+      "fields": {
+        "provider": {
+          "name": "Szolgáltató típusa",
+          "description": "xtream vagy stalker"
+        },
+        "url": {
+          "name": "Szerver URL",
+          "description": "A porttal együtt, pl. http://server:8080."
+        },
+        "username": {
+          "name": "Felhasználónév",
+          "description": "Csak Xtream Codes."
+        },
+        "password": {
+          "name": "Jelszó",
+          "description": "Csak Xtream Codes."
+        },
+        "mac": {
+          "name": "MAC-cím",
+          "description": "Csak Stalker portál, formátum: AA:BB:CC:DD:EE:FF."
+        }
+      }
+    },
+    "get_credentials": {
+      "name": "Hitelesítő adatok lekérése",
+      "description": "Visszaadja egy fiók szerver URL-jét és hitelesítő adatait megtekintésre.",
+      "fields": {
+        "device_id": {
+          "name": "Fiók",
+          "description": ""
+        }
+      }
+    }
+  }
+}

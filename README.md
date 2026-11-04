@@ -31,7 +31,7 @@ Home Assistant integration and Lovelace card that track one or several **IPTV su
 - **Sidebar panel** (administrators): every account and its settings on one page
 - Visual editor, refresh button
 - Fully compatible with Home Assistant dark mode
-- English, French, German, Spanish, Italian, Dutch, European Portuguese, Polish and Serbian (Cyrillic and Latin), auto-detected
+- English, French, German, Spanish, Italian, Dutch, European Portuguese, Polish, Romanian, Danish, Swedish, Bulgarian, Russian, Ukrainian, Hungarian, Irish, Slovak, Czech, Slovenian, Maltese, Latvian, Greek and Serbian (Cyrillic and Latin), auto-detected
 
 Home Assistant queries the Xtream server itself, so it works even when the server is plain `http://` without CORS headers or is only reachable from your network. Only a small summary is stored: the full channel, movie and series lists never reach the browser.
 
@@ -199,7 +199,7 @@ devices:
 | `device` | ❌ | — | Legacy single-device option, still read when `devices` is not set |
 | `title` | ❌ | Auto (i18n) | Card title |
 | `warning_days` | ❌ | `7` | Turns orange when fewer days than this are left |
-| `language` | ❌ | Auto | Force language: `en`, `fr`, `de`, `es`, `it`, `nl`, `pt`, `pl`, `sr` or `sr-Latn` (auto-detects from HA settings) |
+| `language` | ❌ | Auto | Force language: `en`, `fr`, `de`, `es`, `it`, `nl`, `pt`, `pl`, `ro`, `da`, `sv`, `bg`, `ru`, `uk`, `hu`, `ga`, `sk`, `cs`, `sl`, `mt`, `lv`, `el`, `sr` or `sr-Latn` (auto-detects from HA settings) |
 
 Each subscription shows a French flag pill (**FR** in green when French lists were found, **No FR** in red otherwise), a health pill next to its status, and the moment of its last health check: **Online** with the response time (green), **Slow** above 3 s (orange), **Unreachable** (red). The **+** button (card header) opens a popup to add a new account, the 👁 button on each subscription shows its server URL and credentials with a copy button for each, the ✎ button edits them, and the 🗑 button removes the account (with confirmation). Adding or editing runs the same checks as the UI (credentials, French lists and video stream). The edit form is also available from **Settings → Devices & services → IPTV → ⋮ → Reconfigure**. The ⟳ button queries every shown server (re-reading the channel / movie / series counts and French lists, otherwise cached for 6 hours) and runs a health check right away. The add, view, edit and remove buttons are shown to Home Assistant administrators only. The card adds, views and edits accounts through admin-only WebSocket commands (`iptv/add_account`, `iptv/edit_account`, `iptv/get_credentials`), so the password never goes through a service call; removing uses the admin-only `iptv.remove_account` service.
 
@@ -299,6 +299,20 @@ The integration and the card auto-detect the language from your Home Assistant s
 | Nederlands | `nl` |
 | Português (Portugal); pt-BR uses the European Portuguese texts | `pt`, `pt-BR` |
 | Polski | `pl` |
+| Română | `ro` |
+| Dansk | `da` |
+| Svenska | `sv` |
+| Български | `bg` |
+| Русский | `ru` |
+| Українська | `uk` |
+| Magyar | `hu` |
+| Gaeilge | `ga` |
+| Slovenčina | `sk` |
+| Čeština | `cs` |
+| Slovenščina | `sl` |
+| Malti | `mt` |
+| Latviešu | `lv` |
+| Ελληνικά | `el` |
 | Српски | `sr` |
 | Srpski (latinica) | `sr-Latn` |
 
