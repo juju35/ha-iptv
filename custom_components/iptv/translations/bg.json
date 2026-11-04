@@ -1,0 +1,247 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "IPTV абонамент",
+        "description": "Изберете типа доставчик.",
+        "menu_options": {
+          "xtream": "Xtream Codes (потребителско име / парола)",
+          "stalker": "Stalker / Ministra (MAC адрес)"
+        }
+      },
+      "xtream": {
+        "title": "Xtream Codes",
+        "description": "Home Assistant изпраща запитвания към Xtream Codes API на вашия доставчик.",
+        "data": {
+          "url": "URL на Xtream сървъра",
+          "username": "Потребителско име",
+          "password": "Парола",
+          "notify_service": "Изпращане на данните за връзка до"
+        },
+        "data_description": {
+          "url": "Включително порта, напр. http://server:8080",
+          "notify_service": "По избор: услуга за известия (напр. notify.mobile_app_phone), която получава сървъра, потребителското име (или MAC адреса) и датата на изтичане, но никога паролата, след като акаунтът е добавен"
+        }
+      },
+      "stalker": {
+        "title": "IPTV Stalker (MAC адрес)",
+        "description": "Home Assistant изпраща запитвания към портала Stalker/Ministra на вашия доставчик с MAC адрес.",
+        "data": {
+          "url": "URL на портала",
+          "mac": "MAC адрес",
+          "notify_service": "Изпращане на данните за връзка до"
+        },
+        "data_description": {
+          "url": "Включително порта, напр. http://portal:80",
+          "mac": "Формат AA:BB:CC:DD:EE:FF",
+          "notify_service": "По избор: услуга за известия (напр. notify.mobile_app_phone), която получава сървъра, потребителското име (или MAC адреса) и датата на изтичане, но никога паролата, след като акаунтът е добавен"
+        }
+      },
+      "reconfigure": {
+        "title": "IPTV абонамент",
+        "data": {
+          "url": "URL на сървъра или портала",
+          "username": "Потребителско име",
+          "password": "Парола",
+          "mac": "MAC адрес"
+        },
+        "data_description": {
+          "url": "Включително порта, напр. http://server:8080",
+          "mac": "Формат AA:BB:CC:DD:EE:FF",
+          "password": "Оставете празно, за да запазите текущата парола"
+        }
+      },
+      "reauth_confirm": {
+        "title": "IPTV абонамент",
+        "data": {
+          "url": "URL на сървъра или портала",
+          "username": "Потребителско име",
+          "password": "Парола",
+          "mac": "MAC адрес"
+        },
+        "data_description": {
+          "url": "Включително порта, напр. http://server:8080",
+          "mac": "Формат AA:BB:CC:DD:EE:FF",
+          "password": "Оставете празно, за да запазите текущата парола"
+        },
+        "description": "Сървърът отхвърли данните за вход на {name}. Въведете новите."
+      }
+    },
+    "error": {
+      "cannot_connect": "Няма връзка с IPTV сървъра",
+      "invalid_auth": "Сървърът отхвърли данните за вход",
+      "invalid_mac": "Невалиден MAC адрес (формат AA:BB:CC:DD:EE:FF)",
+      "no_french_lists": "Не е намерен френски списък при този доставчик (категории на живо, VOD или сериали): акаунтът не е добавен.",
+      "french_unknown": "Категориите на този доставчик не можаха да бъдат прочетени, за да се проверят френските списъци.",
+      "stream_ko": "Видеопотокът на тестовия канал не се възпроизвежда: акаунтът не е добавен.",
+      "empty_catalogue": "Доставчикът няма използваем каталог с канали / филми / сериали: акаунтът не е добавен."
+    },
+    "abort": {
+      "already_configured": "Този акаунт вече е конфигуриран",
+      "reconfigure_successful": "Преконфигурирането е успешно",
+      "reauth_successful": "Повторното удостоверяване е успешно",
+      "migrated": "Акаунти от предишната интеграция IPTV Xtream, преместени в IPTV със същите обекти: {count}. Изтрийте старата папка custom_components/iptv_xtream, ако още съществува, и рестартирайте Home Assistant.",
+      "account_updated": "{title} е на същия сървър: новият акаунт е валиден по-дълго ({new} вместо {current}), затова {title} вече използва новите данни за вход.",
+      "existing_longer": "{title} е на същия сървър и е валиден също толкова дълго или по-дълго ({current}, нов акаунт: {new}): нищо не е променено."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Интервал на обновяване",
+          "notify_days": "Известие преди изтичане",
+          "health_interval": "Интервал на проверка на сървъра",
+          "stream_check": "Тест на видеопотока на канал"
+        },
+        "data_description": {
+          "notify_days": "Постоянно известие толкова дни преди изтичането на абонамента (0 за изключване)",
+          "health_interval": "Колко често сървърът се проверява с леко запитване (само информация за акаунта)",
+          "stream_check": "При всяка проверка на сървъра за кратко се отваря канал, за да се потвърди, че се възпроизвежда (заема една връзка). При неуспех състоянието показва Няма поток."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "status": {
+        "name": "Статус",
+        "state": {
+          "active": "Активен",
+          "expired": "Изтекъл",
+          "banned": "Блокиран",
+          "disabled": "Деактивиран",
+          "invalid_auth": "Невалидни данни за вход"
+        }
+      },
+      "expiration": {
+        "name": "Изтичане"
+      },
+      "days_left": {
+        "name": "Оставащи дни"
+      },
+      "created": {
+        "name": "Създаден"
+      },
+      "active_connections": {
+        "name": "Активни връзки"
+      },
+      "max_connections": {
+        "name": "Макс. връзки"
+      },
+      "channels": {
+        "name": "Канали на живо"
+      },
+      "movies": {
+        "name": "Филми"
+      },
+      "series": {
+        "name": "Сериали"
+      },
+      "health": {
+        "name": "Състояние на сървъра",
+        "state": {
+          "ok": "OK",
+          "degraded": "Бавен",
+          "auth_failed": "Данните за вход са отхвърлени",
+          "unreachable": "Недостъпен",
+          "stream_ko": "Няма поток"
+        }
+      },
+      "response_time": {
+        "name": "Време за отговор"
+      },
+      "last_check": {
+        "name": "Последна проверка"
+      },
+      "added": {
+        "name": "Добавен"
+      },
+      "updated": {
+        "name": "Актуализиран"
+      }
+    },
+    "binary_sensor": {
+      "trial": {
+        "name": "Пробен период"
+      },
+      "french_lists": {
+        "name": "Френски списъци"
+      }
+    }
+  },
+  "services": {
+    "edit_account": {
+      "name": "Редактиране на акаунт",
+      "description": "Променя данните за вход или MAC адреса на акаунт след същите проверки като при добавяне. Данните от извикванията на услуги се записват от recorder (събитие call_service), включително паролата: за предпочитане използвайте картата.",
+      "fields": {
+        "device_id": {
+          "name": "Акаунт",
+          "description": "IPTV акаунтът за редактиране."
+        },
+        "url": {
+          "name": "URL на сървъра",
+          "description": "Нов URL на сървъра; пропуснете, за да запазите текущия."
+        },
+        "username": {
+          "name": "Потребителско име",
+          "description": "Ново потребителско име (Xtream Codes)."
+        },
+        "password": {
+          "name": "Парола",
+          "description": "Нова парола (Xtream Codes); пропуснете, за да запазите текущата."
+        },
+        "mac": {
+          "name": "MAC адрес",
+          "description": "Нов MAC адрес (портал Stalker)."
+        }
+      }
+    },
+    "remove_account": {
+      "name": "Премахване на акаунт",
+      "description": "Премахва IPTV акаунт и неговите обекти.",
+      "fields": {
+        "device_id": {
+          "name": "Акаунт",
+          "description": "IPTV акаунтът за премахване."
+        }
+      }
+    },
+    "add_account": {
+      "name": "Добавяне на акаунт",
+      "description": "Добавя нов IPTV акаунт със същите проверки като в интерфейса. Данните от извикванията на услуги се записват от recorder (събитие call_service), включително паролата: за предпочитане използвайте картата.",
+      "fields": {
+        "provider": {
+          "name": "Тип доставчик",
+          "description": "xtream или stalker"
+        },
+        "url": {
+          "name": "URL на сървъра",
+          "description": "Включително порта, напр. http://server:8080."
+        },
+        "username": {
+          "name": "Потребителско име",
+          "description": "Само за Xtream Codes."
+        },
+        "password": {
+          "name": "Парола",
+          "description": "Само за Xtream Codes."
+        },
+        "mac": {
+          "name": "MAC адрес",
+          "description": "Само за портал Stalker, формат AA:BB:CC:DD:EE:FF."
+        }
+      }
+    },
+    "get_credentials": {
+      "name": "Получаване на данните за вход",
+      "description": "Връща URL на сървъра и данните за вход на акаунт за преглед.",
+      "fields": {
+        "device_id": {
+          "name": "Акаунт",
+          "description": ""
+        }
+      }
+    }
+  }
+}

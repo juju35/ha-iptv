@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.22.7 - 2026-11-04
+
+### Changes
+- Added Romanian, Danish, Swedish, Bulgarian, Russian, Ukrainian, Hungarian, Slovak, Czech, Slovenian, Latvian and Greek translations: integration (`ro`, `da`, `sv`, `bg`, `ru`, `uk`, `hu`, `sk`, `cs`, `sl`, `lv`, `el`), card, sidebar panel and notifications; the card editor offers **Română**, **Dansk**, **Svenska**, **Български**, **Русский**, **Українська**, **Magyar**, **Slovenčina**, **Čeština**, **Slovenščina**, **Latviešu** and **Ελληνικά**.
+
 ## 3.22.6 - 2026-11-02
 
 ### Fixes

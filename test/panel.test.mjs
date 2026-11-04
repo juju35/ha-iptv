@@ -29,8 +29,8 @@ const placeholders = (s) => [...String(s).matchAll(/\{\w+\}/g)].map((m) => m[0])
 
 test('panel i18n parity: every language has exactly the English keys and placeholders', () => {
   const en = IptvPanelI18n.en;
-  assert.deepEqual(Object.keys(IptvPanelI18n).sort(), ['de', 'en', 'es', 'fr', 'it', 'nl', 'pl', 'pt', 'sr', 'sr-Latn']);
-  for (const lang of ['fr', 'de', 'es', 'it', 'nl', 'pt', 'pl', 'sr', 'sr-Latn']) {
+  assert.deepEqual(Object.keys(IptvPanelI18n).sort(), ['bg', 'cs', 'da', 'de', 'el', 'en', 'es', 'fr', 'hu', 'it', 'lv', 'nl', 'pl', 'pt', 'ro', 'ru', 'sk', 'sl', 'sr', 'sr-Latn', 'sv', 'uk']);
+  for (const lang of ['fr', 'de', 'es', 'it', 'nl', 'pt', 'pl', 'ro', 'da', 'sv', 'bg', 'ru', 'uk', 'hu', 'sk', 'cs', 'sl', 'lv', 'el', 'sr', 'sr-Latn']) {
     const strings = IptvPanelI18n[lang];
     assert.deepEqual(Object.keys(strings).sort(), Object.keys(en).sort(), `keys of ${lang}`);
     for (const key of Object.keys(en)) {
@@ -79,6 +79,22 @@ test('the panel resolves Italian, Dutch, Portuguese and Polish codes', () => {
   assert.equal(panel._t('settings'), 'Definições');
   assert.equal(lang('pl-PL'), 'pl');
   assert.equal(lang('sr-Latn'), 'sr-Latn');
+  assert.equal(lang('ja'), 'en');
+});
+
+test('the panel resolves the 12 languages added in 3.22.7', () => {
+  const panel = Object.create(IptvPanel.prototype);
+  const lang = (language) => {
+    panel._hass = { language };
+    return panel._lang();
+  };
+  for (const code of ['ro', 'da', 'sv', 'bg', 'ru', 'uk', 'hu', 'sk', 'cs', 'sl', 'lv', 'el']) {
+    assert.equal(lang(code), code);
+  }
+  assert.equal(lang('sv-FI'), 'sv');
+  assert.equal(panel._t('settings'), 'Inställningar');
+  assert.equal(lang('el-CY'), 'el');
+  assert.equal(panel._t('settings'), 'Ρυθμίσεις');
   assert.equal(lang('ja'), 'en');
 });
 

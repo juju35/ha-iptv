@@ -1,0 +1,247 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "IPTV abonements",
+        "description": "Izvēlieties pakalpojumu sniedzēja veidu.",
+        "menu_options": {
+          "xtream": "Xtream Codes (lietotājvārds / parole)",
+          "stalker": "Stalker / Ministra (MAC adrese)"
+        }
+      },
+      "xtream": {
+        "title": "Xtream Codes",
+        "description": "Home Assistant vaicā jūsu pakalpojumu sniedzēja Xtream Codes API.",
+        "data": {
+          "url": "Xtream servera URL",
+          "username": "Lietotājvārds",
+          "password": "Parole",
+          "notify_service": "Sūtīt savienojuma datus uz"
+        },
+        "data_description": {
+          "url": "Ieskaitot portu, piem., http://server:8080",
+          "notify_service": "Neobligāti: paziņojumu pakalpojums (piem., notify.mobile_app_phone), kas pēc konta pievienošanas saņem serveri, lietotājvārdu (vai MAC adresi) un derīguma beigas, bet nekad paroli"
+        }
+      },
+      "stalker": {
+        "title": "IPTV Stalker (MAC adrese)",
+        "description": "Home Assistant ar MAC adresi vaicā jūsu pakalpojumu sniedzēja Stalker/Ministra portālu.",
+        "data": {
+          "url": "Portāla URL",
+          "mac": "MAC adrese",
+          "notify_service": "Sūtīt savienojuma datus uz"
+        },
+        "data_description": {
+          "url": "Ieskaitot portu, piem., http://portal:80",
+          "mac": "Formāts AA:BB:CC:DD:EE:FF",
+          "notify_service": "Neobligāti: paziņojumu pakalpojums (piem., notify.mobile_app_phone), kas pēc konta pievienošanas saņem serveri, lietotājvārdu (vai MAC adresi) un derīguma beigas, bet nekad paroli"
+        }
+      },
+      "reconfigure": {
+        "title": "IPTV abonements",
+        "data": {
+          "url": "Servera vai portāla URL",
+          "username": "Lietotājvārds",
+          "password": "Parole",
+          "mac": "MAC adrese"
+        },
+        "data_description": {
+          "url": "Ieskaitot portu, piem., http://server:8080",
+          "mac": "Formāts AA:BB:CC:DD:EE:FF",
+          "password": "Atstājiet tukšu, lai saglabātu pašreizējo paroli"
+        }
+      },
+      "reauth_confirm": {
+        "title": "IPTV abonements",
+        "data": {
+          "url": "Servera vai portāla URL",
+          "username": "Lietotājvārds",
+          "password": "Parole",
+          "mac": "MAC adrese"
+        },
+        "data_description": {
+          "url": "Ieskaitot portu, piem., http://server:8080",
+          "mac": "Formāts AA:BB:CC:DD:EE:FF",
+          "password": "Atstājiet tukšu, lai saglabātu pašreizējo paroli"
+        },
+        "description": "Serveris noraidīja {name} pieteikšanās datus. Ievadiet jaunos."
+      }
+    },
+    "error": {
+      "cannot_connect": "Nevar sasniegt IPTV serveri",
+      "invalid_auth": "Serveris noraidīja pieteikšanās datus",
+      "invalid_mac": "Nederīga MAC adrese (formāts AA:BB:CC:DD:EE:FF)",
+      "no_french_lists": "Šim pakalpojumu sniedzējam nav atrasts neviens franču saraksts (tiešraides, VOD vai seriālu kategorijas): konts netiek pievienots.",
+      "french_unknown": "Neizdevās nolasīt šī pakalpojumu sniedzēja kategorijas, lai pārbaudītu franču sarakstus.",
+      "stream_ko": "Testa kanāla video straume netiek atskaņota: konts netiek pievienots.",
+      "empty_catalogue": "Pakalpojumu sniedzējam nav izmantojama kanālu / filmu / seriālu kataloga: konts netiek pievienots."
+    },
+    "abort": {
+      "already_configured": "Šis konts jau ir konfigurēts",
+      "reconfigure_successful": "Atkārtota konfigurēšana veiksmīga",
+      "reauth_successful": "Atkārtota autentifikācija veiksmīga",
+      "migrated": "Iepriekšējās IPTV Xtream integrācijas konti, kas pārvietoti uz IPTV ar tām pašām entītijām: {count}. Izdzēsiet veco mapi custom_components/iptv_xtream, ja tā vēl pastāv, un restartējiet Home Assistant.",
+      "account_updated": "{title} atrodas tajā pašā serverī: jaunais konts ir derīgs ilgāk ({new}, nevis {current}), tāpēc {title} tagad izmanto jaunos pieteikšanās datus.",
+      "existing_longer": "{title} atrodas tajā pašā serverī un ir derīgs tikpat ilgi vai ilgāk ({current}, jaunais konts: {new}): nekas nav mainīts."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Atsvaidzināšanas intervāls",
+          "notify_days": "Paziņot pirms derīguma beigām",
+          "health_interval": "Servera pārbaudes intervāls",
+          "stream_check": "Testēt kanāla video straumi"
+        },
+        "data_description": {
+          "notify_days": "Pastāvīgs paziņojums tik dienas pirms abonementa derīguma beigām (0, lai izslēgtu)",
+          "health_interval": "Cik bieži serveris tiek pārbaudīts ar vieglu pieprasījumu (tikai konta informācija)",
+          "stream_check": "Katras servera pārbaudes laikā uz īsu brīdi tiek atvērts kanāls, lai pārliecinātos, ka tas tiek atskaņots (aizņem vienu savienojumu). Ja tas neizdodas, servera stāvoklis rāda Straume nedarbojas."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "status": {
+        "name": "Statuss",
+        "state": {
+          "active": "Aktīvs",
+          "expired": "Beidzies",
+          "banned": "Bloķēts",
+          "disabled": "Atspējots",
+          "invalid_auth": "Nederīgi pieteikšanās dati"
+        }
+      },
+      "expiration": {
+        "name": "Derīguma beigas"
+      },
+      "days_left": {
+        "name": "Atlikušās dienas"
+      },
+      "created": {
+        "name": "Izveidots"
+      },
+      "active_connections": {
+        "name": "Aktīvie savienojumi"
+      },
+      "max_connections": {
+        "name": "Maks. savienojumi"
+      },
+      "channels": {
+        "name": "Tiešraides kanāli"
+      },
+      "movies": {
+        "name": "Filmas"
+      },
+      "series": {
+        "name": "Seriāli"
+      },
+      "health": {
+        "name": "Servera stāvoklis",
+        "state": {
+          "ok": "OK",
+          "degraded": "Lēns",
+          "auth_failed": "Pieteikšanās dati noraidīti",
+          "unreachable": "Nesasniedzams",
+          "stream_ko": "Straume nedarbojas"
+        }
+      },
+      "response_time": {
+        "name": "Atbildes laiks"
+      },
+      "last_check": {
+        "name": "Pēdējā pārbaude"
+      },
+      "added": {
+        "name": "Pievienots"
+      },
+      "updated": {
+        "name": "Atjaunināts"
+      }
+    },
+    "binary_sensor": {
+      "trial": {
+        "name": "Izmēģinājuma periods"
+      },
+      "french_lists": {
+        "name": "Franču saraksti"
+      }
+    }
+  },
+  "services": {
+    "edit_account": {
+      "name": "Rediģēt kontu",
+      "description": "Maina konta pieteikšanās datus vai MAC adresi pēc tām pašām pārbaudēm kā pievienojot. Pakalpojumu izsaukumu datus saglabā recorder (notikums call_service), ieskaitot paroli: labāk izmantojiet kartīti.",
+      "fields": {
+        "device_id": {
+          "name": "Konts",
+          "description": "Rediģējamais IPTV konts."
+        },
+        "url": {
+          "name": "Servera URL",
+          "description": "Jaunais servera URL; izlaidiet, lai saglabātu pašreizējo."
+        },
+        "username": {
+          "name": "Lietotājvārds",
+          "description": "Jaunais lietotājvārds (Xtream Codes)."
+        },
+        "password": {
+          "name": "Parole",
+          "description": "Jaunā parole (Xtream Codes); izlaidiet, lai saglabātu pašreizējo."
+        },
+        "mac": {
+          "name": "MAC adrese",
+          "description": "Jaunā MAC adrese (Stalker portāls)."
+        }
+      }
+    },
+    "remove_account": {
+      "name": "Noņemt kontu",
+      "description": "Noņem IPTV kontu un tā entītijas.",
+      "fields": {
+        "device_id": {
+          "name": "Konts",
+          "description": "Noņemamais IPTV konts."
+        }
+      }
+    },
+    "add_account": {
+      "name": "Pievienot kontu",
+      "description": "Pievieno jaunu IPTV kontu ar tām pašām pārbaudēm kā saskarnē. Pakalpojumu izsaukumu datus saglabā recorder (notikums call_service), ieskaitot paroli: labāk izmantojiet kartīti.",
+      "fields": {
+        "provider": {
+          "name": "Pakalpojumu sniedzēja veids",
+          "description": "xtream vai stalker"
+        },
+        "url": {
+          "name": "Servera URL",
+          "description": "Ieskaitot portu, piem., http://server:8080."
+        },
+        "username": {
+          "name": "Lietotājvārds",
+          "description": "Tikai Xtream Codes."
+        },
+        "password": {
+          "name": "Parole",
+          "description": "Tikai Xtream Codes."
+        },
+        "mac": {
+          "name": "MAC adrese",
+          "description": "Tikai Stalker portāls, formāts AA:BB:CC:DD:EE:FF."
+        }
+      }
+    },
+    "get_credentials": {
+      "name": "Iegūt pieteikšanās datus",
+      "description": "Atgriež konta servera URL un pieteikšanās datus apskatei.",
+      "fields": {
+        "device_id": {
+          "name": "Konts",
+          "description": ""
+        }
+      }
+    }
+  }
+}

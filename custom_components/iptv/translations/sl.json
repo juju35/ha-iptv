@@ -1,0 +1,247 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Naročnina IPTV",
+        "description": "Izberite vrsto ponudnika.",
+        "menu_options": {
+          "xtream": "Xtream Codes (uporabniško ime / geslo)",
+          "stalker": "Stalker / Ministra (naslov MAC)"
+        }
+      },
+      "xtream": {
+        "title": "Xtream Codes",
+        "description": "Home Assistant pošilja poizvedbe API-ju Xtream Codes vašega ponudnika.",
+        "data": {
+          "url": "URL strežnika Xtream",
+          "username": "Uporabniško ime",
+          "password": "Geslo",
+          "notify_service": "Pošlji podatke za povezavo na"
+        },
+        "data_description": {
+          "url": "Vključno z vrati, npr. http://server:8080",
+          "notify_service": "Neobvezno: storitev obvestil (npr. notify.mobile_app_phone), ki po dodajanju računa prejme strežnik, uporabniško ime (ali naslov MAC) in datum poteka, nikoli pa gesla"
+        }
+      },
+      "stalker": {
+        "title": "IPTV Stalker (naslov MAC)",
+        "description": "Home Assistant z naslovom MAC pošilja poizvedbe portalu Stalker/Ministra vašega ponudnika.",
+        "data": {
+          "url": "URL portala",
+          "mac": "Naslov MAC",
+          "notify_service": "Pošlji podatke za povezavo na"
+        },
+        "data_description": {
+          "url": "Vključno z vrati, npr. http://portal:80",
+          "mac": "Oblika AA:BB:CC:DD:EE:FF",
+          "notify_service": "Neobvezno: storitev obvestil (npr. notify.mobile_app_phone), ki po dodajanju računa prejme strežnik, uporabniško ime (ali naslov MAC) in datum poteka, nikoli pa gesla"
+        }
+      },
+      "reconfigure": {
+        "title": "Naročnina IPTV",
+        "data": {
+          "url": "URL strežnika ali portala",
+          "username": "Uporabniško ime",
+          "password": "Geslo",
+          "mac": "Naslov MAC"
+        },
+        "data_description": {
+          "url": "Vključno z vrati, npr. http://server:8080",
+          "mac": "Oblika AA:BB:CC:DD:EE:FF",
+          "password": "Pustite prazno, da ohranite trenutno geslo"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Naročnina IPTV",
+        "data": {
+          "url": "URL strežnika ali portala",
+          "username": "Uporabniško ime",
+          "password": "Geslo",
+          "mac": "Naslov MAC"
+        },
+        "data_description": {
+          "url": "Vključno z vrati, npr. http://server:8080",
+          "mac": "Oblika AA:BB:CC:DD:EE:FF",
+          "password": "Pustite prazno, da ohranite trenutno geslo"
+        },
+        "description": "Strežnik je zavrnil poverilnice za {name}. Vnesite nove."
+      }
+    },
+    "error": {
+      "cannot_connect": "Strežnika IPTV ni mogoče doseči",
+      "invalid_auth": "Strežnik je zavrnil poverilnice",
+      "invalid_mac": "Neveljaven naslov MAC (oblika AA:BB:CC:DD:EE:FF)",
+      "no_french_lists": "Pri tem ponudniku ni bilo najdenega francoskega seznama (kategorije v živo, VOD ali serij): račun ni dodan.",
+      "french_unknown": "Kategorij tega ponudnika ni bilo mogoče prebrati za preverjanje francoskih seznamov.",
+      "stream_ko": "Video pretok testnega kanala se ne predvaja: račun ni dodan.",
+      "empty_catalogue": "Ponudnik nima uporabnega kataloga kanalov / filmov / serij: račun ni dodan."
+    },
+    "abort": {
+      "already_configured": "Ta račun je že nastavljen",
+      "reconfigure_successful": "Ponovna nastavitev je uspela",
+      "reauth_successful": "Ponovno preverjanje pristnosti je uspelo",
+      "migrated": "Računi nekdanje integracije IPTV Xtream, premaknjeni v IPTV z istimi entitetami: {count}. Izbrišite staro mapo custom_components/iptv_xtream, če še obstaja, in znova zaženite Home Assistant.",
+      "account_updated": "{title} je na istem strežniku: novi račun velja dlje ({new} namesto {current}), zato {title} zdaj uporablja nove poverilnice.",
+      "existing_longer": "{title} je na istem strežniku in velja enako dolgo ali dlje ({current}, novi račun: {new}): nič ni spremenjeno."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Interval osveževanja",
+          "notify_days": "Obvesti pred potekom",
+          "health_interval": "Interval preverjanja strežnika",
+          "stream_check": "Preizkusi video pretok kanala"
+        },
+        "data_description": {
+          "notify_days": "Trajno obvestilo toliko dni pred potekom naročnine (0 za izklop)",
+          "health_interval": "Kako pogosto se strežnik preverja z lahko zahtevo (samo podatki o računu)",
+          "stream_check": "Ob vsakem preverjanju strežnika se za kratek čas odpre kanal, da se potrdi, da se predvaja (zasede eno povezavo). Če ne uspe, stanje strežnika prikaže Pretok ne deluje."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "status": {
+        "name": "Stanje",
+        "state": {
+          "active": "Aktivna",
+          "expired": "Potekla",
+          "banned": "Blokirana",
+          "disabled": "Onemogočena",
+          "invalid_auth": "Neveljavne poverilnice"
+        }
+      },
+      "expiration": {
+        "name": "Potek"
+      },
+      "days_left": {
+        "name": "Preostali dnevi"
+      },
+      "created": {
+        "name": "Ustvarjeno"
+      },
+      "active_connections": {
+        "name": "Aktivne povezave"
+      },
+      "max_connections": {
+        "name": "Največ povezav"
+      },
+      "channels": {
+        "name": "Kanali v živo"
+      },
+      "movies": {
+        "name": "Filmi"
+      },
+      "series": {
+        "name": "Serije"
+      },
+      "health": {
+        "name": "Stanje strežnika",
+        "state": {
+          "ok": "OK",
+          "degraded": "Počasen",
+          "auth_failed": "Poverilnice so zavrnjene",
+          "unreachable": "Nedosegljiv",
+          "stream_ko": "Pretok ne deluje"
+        }
+      },
+      "response_time": {
+        "name": "Odzivni čas"
+      },
+      "last_check": {
+        "name": "Zadnje preverjanje"
+      },
+      "added": {
+        "name": "Dodano"
+      },
+      "updated": {
+        "name": "Posodobljeno"
+      }
+    },
+    "binary_sensor": {
+      "trial": {
+        "name": "Preizkusno obdobje"
+      },
+      "french_lists": {
+        "name": "Francoski seznami"
+      }
+    }
+  },
+  "services": {
+    "edit_account": {
+      "name": "Uredi račun",
+      "description": "Spremeni poverilnice ali naslov MAC računa po enakih preverjanjih kot pri dodajanju. Podatke klicev storitev shranjuje recorder (dogodek call_service), vključno z geslom: raje uporabite kartico.",
+      "fields": {
+        "device_id": {
+          "name": "Račun",
+          "description": "Račun IPTV, ki ga želite urediti."
+        },
+        "url": {
+          "name": "URL strežnika",
+          "description": "Nov URL strežnika; izpustite, da ohranite trenutnega."
+        },
+        "username": {
+          "name": "Uporabniško ime",
+          "description": "Novo uporabniško ime (Xtream Codes)."
+        },
+        "password": {
+          "name": "Geslo",
+          "description": "Novo geslo (Xtream Codes); izpustite, da ohranite trenutno."
+        },
+        "mac": {
+          "name": "Naslov MAC",
+          "description": "Nov naslov MAC (portal Stalker)."
+        }
+      }
+    },
+    "remove_account": {
+      "name": "Odstrani račun",
+      "description": "Odstrani račun IPTV in njegove entitete.",
+      "fields": {
+        "device_id": {
+          "name": "Račun",
+          "description": "Račun IPTV, ki ga želite odstraniti."
+        }
+      }
+    },
+    "add_account": {
+      "name": "Dodaj račun",
+      "description": "Doda nov račun IPTV z enakimi preverjanji kot vmesnik. Podatke klicev storitev shranjuje recorder (dogodek call_service), vključno z geslom: raje uporabite kartico.",
+      "fields": {
+        "provider": {
+          "name": "Vrsta ponudnika",
+          "description": "xtream ali stalker"
+        },
+        "url": {
+          "name": "URL strežnika",
+          "description": "Vključno z vrati, npr. http://server:8080."
+        },
+        "username": {
+          "name": "Uporabniško ime",
+          "description": "Samo Xtream Codes."
+        },
+        "password": {
+          "name": "Geslo",
+          "description": "Samo Xtream Codes."
+        },
+        "mac": {
+          "name": "Naslov MAC",
+          "description": "Samo portal Stalker, oblika AA:BB:CC:DD:EE:FF."
+        }
+      }
+    },
+    "get_credentials": {
+      "name": "Pridobi poverilnice",
+      "description": "Vrne URL strežnika in poverilnice računa za prikaz.",
+      "fields": {
+        "device_id": {
+          "name": "Račun",
+          "description": ""
+        }
+      }
+    }
+  }
+}
