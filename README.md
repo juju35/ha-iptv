@@ -1,4 +1,4 @@
-<img src="custom_components/iptv/brand/icon.png" alt="" width="96" align="right">
+<img src="https://raw.githubusercontent.com/juju35/ha-iptv/main/custom_components/iptv/brand/icon.png" alt="" width="96" align="right">
 
 # ha-iptv
 
@@ -6,7 +6,7 @@
 [![HACS Validation](https://github.com/juju35/ha-iptv/actions/workflows/hacs.yml/badge.svg)](https://github.com/juju35/ha-iptv/actions/workflows/hacs.yml)
 [![Validate](https://github.com/juju35/ha-iptv/actions/workflows/validate.yml/badge.svg)](https://github.com/juju35/ha-iptv/actions/workflows/validate.yml)
 [![Release](https://img.shields.io/github/v/release/juju35/ha-iptv)](https://github.com/juju35/ha-iptv/releases/latest)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/juju35/ha-iptv/blob/main/LICENSE)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/julienstep9)
 
 Home Assistant integration and Lovelace card that track one or several **IPTV subscriptions** using the **Xtream Codes API** or a **Stalker / Ministra portal** (MAC address): status, expiration date, days left, number of live channels, movies and series, and connections.
@@ -283,7 +283,7 @@ The card is plain JavaScript (`custom_components/iptv/frontend/iptv-card.js`), s
 ### Releasing
 
 1. Bump the version in `custom_components/iptv/manifest.json`, `VERSION` in `const.py`, `IPTV_CARD_VERSION` in `frontend/iptv-card.js` and `IPTV_PANEL_VERSION` in `frontend/iptv-panel.js`
-2. Add a `## <version>` section at the top of [CHANGELOG.md](CHANGELOG.md)
+2. Add a `## <version>` section at the top of [CHANGELOG.md](https://github.com/juju35/ha-iptv/blob/main/CHANGELOG.md)
 3. Push to `main`: the **Release** workflow creates the tag and the GitHub release with `iptv.zip` and the changelog section as notes
 
 ## Translations
@@ -319,7 +319,7 @@ Contributions for additional languages are welcome!
 
 ## License
 
-[MIT](LICENSE)
+[MIT](https://github.com/juju35/ha-iptv/blob/main/LICENSE)
 
 ## Support
 
