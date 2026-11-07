@@ -2,7 +2,7 @@
 
 # ha-iptv
 
-[![HACS](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
+[![Marketplace](https://img.shields.io/badge/Marketplace-Custom-41BDF5.svg)](https://www.home-assistant.io/integrations/marketplace/)
 [![HACS Validation](https://github.com/juju35/ha-iptv/actions/workflows/hacs.yml/badge.svg)](https://github.com/juju35/ha-iptv/actions/workflows/hacs.yml)
 [![Validate](https://github.com/juju35/ha-iptv/actions/workflows/validate.yml/badge.svg)](https://github.com/juju35/ha-iptv/actions/workflows/validate.yml)
 [![Release](https://img.shields.io/github/v/release/juju35/ha-iptv)](https://github.com/juju35/ha-iptv/releases/latest)
@@ -11,7 +11,7 @@
 
 Home Assistant integration and Lovelace card that track one or several **IPTV subscriptions** using the **Xtream Codes API** or a **Stalker / Ministra portal** (MAC address): status, expiration date, days left, number of live channels, movies and series, and connections.
 
-[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=juju35&repository=ha-iptv&category=integration)
+[![Open your Home Assistant instance and open a repository inside the Marketplace.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/marketplace_repository/?owner=juju35&repository=ha-iptv&category=integration)
 
 ## Features
 
@@ -43,15 +43,15 @@ Home Assistant queries the Xtream server itself, so it works even when the serve
 
 ## Installation
 
-### Via HACS (recommended)
+### Via the Marketplace (recommended)
 
-[![Add to HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=juju35&repository=ha-iptv&category=integration)
+[![Add to the Marketplace](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/marketplace_repository/?owner=juju35&repository=ha-iptv&category=integration)
 
 Or manually:
 
-1. Open HACS → **⋮** → **Custom repositories**
+1. Open **Settings → Marketplace → Add from link** (top right; this needs a GitHub account connected)
 2. Add `https://github.com/juju35/ha-iptv` — Type: **Integration**
-3. Search for **IPTV** and download it
+3. Open **IPTV** and click **Install**
 4. Restart Home Assistant
 
 ### Manual
@@ -64,7 +64,7 @@ Or manually:
 
 Version 3.0 renames the integration from **IPTV Xtream** (`iptv_xtream`) to **IPTV** (`iptv`), since it handles Stalker portals too. Your accounts are moved over with the same entity ids, so automations, history and statistics keep working:
 
-1. Update the integration in HACS and restart Home Assistant
+1. Update the integration in the Marketplace and restart Home Assistant
 2. **Settings → Devices & services → Add integration → IPTV** (or the button below): the existing accounts are moved and the flow closes with "N account(s) moved"
 
    [![Add the integration](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=iptv)
@@ -76,14 +76,14 @@ The data, options (refresh interval, notification delay), entity ids, entity nam
 
 Version 2.0 replaces the `shell_command` with a real integration, and the repository was renamed from `ha-iptv-card` to `ha-iptv`:
 
-1. In HACS, remove the old **IPTV Subscription Card** (Dashboard), then the old `https://github.com/juju35/ha-iptv-card` custom repository, and the `/hacsfiles/ha-iptv-card/iptv-card.js` or `/local/iptv-card.js` resource if it is still listed in **Settings → Dashboards → Resources**
+1. In **Settings → Marketplace**, uninstall the old **IPTV Subscription Card** (Dashboard) and remove the old `https://github.com/juju35/ha-iptv-card` repository, and the `/local/community/ha-iptv-card/iptv-card.js` or `/local/iptv-card.js` resource if it is still listed in **Settings → Dashboards → Resources**
 2. Add `https://github.com/juju35/ha-iptv` as an **Integration** custom repository, install **IPTV**, restart and add your account
 3. Remove `iptv_xtream:` from `shell_command:` in `configuration.yaml`
 4. In your cards, remove `url`, `username`, `password`, `refresh_interval` and `service`: the card now reads the integration entities
 
 ### Removal
 
-Delete the account in **Settings → Devices & services → IPTV**, then remove the integration in HACS and restart. Deleting the last account also removes the card resource. Remove the cards from your dashboards first, or they will show a "no subscription found" message.
+Delete the account in **Settings → Devices & services → IPTV**, then uninstall the integration in **Settings → Marketplace** and restart. Deleting the last account also removes the card resource. Remove the cards from your dashboards first, or they will show a "no subscription found" message.
 
 ## Configuration
 
