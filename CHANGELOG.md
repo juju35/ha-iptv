@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.23.0 - 2026-11-07
+
+### What's new
+- **Playlist and guide URLs**: for an Xtream Codes account, the 👁 popup of the card now also shows the **M3U playlist** and the **EPG guide (XMLTV)** URLs, each with its copy button, ready to paste into VLC, TiviMate or Jellyfin. `iptv.get_credentials` and the `iptv/get_credentials` command (admin-only) return them as `m3u_url` and `xmltv_url`. Translated in every language of the card.
+
 ## 3.22.8 - 2026-11-04
 
 ### Documentation

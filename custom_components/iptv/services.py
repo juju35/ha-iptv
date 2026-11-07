@@ -17,6 +17,7 @@ WebSocket commands, which run the same code without that event.
 from __future__ import annotations
 
 from typing import Any
+from urllib.parse import urlencode
 
 import voluptuous as vol
 from homeassistant.components import websocket_api
@@ -164,13 +165,27 @@ def _get_credentials(hass: HomeAssistant, params: dict[str, Any]) -> dict[str, A
     entry = _entry_for_device(hass, params["device_id"])
     if entry is None:
         return {"ok": False, "error": "not_found"}
-    return {
+    provider = entry.data.get(CONF_PROVIDER, PROVIDER_XTREAM)
+    result = {
         "ok": True,
-        "provider": entry.data.get(CONF_PROVIDER, "xtream"),
+        "provider": provider,
         CONF_URL: entry.data.get(CONF_URL, ""),
         CONF_USERNAME: entry.data.get(CONF_USERNAME, ""),
         CONF_PASSWORD: entry.data.get(CONF_PASSWORD, ""),
         CONF_MAC: entry.data.get(CONF_MAC, ""),
+    }
+    if provider == PROVIDER_XTREAM and result[CONF_URL] and result[CONF_USERNAME]:
+        result.update(playlist_urls(result[CONF_URL], result[CONF_USERNAME], result[CONF_PASSWORD]))
+    return result
+
+
+def playlist_urls(url: str, username: str, password: str) -> dict[str, str]:
+    """The M3U playlist and XMLTV guide of an Xtream Codes account, for a player (VLC, TiviMate, Jellyfin…)."""
+    base = normalize_url(url)
+    query = urlencode({"username": username, "password": password})
+    return {
+        "m3u_url": f"{base}/get.php?{query}&type=m3u_plus&output=ts",
+        "xmltv_url": f"{base}/xmltv.php?{query}",
     }
 
 
