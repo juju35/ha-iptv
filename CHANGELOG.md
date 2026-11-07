@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.24.0 - 2026-11-07
+
+### What's new
+- **Diagnostics**: each account can now be downloaded as diagnostics (device or integration page, ⋮ → **Download diagnostics**), with its settings, last refresh and health check; the server URL, username, password, MAC address, title and playlist / guide URLs are redacted.
+
 ## 3.23.0 - 2026-11-07
 
 ### What's new

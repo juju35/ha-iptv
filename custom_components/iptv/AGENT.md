@@ -14,6 +14,7 @@ custom_components/iptv/
 ├── entity.py          # Base entity: one device per account
 ├── sensor.py          # Subscription sensors (status, expiration, days left, counts, connections)
 ├── binary_sensor.py   # Subscription binary sensors
+├── diagnostics.py     # Config entry diagnostics, credentials / URLs / MAC / title redacted
 ├── health.py          # Lightweight health check of one account (reachability, response time, optional stream)
 ├── naming.py          # Automatic account title: the server name
 ├── notify_add.py      # Sends the connection details of a new account to a notify service

@@ -268,6 +268,7 @@ The card is served by the integration at `/iptv/iptv-card.js` and registered in 
         - call_service
   ```
 - The reconfigure and re-authentication forms never send the current password to the browser: leave the field blank to keep it. The sidebar panel's commands (`iptv/accounts`, `iptv/update_account`, `iptv/check_account`) are admin-only and never return the password either.
+- **Download diagnostics** (device or integration page, ⋮ menu) gives the account's settings, last refresh and health check with the server URL, username, password, MAC address, title and the M3U / XMLTV URLs redacted: safe to attach to an issue.
 - Error messages (logs, the `error` attribute of the health sensor) give the HTTP status or the error type, never the request URL, which carries the Xtream credentials.
 - They are only sent to the Xtream server you configured, as `player_api.php` query parameters (that is how the Xtream API works, so prefer an `https://` URL when your provider offers one).
 
