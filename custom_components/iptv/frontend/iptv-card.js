@@ -8,7 +8,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_CARD_VERSION = '3.24.0';
+var IPTV_CARD_VERSION = '3.25.0';
 var IPTV_DOMAIN = 'iptv';
 
 // ── i18n ──────────────────────────────────────────────────────────────────────
@@ -56,6 +56,8 @@ var IptvCardI18n = {
     view_xmltv: 'EPG guide (XMLTV)',
     view_title: 'Credentials',
     copy: 'Copy',
+    view_show: 'Show',
+    view_hide: 'Hide',
     status_active: 'Active',
     status_expired: 'Expired',
     status_banned: 'Banned',
@@ -140,6 +142,8 @@ var IptvCardI18n = {
     view_xmltv: 'Guide EPG (XMLTV)',
     view_title: 'Identifiants',
     copy: 'Copier',
+    view_show: 'Afficher',
+    view_hide: 'Masquer',
     status_active: 'Actif',
     status_expired: 'Expiré',
     status_banned: 'Banni',
@@ -224,6 +228,8 @@ var IptvCardI18n = {
     view_xmltv: 'EPG-Programmführer (XMLTV)',
     view_title: 'Zugangsdaten',
     copy: 'Kopieren',
+    view_show: 'Anzeigen',
+    view_hide: 'Ausblenden',
     status_active: 'Aktiv',
     status_expired: 'Abgelaufen',
     status_banned: 'Gesperrt',
@@ -308,6 +314,8 @@ var IptvCardI18n = {
     view_xmltv: 'Guía EPG (XMLTV)',
     view_title: 'Credenciales',
     copy: 'Copiar',
+    view_show: 'Mostrar',
+    view_hide: 'Ocultar',
     status_active: 'Activa',
     status_expired: 'Caducada',
     status_banned: 'Bloqueada',
@@ -392,6 +400,8 @@ var IptvCardI18n = {
     view_xmltv: 'Guida EPG (XMLTV)',
     view_title: 'Credenziali',
     copy: 'Copia',
+    view_show: 'Mostra',
+    view_hide: 'Nascondi',
     status_active: 'Attivo',
     status_expired: 'Scaduto',
     status_banned: 'Bloccato',
@@ -476,6 +486,8 @@ var IptvCardI18n = {
     view_xmltv: 'EPG-gids (XMLTV)',
     view_title: 'Inloggegevens',
     copy: 'Kopiëren',
+    view_show: 'Tonen',
+    view_hide: 'Verbergen',
     status_active: 'Actief',
     status_expired: 'Verlopen',
     status_banned: 'Geblokkeerd',
@@ -560,6 +572,8 @@ var IptvCardI18n = {
     view_xmltv: 'Guia EPG (XMLTV)',
     view_title: 'Credenciais',
     copy: 'Copiar',
+    view_show: 'Mostrar',
+    view_hide: 'Ocultar',
     status_active: 'Ativa',
     status_expired: 'Expirada',
     status_banned: 'Banida',
@@ -644,6 +658,8 @@ var IptvCardI18n = {
     view_xmltv: 'Przewodnik EPG (XMLTV)',
     view_title: 'Dane logowania',
     copy: 'Kopiuj',
+    view_show: 'Pokaż',
+    view_hide: 'Ukryj',
     status_active: 'Aktywna',
     status_expired: 'Wygasła',
     status_banned: 'Zablokowana',
@@ -728,6 +744,8 @@ var IptvCardI18n = {
     view_xmltv: 'Ghid EPG (XMLTV)',
     view_title: 'Date de autentificare',
     copy: 'Copiază',
+    view_show: 'Afișează',
+    view_hide: 'Ascunde',
     status_active: 'Activ',
     status_expired: 'Expirat',
     status_banned: 'Blocat',
@@ -812,6 +830,8 @@ var IptvCardI18n = {
     view_xmltv: 'EPG-guide (XMLTV)',
     view_title: 'Login',
     copy: 'Kopiér',
+    view_show: 'Vis',
+    view_hide: 'Skjul',
     status_active: 'Aktiv',
     status_expired: 'Udløbet',
     status_banned: 'Spærret',
@@ -896,6 +916,8 @@ var IptvCardI18n = {
     view_xmltv: 'EPG-guide (XMLTV)',
     view_title: 'Inloggning',
     copy: 'Kopiera',
+    view_show: 'Visa',
+    view_hide: 'Dölj',
     status_active: 'Aktivt',
     status_expired: 'Utgånget',
     status_banned: 'Spärrat',
@@ -980,6 +1002,8 @@ var IptvCardI18n = {
     view_xmltv: 'Програма EPG (XMLTV)',
     view_title: 'Данни за вход',
     copy: 'Копирай',
+    view_show: 'Покажи',
+    view_hide: 'Скрий',
     status_active: 'Активен',
     status_expired: 'Изтекъл',
     status_banned: 'Блокиран',
@@ -1064,6 +1088,8 @@ var IptvCardI18n = {
     view_xmltv: 'Телепрограмма EPG (XMLTV)',
     view_title: 'Учётные данные',
     copy: 'Копировать',
+    view_show: 'Показать',
+    view_hide: 'Скрыть',
     status_active: 'Активна',
     status_expired: 'Истекла',
     status_banned: 'Заблокирована',
@@ -1148,6 +1174,8 @@ var IptvCardI18n = {
     view_xmltv: 'Телепрограма EPG (XMLTV)',
     view_title: 'Облікові дані',
     copy: 'Копіювати',
+    view_show: 'Показати',
+    view_hide: 'Приховати',
     status_active: 'Активна',
     status_expired: 'Закінчилася',
     status_banned: 'Заблокована',
@@ -1232,6 +1260,8 @@ var IptvCardI18n = {
     view_xmltv: 'EPG műsorújság (XMLTV)',
     view_title: 'Hitelesítő adatok',
     copy: 'Másolás',
+    view_show: 'Megjelenítés',
+    view_hide: 'Elrejtés',
     status_active: 'Aktív',
     status_expired: 'Lejárt',
     status_banned: 'Letiltva',
@@ -1316,6 +1346,8 @@ var IptvCardI18n = {
     view_xmltv: 'Programový sprievodca EPG (XMLTV)',
     view_title: 'Prihlasovacie údaje',
     copy: 'Kopírovať',
+    view_show: 'Zobraziť',
+    view_hide: 'Skryť',
     status_active: 'Aktívne',
     status_expired: 'Vypršané',
     status_banned: 'Zablokované',
@@ -1400,6 +1432,8 @@ var IptvCardI18n = {
     view_xmltv: 'Programový průvodce EPG (XMLTV)',
     view_title: 'Přihlašovací údaje',
     copy: 'Kopírovat',
+    view_show: 'Zobrazit',
+    view_hide: 'Skrýt',
     status_active: 'Aktivní',
     status_expired: 'Vypršelo',
     status_banned: 'Zablokováno',
@@ -1484,6 +1518,8 @@ var IptvCardI18n = {
     view_xmltv: 'Programski vodnik EPG (XMLTV)',
     view_title: 'Poverilnice',
     copy: 'Kopiraj',
+    view_show: 'Prikaži',
+    view_hide: 'Skrij',
     status_active: 'Aktivna',
     status_expired: 'Potekla',
     status_banned: 'Blokirana',
@@ -1568,6 +1604,8 @@ var IptvCardI18n = {
     view_xmltv: 'EPG programma (XMLTV)',
     view_title: 'Pieteikšanās dati',
     copy: 'Kopēt',
+    view_show: 'Rādīt',
+    view_hide: 'Slēpt',
     status_active: 'Aktīvs',
     status_expired: 'Beidzies',
     status_banned: 'Bloķēts',
@@ -1652,6 +1690,8 @@ var IptvCardI18n = {
     view_xmltv: 'Οδηγός EPG (XMLTV)',
     view_title: 'Διαπιστευτήρια',
     copy: 'Αντιγραφή',
+    view_show: 'Εμφάνιση',
+    view_hide: 'Απόκρυψη',
     status_active: 'Ενεργή',
     status_expired: 'Έληξε',
     status_banned: 'Αποκλεισμένη',
@@ -1736,6 +1776,8 @@ var IptvCardI18n = {
     view_xmltv: 'EPG водич (XMLTV)',
     view_title: 'Подаци за пријаву',
     copy: 'Копирај',
+    view_show: 'Прикажи',
+    view_hide: 'Сакриј',
     status_active: 'Активна',
     status_expired: 'Истекла',
     status_banned: 'Блокирана',
@@ -1820,6 +1862,8 @@ var IptvCardI18n = {
     view_xmltv: 'EPG vodič (XMLTV)',
     view_title: 'Podaci za prijavu',
     copy: 'Kopiraj',
+    view_show: 'Prikaži',
+    view_hide: 'Sakrij',
     status_active: 'Aktivna',
     status_expired: 'Istekla',
     status_banned: 'Blokirana',
@@ -1942,6 +1986,13 @@ function iptvEsc(x) {
   return String(x == null ? '' : x).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 }
 
+// Masked text of a secret row: the whole password, or the password=… parameter of a playlist / guide URL
+var IPTV_MASK = '••••••••';
+function iptvMask(value, whole) {
+  if (whole) return IPTV_MASK;
+  return String(value == null ? '' : value).replace(/([?&]password=)[^&#]*/g, `$1${IPTV_MASK}`);
+}
+
 // The card is a size container (for its narrow layouts), which a parent sizing it from its content (inline-block,
 // flex row, grid auto column of a layout card or a button card) sees as 0 px wide. This empty, zero-height SVG
 // asks such a parent for 400 px, while its max-width: 100% lets it shrink to any room.
@@ -2043,7 +2094,7 @@ class IptvCard extends HTMLElement {
     .view-row { display:flex; align-items:center; gap:8px; }
     .view-k { font-size:11px; color:var(--secondary-text-color); width:96px; flex:none; }
     .view-v { flex:1; min-width:0; font-size:13px; font-family:monospace; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; user-select:all; }
-    .modal button.copy { padding:4px; --mdc-icon-size:16px; width:auto; height:auto; background:none; color:var(--secondary-text-color); }
+    .modal button.copy, .modal button.reveal { padding:4px; --mdc-icon-size:16px; width:auto; height:auto; background:none; color:var(--secondary-text-color); }
     .modal button.copy.ok { color:var(--iptv-ok); }
     /* Narrow card (inner width; 6 columns of a section = 132 to 220 px): the figures keep their room (no icon, then two tiles a row) */
     @container (max-width: 340px) {
@@ -2743,25 +2794,43 @@ class IptvCard extends HTMLElement {
     if (this._modal !== modal) return;
     if (!creds.ok) return this._modalError(modal, 'view_title', creds.error);
     var close = `<div class="modal-actions"><button class="act cancel">${esc(this._t('edit_cancel'))}</button></div>`;
+    // [label, value, secret]: 'whole' masks the value, 'url' its password parameter
     var rows = creds.provider === 'stalker'
       ? [['edit_url', creds.url], ['edit_mac', creds.mac]]
-      : [['edit_url', creds.url], ['edit_username', creds.username], ['edit_password', creds.password]];
+      : [['edit_url', creds.url], ['edit_username', creds.username], ['edit_password', creds.password, 'whole']];
     // Xtream Codes: the playlist and the guide to paste into a player (VLC, TiviMate, Jellyfin…)
-    if (creds.m3u_url) rows.push(['view_m3u', creds.m3u_url]);
-    if (creds.xmltv_url) rows.push(['view_xmltv', creds.xmltv_url]);
+    if (creds.m3u_url) rows.push(['view_m3u', creds.m3u_url, 'url']);
+    if (creds.xmltv_url) rows.push(['view_xmltv', creds.xmltv_url, 'url']);
     var rowsHtml = rows.map((r) => `
       <div class="view-row">
         <div class="view-k">${esc(this._t(r[0]))}</div>
-        <div class="view-v">${esc(r[1])}</div>
+        <div class="view-v">${esc(r[2] ? iptvMask(r[1], r[2] === 'whole') : r[1])}</div>
+        ${r[2] ? `<button class="reveal" title="${esc(this._t('view_show'))}" aria-label="${esc(this._t('view_show'))}" aria-pressed="false"><ha-icon icon="mdi:eye"></ha-icon></button>` : ''}
         <button class="copy" title="${esc(this._t('copy'))}"><ha-icon icon="mdi:content-copy"></ha-icon></button>
       </div>`).join('');
     modal.querySelector('.modal').innerHTML = `<h3 id="iptv-dialog-title">${esc(this._t('view_title'))}</h3>${rowsHtml}${close}`;
-    // The value stays in a closure: the password is never written into the DOM
-    modal.querySelectorAll('button.copy').forEach((el, i) => {
-      el.addEventListener('click', () => this._copy(el, rows[i][1]));
+    // The values stay in a closure: a secret is written into the DOM only while shown, and the popup
+    // is rebuilt masked each time it opens
+    modal.querySelectorAll('.view-row').forEach((row, i) => {
+      var r = rows[i];
+      var copy = row.querySelector('button.copy');
+      copy.addEventListener('click', () => this._copy(copy, r[1]));
+      var reveal = row.querySelector('button.reveal');
+      if (reveal) reveal.addEventListener('click', () => this._toggleSecret(row, reveal, r));
     });
     modal.querySelector('.cancel').addEventListener('click', () => this._closeEditor());
     this._focusModal(modal, 'button.copy');
+  }
+
+  // Show or mask again one secret row of the view popup
+  _toggleSecret(row, btn, r) {
+    var shown = btn.getAttribute('aria-pressed') !== 'true';
+    row.querySelector('.view-v').textContent = shown ? r[1] : iptvMask(r[1], r[2] === 'whole');
+    var label = this._t(shown ? 'view_hide' : 'view_show');
+    btn.setAttribute('aria-pressed', String(shown));
+    btn.setAttribute('title', label);
+    btn.setAttribute('aria-label', label);
+    btn.querySelector('ha-icon').setAttribute('icon', shown ? 'mdi:eye-off' : 'mdi:eye');
   }
 
   // Error message in an open popup, with a close button

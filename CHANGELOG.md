@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.25.0 - 2026-11-07
+
+### What's new
+- **Expiration events**: `iptv_expiring` is fired when a subscription enters the notification window and `iptv_expired` when it expires, with `entry_id`, `name`, `days_left` and `exp_date`, for automations (see the README).
+
+### Security
+- The 👁 popup of the card now masks the password and the password inside the M3U / XMLTV URLs until you click the eye next to them; copy always takes the real value, and the popup opens masked again every time.
+
 ## 3.24.0 - 2026-11-07
 
 ### What's new

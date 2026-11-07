@@ -18,7 +18,7 @@ custom_components/iptv/
 ├── health.py          # Lightweight health check of one account (reachability, response time, optional stream)
 ├── naming.py          # Automatic account title: the server name
 ├── notify_add.py      # Sends the connection details of a new account to a notify service
-├── notify_expiry.py   # Persistent notification before the subscription expires
+├── notify_expiry.py   # Persistent notification before the subscription expires, iptv_expiring / iptv_expired events
 ├── panel.py           # Sidebar panel registration and its admin WebSocket commands
 │                      # iptv/accounts, iptv/update_account, iptv/check_account
 ├── services.py        # iptv.add_account / edit_account / remove_account / get_credentials services,
