@@ -1157,3 +1157,38 @@ async def test_expiry_notification_languages(hass, lang, title):
     with patch("custom_components.iptv.notify_expiry.persistent_notification.async_create") as create:
         notifier.update({"auth": True, "exp_date": exp})
     assert create.call_args.kwargs["title"] == f"{title} provider.example"
+
+
+# ── diagnostics ─────────────────────────────────────────────────────────────
+
+
+async def test_diagnostics_redacts_secrets(hass, aioclient_mock, entry):
+    from homeassistant.components.diagnostics import REDACTED
+
+    from custom_components.iptv.diagnostics import async_get_config_entry_diagnostics
+
+    await _setup(hass, aioclient_mock, entry)
+    diag = await async_get_config_entry_diagnostics(hass, entry)
+    dumped = str(diag)
+    for secret in (PASSWORD, USERNAME, "provider.example"):
+        assert secret not in dumped
+    data = diag["entry"]["data"]
+    assert data[CONF_URL] == data[CONF_USERNAME] == data[CONF_PASSWORD] == REDACTED
+    assert diag["entry"]["title"] == diag["entry"]["unique_id"] == REDACTED
+    assert data[CONF_PROVIDER] == PROVIDER_XTREAM
+    assert diag["coordinator"]["data"]["status"] == "Active"
+    assert diag["coordinator"]["data"]["channels"] == 2
+    assert diag["health"]["status"] == "ok"
+
+
+async def test_diagnostics_redacts_mac_of_stalker_entry(hass, stalker_entry):
+    from homeassistant.components.diagnostics import REDACTED
+
+    from custom_components.iptv.diagnostics import async_get_config_entry_diagnostics
+
+    # Not loaded: entry part only, MAC and portal hidden
+    diag = await async_get_config_entry_diagnostics(hass, stalker_entry)
+    assert diag["entry"]["data"][CONF_MAC] == diag["entry"]["data"][CONF_URL] == REDACTED
+    assert MAC.lower() not in str(diag).lower()
+    assert "portal.example" not in str(diag)
+    assert "coordinator" not in diag
