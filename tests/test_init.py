@@ -5,6 +5,7 @@ import logging
 import re
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
+from urllib.parse import urlencode
 
 import aiohttp
 import pytest
@@ -216,6 +217,22 @@ async def test_get_credentials_for_admin(hass, aioclient_mock, entry, hass_admin
     )
     assert response["ok"] is True
     assert response[CONF_PASSWORD] == PASSWORD
+    # Xtream Codes: the playlist and the guide, with the credentials URL-encoded.
+    base = entry.data[CONF_URL].rstrip("/")
+    query = urlencode({"username": entry.data[CONF_USERNAME], "password": PASSWORD})
+    assert response["m3u_url"] == f"{base}/get.php?{query}&type=m3u_plus&output=ts"
+    assert response["xmltv_url"] == f"{base}/xmltv.php?{query}"
+
+
+def test_playlist_urls_encode_the_credentials():
+    from custom_components.iptv.services import playlist_urls
+
+    urls = playlist_urls("example.com:8080/", "me & you", "p@ss/w0rd")
+    assert (
+        urls["m3u_url"]
+        == "http://example.com:8080/get.php?username=me+%26+you&password=p%40ss%2Fw0rd&type=m3u_plus&output=ts"
+    )
+    assert urls["xmltv_url"] == "http://example.com:8080/xmltv.php?username=me+%26+you&password=p%40ss%2Fw0rd"
 
 
 async def test_edit_account_reloads_once(hass, aioclient_mock, entry):

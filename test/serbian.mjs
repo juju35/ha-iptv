@@ -10,7 +10,7 @@ for (const [c, lat] of [...TO_LATIN]) TO_LATIN.set(c.toUpperCase(), lat[0].toUpp
 export const toLatin = (text) => [...text].map((c) => TO_LATIN.get(c) ?? c).join('');
 
 // Latin words allowed in Cyrillic text: brands, acronyms and the provider types
-const NAMES = /\b(IPTV|URL|MAC|FR|VOD|Xtream|Codes|Stalker|Ministra|Home Assistant)\b/g;
+const NAMES = /\b(IPTV|URL|MAC|FR|VOD|M3U|EPG|XMLTV|Xtream|Codes|Stalker|Ministra|Home Assistant)\b/g;
 
 export function checkSerbianTables(tables) {
   const cyrillic = tables.sr;
