@@ -82,6 +82,7 @@
       "reauth_successful": "Omautentiseringen lyckades",
       "migrated": "Konton från den tidigare IPTV Xtream-integrationen flyttade till IPTV, med samma entiteter: {count}. Radera den gamla mappen custom_components/iptv_xtream om den fortfarande finns och starta om Home Assistant.",
       "account_updated": "{title} finns på samma server: det nya kontot gäller längre ({new} i stället för {current}), så {title} använder nu de nya inloggningsuppgifterna.",
+      "credentials_updated": "{title} var redan konfigurerat: det använder nu dessa inloggningsuppgifter.",
       "existing_longer": "{title} finns på samma server och gäller lika länge eller längre ({current}, nytt konto: {new}): inget har ändrats."
     }
   },

@@ -162,7 +162,8 @@ async def async_unload_entry(hass: HomeAssistant, entry: IptvConfigEntry) -> boo
 async def async_remove_entry(hass: HomeAssistant, entry: IptvConfigEntry) -> None:
     """Drop the account notification, and the card resource with the last account."""
     persistent_notification.async_dismiss(hass, notification_id(entry.entry_id))
-    if hass.config_entries.async_entries(DOMAIN):
+    # Depending on the Home Assistant version, the removed entry may still be listed here
+    if any(e.entry_id != entry.entry_id for e in hass.config_entries.async_entries(DOMAIN)):
         return
     if (resources := _storage_resources(hass)) is None:
         return

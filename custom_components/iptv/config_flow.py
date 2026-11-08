@@ -168,9 +168,12 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
     def _create_or_replace(self, data: dict[str, Any]) -> ConfigFlowResult:
         """New account, unless the same server is already configured.
 
+        The same URL and login already configured takes the checked credentials.
         On a known server the account with the shortest validity gets the new
         credentials when the new account is valid longer; otherwise nothing changes.
         """
+        if (existing := self._same_login()) is not None:
+            return self._update(existing, data, "credentials_updated", {"title": existing.title})
         title = auto_title(data)
         server = server_key(data[CONF_URL])
         same = [
@@ -189,6 +192,24 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
         placeholders = {"title": existing.title, "current": _fmt(current), "new": _fmt(new)}
         if new <= current:
             return self.async_abort(reason="existing_longer", description_placeholders=placeholders)
+        return self._update(existing, data, "account_updated", placeholders)
+
+    def _same_login(self) -> ConfigEntry | None:
+        """The account with this URL and login (unique id), when it is already configured."""
+        return next(
+            (e for e in self._async_current_entries(include_ignore=False) if e.unique_id == self.unique_id),
+            None,
+        )
+
+    def _update(
+        self, existing: ConfigEntry, data: dict[str, Any], reason: str, placeholders: dict[str, str]
+    ) -> ConfigFlowResult:
+        """Give an existing account the checked credentials, reload it and say so.
+
+        Same URL and login (e.g. a new password): credentials_updated; another
+        account on the same server, valid longer: account_updated.
+        """
+        now = dt_util.utcnow().replace(microsecond=0).isoformat()
         data = {
             **data,
             CONF_ADDED_AT: existing.data.get(CONF_ADDED_AT, now),
@@ -198,12 +219,12 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
             existing,
             unique_id=self.unique_id,
             # Keep a title the user chose; refresh the generated one
-            title=title if is_auto_generated(existing.title, dict(existing.data)) else existing.title,
+            title=auto_title(data) if is_auto_generated(existing.title, dict(existing.data)) else existing.title,
             data=data,
         )
         self.hass.config_entries.async_schedule_reload(existing.entry_id)
         self._notify(existing.title, data, updated=True)
-        return self.async_abort(reason="account_updated", description_placeholders=placeholders)
+        return self.async_abort(reason=reason, description_placeholders=placeholders)
 
     def _notify(self, title: str, data: dict[str, Any], updated: bool) -> None:
         """Send the connection details when a notify service was picked (optional)."""
@@ -275,13 +296,11 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
             if not valid_mac(user_input[CONF_MAC]):
                 return self.async_abort(reason="invalid_mac")
             await self.async_set_unique_id(f"{user_input[CONF_URL]}|{user_input[CONF_MAC]}".lower())
-            self._abort_if_unique_id_configured()
             errors = await self._check_stalker(user_input, french=True)
         else:
             user_input[CONF_USERNAME] = data.get(CONF_USERNAME, "")
             user_input[CONF_PASSWORD] = data.get(CONF_PASSWORD, "")
             await self.async_set_unique_id(f"{user_input[CONF_URL]}|{user_input[CONF_USERNAME]}".lower())
-            self._abort_if_unique_id_configured()
             errors = await self._check_xtream(user_input, french=True)
         if errors:
             return self.async_abort(reason=errors["base"])
@@ -300,7 +319,6 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             self._prepare(user_input, PROVIDER_XTREAM)
             await self.async_set_unique_id(f"{user_input[CONF_URL]}|{user_input[CONF_USERNAME]}".lower())
-            self._abort_if_unique_id_configured()
             errors = await self._check_xtream(user_input, french=True)
             if not errors:
                 return self._create_or_replace(user_input)
@@ -321,7 +339,6 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
                 errors = {"base": "invalid_mac"}
             else:
                 await self.async_set_unique_id(f"{user_input[CONF_URL]}|{user_input[CONF_MAC]}".lower())
-                self._abort_if_unique_id_configured()
                 errors = await self._check_stalker(user_input, french=True)
                 if not errors:
                     return self._create_or_replace(user_input)

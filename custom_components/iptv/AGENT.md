@@ -20,7 +20,7 @@ custom_components/iptv/
 ├── notify_add.py      # Sends the connection details of a new account to a notify service
 ├── notify_expiry.py   # Persistent notification before the subscription expires, iptv_expiring / iptv_expired events
 ├── panel.py           # Sidebar panel registration and its admin WebSocket commands
-│                      # iptv/accounts, iptv/update_account, iptv/check_account
+│                      # iptv/accounts, iptv/update_account, iptv/check_account, iptv/remove_account
 ├── services.py        # iptv.add_account / edit_account / remove_account / get_credentials services,
 │                      # and the card's admin WebSocket commands iptv/add_account, edit_account, get_credentials
 ├── registry_compat.py # Device registry calls for HA before / since 2026.8 (single config entry per device)

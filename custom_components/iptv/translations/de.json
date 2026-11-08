@@ -82,6 +82,7 @@
       "reauth_successful": "Erneute Authentifizierung erfolgreich",
       "migrated": "{count} Konto/Konten der früheren Integration IPTV Xtream wurden mit denselben Entitäten nach IPTV übernommen. Lösche den alten Ordner custom_components/iptv_xtream, falls er noch vorhanden ist, und starte Home Assistant neu.",
       "account_updated": "{title} liegt auf demselben Server: Das neue Konto ist länger gültig ({new} statt {current}), daher verwendet {title} jetzt die neuen Zugangsdaten.",
+      "credentials_updated": "{title} war bereits eingerichtet: es verwendet jetzt diese Zugangsdaten.",
       "existing_longer": "{title} liegt auf demselben Server und ist länger oder gleich lang gültig ({current}, neues Konto: {new}): Nichts wurde geändert."
     }
   },

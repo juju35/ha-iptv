@@ -82,6 +82,7 @@
       "reauth_successful": "Fornyet godkendelse lykkedes",
       "migrated": "Konti fra den tidligere IPTV Xtream-integration flyttet til IPTV med de samme entiteter: {count}. Slet den gamle mappe custom_components/iptv_xtream, hvis den stadig findes, og genstart Home Assistant.",
       "account_updated": "{title} er på samme server: den nye konto er gyldig længere ({new} i stedet for {current}), så {title} bruger nu de nye loginoplysninger.",
+      "credentials_updated": "{title} var allerede konfigureret: den bruger nu disse loginoplysninger.",
       "existing_longer": "{title} er på samme server og er gyldig lige så længe eller længere ({current}, ny konto: {new}): intet er ændret."
     }
   },

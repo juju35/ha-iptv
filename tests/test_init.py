@@ -364,14 +364,91 @@ async def test_config_flow_cannot_connect(hass, aioclient_mock):
     assert result["errors"] == {"base": "cannot_connect"}
 
 
-async def test_config_flow_duplicate(hass, aioclient_mock, entry):
+ADDED_AT = "2026-01-02T03:04:05+00:00"
+
+
+def _renamed(hass, entry) -> None:
+    """The account was renamed by the user and added long ago."""
+    hass.config_entries.async_update_entry(entry, title="Salon", data={**entry.data, "added_at": ADDED_AT})
+
+
+async def test_config_flow_readd_updates_credentials(hass, aioclient_mock, entry):
+    """The same URL and username again (e.g. a new password): the account takes it, nothing is duplicated."""
+    _renamed(hass, entry)
     _mock_server(aioclient_mock)
     result = await _start_xtream(hass)
-    result = await hass.config_entries.flow.async_configure(
-        result["flow_id"], {CONF_URL: SERVER, CONF_USERNAME: USERNAME, CONF_PASSWORD: PASSWORD}
-    )
+    with patch.object(hass.config_entries, "async_schedule_reload") as reload:
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"], {CONF_URL: SERVER, CONF_USERNAME: USERNAME, CONF_PASSWORD: "renewed"}
+        )
     assert result["type"] is FlowResultType.ABORT
-    assert result["reason"] == "already_configured"
+    assert result["reason"] == "credentials_updated"
+    assert result["description_placeholders"] == {"title": "Salon"}
+    reload.assert_called_once_with(entry.entry_id)
+    assert len(hass.config_entries.async_entries(DOMAIN)) == 1
+    assert entry.title == "Salon"
+    assert entry.data[CONF_PASSWORD] == "renewed"
+    assert entry.data["added_at"] == ADDED_AT
+    assert entry.data["updated_at"]
+
+
+async def test_config_flow_readd_checks_credentials_first(hass, aioclient_mock, entry):
+    """Wrong credentials for an existing account: the form shows the error and the account is untouched."""
+    aioclient_mock.get(API, json={"user_info": {"auth": 0}})
+    result = await _start_xtream(hass)
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {CONF_URL: SERVER, CONF_USERNAME: USERNAME, CONF_PASSWORD: "bad"}
+    )
+    assert result["type"] is FlowResultType.FORM
+    assert result["errors"] == {"base": "invalid_auth"}
+    assert entry.data[CONF_PASSWORD] == PASSWORD
+
+
+async def test_config_flow_readd_stalker_updates_account(hass, stalker_entry):
+    _renamed(hass, stalker_entry)
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": "user"})
+    await hass.async_block_till_done()
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"next_step_id": "stalker"})
+    with (
+        patch("custom_components.iptv.config_flow.IptvConfigFlow._check_stalker", return_value={}) as check,
+        patch.object(hass.config_entries, "async_schedule_reload") as reload,
+    ):
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"], {CONF_URL: PORTAL, CONF_MAC: MAC.lower()}
+        )
+    check.assert_awaited_once()
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "credentials_updated"
+    reload.assert_called_once_with(stalker_entry.entry_id)
+    assert len(hass.config_entries.async_entries(DOMAIN)) == 1
+    assert stalker_entry.title == "Salon"
+    assert stalker_entry.data[CONF_MAC] == MAC
+    assert stalker_entry.data["added_at"] == ADDED_AT
+    assert stalker_entry.data["updated_at"]
+
+
+async def test_card_readd_updates_credentials(hass, aioclient_mock, entry, hass_ws_client):
+    """The card's add popup with an existing account's URL and username: ok, and the new password is stored."""
+    await _setup(hass, aioclient_mock, entry)
+    _renamed(hass, entry)
+    client = await hass_ws_client(hass)
+    with patch.object(hass.config_entries, "async_schedule_reload") as reload:
+        await client.send_json_auto_id(
+            {
+                "type": "iptv/add_account",
+                CONF_PROVIDER: PROVIDER_XTREAM,
+                CONF_URL: SERVER,
+                CONF_USERNAME: USERNAME,
+                CONF_PASSWORD: "renewed",
+            }
+        )
+        msg = await client.receive_json()
+    assert msg["result"] == {"ok": True}
+    reload.assert_called_once_with(entry.entry_id)
+    assert len(hass.config_entries.async_entries(DOMAIN)) == 1
+    assert entry.title == "Salon"
+    assert entry.data[CONF_PASSWORD] == "renewed"
+    assert entry.data["added_at"] == ADDED_AT
 
 
 async def test_reconfigure_updates_unique_id(hass, aioclient_mock, entry):
@@ -1219,6 +1296,53 @@ async def test_expired_event_fires_with_notification_disabled(hass):
     notifier.update({"auth": True, "exp_date": now - 60})
     await hass.async_block_till_done()
     assert [e.event_type for e in events] == ["iptv_expired"]
+
+
+async def test_expired_line_losing_auth_stays_expired(hass):
+    """An expired line is usually refused right away: iptv_expired fires once and the notice stays."""
+    from custom_components.iptv.notify_expiry import ExpiryNotifier
+
+    events = []
+    hass.bus.async_listen("iptv_expired", events.append)
+    now = int(dt_util.utcnow().timestamp())
+    notifier = ExpiryNotifier(hass, "e1", "Provider", {"notify_days": 7})
+    with (
+        patch("custom_components.iptv.notify_expiry.persistent_notification.async_create") as create,
+        patch("custom_components.iptv.notify_expiry.persistent_notification.async_dismiss") as dismiss,
+    ):
+        notifier.update({"auth": True, "exp_date": now + 3600})
+        dismiss.reset_mock()
+        # Expired meanwhile, and the server now refuses the login (no exp_date either)
+        with patch(
+            "custom_components.iptv.notify_expiry.dt_util.utcnow", return_value=dt_util.utcnow().replace(year=2100)
+        ):
+            notifier.update({"auth": False, "status": "invalid_auth"})
+            notifier.update({"auth": False, "status": "invalid_auth"})
+        await hass.async_block_till_done()
+    assert [e.event_type for e in events] == ["iptv_expired"]
+    assert events[0].data["days_left"] == 0
+    dismiss.assert_not_called()
+    assert create.call_count == 2
+    assert "expired" in create.call_args.args[1]
+
+
+async def test_refused_login_before_expiry_is_not_expired(hass):
+    from custom_components.iptv.notify_expiry import ExpiryNotifier
+
+    events = []
+    hass.bus.async_listen("iptv_expired", events.append)
+    now = int(dt_util.utcnow().timestamp())
+    notifier = ExpiryNotifier(hass, "e1", "Provider", {"notify_days": 7})
+    with (
+        patch("custom_components.iptv.notify_expiry.persistent_notification.async_create"),
+        patch("custom_components.iptv.notify_expiry.persistent_notification.async_dismiss") as dismiss,
+    ):
+        notifier.update({"auth": True, "exp_date": now + 3 * 86400})
+        dismiss.reset_mock()
+        notifier.update({"auth": False})
+    await hass.async_block_till_done()
+    assert events == []
+    dismiss.assert_called_once()
 
 
 # ── diagnostics ─────────────────────────────────────────────────────────────

@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.26.0 - 2026-11-08
+
+### What's new
+- **Remove an account that never started**: the sidebar panel now shows a **Remove** button, with a confirmation at the top of the account, for an account whose setup never finished (no device, so the card cannot list it); it uses the new admin-only `iptv/remove_account` command.
+
+### Fixes
+- Adding an account that is already configured (same URL and username, or same MAC address), from the integration page or the card, no longer stops with "already configured": the credentials are checked, then the existing account takes them (a new password, for example) and is reloaded, keeping its name and its "added" date.
+- An expired subscription whose login is then refused by the server is still reported as expired: `iptv_expired` is fired and the expiration notification stays, instead of disappearing.
+- Removing an account no longer risks keeping the card resource when it was the last account, whatever the Home Assistant version.
+
 ## 3.25.0 - 2026-11-07
 
 ### What's new

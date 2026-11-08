@@ -195,7 +195,7 @@ async def _add_account(hass: HomeAssistant, params: dict[str, Any]) -> dict[str,
         return {"ok": True}
     if result["type"] == FlowResultType.ABORT:
         reason = result.get("reason") or "generic"
-        return {"ok": True} if reason == "account_updated" else {"ok": False, "error": reason}
+        return {"ok": True} if reason in ("account_updated", "credentials_updated") else {"ok": False, "error": reason}
     return {"ok": False, "error": "generic"}
 
 

@@ -82,6 +82,7 @@
       "reauth_successful": "Az újrahitelesítés sikeres",
       "migrated": "A korábbi IPTV Xtream integrációból az IPTV-be áthelyezett fiókok, ugyanazokkal az entitásokkal: {count}. Töröld a régi custom_components/iptv_xtream mappát, ha még megvan, és indítsd újra a Home Assistantot.",
       "account_updated": "{title} ugyanazon a szerveren van: az új fiók tovább érvényes ({new} a(z) {current} helyett), ezért {title} mostantól az új hitelesítő adatokat használja.",
+      "credentials_updated": "{title} már be volt állítva: mostantól ezeket a hitelesítő adatokat használja.",
       "existing_longer": "{title} ugyanazon a szerveren van, és legalább ugyanolyan sokáig érvényes ({current}, új fiók: {new}): nem változott semmi."
     }
   },

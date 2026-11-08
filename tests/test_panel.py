@@ -1,11 +1,12 @@
 """Tests for the sidebar panel and its WebSocket commands."""
 
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 from homeassistant.components.frontend import DATA_PANELS
 from homeassistant.const import CONF_PASSWORD
 from homeassistant.helpers import device_registry as dr
+from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.iptv.const import DOMAIN, PANEL_PATH, VERSION
 from custom_components.iptv.registry_compat import get_device
@@ -116,7 +117,7 @@ async def test_update_account_rejects_out_of_range(hass, aioclient_mock, entry, 
 
 async def test_unknown_account(hass, aioclient_mock, entry, hass_ws_client):
     await _setup(hass, aioclient_mock, entry)
-    for command in ("iptv/update_account", "iptv/check_account"):
+    for command in ("iptv/update_account", "iptv/check_account", "iptv/remove_account"):
         msg = await _ws(hass, hass_ws_client, {"type": command, "entry_id": "nope"})
         assert msg["result"] == {"ok": False, "error": "not_found"}
 
@@ -134,7 +135,9 @@ async def test_check_account_refreshes_and_checks_health(hass, aioclient_mock, e
     check.assert_awaited_once()
 
 
-@pytest.mark.parametrize("command", ["iptv/accounts", "iptv/update_account", "iptv/check_account"])
+@pytest.mark.parametrize(
+    "command", ["iptv/accounts", "iptv/update_account", "iptv/check_account", "iptv/remove_account"]
+)
 async def test_panel_commands_refused_to_non_admin(
     hass, aioclient_mock, entry, hass_ws_client, hass_read_only_access_token, command
 ):
@@ -143,3 +146,33 @@ async def test_panel_commands_refused_to_non_admin(
     msg = await _ws(hass, hass_ws_client, payload, hass_read_only_access_token)
     assert not msg["success"]
     assert msg["error"]["code"] == "unauthorized"
+
+
+async def test_remove_account_that_never_set_up(hass, aioclient_mock, entry, hass_ws_client):
+    """An account whose setup failed has no device, so the card cannot list it: the panel removes it."""
+    other = MockConfigEntry(domain=DOMAIN, title="Broken", data={})
+    other.add_to_hass(hass)
+    await _setup(hass, aioclient_mock, entry)
+    msg = await _ws(hass, hass_ws_client, {"type": "iptv/accounts"})
+    broken = next(a for a in msg["result"]["accounts"] if a["entry_id"] == other.entry_id)
+    assert broken["device_id"] is None
+    msg = await _ws(hass, hass_ws_client, {"type": "iptv/remove_account", "entry_id": other.entry_id})
+    assert msg["result"] == {"ok": True}
+    await hass.async_block_till_done()
+    assert hass.config_entries.async_get_entry(other.entry_id) is None
+    assert hass.config_entries.async_get_entry(entry.entry_id) is not None
+
+
+async def test_remove_entry_ignores_the_entry_being_removed(hass, aioclient_mock, entry):
+    """The last account removed drops the card resource, even if Home Assistant still lists it."""
+    from custom_components.iptv import async_remove_entry
+
+    resources = Mock()
+    resources.async_items.return_value = []
+    with (
+        patch("custom_components.iptv._storage_resources", return_value=resources),
+        patch.object(hass.config_entries, "async_entries", return_value=[entry]),
+    ):
+        await async_remove_entry(hass, entry)
+    # Only this account listed (still being removed): it was the last one, the resource goes
+    resources.async_items.assert_called_once()

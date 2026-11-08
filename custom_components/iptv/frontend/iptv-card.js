@@ -8,7 +8,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_CARD_VERSION = '3.25.0';
+var IPTV_CARD_VERSION = '3.26.0';
 var IPTV_DOMAIN = 'iptv';
 
 // ── i18n ──────────────────────────────────────────────────────────────────────

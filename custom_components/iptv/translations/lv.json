@@ -82,6 +82,7 @@
       "reauth_successful": "Atkārtota autentifikācija veiksmīga",
       "migrated": "Iepriekšējās IPTV Xtream integrācijas konti, kas pārvietoti uz IPTV ar tām pašām entītijām: {count}. Izdzēsiet veco mapi custom_components/iptv_xtream, ja tā vēl pastāv, un restartējiet Home Assistant.",
       "account_updated": "{title} atrodas tajā pašā serverī: jaunais konts ir derīgs ilgāk ({new}, nevis {current}), tāpēc {title} tagad izmanto jaunos pieteikšanās datus.",
+      "credentials_updated": "{title} jau bija iestatīts: tagad tas izmanto šos pieteikšanās datus.",
       "existing_longer": "{title} atrodas tajā pašā serverī un ir derīgs tikpat ilgi vai ilgāk ({current}, jaunais konts: {new}): nekas nav mainīts."
     }
   },
