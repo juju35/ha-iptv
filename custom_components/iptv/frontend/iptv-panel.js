@@ -1,16 +1,17 @@
 /*
  * IPTV sidebar panel — every IPTV account in one page (administrators only).
  *
- * Left: the bundled iptv-card, which already adds, views, edits and removes accounts.
- * Right: one settings form per account (name, polling, expiration notice, health check,
- * stream test) and a "check now" action, through the iptv/accounts, iptv/update_account
- * and iptv/check_account WebSocket commands; an account that never finished its setup (no
- * device, so the card cannot list it) gets a Remove action (iptv/remove_account). The list follows config entry changes
- * (config_entries/subscribe), so an account added or removed from the card shows up here.
+ * Two tabs under the toolbar, as in Smart Comfort: Subscriptions, the bundled iptv-card, which already adds,
+ * views, edits and removes accounts; Settings, one form per account (name, polling, expiration notice, health
+ * check, stream test) and a "check now" action, through the iptv/accounts, iptv/update_account and
+ * iptv/check_account WebSocket commands; an account that never finished its setup (no device, so the card cannot
+ * list it) gets a Remove action (iptv/remove_account). The list follows config entry changes
+ * (config_entries/subscribe), so an account added or removed from the card shows up here. The tab is in the
+ * address (/iptv-config/settings).
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_PANEL_VERSION = '3.26.0';
+var IPTV_PANEL_VERSION = '3.27.0';
 
 var IptvPanelI18n = {
   en: {
@@ -1078,6 +1079,8 @@ var IPTV_PANEL_LIMITS = {
   health_interval: [1, 60],
 };
 
+var IPTV_PANEL_TABS = ['accounts', 'settings'];
+
 function iptvPanelT(lang, key, vars) {
   var table = IptvPanelI18n[lang] || IptvPanelI18n.en;
   var text = table[key] || IptvPanelI18n.en[key] || key;
@@ -1105,13 +1108,19 @@ class IptvPanel extends HTMLElement {
             --tone-good: var(--success-color, #43a047); --tone-warn: var(--warning-color, #ffa600); --tone-bad: var(--error-color, #db4437); }
     .toolbar { height:var(--header-height, 56px); display:flex; align-items:center; gap:8px; padding:0 12px; box-sizing:border-box;
                background:var(--app-header-background-color, var(--primary-color)); color:var(--app-header-text-color, #fff);
-               border-bottom:var(--app-header-border-bottom, none); font-size:20px; }
+               border-bottom:var(--app-header-border-bottom, none); font-size:20px; position:sticky; top:0; z-index:2; }
     .toolbar .grow { flex:1; }
     .toolbar a { color:inherit; display:flex; padding:8px; border-radius:50%; --mdc-icon-size:22px; }
     .toolbar a:hover { background:rgba(255,255,255,.12); }
-    main { max-width:1200px; margin:0 auto; padding:16px; box-sizing:border-box; display:grid; gap:16px; grid-template-columns:minmax(0, 1fr); }
-    @media (min-width: 960px) { main { grid-template-columns:minmax(0, 5fr) minmax(0, 6fr); align-items:start; } }
-    h2 { margin:0 0 8px 4px; font-size:14px; font-weight:500; text-transform:uppercase; letter-spacing:.06em; color:var(--secondary-text-color); }
+    /* Tabs under the toolbar, as in Smart Comfort: text, the active one underlined, sticky with the toolbar */
+    .tabs { display:flex; gap:4px; padding:0 12px; overflow-x:auto; background:var(--app-header-background-color, var(--primary-color));
+            position:sticky; top:var(--header-height, 56px); z-index:2; }
+    .tab { background:none; border:none; border-bottom:2px solid transparent; color:var(--app-header-text-color, #fff); opacity:.75;
+           padding:12px 14px; font:inherit; font-size:14px; cursor:pointer; white-space:nowrap; }
+    .tab:hover, .tab:focus-visible { opacity:1; outline:none; }
+    .tab.active { opacity:1; border-bottom-color:var(--app-header-text-color, #fff); }
+    main { max-width:1040px; margin:0 auto; padding:16px; box-sizing:border-box; }
+    section[hidden] { display:none; }
     .column { display:flex; flex-direction:column; gap:12px; min-width:0; }
     .note { padding:16px; color:var(--secondary-text-color); }
     .account { padding:14px 16px; display:flex; flex-direction:column; gap:12px; }
@@ -1186,6 +1195,48 @@ class IptvPanel extends HTMLElement {
     this._confirm = null;
     // Passwords revealed on request ({password, updatedAt}), kept in memory only while shown
     this._secrets = {};
+    this._tab = 'accounts';
+  }
+
+  // /iptv-config/<tab> opens that tab (Home Assistant sets the route; the base address is Subscriptions)
+  set route(route) {
+    var path = (route?.path || '').split('/').filter(Boolean)[0];
+    var tab = IPTV_PANEL_TABS.includes(path) ? path : 'accounts';
+    if (tab !== this._tab) this._showTab(tab);
+  }
+
+  // Shows a tab; `focus` moves the keyboard to its button (arrow keys). The address follows, so a reload or a link
+  // comes back to the same tab.
+  _goTab(tab, focus) {
+    if (!IPTV_PANEL_TABS.includes(tab)) return;
+    this._showTab(tab, focus);
+    var base = (this._panel?.url_path || 'iptv-config').replace(/^\//, '');
+    try {
+      history.replaceState(history.state, '', `/${base}${tab === 'accounts' ? '' : `/${tab}`}`);
+    } catch (_err) {
+      // no history (a test, a sandboxed page): the tab still shows
+    }
+  }
+
+  _showTab(tab, focus) {
+    this._tab = tab;
+    var root = this.shadowRoot;
+    root.querySelectorAll?.('.tab').forEach((button) => {
+      var selected = button.dataset.tab === tab;
+      button.classList.toggle('active', selected);
+      button.setAttribute('aria-selected', String(selected));
+      button.tabIndex = selected ? 0 : -1;
+      if (selected && focus) button.focus({ preventScroll: true });
+    });
+    IPTV_PANEL_TABS.forEach((name) => {
+      var panel = root.getElementById(`tab-${name}`);
+      if (panel) panel.hidden = name !== tab;
+    });
+  }
+
+  _tabHtml(tab) {
+    var selected = tab === this._tab;
+    return `<button class="tab${selected ? ' active' : ''}" role="tab" id="tabbtn-${tab}" data-tab="${tab}" aria-selected="${selected}" aria-controls="tab-${tab}" tabindex="${selected ? 0 : -1}">${iptvPanelEsc(this._t(tab))}</button>`;
   }
 
   set hass(hass) {
@@ -1287,13 +1338,26 @@ class IptvPanel extends HTMLElement {
         <span class="grow">${iptvPanelEsc(this._t('title'))}</span>
         <a href="/config/integrations/integration/iptv" title="${iptvPanelEsc(this._t('open_integration'))}"><ha-icon icon="mdi:cog"></ha-icon></a>
       </div>
+      <div class="tabs" role="tablist">${IPTV_PANEL_TABS.map((tab) => this._tabHtml(tab)).join('')}</div>
       <main>
-        <section class="column"><h2>${iptvPanelEsc(this._t('accounts'))}</h2><div id="card"></div></section>
-        <section class="column"><h2>${iptvPanelEsc(this._t('settings'))}</h2><div id="accounts" class="column"></div></section>
+        <section class="column" id="tab-accounts" role="tabpanel" aria-labelledby="tabbtn-accounts"><div id="card"></div></section>
+        <section class="column" id="tab-settings" role="tabpanel" aria-labelledby="tabbtn-settings"><div id="accounts" class="column"></div></section>
       </main>`;
     this._menu = root.querySelector('ha-menu-button');
     this._menu.hass = this._hass;
     this._menu.narrow = this._narrow;
+    root.querySelectorAll('.tab').forEach((button) => {
+      button.addEventListener('click', () => this._goTab(button.dataset.tab));
+      // Left and right arrows move between the tabs, as in a native tab bar
+      button.addEventListener('keydown', (ev) => {
+        var step = ev.key === 'ArrowRight' ? 1 : ev.key === 'ArrowLeft' ? -1 : 0;
+        if (!step) return;
+        ev.preventDefault();
+        var i = IPTV_PANEL_TABS.indexOf(this._tab);
+        this._goTab(IPTV_PANEL_TABS[(i + step + IPTV_PANEL_TABS.length) % IPTV_PANEL_TABS.length], true);
+      });
+    });
+    this._showTab(this._tab);
     if (this._card) root.getElementById('card').appendChild(this._card);
     this._renderAccounts();
   }

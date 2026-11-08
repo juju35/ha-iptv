@@ -22,8 +22,8 @@ const context = {
   console,
 };
 vm.createContext(context);
-vm.runInContext(`${source}\nthis.panel = { IptvPanel, IptvPanelI18n, IPTV_PANEL_LIMITS, iptvPanelT, iptvPanelTone };`, context);
-const { IptvPanel, IptvPanelI18n, IPTV_PANEL_LIMITS, iptvPanelT, iptvPanelTone } = context.panel;
+vm.runInContext(`${source}\nthis.panel = { IptvPanel, IptvPanelI18n, IPTV_PANEL_LIMITS, IPTV_PANEL_TABS, iptvPanelT, iptvPanelTone };`, context);
+const { IptvPanel, IptvPanelI18n, IPTV_PANEL_LIMITS, IPTV_PANEL_TABS, iptvPanelT, iptvPanelTone } = context.panel;
 
 const placeholders = (s) => [...String(s).matchAll(/\{\w+\}/g)].map((m) => m[0]).sort();
 
@@ -490,4 +490,44 @@ test('confirming removes the account by its config entry and reloads the list', 
   );
   assert.equal(card(box, 'e1'), null);
   assert.ok(card(box, 'e2'));
+});
+
+test('tabs: the address picks the tab, a selection updates the address and hides the other panel', () => {
+  const plain = (x) => JSON.parse(JSON.stringify(x));
+  const panels = Object.fromEntries(IPTV_PANEL_TABS.map((t) => [`tab-${t}`, { hidden: false }]));
+  const buttons = IPTV_PANEL_TABS.map((t) => ({
+    dataset: { tab: t },
+    attrs: {},
+    classes: new Set(),
+    setAttribute(k, v) { this.attrs[k] = v; },
+    focus() { this.focused = true; },
+  }));
+  for (const b of buttons) b.classList = { toggle: (c, on) => (on ? b.classes.add(c) : b.classes.delete(c)) };
+  const root = { getElementById: (id) => panels[id] || null, querySelector: () => null, querySelectorAll: (sel) => (sel === '.tab' ? buttons : []) };
+  const urls = [];
+  context.history = { state: null, replaceState: (_s, _t, url) => urls.push(url) };
+  const panel = Object.create(IptvPanel.prototype);
+  panel.shadowRoot = root;
+  panel._tab = 'accounts';
+  panel._panel = { url_path: 'iptv-config' };
+  assert.deepEqual(plain(IPTV_PANEL_TABS), ['accounts', 'settings']);
+  // The route from Home Assistant: /iptv-config/settings
+  panel.route = { path: '/settings' };
+  assert.equal(panel._tab, 'settings');
+  assert.deepEqual(plain(IPTV_PANEL_TABS.map((t) => panels[`tab-${t}`].hidden)), [true, false]);
+  // An unknown path: Subscriptions
+  panel.route = { path: '/nope' };
+  assert.equal(panel._tab, 'accounts');
+  // A click: the address follows, Subscriptions is the base address
+  panel._goTab('settings', true);
+  assert.deepEqual(plain(urls), ['/iptv-config/settings']);
+  assert.deepEqual(plain(buttons.map((b) => b.attrs['aria-selected'])), ['false', 'true']);
+  assert.deepEqual(plain(buttons.map((b) => b.classes.has('active'))), [false, true]);
+  assert.deepEqual(plain(buttons.map((b) => b.tabIndex)), [-1, 0]);
+  assert.ok(buttons[1].focused);
+  panel._goTab('accounts');
+  assert.equal(urls.at(-1), '/iptv-config');
+  panel._goTab('nope');
+  assert.equal(panel._tab, 'accounts');
+  delete context.history;
 });

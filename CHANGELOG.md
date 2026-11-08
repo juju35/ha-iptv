@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.27.0 - 2026-11-08
+
+### What's new
+- **Sidebar panel in tabs**: **Subscriptions** (the card) and **Settings** (one block per account) under the toolbar, instead of two columns, laid out like Smart Comfort's and Battery Monitor's panels; each tab has its own address (`/iptv-config/settings`), so a reload or a link comes back to it, and the arrow keys move between tabs.
+
 ## 3.26.0 - 2026-11-08
 
 ### What's new

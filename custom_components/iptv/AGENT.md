@@ -31,7 +31,7 @@ custom_components/iptv/
 ├── services.yaml / translations/{en,fr,de,es,it,nl,pt,pl,ro,da,sv,bg,ru,uk,hu,sk,cs,sl,lv,el,sr,sr-Latn}.json
 ├── brand/             # Integration icon and logo
 ├── frontend/iptv-card.js   # Vanilla JS cards (iptv-card, iptv-mini-card), no dependencies
-└── frontend/iptv-panel.js  # Vanilla JS sidebar panel (iptv-panel), embeds iptv-card
+└── frontend/iptv-panel.js  # Vanilla JS sidebar panel (iptv-panel), two tabs: embeds iptv-card, settings per account
 ```
 
 ## Card
@@ -43,7 +43,7 @@ custom_components/iptv/
 
 ## Sidebar panel
 - Registered in `async_setup` (`panel_custom`, `require_admin`) at `/iptv-config` — its own path, not `/iptv`, so the frontend's panel route never shadows the files served under `/iptv/`. Module served from `/iptv/iptv-panel.js?v=VERSION`; `IPTV_PANEL_VERSION` is bumped with the others.
-- The panel imports the card and embeds `iptv-card` for the account list and add / view / edit / remove (no duplicated code: jscpd is blocking), and adds a settings form per account through `iptv/accounts` (no password), `iptv/update_account` (title first: renamed in place, then options: one reload; blank title = `auto_title`; same limits as the options flow via the `MIN_* / MAX_*` constants) and `iptv/check_account` (refresh + `health.async_check_now`, or a reload when the entry is not loaded). Credentials block per account: login from `iptv/accounts`; the Xtream password is fetched with `iptv/get_credentials` (device id) only on show / copy, kept in `_secrets` while shown, dropped on hide and on disconnect. It follows `config_entries/subscribe` to reload the list when an account changes; drafts survive re-renders, and typing only refreshes the buttons.
+- Two tabs under the toolbar (`IPTV_PANEL_TABS` = accounts, settings; `_goTab` shows one and writes its address `/iptv-config/<tab>` with `history.replaceState`, the `route` setter opens the tab of the address; arrow keys between tabs; sections `#tab-<name>`, hidden when not selected). The panel imports the card and embeds `iptv-card` (Subscriptions tab) for the account list and add / view / edit / remove (no duplicated code: jscpd is blocking), and adds a settings form per account through `iptv/accounts` (no password), `iptv/update_account` (title first: renamed in place, then options: one reload; blank title = `auto_title`; same limits as the options flow via the `MIN_* / MAX_*` constants) and `iptv/check_account` (refresh + `health.async_check_now`, or a reload when the entry is not loaded). Credentials block per account: login from `iptv/accounts`; the Xtream password is fetched with `iptv/get_credentials` (device id) only on show / copy, kept in `_secrets` while shown, dropped on hide and on disconnect. It follows `config_entries/subscribe` to reload the list when an account changes; drafts survive re-renders, and typing only refreshes the buttons.
 
 ## Health check
 - A Stalker client runs one operation at a time (asyncio lock; the coordinator and the health check share its token). The health latency is measured by the client once it holds the lock (`user_info_ms`), a tick is skipped while the previous check still runs, and the stream probe is skipped when the slots are all in use or, with unknown occupancy (Stalker), while a refresh holds or waits for the client (`busy`).
