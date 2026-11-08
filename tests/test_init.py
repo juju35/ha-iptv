@@ -3,6 +3,7 @@
 import asyncio
 import logging
 import re
+from datetime import UTC, datetime
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 from urllib.parse import urlencode
@@ -1157,6 +1158,67 @@ async def test_expiry_notification_languages(hass, lang, title):
     with patch("custom_components.iptv.notify_expiry.persistent_notification.async_create") as create:
         notifier.update({"auth": True, "exp_date": exp})
     assert create.call_args.kwargs["title"] == f"{title} provider.example"
+
+
+# ── expiry events ───────────────────────────────────────────────────────────
+
+
+async def test_expiry_events_fire_on_transitions_only(hass):
+    from homeassistant.core import callback
+
+    from custom_components.iptv.notify_expiry import ExpiryNotifier
+
+    events = []
+
+    @callback
+    def listen(event):
+        events.append(event)
+
+    hass.bus.async_listen("iptv_expiring", listen)
+    hass.bus.async_listen("iptv_expired", listen)
+    now = int(dt_util.utcnow().timestamp())
+    notifier = ExpiryNotifier(hass, "e1", "Provider", {"notify_days": 7})
+
+    def at(days):
+        return {"auth": True, "exp_date": now + days * 86400 - 60}
+
+    # Startup inside the window: recorded, not fired (a restart fires nothing again)
+    notifier.update(at(3))
+    await hass.async_block_till_done()
+    assert events == []
+    notifier.update(at(2))
+    await hass.async_block_till_done()
+    assert events == []
+    # Renewed, then entering the window: one iptv_expiring
+    notifier.update(at(30))
+    notifier.update(at(7))
+    notifier.update(at(6))
+    await hass.async_block_till_done()
+    assert [e.event_type for e in events] == ["iptv_expiring"]
+    exp = datetime.fromtimestamp(now + 7 * 86400 - 60, tz=UTC)
+    assert events[0].data == {"entry_id": "e1", "name": "Provider", "days_left": 7, "exp_date": exp.isoformat()}
+    # Expired: one iptv_expired; a failed refresh (no data) is not a transition
+    notifier.update(at(0))
+    notifier.update(None)
+    notifier.update(at(-1))
+    await hass.async_block_till_done()
+    assert [e.event_type for e in events] == ["iptv_expiring", "iptv_expired"]
+    assert events[1].data["days_left"] == 0
+    assert events[1].data["entry_id"] == "e1"
+
+
+async def test_expired_event_fires_with_notification_disabled(hass):
+    from custom_components.iptv.notify_expiry import ExpiryNotifier
+
+    events = []
+    hass.bus.async_listen("iptv_expired", events.append)
+    hass.bus.async_listen("iptv_expiring", events.append)
+    now = int(dt_util.utcnow().timestamp())
+    notifier = ExpiryNotifier(hass, "e1", "Provider", {"notify_days": 0})
+    notifier.update({"auth": True, "exp_date": now + 2 * 86400})
+    notifier.update({"auth": True, "exp_date": now - 60})
+    await hass.async_block_till_done()
+    assert [e.event_type for e in events] == ["iptv_expired"]
 
 
 # ── diagnostics ─────────────────────────────────────────────────────────────

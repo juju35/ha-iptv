@@ -29,6 +29,7 @@ Home Assistant integration and Lovelace card that track one or several **IPTV su
 - French lists check: accounts without French categories are refused, and the card shows a French flag pill
 - Optional notification with the connection details when an account is added
 - Persistent notification a configurable number of days before expiration (7 by default)
+- `iptv_expiring` / `iptv_expired` events for automations
 - **Sidebar panel** (administrators): every account and its settings on one page
 - Visual editor, refresh button
 - Fully compatible with Home Assistant dark mode
@@ -173,6 +174,31 @@ actions:
       message: "IPTV subscription expires in {{ states('sensor.my_account_days_left') }} days"
 ```
 
+#### Events
+
+The integration fires an event on the Home Assistant bus when an account changes phase (never at startup or after a restart, only on a change seen while running):
+
+| Event | When | Data |
+|---|---|---|
+| `iptv_expiring` | The subscription enters the **Notify before expiration** window | `entry_id`, `name`, `days_left`, `exp_date` (ISO 8601, UTC) |
+| `iptv_expired` | The subscription expires (also fired when the notification is disabled) | `entry_id`, `name`, `days_left` (`0`), `exp_date` |
+
+Example automation:
+
+```yaml
+triggers:
+  - trigger: event
+    event_type: iptv_expiring
+  - trigger: event
+    event_type: iptv_expired
+actions:
+  - action: notify.notify
+    data:
+      message: >-
+        {% if trigger.event.event_type == 'iptv_expired' %}{{ trigger.event.data.name }} has expired
+        {% else %}{{ trigger.event.data.name }} expires in {{ trigger.event.data.days_left }} days{% endif %}
+```
+
 ### Card
 
 The card is available in the card picker as **IPTV Subscription Card**, with a visual editor. With no option it shows every IPTV subscription, one section per provider named after its device (rename the device to change it):
@@ -202,7 +228,7 @@ devices:
 | `warning_days` | ❌ | `7` | Turns orange when fewer days than this are left |
 | `language` | ❌ | Auto | Force language: `en`, `fr`, `de`, `es`, `it`, `nl`, `pt`, `pl`, `ro`, `da`, `sv`, `bg`, `ru`, `uk`, `hu`, `sk`, `cs`, `sl`, `lv`, `el`, `sr` or `sr-Latn` (auto-detects from HA settings) |
 
-Each subscription shows a French flag pill (**FR** in green when French lists were found, **No FR** in red otherwise), a health pill next to its status, and the moment of its last health check: **Online** with the response time (green), **Slow** above 3 s (orange), **Unreachable** (red). The **+** button (card header) opens a popup to add a new account, the 👁 button on each subscription shows its server URL and credentials with a copy button for each (plus, for an Xtream Codes account, its **M3U playlist** and **EPG guide (XMLTV)** URLs, ready to paste into VLC, TiviMate or Jellyfin), the ✎ button edits them, and the 🗑 button removes the account (with confirmation). Adding or editing runs the same checks as the UI (credentials, French lists and video stream). The edit form is also available from **Settings → Devices & services → IPTV → ⋮ → Reconfigure**. The ⟳ button queries every shown server (re-reading the channel / movie / series counts and French lists, otherwise cached for 6 hours) and runs a health check right away. The add, view, edit and remove buttons are shown to Home Assistant administrators only. The card adds, views and edits accounts through admin-only WebSocket commands (`iptv/add_account`, `iptv/edit_account`, `iptv/get_credentials`), so the password never goes through a service call; removing uses the admin-only `iptv.remove_account` service.
+Each subscription shows a French flag pill (**FR** in green when French lists were found, **No FR** in red otherwise), a health pill next to its status, and the moment of its last health check: **Online** with the response time (green), **Slow** above 3 s (orange), **Unreachable** (red). The **+** button (card header) opens a popup to add a new account, the 👁 button on each subscription shows its server URL and credentials with a copy button for each (plus, for an Xtream Codes account, its **M3U playlist** and **EPG guide (XMLTV)** URLs, ready to paste into VLC, TiviMate or Jellyfin); the password and the password inside those URLs stay masked until you click the eye next to them, the copy button always copies the real value, and they are masked again each time the popup opens, the ✎ button edits them, and the 🗑 button removes the account (with confirmation). Adding or editing runs the same checks as the UI (credentials, French lists and video stream). The edit form is also available from **Settings → Devices & services → IPTV → ⋮ → Reconfigure**. The ⟳ button queries every shown server (re-reading the channel / movie / series counts and French lists, otherwise cached for 6 hours) and runs a health check right away. The add, view, edit and remove buttons are shown to Home Assistant administrators only. The card adds, views and edits accounts through admin-only WebSocket commands (`iptv/add_account`, `iptv/edit_account`, `iptv/get_credentials`), so the password never goes through a service call; removing uses the admin-only `iptv.remove_account` service.
 
 ### Mini card
 

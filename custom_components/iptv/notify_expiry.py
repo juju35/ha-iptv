@@ -1,4 +1,4 @@
-"""Persistent notification when a subscription is about to expire."""
+"""Persistent notification and events when a subscription is about to expire."""
 
 from __future__ import annotations
 
@@ -166,6 +166,9 @@ def message_language(language: str | None) -> str:
 
 OFF = (0, 0)
 
+EVENT_EXPIRING = f"{DOMAIN}_expiring"
+EVENT_EXPIRED = f"{DOMAIN}_expired"
+
 
 def notification_id(entry_id: str) -> str:
     """One notification per account."""
@@ -177,14 +180,20 @@ class ExpiryNotifier:
 
     The notification is (re)created once per day while the account is inside
     the warning window, so dismissing it silences it until the next day.
+
+    ``iptv_expiring`` / ``iptv_expired`` are fired on the bus when the account
+    enters the warning window or expires; the first known state (startup,
+    reload) is only recorded, so a restart never fires them again.
     """
 
     def __init__(self, hass: HomeAssistant, entry_id: str, name: str, options: dict[str, Any]) -> None:
         self._hass = hass
+        self._entry_id = entry_id
         self._id = notification_id(entry_id)
         self._name = name
         self._threshold = int(options.get(CONF_NOTIFY_DAYS, DEFAULT_NOTIFY_DAYS))
         self._last: tuple[int, int] | None = None  # None: unknown yet
+        self._phase: str | None = None  # "ok", "expiring" or "expired"; None: unknown yet
 
     @callback
     def update(self, data: dict[str, Any] | None) -> None:
@@ -193,12 +202,13 @@ class ExpiryNotifier:
             exp = int(exp) if exp else None
         except (TypeError, ValueError):
             exp = None
-        if not self._threshold or not exp or not (data or {}).get("auth"):
+        if not exp or not (data or {}).get("auth"):
             self.dismiss()
             return
         expiration = datetime.fromtimestamp(exp, tz=UTC)
         days = math.ceil((expiration - dt_util.utcnow()).total_seconds() / 86400)
-        if days > self._threshold:
+        self._fire_on_change(expiration, days)
+        if not self._threshold or days > self._threshold:
             self.dismiss()
             return
         key = (exp, days)
@@ -214,6 +224,28 @@ class ExpiryNotifier:
             message,
             title=text["title"].format(name=self._name),
             notification_id=self._id,
+        )
+
+    @callback
+    def _fire_on_change(self, expiration: datetime, days: int) -> None:
+        """Fire iptv_expiring / iptv_expired when the account enters that phase."""
+        if days <= 0:
+            phase = "expired"
+        elif self._threshold and days <= self._threshold:
+            phase = "expiring"
+        else:
+            phase = "ok"
+        previous, self._phase = self._phase, phase
+        if previous is None or phase in (previous, "ok"):
+            return
+        self._hass.bus.async_fire(
+            EVENT_EXPIRED if phase == "expired" else EVENT_EXPIRING,
+            {
+                "entry_id": self._entry_id,
+                "name": self._name,
+                "days_left": max(days, 0),
+                "exp_date": expiration.isoformat(),
+            },
         )
 
     @callback

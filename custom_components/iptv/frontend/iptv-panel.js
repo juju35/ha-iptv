@@ -9,7 +9,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_PANEL_VERSION = '3.24.0';
+var IPTV_PANEL_VERSION = '3.25.0';
 
 var IptvPanelI18n = {
   en: {

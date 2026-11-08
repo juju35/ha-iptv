@@ -17,8 +17,8 @@ const context = {
   setTimeout: () => 0,
 };
 vm.createContext(context);
-vm.runInContext(`${source}\nthis.iptv = { IptvCard, IptvMiniCard, IptvCardI18n, iptvErr, iptvLang, iptvLocale, iptvT, iptvFocusOf, iptvRefocus };`, context);
-const { IptvCard, IptvMiniCard, IptvCardI18n, iptvErr, iptvLang, iptvLocale, iptvT, iptvFocusOf, iptvRefocus } = context.iptv;
+vm.runInContext(`${source}\nthis.iptv = { IptvCard, IptvMiniCard, IptvCardI18n, iptvErr, iptvLang, iptvLocale, iptvT, iptvFocusOf, iptvRefocus, iptvMask };`, context);
+const { IptvCard, IptvMiniCard, IptvCardI18n, iptvErr, iptvLang, iptvLocale, iptvT, iptvFocusOf, iptvRefocus, iptvMask } = context.iptv;
 
 const placeholders = (s) => [...String(s).matchAll(/\{\w+\}/g)].map((m) => m[0]).sort();
 
@@ -420,6 +420,50 @@ test('the remove popup focuses Cancel, the view popup its first copy button, an 
   card._ws = () => Promise.resolve({ ok: false, error: 'not_found' });
   await card._openView({ device: 'd1' });
   assert.equal(shadow.activeElement, card._modal.querySelector('.cancel'));
+});
+
+test('the view popup masks the password and the playlist / guide URLs until shown', async () => {
+  const { card } = popupCard();
+  card._ws = () =>
+    Promise.resolve({
+      ok: true,
+      provider: 'xtream',
+      url: 'http://x',
+      username: 'u',
+      password: 's3cr%et',
+      m3u_url: 'http://x/get.php?username=u&password=s3cr%25et&type=m3u_plus&output=ts',
+      xmltv_url: 'http://x/xmltv.php?username=u&password=s3cr%25et',
+    });
+  await card._openView({ device: 'd1' });
+  const html = card._modal.querySelector('.modal').innerHTML;
+  assert.doesNotMatch(html, /s3cr/, 'no secret in the DOM');
+  assert.match(html, /get\.php\?username=u&amp;password=••••••••&amp;type=m3u_plus/);
+  assert.match(html, /xmltv\.php\?username=u&amp;password=••••••••</);
+  assert.equal((html.match(/class="reveal"/g) || []).length, 3, 'a show button on each secret row only');
+  assert.match(html, /<div class="view-v">u<\/div>/, 'the username stays visible');
+  assert.equal(iptvMask('anything', true), '••••••••');
+  assert.equal(iptvMask('http://x/a?password=p#f', false), 'http://x/a?password=••••••••#f');
+});
+
+test('the show button reveals the real value, then masks it again', () => {
+  const card = Object.create(IptvCard.prototype);
+  card._config = { language: 'en' };
+  card._hass = { language: 'en' };
+  const value = { textContent: '' };
+  const icon = fakeEl({});
+  const btn = fakeEl({ querySelector: () => icon });
+  const row = { querySelector: () => value };
+  const r = ['view_m3u', 'http://x/get.php?username=u&password=p', 'url'];
+  card._toggleSecret(row, btn, r);
+  assert.equal(value.textContent, r[1]);
+  assert.equal(btn.getAttribute('aria-pressed'), 'true');
+  assert.equal(btn.getAttribute('title'), 'Hide');
+  assert.equal(icon.getAttribute('icon'), 'mdi:eye-off');
+  card._toggleSecret(row, btn, r);
+  assert.equal(value.textContent, 'http://x/get.php?username=u&password=••••••••');
+  assert.equal(btn.getAttribute('aria-pressed'), 'false');
+  assert.equal(btn.getAttribute('title'), 'Show');
+  assert.equal(icon.getAttribute('icon'), 'mdi:eye');
 });
 
 test('closing a popup whose button is gone (account removed) focuses nothing and does not throw', () => {
