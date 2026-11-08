@@ -113,6 +113,8 @@ The credentials are stored in the config entry together with the server URL (use
 
 **Send the connection details** (optional, add form only): pick a notify service (e.g. `notify.mobile_app_phone`) and, once the account is added or an existing account on the same server takes the new credentials, it receives the provider name, server URL, username (or MAC address), expiration date and French category counts. The password is never sent: notifications are kept by the phone app and the push services. Leave it empty to send nothing; a failing service never blocks the account.
 
+**Account already configured** (same URL and username, or same MAC address): the credentials are checked, then the existing account takes them (e.g. a new password) and is reloaded: same device, same entities, same "added" date, and its title is kept if you renamed it.
+
 **Same server already configured** (same host and port): the new credentials are checked, then compared with the account already on that server. When the new account is valid longer (later expiration, unlimited, or the existing one no longer works), the existing account takes the new username / password or MAC address and is reloaded: same device, same entities, and its title is kept if you renamed it. Otherwise nothing changes and the flow says which account is valid longer. With several accounts on the server, the one valid the shortest is the one compared. Add the integration once per account; both provider types can live side by side and share the same card. The URL and credentials can be changed later with **⋮ → Reconfigure**, and with **Configure**:
 
 | Option | Default | Description |
@@ -134,6 +136,7 @@ The integration adds an **IPTV** entry to the sidebar, shown to administrators o
 - the credentials of each account: username (or MAC address) and password, masked until you click the eye, with a copy button;
 - one settings form per account: name (blank = the server name), refresh interval, notification before expiration, health check interval and stream test — the same options and limits as **Configure**;
 - **Check now**: refreshes the subscription and runs a health check right away (retries the setup of an account that failed to start);
+- **Remove**, for an account that never finished its setup (no device, so the card cannot list it), after a confirmation at the top of the account;
 - links to the account's device and to **Devices & services**.
 
 Saving a new name renames the device and the expiration notification in place; changing an option reloads that account once. The account list never carries the passwords: a password is fetched only when you show or copy it, through the admin-only `iptv/get_credentials` command, and forgotten when hidden or when you leave the page. To hide the entry, long-press the sidebar title and hide **IPTV**, like any other panel.
@@ -181,7 +184,7 @@ The integration fires an event on the Home Assistant bus when an account changes
 | Event | When | Data |
 |---|---|---|
 | `iptv_expiring` | The subscription enters the **Notify before expiration** window | `entry_id`, `name`, `days_left`, `exp_date` (ISO 8601, UTC) |
-| `iptv_expired` | The subscription expires (also fired when the notification is disabled) | `entry_id`, `name`, `days_left` (`0`), `exp_date` |
+| `iptv_expired` | The subscription expires (also fired when the notification is disabled, and when the server refuses the login of a line past its last known expiration date) | `entry_id`, `name`, `days_left` (`0`), `exp_date` |
 
 Example automation:
 
@@ -293,7 +296,7 @@ The card is served by the integration at `/iptv/iptv-card.js` and registered in 
       event_types:
         - call_service
   ```
-- The reconfigure and re-authentication forms never send the current password to the browser: leave the field blank to keep it. The sidebar panel's commands (`iptv/accounts`, `iptv/update_account`, `iptv/check_account`) are admin-only and never return the password either.
+- The reconfigure and re-authentication forms never send the current password to the browser: leave the field blank to keep it. The sidebar panel's commands (`iptv/accounts`, `iptv/update_account`, `iptv/check_account`, `iptv/remove_account`) are admin-only and never return the password either.
 - **Download diagnostics** (device or integration page, ⋮ menu) gives the account's settings, last refresh and health check with the server URL, username, password, MAC address, title and the M3U / XMLTV URLs redacted: safe to attach to an issue.
 - Error messages (logs, the `error` attribute of the health sensor) give the HTTP status or the error type, never the request URL, which carries the Xtream credentials.
 - They are only sent to the Xtream server you configured, as `player_api.php` query parameters (that is how the Xtream API works, so prefer an `https://` URL when your provider offers one).

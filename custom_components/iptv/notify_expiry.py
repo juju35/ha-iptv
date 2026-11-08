@@ -184,6 +184,9 @@ class ExpiryNotifier:
     ``iptv_expiring`` / ``iptv_expired`` are fired on the bus when the account
     enters the warning window or expires; the first known state (startup,
     reload) is only recorded, so a restart never fires them again.
+
+    An expired line whose login is then refused keeps the last expiration date
+    seen: it is still reported as expired, not as a line without expiration.
     """
 
     def __init__(self, hass: HomeAssistant, entry_id: str, name: str, options: dict[str, Any]) -> None:
@@ -194,6 +197,7 @@ class ExpiryNotifier:
         self._threshold = int(options.get(CONF_NOTIFY_DAYS, DEFAULT_NOTIFY_DAYS))
         self._last: tuple[int, int] | None = None  # None: unknown yet
         self._phase: str | None = None  # "ok", "expiring" or "expired"; None: unknown yet
+        self._exp: int | None = None  # last expiration date seen with a valid login
 
     @callback
     def update(self, data: dict[str, Any] | None) -> None:
@@ -202,7 +206,14 @@ class ExpiryNotifier:
             exp = int(exp) if exp else None
         except (TypeError, ValueError):
             exp = None
-        if not exp or not (data or {}).get("auth"):
+        if not (data or {}).get("auth"):
+            # An expired line usually loses its authentication along with its expiration
+            # date: it stays expired on the last date seen instead of looking fixed
+            past = self._exp is not None and self._exp <= dt_util.utcnow().timestamp()
+            exp = self._exp if past else None
+        elif exp:
+            self._exp = exp
+        if not exp:
             self.dismiss()
             return
         expiration = datetime.fromtimestamp(exp, tz=UTC)

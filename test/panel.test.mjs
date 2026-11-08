@@ -448,3 +448,46 @@ test('on a phone the credential label shrinks to its text, so a MAC address is n
   assert.match(narrow, /\.cred > span \{[^}]*width:auto/);
   assert.match(narrow, /\.cred > span \{[^}]*max-width:40%/);
 });
+
+// --- Removing an account that never finished its setup ----------------------------------------------------------
+
+const card = (box, id) => box.querySelector(`ha-card[data-id="${id}"]`);
+const action = (box, id, name) => card(box, id).querySelector(`[data-do="${name}"]`);
+
+test('only an account without a device offers Remove (the card removes the others)', async () => {
+  const { panel } = panelWith({ accounts: [] });
+  assert.doesNotMatch(panel._accountHtml(account()), /data-do="remove"/);
+  assert.match(panel._accountHtml(account({ device_id: null, state: 'setup_error' })), /data-do="remove"/);
+});
+
+test('Remove asks first at the top of the account, as a dialog, focus on Cancel then back on Remove', async () => {
+  const server = { accounts: [account({ device_id: null, state: 'setup_error' })] };
+  const { panel, calls, root, box } = renderedPanel(server);
+  await panel._load();
+  action(box, 'e1', 'remove').focus();
+  panel._askRemove(panel._accounts[0]);
+  const html = box.html.slice(box.html.indexOf('<ha-card'));
+  assert.ok(html.indexOf('class="confirm"') < html.indexOf('class="acc-head"'), 'the confirmation is at the top');
+  assert.match(html, /role="dialog" aria-modal="true" aria-labelledby="cf-t-e1" aria-describedby="cf-m-e1"/);
+  assert.match(html, /id="cf-m-e1">Provider A never finished its setup/);
+  assert.equal(root.activeElement, action(box, 'e1', 'cancel'));
+  assert.equal(calls.filter((c) => c.type === 'iptv/remove_account').length, 0, 'nothing removed yet');
+  panel._closeConfirm(panel._accounts[0]);
+  assert.equal(action(box, 'e1', 'cancel'), null);
+  assert.equal(root.activeElement, action(box, 'e1', 'remove'));
+});
+
+test('confirming removes the account by its config entry and reloads the list', async () => {
+  const server = { accounts: [account({ device_id: null, state: 'setup_error' }), account({ entry_id: 'e2' })] };
+  const { panel, calls, box } = renderedPanel(server);
+  await panel._load();
+  panel._askRemove(panel._accounts[0]);
+  server.accounts = [account({ entry_id: 'e2' })];
+  await panel._remove(panel._accounts[0]);
+  assert.deepEqual(
+    calls.filter((c) => c.type === 'iptv/remove_account').map((c) => ({ ...c })),
+    [{ type: 'iptv/remove_account', entry_id: 'e1' }],
+  );
+  assert.equal(card(box, 'e1'), null);
+  assert.ok(card(box, 'e2'));
+});

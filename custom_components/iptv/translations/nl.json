@@ -82,6 +82,7 @@
       "reauth_successful": "Herauthenticatie geslaagd",
       "migrated": "Accounts van de vroegere integratie IPTV Xtream verplaatst naar IPTV, met dezelfde entiteiten: {count}. Verwijder de oude map custom_components/iptv_xtream als die er nog is en herstart Home Assistant.",
       "account_updated": "{title} staat op dezelfde server: het nieuwe account is langer geldig ({new} in plaats van {current}), dus {title} gebruikt nu de nieuwe inloggegevens.",
+      "credentials_updated": "{title} was al ingesteld: het gebruikt nu deze inloggegevens.",
       "existing_longer": "{title} staat op dezelfde server en is even lang of langer geldig ({current}, nieuw account: {new}): er is niets gewijzigd."
     }
   },

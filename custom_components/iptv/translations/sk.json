@@ -82,6 +82,7 @@
       "reauth_successful": "Opätovné overenie bolo úspešné",
       "migrated": "Účty z bývalej integrácie IPTV Xtream presunuté do IPTV s rovnakými entitami: {count}. Ak ešte existuje starý priečinok custom_components/iptv_xtream, odstráňte ho a reštartujte Home Assistant.",
       "account_updated": "{title} je na rovnakom serveri: nový účet platí dlhšie ({new} namiesto {current}), takže {title} teraz používa nové prihlasovacie údaje.",
+      "credentials_updated": "{title} už bol nastavený: teraz používa tieto prihlasovacie údaje.",
       "existing_longer": "{title} je na rovnakom serveri a platí rovnako dlho alebo dlhšie ({current}, nový účet: {new}): nič sa nezmenilo."
     }
   },

@@ -82,6 +82,7 @@
       "reauth_successful": "Ponovno preverjanje pristnosti je uspelo",
       "migrated": "Računi nekdanje integracije IPTV Xtream, premaknjeni v IPTV z istimi entitetami: {count}. Izbrišite staro mapo custom_components/iptv_xtream, če še obstaja, in znova zaženite Home Assistant.",
       "account_updated": "{title} je na istem strežniku: novi račun velja dlje ({new} namesto {current}), zato {title} zdaj uporablja nove poverilnice.",
+      "credentials_updated": "{title} je bil že nastavljen: zdaj uporablja te prijavne podatke.",
       "existing_longer": "{title} je na istem strežniku in velja enako dolgo ali dlje ({current}, novi račun: {new}): nič ni spremenjeno."
     }
   },

@@ -82,6 +82,7 @@
       "reauth_successful": "Reautenticación correcta",
       "migrated": "{count} cuenta(s) de la antigua integración IPTV Xtream se han trasladado a IPTV, con las mismas entidades. Elimina la antigua carpeta custom_components/iptv_xtream si sigue ahí y reinicia Home Assistant.",
       "account_updated": "{title} está en el mismo servidor: la nueva cuenta es válida durante más tiempo ({new} en lugar de {current}), así que {title} usa ahora las nuevas credenciales.",
+      "credentials_updated": "{title} ya estaba configurada: ahora usa estas credenciales.",
       "existing_longer": "{title} está en el mismo servidor y es válida durante más o el mismo tiempo ({current}, nueva cuenta: {new}): no se ha cambiado nada."
     }
   },

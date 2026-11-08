@@ -82,6 +82,7 @@
       "reauth_successful": "Ponovna autentifikacija je uspela",
       "migrated": "Nalozi nekadašnje integracije IPTV Xtream premešteni u IPTV, sa istim entitetima: {count}. Obrišite stari direktorijum custom_components/iptv_xtream ako još postoji i ponovo pokrenite Home Assistant.",
       "account_updated": "{title} je na istom serveru: novi nalog važi duže ({new} umesto {current}), pa {title} sada koristi nove podatke za prijavu.",
+      "credentials_updated": "{title} je već bio podešen: sada koristi ove podatke za prijavu.",
       "existing_longer": "{title} je na istom serveru i važi jednako dugo ili duže ({current}, novi nalog: {new}): ništa nije promenjeno."
     }
   },

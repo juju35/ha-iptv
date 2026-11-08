@@ -4,12 +4,13 @@
  * Left: the bundled iptv-card, which already adds, views, edits and removes accounts.
  * Right: one settings form per account (name, polling, expiration notice, health check,
  * stream test) and a "check now" action, through the iptv/accounts, iptv/update_account
- * and iptv/check_account WebSocket commands. The list follows config entry changes
+ * and iptv/check_account WebSocket commands; an account that never finished its setup (no
+ * device, so the card cannot list it) gets a Remove action (iptv/remove_account). The list follows config entry changes
  * (config_entries/subscribe), so an account added or removed from the card shows up here.
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_PANEL_VERSION = '3.25.0';
+var IPTV_PANEL_VERSION = '3.26.0';
 
 var IptvPanelI18n = {
   en: {
@@ -54,6 +55,11 @@ var IptvPanelI18n = {
     st_setup_error: 'Setup failed',
     st_not_loaded: 'Stopped',
     st_other: 'Unavailable',
+    remove: 'Remove',
+    removing: 'Removing…',
+    remove_title: 'Remove this account?',
+    remove_msg: '{name} never finished its setup, so it has no device and no card entry. Remove it from Home Assistant?',
+    cancel: 'Cancel',
   },
   fr: {
     title: 'IPTV',
@@ -97,6 +103,11 @@ var IptvPanelI18n = {
     st_setup_error: 'Échec de configuration',
     st_not_loaded: 'Arrêté',
     st_other: 'Indisponible',
+    remove: 'Supprimer',
+    removing: 'Suppression…',
+    remove_title: 'Supprimer ce compte ?',
+    remove_msg: '{name} n’a jamais terminé sa configuration : il n’a ni appareil ni place dans la carte. Le supprimer de Home Assistant ?',
+    cancel: 'Annuler',
   },
   de: {
     title: 'IPTV',
@@ -140,6 +151,11 @@ var IptvPanelI18n = {
     st_setup_error: 'Einrichtung fehlgeschlagen',
     st_not_loaded: 'Gestoppt',
     st_other: 'Nicht verfügbar',
+    remove: 'Entfernen',
+    removing: 'Wird entfernt…',
+    remove_title: 'Dieses Konto entfernen?',
+    remove_msg: '{name} wurde nie fertig eingerichtet und hat daher weder Gerät noch Eintrag in der Karte. Aus Home Assistant entfernen?',
+    cancel: 'Abbrechen',
   },
   es: {
     title: 'IPTV',
@@ -183,6 +199,11 @@ var IptvPanelI18n = {
     st_setup_error: 'Error de configuración',
     st_not_loaded: 'Detenida',
     st_other: 'No disponible',
+    remove: 'Eliminar',
+    removing: 'Eliminando…',
+    remove_title: '¿Eliminar esta cuenta?',
+    remove_msg: '{name} nunca terminó su configuración, así que no tiene dispositivo ni entrada en la tarjeta. ¿Eliminarla de Home Assistant?',
+    cancel: 'Cancelar',
   },
   it: {
     title: 'IPTV',
@@ -226,6 +247,11 @@ var IptvPanelI18n = {
     st_setup_error: 'Configurazione non riuscita',
     st_not_loaded: 'Arrestato',
     st_other: 'Non disponibile',
+    remove: 'Rimuovi',
+    removing: 'Rimozione…',
+    remove_title: 'Rimuovere questo account?',
+    remove_msg: '{name} non ha mai completato la configurazione, quindi non ha né dispositivo né voce nella scheda. Rimuoverlo da Home Assistant?',
+    cancel: 'Annulla',
   },
   nl: {
     title: 'IPTV',
@@ -269,6 +295,11 @@ var IptvPanelI18n = {
     st_setup_error: 'Instellen mislukt',
     st_not_loaded: 'Gestopt',
     st_other: 'Niet beschikbaar',
+    remove: 'Verwijderen',
+    removing: 'Verwijderen…',
+    remove_title: 'Dit account verwijderen?',
+    remove_msg: '{name} is nooit volledig ingesteld en heeft dus geen apparaat en geen plek in de kaart. Verwijderen uit Home Assistant?',
+    cancel: 'Annuleren',
   },
   pt: {
     title: 'IPTV',
@@ -312,6 +343,11 @@ var IptvPanelI18n = {
     st_setup_error: 'Falha na configuração',
     st_not_loaded: 'Parado',
     st_other: 'Indisponível',
+    remove: 'Remover',
+    removing: 'A remover…',
+    remove_title: 'Remover esta conta?',
+    remove_msg: '{name} nunca concluiu a configuração, por isso não tem dispositivo nem entrada no cartão. Removê-la do Home Assistant?',
+    cancel: 'Cancelar',
   },
   pl: {
     title: 'IPTV',
@@ -355,6 +391,11 @@ var IptvPanelI18n = {
     st_setup_error: 'Konfiguracja nie powiodła się',
     st_not_loaded: 'Zatrzymano',
     st_other: 'Niedostępne',
+    remove: 'Usuń',
+    removing: 'Usuwanie…',
+    remove_title: 'Usunąć to konto?',
+    remove_msg: '{name} nigdy nie zakończyło konfiguracji, więc nie ma urządzenia ani wpisu na karcie. Usunąć je z Home Assistant?',
+    cancel: 'Anuluj',
   },
   ro: {
     title: 'IPTV',
@@ -398,6 +439,11 @@ var IptvPanelI18n = {
     st_setup_error: 'Configurare eșuată',
     st_not_loaded: 'Oprit',
     st_other: 'Indisponibil',
+    remove: 'Elimină',
+    removing: 'Se elimină…',
+    remove_title: 'Elimini acest cont?',
+    remove_msg: '{name} nu și-a terminat niciodată configurarea, deci nu are dispozitiv și nici intrare în card. Îl elimini din Home Assistant?',
+    cancel: 'Anulează',
   },
   da: {
     title: 'IPTV',
@@ -441,6 +487,11 @@ var IptvPanelI18n = {
     st_setup_error: 'Opsætning mislykkedes',
     st_not_loaded: 'Stoppet',
     st_other: 'Utilgængelig',
+    remove: 'Fjern',
+    removing: 'Fjerner…',
+    remove_title: 'Fjern denne konto?',
+    remove_msg: '{name} blev aldrig færdigopsat og har derfor hverken enhed eller plads i kortet. Fjern den fra Home Assistant?',
+    cancel: 'Annuller',
   },
   sv: {
     title: 'IPTV',
@@ -484,6 +535,11 @@ var IptvPanelI18n = {
     st_setup_error: 'Konfigurationen misslyckades',
     st_not_loaded: 'Stoppad',
     st_other: 'Otillgänglig',
+    remove: 'Ta bort',
+    removing: 'Tar bort…',
+    remove_title: 'Ta bort det här kontot?',
+    remove_msg: '{name} slutförde aldrig sin konfiguration och har därför varken enhet eller plats i kortet. Ta bort det från Home Assistant?',
+    cancel: 'Avbryt',
   },
   bg: {
     title: 'IPTV',
@@ -527,6 +583,11 @@ var IptvPanelI18n = {
     st_setup_error: 'Неуспешна настройка',
     st_not_loaded: 'Спряна',
     st_other: 'Недостъпна',
+    remove: 'Премахни',
+    removing: 'Премахване…',
+    remove_title: 'Да се премахне ли този акаунт?',
+    remove_msg: '{name} така и не завърши настройката си, затова няма устройство, нито запис в картата. Да се премахне ли от Home Assistant?',
+    cancel: 'Отказ',
   },
   ru: {
     title: 'IPTV',
@@ -570,6 +631,11 @@ var IptvPanelI18n = {
     st_setup_error: 'Ошибка настройки',
     st_not_loaded: 'Остановлена',
     st_other: 'Недоступна',
+    remove: 'Удалить',
+    removing: 'Удаление…',
+    remove_title: 'Удалить эту учётную запись?',
+    remove_msg: '{name} так и не завершила настройку, поэтому у неё нет ни устройства, ни строки в карточке. Удалить её из Home Assistant?',
+    cancel: 'Отмена',
   },
   uk: {
     title: 'IPTV',
@@ -613,6 +679,11 @@ var IptvPanelI18n = {
     st_setup_error: 'Помилка налаштування',
     st_not_loaded: 'Зупинено',
     st_other: 'Недоступно',
+    remove: 'Видалити',
+    removing: 'Видалення…',
+    remove_title: 'Видалити цей обліковий запис?',
+    remove_msg: '{name} так і не завершив налаштування, тому не має ні пристрою, ні рядка в картці. Видалити його з Home Assistant?',
+    cancel: 'Скасувати',
   },
   hu: {
     title: 'IPTV',
@@ -656,6 +727,11 @@ var IptvPanelI18n = {
     st_setup_error: 'Sikertelen beállítás',
     st_not_loaded: 'Leállítva',
     st_other: 'Nem elérhető',
+    remove: 'Eltávolítás',
+    removing: 'Eltávolítás…',
+    remove_title: 'Eltávolítod ezt a fiókot?',
+    remove_msg: 'A(z) {name} beállítása sosem fejeződött be, ezért nincs eszköze és a kártyán sem szerepel. Eltávolítod a Home Assistantból?',
+    cancel: 'Mégse',
   },
   sk: {
     title: 'IPTV',
@@ -699,6 +775,11 @@ var IptvPanelI18n = {
     st_setup_error: 'Nastavenie zlyhalo',
     st_not_loaded: 'Zastavené',
     st_other: 'Nedostupné',
+    remove: 'Odstrániť',
+    removing: 'Odstraňuje sa…',
+    remove_title: 'Odstrániť tento účet?',
+    remove_msg: '{name} nikdy nedokončil nastavenie, preto nemá zariadenie ani položku v karte. Odstrániť ho z Home Assistant?',
+    cancel: 'Zrušiť',
   },
   cs: {
     title: 'IPTV',
@@ -742,6 +823,11 @@ var IptvPanelI18n = {
     st_setup_error: 'Nastavení selhalo',
     st_not_loaded: 'Zastaveno',
     st_other: 'Nedostupné',
+    remove: 'Odebrat',
+    removing: 'Odebírá se…',
+    remove_title: 'Odebrat tento účet?',
+    remove_msg: '{name} nikdy nedokončil nastavení, proto nemá zařízení ani položku v kartě. Odebrat ho z Home Assistant?',
+    cancel: 'Zrušit',
   },
   sl: {
     title: 'IPTV',
@@ -785,6 +871,11 @@ var IptvPanelI18n = {
     st_setup_error: 'Nastavitev ni uspela',
     st_not_loaded: 'Ustavljeno',
     st_other: 'Ni na voljo',
+    remove: 'Odstrani',
+    removing: 'Odstranjevanje…',
+    remove_title: 'Odstranim ta račun?',
+    remove_msg: '{name} nikoli ni dokončal nastavitve, zato nima naprave ne vnosa na kartici. Ga odstranim iz Home Assistant?',
+    cancel: 'Prekliči',
   },
   lv: {
     title: 'IPTV',
@@ -828,6 +919,11 @@ var IptvPanelI18n = {
     st_setup_error: 'Iestatīšana neizdevās',
     st_not_loaded: 'Apturēts',
     st_other: 'Nav pieejams',
+    remove: 'Noņemt',
+    removing: 'Noņem…',
+    remove_title: 'Noņemt šo kontu?',
+    remove_msg: '{name} iestatīšana netika pabeigta, tāpēc tam nav ne ierīces, ne ieraksta kartē. Noņemt to no Home Assistant?',
+    cancel: 'Atcelt',
   },
   el: {
     title: 'IPTV',
@@ -871,6 +967,11 @@ var IptvPanelI18n = {
     st_setup_error: 'Η ρύθμιση απέτυχε',
     st_not_loaded: 'Σταματημένη',
     st_other: 'Μη διαθέσιμη',
+    remove: 'Αφαίρεση',
+    removing: 'Αφαίρεση…',
+    remove_title: 'Αφαίρεση αυτού του λογαριασμού;',
+    remove_msg: 'Το {name} δεν ολοκλήρωσε ποτέ τη ρύθμισή του, άρα δεν έχει συσκευή ούτε θέση στην κάρτα. Να αφαιρεθεί από το Home Assistant;',
+    cancel: 'Άκυρο',
   },
   sr: {
     title: 'IPTV',
@@ -914,6 +1015,11 @@ var IptvPanelI18n = {
     st_setup_error: 'Подешавање није успело',
     st_not_loaded: 'Заустављено',
     st_other: 'Недоступно',
+    remove: 'Уклони',
+    removing: 'Уклањање…',
+    remove_title: 'Уклонити овај налог?',
+    remove_msg: '{name} никада није завршио подешавање, па нема ни уређај ни ставку у картици. Уклонити га из Home Assistant?',
+    cancel: 'Откажи',
   },
   'sr-Latn': {
     title: 'IPTV',
@@ -957,6 +1063,11 @@ var IptvPanelI18n = {
     st_setup_error: 'Podešavanje nije uspelo',
     st_not_loaded: 'Zaustavljeno',
     st_other: 'Nedostupno',
+    remove: 'Ukloni',
+    removing: 'Uklanjanje…',
+    remove_title: 'Ukloniti ovaj nalog?',
+    remove_msg: '{name} nikada nije završio podešavanje, pa nema ni uređaj ni stavku u kartici. Ukloniti ga iz Home Assistant?',
+    cancel: 'Otkaži',
   },
 };
 
@@ -1040,6 +1151,13 @@ class IptvPanel extends HTMLElement {
     .act:hover:not([disabled]) { background:color-mix(in srgb, var(--primary-color) 22%, transparent); }
     .act.quiet { color:var(--primary-text-color); background:var(--secondary-background-color, rgba(127,127,127,.12)); }
     .act[disabled] { opacity:.5; cursor:default; }
+    .act.bad { color:var(--tone-text); background:color-mix(in srgb, var(--tone) 14%, transparent); }
+    .act.bad:hover:not([disabled]) { background:color-mix(in srgb, var(--tone) 22%, transparent); }
+    /* Confirmation at the top of the account, like the card's popups */
+    .confirm { display:flex; flex-direction:column; gap:8px; padding:10px 12px; border-radius:10px;
+               border:1px solid color-mix(in srgb, var(--tone-bad) 45%, transparent); background:color-mix(in srgb, var(--tone-bad) 8%, transparent); }
+    .confirm .cf-t { font-size:14px; font-weight:500; }
+    .confirm .cf-b { display:flex; justify-content:flex-end; gap:8px; flex-wrap:wrap; }
     .creds { display:flex; flex-direction:column; gap:2px; padding:6px 10px; border-radius:10px;
              background:var(--secondary-background-color, rgba(127,127,127,.08)); }
     .cred { display:flex; align-items:center; gap:10px; min-height:32px; }
@@ -1064,6 +1182,8 @@ class IptvPanel extends HTMLElement {
     this._drafts = {};
     this._status = {};
     this._busy = {};
+    // Account whose removal is being confirmed
+    this._confirm = null;
     // Passwords revealed on request ({password, updatedAt}), kept in memory only while shown
     this._secrets = {};
   }
@@ -1300,8 +1420,13 @@ class IptvPanel extends HTMLElement {
     var busy = this._busy[acc.entry_id];
     var canSave = !busy && this._changed(acc) && this._valid(acc);
     var icon = acc.provider === 'stalker' ? 'mdi:router-network' : 'mdi:account-key';
+    // Only an account without a device: the others are removed with the card, which lists them
+    var remove = acc.device_id
+      ? ''
+      : `<button class="act bad" data-do="remove"${busy ? ' disabled' : ''}><ha-icon icon="mdi:delete-outline"></ha-icon>${esc(this._t(busy === 'remove' ? 'removing' : 'remove'))}</button>`;
     return `
       <ha-card class="account" data-id="${esc(acc.entry_id)}">
+        ${this._confirm === acc.entry_id && !acc.device_id ? this._confirmHtml(acc) : ''}
         <div class="acc-head">
           <div class="avatar"><ha-icon icon="${icon}"></ha-icon></div>
           <div class="who">
@@ -1330,10 +1455,25 @@ class IptvPanel extends HTMLElement {
             ${acc.device_id ? `<a href="/config/devices/device/${esc(acc.device_id)}"><ha-icon icon="mdi:devices"></ha-icon>${esc(this._t('open_device'))}</a>` : ''}
             ${status ? `<span class="msg ${status.tone || ''}">${esc(status.text)}</span>` : ''}
           </div>
+          ${remove}
           <button class="act quiet" data-do="check"${busy ? ' disabled' : ''}><ha-icon icon="mdi:stethoscope"></ha-icon>${esc(this._t(busy === 'check' ? 'checking' : 'check'))}</button>
           <button class="act" data-do="save"${canSave ? '' : ' disabled'}><ha-icon icon="mdi:content-save"></ha-icon>${esc(this._t(busy === 'save' ? 'saving' : 'save'))}</button>
         </div>
       </ha-card>`;
+  }
+
+  _confirmHtml(acc) {
+    var esc = iptvPanelEsc;
+    var id = esc(acc.entry_id);
+    return `
+      <div class="confirm" role="dialog" aria-modal="true" aria-labelledby="cf-t-${id}" aria-describedby="cf-m-${id}">
+        <div class="cf-t" id="cf-t-${id}">${esc(this._t('remove_title'))}</div>
+        <div class="msg" id="cf-m-${id}">${esc(this._t('remove_msg', { name: acc.title }))}</div>
+        <div class="cf-b">
+          <button class="act quiet" data-do="cancel">${esc(this._t('cancel'))}</button>
+          <button class="act bad" data-do="confirm-remove"><ha-icon icon="mdi:delete-outline"></ha-icon>${esc(this._t('remove'))}</button>
+        </div>
+      </div>`;
   }
 
   _renderAccounts() {
@@ -1429,6 +1569,48 @@ class IptvPanel extends HTMLElement {
     });
     el.querySelector('[data-do="save"]').addEventListener('click', () => this._save(acc));
     el.querySelector('[data-do="check"]').addEventListener('click', () => this._check(acc));
+    el.querySelector('[data-do="remove"]')?.addEventListener('click', () => this._askRemove(acc));
+    el.querySelector('[data-do="cancel"]')?.addEventListener('click', () => this._closeConfirm(acc));
+    el.querySelector('[data-do="confirm-remove"]')?.addEventListener('click', () => this._remove(acc));
+    // Escape closes the confirmation, Tab stays on its two buttons
+    el.querySelector('.confirm')?.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Escape') {
+        ev.stopPropagation();
+        this._closeConfirm(acc);
+      } else if (ev.key === 'Tab') {
+        ev.preventDefault();
+        var next = this.shadowRoot.activeElement?.dataset?.do === 'cancel' ? 'confirm-remove' : 'cancel';
+        this._focusAction(acc, next);
+      }
+    });
+  }
+
+  _focusAction(acc, action) {
+    var card = this.shadowRoot.getElementById('accounts')?.querySelector(`ha-card[data-id="${CSS.escape(acc.entry_id)}"]`);
+    card?.querySelector(`[data-do="${action}"]`)?.focus({ preventScroll: true });
+  }
+
+  _askRemove(acc) {
+    this._confirm = acc.entry_id;
+    this._renderAccounts();
+    this._focusAction(acc, 'cancel');
+  }
+
+  // Back to the Remove button that opened it
+  _closeConfirm(acc) {
+    this._confirm = null;
+    this._renderAccounts();
+    this._focusAction(acc, 'remove');
+  }
+
+  _remove(acc) {
+    this._confirm = null;
+    return this._run(acc, 'remove', async () => {
+      var res = await this._hass.callWS({ type: 'iptv/remove_account', entry_id: acc.entry_id });
+      if (!res?.ok) return { tone: 'bad', text: this._t(`err_${res?.error || 'generic'}`) };
+      await this._load();
+      return null;
+    });
   }
 
   async _run(acc, kind, call) {

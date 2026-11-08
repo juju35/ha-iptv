@@ -9,6 +9,8 @@ account backed by the WebSocket commands below:
 - ``iptv/update_account``: renames an account (blank = back to the server name)
   and changes its options, with the same limits as the options flow;
 - ``iptv/check_account``: refreshes the subscription and runs a health check now.
+- ``iptv/remove_account``: removes an account by its config entry, also one
+  that never finished its setup (no device, so the card cannot list it).
 """
 
 from __future__ import annotations
@@ -77,7 +79,7 @@ async def async_register_panel(hass: HomeAssistant) -> None:
         require_admin=True,
         config={"version": VERSION},
     )
-    for command in (_ws_accounts, _ws_update_account, _ws_check_account):
+    for command in (_ws_accounts, _ws_update_account, _ws_check_account, _ws_remove_account):
         websocket_api.async_register_command(hass, command)
 
 
@@ -162,3 +164,13 @@ async def _ws_check_account(
     await coordinator.async_refresh()
     await coordinator.health.async_check_now()
     connection.send_result(msg["id"], {"ok": coordinator.last_update_success})
+
+
+@websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/remove_account", vol.Required("entry_id"): str})
+@websocket_api.require_admin
+@websocket_api.async_response
+async def _ws_remove_account(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict) -> None:
+    found = _entry(hass, msg["entry_id"]) is not None
+    if found:
+        await hass.config_entries.async_remove(msg["entry_id"])
+    connection.send_result(msg["id"], {"ok": True} if found else {"ok": False, "error": "not_found"})
