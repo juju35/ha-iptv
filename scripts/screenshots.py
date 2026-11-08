@@ -259,7 +259,13 @@ PANEL_ACCOUNTS = [
         "options": {"scan_interval": 120, "notify_days": 14, "health_interval": 10, "stream_check": False},
     },
 ]
-PANEL_SHOTS = [{"file": "panel", "theme": "light"}, {"file": "panel-dark", "theme": "dark"}]
+# The two tabs of the panel (Subscriptions, Settings), light and dark.
+PANEL_SHOTS = [
+    {"file": "panel", "theme": "light", "tab": "accounts"},
+    {"file": "panel-dark", "theme": "dark", "tab": "accounts"},
+    {"file": "panel-settings", "theme": "light", "tab": "settings"},
+    {"file": "panel-settings-dark", "theme": "dark", "tab": "settings"},
+]
 
 
 def page_html(theme, width):
@@ -314,7 +320,7 @@ def mount_panel(context, shot):
     page.add_script_tag(content=PANEL_JS)
     shown = {"iptv", "iptv2"}
     page.evaluate(
-        """({states, entities, devices, accounts, dark}) => {
+        """({states, entities, devices, accounts, dark, tab}) => {
           const el = document.createElement("iptv-panel");
           el.panel = {config: {}};
           el.narrow = false;
@@ -324,6 +330,7 @@ def mount_panel(context, shot):
               : msg.type === "iptv/get_credentials" ? {ok: true, password: "example-pass"} : {ok: true}),
             connection: {subscribeMessage: () => Promise.resolve(() => {})}};
           document.getElementById("root").appendChild(el);
+          el._goTab(tab);
           // Show the first account's password, as after a click on the eye
           setTimeout(() => el.shadowRoot.querySelector("[data-reveal]")?.click(), 100);
         }""",
@@ -333,6 +340,7 @@ def mount_panel(context, shot):
             "devices": {k: v for k, v in DEVICES.items() if k in shown},
             "accounts": PANEL_ACCOUNTS,
             "dark": shot["theme"] == "dark",
+            "tab": shot["tab"],
         },
     )
     return page

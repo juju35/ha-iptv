@@ -30,7 +30,7 @@ Home Assistant integration and Lovelace card that track one or several **IPTV su
 - Optional notification with the connection details when an account is added
 - Persistent notification a configurable number of days before expiration (7 by default)
 - `iptv_expiring` / `iptv_expired` events for automations
-- **Sidebar panel** (administrators): every account and its settings on one page
+- **Sidebar panel** (administrators), in two tabs: the subscriptions and their settings
 - Visual editor, refresh button
 - Fully compatible with Home Assistant dark mode
 - English, French, German, Spanish, Italian, Dutch, European Portuguese, Polish, Romanian, Danish, Swedish, Bulgarian, Russian, Ukrainian, Hungarian, Slovak, Czech, Slovenian, Latvian, Greek and Serbian (Cyrillic and Latin), auto-detected
@@ -130,14 +130,15 @@ The notification names the account and its expiration date, is refreshed once a 
 
 ### Sidebar panel
 
-The integration adds an **IPTV** entry to the sidebar, shown to administrators only (`/iptv-config`). It gathers on one page:
+The integration adds an **IPTV** entry to the sidebar, shown to administrators only (`/iptv-config`), with two tabs, each with its own address (`/iptv-config`, `/iptv-config/settings`), so a reload or a link comes back to the same tab:
 
-- the subscriptions, with the bundled card: add, view, edit and remove accounts;
-- the credentials of each account: username (or MAC address) and password, masked until you click the eye, with a copy button;
-- one settings form per account: name (blank = the server name), refresh interval, notification before expiration, health check interval and stream test — the same options and limits as **Configure**;
-- **Check now**: refreshes the subscription and runs a health check right away (retries the setup of an account that failed to start);
-- **Remove**, for an account that never finished its setup (no device, so the card cannot list it), after a confirmation at the top of the account;
-- links to the account's device and to **Devices & services**.
+- **Subscriptions**: the bundled card — add, view, edit and remove accounts;
+- **Settings**, one block per account:
+  - the credentials of the account: username (or MAC address) and password, masked until you click the eye, with a copy button;
+  - a settings form: name (blank = the server name), refresh interval, notification before expiration, health check interval and stream test — the same options and limits as **Configure**;
+  - **Check now**: refreshes the subscription and runs a health check right away (retries the setup of an account that failed to start);
+  - **Remove**, for an account that never finished its setup (no device, so the card cannot list it), after a confirmation at the top of the account;
+  - a link to the account's device. The cog in the toolbar opens **Devices & services**.
 
 Saving a new name renames the device and the expiration notification in place; changing an option reloads that account once. The account list never carries the passwords: a password is fetched only when you show or copy it, through the admin-only `iptv/get_credentials` command, and forgotten when hidden or when you leave the page. To hide the entry, long-press the sidebar title and hide **IPTV**, like any other panel.
 
@@ -266,11 +267,12 @@ While subscriptions reload, the card animates: the refresh button spins until th
 
 <img src="https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/card-multi-dark.png" alt="iptv-card with two providers, dark theme" width="400">
 
-**Sidebar panel** (light and dark themes):
+**Sidebar panel**, its two tabs (light and dark themes):
 
-<img src="https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/panel.png" alt="IPTV sidebar panel" width="606">
-
-<img src="https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/panel-dark.png" alt="IPTV sidebar panel, dark theme" width="606">
+| Subscriptions | Settings |
+|---|---|
+| <img src="https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/panel.png" alt="IPTV sidebar panel, Subscriptions tab" width="400"> | <img src="https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/panel-settings.png" alt="IPTV sidebar panel, Settings tab" width="400"> |
+| <img src="https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/panel-dark.png" alt="IPTV sidebar panel, Subscriptions tab, dark theme" width="400"> | <img src="https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/panel-settings-dark.png" alt="IPTV sidebar panel, Settings tab, dark theme" width="400"> |
 
 | Mini card | Zoomed in |
 |---|---|
