@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.29.1 - 2026-11-09
+
+### Maintenance
+- No code change: released again to check the installation from the Marketplace.
+
 ## 3.29.0 - 2026-11-09
 
 ### Features
