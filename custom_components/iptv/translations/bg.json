@@ -169,6 +169,11 @@
       "french_lists": {
         "name": "Френски списъци"
       }
+    },
+    "calendar": {
+      "expiration_calendar": {
+        "name": "Изтичане"
+      }
     }
   },
   "services": {

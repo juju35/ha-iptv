@@ -27,7 +27,7 @@ from .services import async_register_services
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR]
+PLATFORMS = [Platform.BINARY_SENSOR, Platform.CALENDAR, Platform.SENSOR]
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 # Set once the card is loaded, cleared when the last account removes its resource
 CARD_LOADED = f"{DOMAIN}_card_loaded"

@@ -1,5 +1,8 @@
 {
   "entity": {
+    "calendar": {
+      "expiration_calendar": { "default": "mdi:calendar-alert" }
+    },
     "sensor": {
       "status": {
         "default": "mdi:television-classic",

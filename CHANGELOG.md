@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.29.0 - 2026-11-09
+
+### Features
+- **Calendar** per account (`calendar.<account>_expiration`): the expiration day as an all-day event (*provider expires*, in Home Assistant's language), in the Home Assistant calendar and calendar cards, and for calendar triggers (a reminder a week before with an `offset`). None for an unlimited account.
+
 ## 3.28.0 - 2026-11-09
 
 ### Performance

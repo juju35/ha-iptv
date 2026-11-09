@@ -169,6 +169,11 @@
       "french_lists": {
         "name": "Francoski seznami"
       }
+    },
+    "calendar": {
+      "expiration_calendar": {
+        "name": "Potek"
+      }
     }
   },
   "services": {

@@ -169,6 +169,11 @@
       "french_lists": {
         "name": "Französische Listen"
       }
+    },
+    "calendar": {
+      "expiration_calendar": {
+        "name": "Ablauf"
+      }
     }
   },
   "services": {

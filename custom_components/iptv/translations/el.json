@@ -169,6 +169,11 @@
       "french_lists": {
         "name": "Γαλλικές λίστες"
       }
+    },
+    "calendar": {
+      "expiration_calendar": {
+        "name": "Λήξη"
+      }
     }
   },
   "services": {

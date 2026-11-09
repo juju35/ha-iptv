@@ -169,6 +169,11 @@
       "french_lists": {
         "name": "Francuske liste"
       }
+    },
+    "calendar": {
+      "expiration_calendar": {
+        "name": "Istek"
+      }
     }
   },
   "services": {

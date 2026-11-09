@@ -169,6 +169,11 @@
       "french_lists": {
         "name": "Listes françaises"
       }
+    },
+    "calendar": {
+      "expiration_calendar": {
+        "name": "Expiration"
+      }
     }
   },
   "services": {

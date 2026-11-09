@@ -169,6 +169,11 @@
       "french_lists": {
         "name": "Franču saraksti"
       }
+    },
+    "calendar": {
+      "expiration_calendar": {
+        "name": "Beigas"
+      }
     }
   },
   "services": {
