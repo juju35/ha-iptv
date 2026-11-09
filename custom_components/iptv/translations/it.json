@@ -169,6 +169,11 @@
       "french_lists": {
         "name": "Liste francesi"
       }
+    },
+    "calendar": {
+      "expiration_calendar": {
+        "name": "Scadenza"
+      }
     }
   },
   "services": {

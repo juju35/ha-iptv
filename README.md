@@ -29,6 +29,7 @@ Home Assistant integration and Lovelace card that track one or several **IPTV su
 - French lists check: accounts without French categories are refused, and the card shows a French flag pill
 - Optional notification with the connection details when an account is added
 - Persistent notification a configurable number of days before expiration (7 by default)
+- **Calendar** per account with its expiration day, for the Home Assistant calendar, calendar cards and calendar triggers
 - `iptv_expiring` / `iptv_expired` events for automations
 - **Sidebar panel** (administrators), in two tabs: the subscriptions and their settings
 - Visual editor, refresh button
@@ -162,6 +163,7 @@ Each account is a device named after its **server** (the host of the URL, e.g. `
 | `sensor.<account>_health` | Health check: `ok`, `degraded` (answer slower than 3 s), `auth_failed`, `unreachable` or `stream_ko` (the test channel does not play); attributes `response_time_ms`, `last_check`, `error`, `stream_ok`, `stream_channel` |
 | `sensor.<account>_response_time` | Response time of the last health check, in ms (diagnostic) |
 | `sensor.<account>_last_check` | Moment of the last health check (timestamp, diagnostic) |
+| `calendar.<account>_expiration` | The expiration day as an all-day event (*provider expires*), in Home Assistant's calendar and calendar cards; none for an unlimited account. A calendar trigger with an `offset` (`-7:00:00:00`) makes a reminder a week before |
 | `sensor.<account>_added` | When the account was added (timestamp, diagnostic) |
 | `sensor.<account>_updated` | When the account's credentials were last changed (timestamp, diagnostic) |
 

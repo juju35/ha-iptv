@@ -169,6 +169,11 @@
       "french_lists": {
         "name": "Listy francuskie"
       }
+    },
+    "calendar": {
+      "expiration_calendar": {
+        "name": "Wygaśnięcie"
+      }
     }
   },
   "services": {

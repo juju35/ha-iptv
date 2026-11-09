@@ -169,6 +169,11 @@
       "french_lists": {
         "name": "Franse lijsten"
       }
+    },
+    "calendar": {
+      "expiration_calendar": {
+        "name": "Verloopdatum"
+      }
     }
   },
   "services": {
