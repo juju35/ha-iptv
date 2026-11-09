@@ -36,11 +36,18 @@ CARD_LOADED = f"{DOMAIN}_card_loaded"
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Serve the card, its logo and the sidebar panel, and load the card on every dashboard."""
     base = Path(__file__).parent
+    # The release splits the card translations into <file>.i18n.<lang>.js files (scripts/split-frontend.mjs):
+    # served next to the card, which fetches the one it needs. A git checkout has none.
+    languages = await hass.async_add_executor_job(_language_files, base / "frontend")
     await hass.http.async_register_static_paths(
         [
             StaticPathConfig(CARD_URL, str(base / "frontend" / "iptv-card.js"), True),
             StaticPathConfig(LOGO_URL, str(base / "brand" / "icon@2x.png"), True),
             StaticPathConfig(PANEL_URL, str(base / "frontend" / "iptv-panel.js"), True),
+            *(
+                StaticPathConfig(f"{CARD_URL.rsplit('/', 1)[0]}/{name}", str(base / "frontend" / name), True)
+                for name in languages
+            ),
         ]
     )
     await async_register_panel(hass)
@@ -171,3 +178,8 @@ async def async_remove_entry(hass: HomeAssistant, entry: IptvConfigEntry) -> Non
     for item in list(resources.async_items()):
         if item.get("url", "").split("?")[0] == CARD_URL:
             await resources.async_delete_item(item["id"])
+
+
+def _language_files(frontend: Path) -> list[str]:
+    """The translation files the release split out of the frontend files, if any."""
+    return sorted(p.name for p in frontend.glob("*.i18n.*.js"))
