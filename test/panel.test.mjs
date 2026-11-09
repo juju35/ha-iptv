@@ -19,8 +19,12 @@ const context = {
   customElements: { get: () => true, define() {} },
   structuredClone,
   CSS: { escape: (s) => String(s) },
-  console,
+  console: { ...console, error() {} },
+  // Timers recorded, not run: the retry test calls them itself
+  setTimeout: (fn, ms) => timers.push({ fn, ms }),
+  clearTimeout() {},
 };
+const timers = [];
 vm.createContext(context);
 vm.runInContext(`${source}\nthis.panel = { IptvPanel, IptvPanelI18n, IPTV_PANEL_LIMITS, IPTV_PANEL_TABS, iptvPanelT, iptvPanelTone };`, context);
 const { IptvPanel, IptvPanelI18n, IPTV_PANEL_LIMITS, IPTV_PANEL_TABS, iptvPanelT, iptvPanelTone } = context.panel;
@@ -530,4 +534,36 @@ test('tabs: the address picks the tab, a selection updates the address and hides
   panel._goTab('nope');
   assert.equal(panel._tab, 'accounts');
   delete context.history;
+});
+
+test('a failed account list is tried again after 2 s, 5 s, 15 s then every 30 s, and when the connection is back', async () => {
+  timers.length = 0;
+  const panel = Object.create(IptvPanel.prototype);
+  panel._renderAccounts = () => {};
+  panel._drafts = {};
+  panel._secrets = {};
+  let fail = true;
+  panel._hass = { callWS: async () => { if (fail) throw new Error('unknown_command'); return { accounts: [] }; } };
+  for (let i = 0; i < 5; i++) await panel._load();
+  assert.deepEqual(timers.map((t) => t.ms), [2000, 5000, 15000, 30000, 30000]);
+  let loads = 0;
+  panel._load = async () => { loads++; };
+  panel.isConnected = false;
+  timers[0].fn();
+  assert.equal(loads, 0);
+  panel.isConnected = true;
+  timers[0].fn();
+  assert.equal(loads, 1);
+  delete panel._load;
+  fail = false;
+  await panel._load();
+  assert.equal(panel._failed, false);
+  const listeners = new Map();
+  panel._hass.connection = { addEventListener: (t, f) => listeners.set(t, f), removeEventListener: (t, f) => listeners.get(t) === f && listeners.delete(t) };
+  panel._watchConnection(true);
+  panel._load = async () => { loads++; };
+  listeners.get('ready')();
+  assert.equal(loads, 2);
+  panel._watchConnection(false);
+  assert.equal(listeners.size, 0);
 });
