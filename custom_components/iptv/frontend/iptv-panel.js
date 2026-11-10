@@ -12,7 +12,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_PANEL_VERSION = '3.30.0';
+var IPTV_PANEL_VERSION = '3.31.0';
 
 var IptvPanelI18n = {
   en: {
@@ -122,6 +122,7 @@ var IptvPanelI18n = {
     p_health_unreachable: 'Unreachable',
     p_health_stream_ko: 'Stream down',
     p_health_auth_failed: 'Credentials refused',
+    all_accounts: 'All accounts',
   },
   fr: {
     title: 'IPTV',
@@ -230,6 +231,7 @@ var IptvPanelI18n = {
     p_health_unreachable: 'Injoignable',
     p_health_stream_ko: 'Flux KO',
     p_health_auth_failed: 'Identifiants refusés',
+    all_accounts: 'Tous les comptes',
   },
   de: {
     title: 'IPTV',
@@ -338,6 +340,7 @@ var IptvPanelI18n = {
     p_health_unreachable: 'Nicht erreichbar',
     p_health_stream_ko: 'Stream ausgefallen',
     p_health_auth_failed: 'Zugangsdaten abgelehnt',
+    all_accounts: 'Alle Konten',
   },
   es: {
     title: 'IPTV',
@@ -446,6 +449,7 @@ var IptvPanelI18n = {
     p_health_unreachable: 'Inaccesible',
     p_health_stream_ko: 'Flujo caído',
     p_health_auth_failed: 'Credenciales rechazadas',
+    all_accounts: 'Todas las cuentas',
   },
   it: {
     title: 'IPTV',
@@ -554,6 +558,7 @@ var IptvPanelI18n = {
     p_health_unreachable: 'Non raggiungibile',
     p_health_stream_ko: 'Stream KO',
     p_health_auth_failed: 'Credenziali rifiutate',
+    all_accounts: 'Tutti gli account',
   },
   nl: {
     title: 'IPTV',
@@ -662,6 +667,7 @@ var IptvPanelI18n = {
     p_health_unreachable: 'Onbereikbaar',
     p_health_stream_ko: 'Geen stream',
     p_health_auth_failed: 'Inloggegevens geweigerd',
+    all_accounts: 'Alle accounts',
   },
   pt: {
     title: 'IPTV',
@@ -770,6 +776,7 @@ var IptvPanelI18n = {
     p_health_unreachable: 'Inacessível',
     p_health_stream_ko: 'Sem stream',
     p_health_auth_failed: 'Credenciais recusadas',
+    all_accounts: 'Todas as contas',
   },
   pl: {
     title: 'IPTV',
@@ -878,6 +885,7 @@ var IptvPanelI18n = {
     p_health_unreachable: 'Nieosiągalny',
     p_health_stream_ko: 'Brak streamu',
     p_health_auth_failed: 'Dane logowania odrzucone',
+    all_accounts: 'Wszystkie konta',
   },
   ro: {
     title: 'IPTV',
@@ -986,6 +994,7 @@ var IptvPanelI18n = {
     p_health_unreachable: 'Inaccesibil',
     p_health_stream_ko: 'Flux oprit',
     p_health_auth_failed: 'Date de autentificare respinse',
+    all_accounts: 'Toate conturile',
   },
   da: {
     title: 'IPTV',
@@ -1094,6 +1103,7 @@ var IptvPanelI18n = {
     p_health_unreachable: 'Kan ikke nås',
     p_health_stream_ko: 'Stream nede',
     p_health_auth_failed: 'Loginoplysninger afvist',
+    all_accounts: 'Alle konti',
   },
   sv: {
     title: 'IPTV',
@@ -1202,6 +1212,7 @@ var IptvPanelI18n = {
     p_health_unreachable: 'Går inte att nå',
     p_health_stream_ko: 'Stream nere',
     p_health_auth_failed: 'Inloggningsuppgifterna nekades',
+    all_accounts: 'Alla konton',
   },
   bg: {
     title: 'IPTV',
@@ -1310,6 +1321,7 @@ var IptvPanelI18n = {
     p_health_unreachable: 'Недостъпен',
     p_health_stream_ko: 'Няма поток',
     p_health_auth_failed: 'Данните за вход са отхвърлени',
+    all_accounts: 'Всички акаунти',
   },
   ru: {
     title: 'IPTV',
@@ -1418,6 +1430,7 @@ var IptvPanelI18n = {
     p_health_unreachable: 'Недоступен',
     p_health_stream_ko: 'Нет потока',
     p_health_auth_failed: 'Учётные данные отклонены',
+    all_accounts: 'Все аккаунты',
   },
   uk: {
     title: 'IPTV',
@@ -1526,6 +1539,7 @@ var IptvPanelI18n = {
     p_health_unreachable: 'Недоступний',
     p_health_stream_ko: 'Немає потоку',
     p_health_auth_failed: 'Облікові дані відхилено',
+    all_accounts: 'Усі облікові записи',
   },
   hu: {
     title: 'IPTV',
@@ -1634,6 +1648,7 @@ var IptvPanelI18n = {
     p_health_unreachable: 'Nem érhető el',
     p_health_stream_ko: 'Stream leállt',
     p_health_auth_failed: 'Elutasított hitelesítő adatok',
+    all_accounts: 'Összes fiók',
   },
   sk: {
     title: 'IPTV',
@@ -1742,6 +1757,7 @@ var IptvPanelI18n = {
     p_health_unreachable: 'Nedostupný',
     p_health_stream_ko: 'Stream nefunguje',
     p_health_auth_failed: 'Prihlasovacie údaje boli odmietnuté',
+    all_accounts: 'Všetky účty',
   },
   cs: {
     title: 'IPTV',
@@ -1850,6 +1866,7 @@ var IptvPanelI18n = {
     p_health_unreachable: 'Nedostupný',
     p_health_stream_ko: 'Stream nefunguje',
     p_health_auth_failed: 'Přihlašovací údaje byly odmítnuty',
+    all_accounts: 'Všechny účty',
   },
   sl: {
     title: 'IPTV',
@@ -1958,6 +1975,7 @@ var IptvPanelI18n = {
     p_health_unreachable: 'Nedosegljiv',
     p_health_stream_ko: 'Pretok ne deluje',
     p_health_auth_failed: 'Poverilnice so zavrnjene',
+    all_accounts: 'Vsi računi',
   },
   lv: {
     title: 'IPTV',
@@ -2066,6 +2084,7 @@ var IptvPanelI18n = {
     p_health_unreachable: 'Nesasniedzams',
     p_health_stream_ko: 'Straume nedarbojas',
     p_health_auth_failed: 'Pieteikšanās dati noraidīti',
+    all_accounts: 'Visi konti',
   },
   el: {
     title: 'IPTV',
@@ -2174,6 +2193,7 @@ var IptvPanelI18n = {
     p_health_unreachable: 'Μη προσβάσιμος',
     p_health_stream_ko: 'Η ροή δεν λειτουργεί',
     p_health_auth_failed: 'Τα διαπιστευτήρια απορρίφθηκαν',
+    all_accounts: 'Όλοι οι λογαριασμοί',
   },
   sr: {
     title: 'IPTV',
@@ -2282,6 +2302,7 @@ var IptvPanelI18n = {
     p_health_unreachable: 'Недоступно',
     p_health_stream_ko: 'Стрим не ради',
     p_health_auth_failed: 'Подаци за пријаву одбијени',
+    all_accounts: 'Сви налози',
   },
   'sr-Latn': {
     title: 'IPTV',
@@ -2390,6 +2411,7 @@ var IptvPanelI18n = {
     p_health_unreachable: 'Nedostupno',
     p_health_stream_ko: 'Strim ne radi',
     p_health_auth_failed: 'Podaci za prijavu odbijeni',
+    all_accounts: 'Svi nalozi',
   },
 };
 
@@ -2604,6 +2626,29 @@ class IptvPanel extends HTMLElement {
     .form select { flex:1; min-width:0; border:0; outline:0; background:none; color:inherit; font:inherit; font-size:14px; padding:8px 10px; }
     .form select option { color:initial; }
     .addcard { padding:14px 16px; }
+    /* Settings tab: the accounts on the left, the selected one on the right; on a phone, one then the other */
+    .md { display:grid; grid-template-columns:minmax(220px, 300px) minmax(0, 1fr); gap:12px; align-items:start; }
+    .md-list { padding:6px; display:flex; flex-direction:column; gap:2px; position:sticky; top:calc(var(--header-height, 56px) + 56px); }
+    .md-item { display:flex; align-items:center; gap:10px; width:100%; padding:8px 10px; border:0; border-radius:10px; background:none;
+               color:inherit; font:inherit; text-align:left; cursor:pointer; }
+    .md-item:hover { background:var(--secondary-background-color, rgba(127,127,127,.08)); }
+    .md-item.active { background:color-mix(in srgb, var(--primary-color) 14%, transparent); }
+    .md-item:focus-visible { outline:2px solid var(--primary-color); outline-offset:-2px; }
+    .md-item .who .n { font-size:14px; }
+    .md-item .who .n, .md-item .who .s { display:block; }
+    .md-ico { flex:none; width:32px; height:32px; border-radius:50%; display:grid; place-items:center; --mdc-icon-size:18px;
+              color:var(--primary-color); background:color-mix(in srgb, var(--primary-color) 12%, transparent); }
+    .md-item .dot { flex:none; width:8px; height:8px; border-radius:50%; background:var(--tone); }
+    .md-back { display:none; align-self:flex-start; margin-bottom:8px; }
+    .md-detail { display:flex; flex-direction:column; min-width:0; }
+    .cred.edit { justify-content:flex-end; }
+    @media (max-width: 720px) {
+      .md { grid-template-columns:minmax(0, 1fr); }
+      .md-list { position:static; }
+      .md.open .md-list { display:none; }
+      .md:not(.open) .md-detail { display:none; }
+      .md-back { display:inline-flex; }
+    }
     .addcard .form { border:0; padding:0; }
     @media (max-width: 600px) {
       main { padding:12px 8px; }
@@ -2866,9 +2911,8 @@ class IptvPanel extends HTMLElement {
       else if (el.dataset.refresh !== undefined) this._refreshSubs(el);
       else if (el.dataset.addCancel !== undefined) this._openAdd(false);
       else if (el.dataset.addSubmit !== undefined) this._submitAdd(el);
-      else if (el.dataset.edit !== undefined) this._openEdit(device);
-      else if (el.dataset.editCancel !== undefined || el.dataset.delCancel !== undefined) this._closeSubForm(device);
-      else if (el.dataset.editSubmit !== undefined) this._submitEdit(device, el);
+      else if (el.dataset.settings !== undefined) this._openSettings(device);
+      else if (el.dataset.delCancel !== undefined) this._closeSubForm(device);
       else if (el.dataset.del !== undefined) this._openDelete(device);
       else if (el.dataset.delSubmit !== undefined) this._submitDelete(device, el);
       else if (el.dataset.entity) this._moreInfo(el.dataset.entity);
@@ -2882,7 +2926,7 @@ class IptvPanel extends HTMLElement {
     tab?.addEventListener('keydown', (ev) => {
       if (ev.key !== 'Enter' || !ev.target.matches?.('.form input')) return;
       ev.preventDefault();
-      ev.target.closest('.form').querySelector('[data-add-submit], [data-edit-submit]')?.click();
+      ev.target.closest('.form').querySelector('[data-add-submit]')?.click();
     });
   }
 
@@ -3001,33 +3045,13 @@ class IptvPanel extends HTMLElement {
   }
 
   // ── Edit and remove, in the subscription's card ──
-  async _openEdit(device) {
-    this._subForms = { [device]: { kind: 'edit', loading: true } };
-    this._renderSubs(true);
-    var prefill = await this._command('edit_account', { device_id: device });
-    if (this._subForms?.[device]?.kind !== 'edit') return;
-    this._subForms[device] = prefill.ok
-      ? { kind: 'edit', provider: prefill.provider === 'stalker' ? 'stalker' : 'xtream', values: prefill }
-      : { kind: 'edit', error: iptvPanelError(this._lang(), prefill.error) };
-    this._renderSubs(true);
-    this.shadowRoot.querySelector(`[data-device="${CSS.escape(device)}"] .form input`)?.focus();
-  }
-
-  async _submitEdit(device, button) {
-    var state = this._subForms?.[device];
-    var form = button.closest('.form');
-    var payload = { device_id: device, ...this._formValues(form) };
-    button.disabled = true;
-    button.textContent = this._t('p_edit_saving');
-    var out = await this._command('edit_account', payload);
-    if (this._subForms?.[device] !== state) return;
-    if (out.ok) {
-      this._closeSubForm(device);
-      return;
-    }
-    button.disabled = false;
-    button.textContent = this._t('p_edit_save');
-    form.querySelector('.err').textContent = iptvPanelError(this._lang(), out.error);
+  // The Settings tab on this subscription's account: its credentials and options
+  _openSettings(device) {
+    var acc = (this._accounts || []).find((a) => a.device_id === device);
+    if (acc) this._selected = acc.entry_id;
+    this._mdOpen = true;
+    this._renderAccounts();
+    this._goTab('settings');
   }
 
   _openDelete(device) {
@@ -3062,24 +3086,12 @@ class IptvPanel extends HTMLElement {
   }
 
   _subForm(device) {
-    var state = this._subForms?.[device];
-    if (!state) return '';
+    if (this._subForms?.[device]?.kind !== 'delete') return '';
     var esc = iptvPanelEsc;
-    if (state.kind === 'delete') {
-      return `<div class="form confirm"><div class="t">${esc(this._t('p_del_title'))}</div><div class="msg">${esc(this._t('p_del_confirm'))}</div>
-        <div class="err" role="alert"></div>
-        <div class="b"><button class="act quiet" data-del-cancel>${esc(this._t('p_edit_cancel'))}</button>
-          <button class="act bad" data-del-submit>${esc(this._t('p_del_delete'))}</button></div></div>`;
-    }
-    var body = state.loading
-      ? `<div class="msg">${esc(this._t('p_edit_saving'))}</div>`
-      : state.provider
-        ? this._credentialFields(state.provider, state.values, true)
-        : '';
-    return `<div class="form"><div class="t">${esc(this._t('p_edit_title'))}</div>${body}
-      <div class="err" role="alert">${esc(state.error || '')}</div>
-      <div class="b"><button class="act quiet" data-edit-cancel>${esc(this._t('p_edit_cancel'))}</button>
-        ${state.provider ? `<button class="act" data-edit-submit>${esc(this._t('p_edit_save'))}</button>` : ''}</div></div>`;
+    return `<div class="form confirm"><div class="t">${esc(this._t('p_del_title'))}</div><div class="msg">${esc(this._t('p_del_confirm'))}</div>
+      <div class="err" role="alert"></div>
+      <div class="b"><button class="act quiet" data-del-cancel>${esc(this._t('p_edit_cancel'))}</button>
+        <button class="act bad" data-del-submit>${esc(this._t('p_del_delete'))}</button></div></div>`;
   }
 
   // ── The cards ──
@@ -3109,7 +3121,7 @@ class IptvPanel extends HTMLElement {
         ${pill}
       </div>`;
     var actions = `<div class="bar"><span class="links"></span>
-        <button class="act quiet" data-edit><ha-icon icon="mdi:pencil"></ha-icon>${esc(this._t('p_edit_btn'))}</button>
+        <button class="act quiet" data-settings><ha-icon icon="mdi:cog-outline"></ha-icon>${esc(this._t('settings'))}</button>
         <button class="act quiet bad" data-del><ha-icon icon="mdi:delete-outline"></ha-icon>${esc(this._t('p_del_btn'))}</button></div>`;
     if (!summary || summary.unavailable) {
       return `<ha-card class="sub bad" data-device="${esc(sub.device)}">${head('bad', `<span class="pill bad">${esc(this._t('p_unavailable'))}</span>`)}
@@ -3220,7 +3232,10 @@ class IptvPanel extends HTMLElement {
         <code>${esc(acc.login)}</code>
         ${copy('login')}
       </div>`;
-    if (stalker) return `<div class="creds">${login}</div>`;
+    var edit = acc.device_id
+      ? `<div class="cred edit"><button class="act quiet" data-cred-edit><ha-icon icon="mdi:pencil"></ha-icon>${esc(this._t('p_edit_btn'))}</button></div>`
+      : '';
+    if (stalker) return `<div class="creds">${login}${edit}</div>`;
     var secret = this._secrets[acc.entry_id]?.password;
     var shown = secret != null;
     return `
@@ -3232,6 +3247,7 @@ class IptvPanel extends HTMLElement {
           <button class="ico" data-reveal title="${esc(this._t(shown ? 'cred_hide' : 'cred_show'))}"${acc.device_id ? '' : ' disabled'}><ha-icon icon="${shown ? 'mdi:eye-off-outline' : 'mdi:eye-outline'}"></ha-icon></button>
           ${copy('password')}
         </div>
+        ${edit}
       </div>`;
   }
 
@@ -3293,7 +3309,7 @@ class IptvPanel extends HTMLElement {
           </div>
           <span class="pill ${iptvPanelTone(acc.state)}">${esc(state)}</span>
         </div>
-        ${this._credsHtml(acc)}
+        ${this._credEdit?.entry_id === acc.entry_id ? this._credEditHtml() : this._credsHtml(acc)}
         <div class="grid">
           <label class="ctl wide">
             <span>${esc(this._t('f_name'))}</span>
@@ -3318,6 +3334,79 @@ class IptvPanel extends HTMLElement {
           <button class="act" data-do="save"${canSave ? '' : ' disabled'}><ha-icon icon="mdi:content-save"></ha-icon>${esc(this._t(busy === 'save' ? 'saving' : 'save'))}</button>
         </div>
       </ha-card>`;
+  }
+
+  // An account of the list: its type, name, login and state
+  _listItem(acc) {
+    var esc = iptvPanelEsc;
+    var selected = acc.entry_id === this._selected;
+    var icon = acc.provider === 'stalker' ? 'mdi:router-network' : 'mdi:account-key';
+    var tone = iptvPanelTone(acc.state);
+    var dirty = this._drafts[acc.entry_id] && this._changed(acc);
+    return `<button class="md-item ${tone}${selected ? ' active' : ''}" role="option" aria-selected="${selected}" tabindex="${selected ? 0 : -1}"
+        data-select="${esc(acc.entry_id)}">
+        <span class="md-ico"><ha-icon icon="${icon}"></ha-icon></span>
+        <span class="who"><span class="n">${esc(acc.title)}${dirty ? ' •' : ''}</span>
+          <span class="s">${esc(acc.provider === 'stalker' ? 'Stalker' : 'Xtream')} · ${esc(acc.login)}</span></span>
+        <span class="dot" aria-hidden="true"></span>
+      </button>`;
+  }
+
+  // Another account: its form keeps what was typed (drafts are per account), its password is hidden again
+  _select(entryId, open = true) {
+    if (this._credEdit && this._credEdit.entry_id !== entryId) this._credEdit = null;
+    this._selected = entryId;
+    if (open) this._mdOpen = true;
+    this._confirm = null;
+    this._renderAccounts();
+  }
+
+  // ── Credentials: edited in place, in the selected account ──
+  async _openCredEdit(acc) {
+    var state = { entry_id: acc.entry_id, loading: true };
+    this._credEdit = state;
+    this._renderAccounts();
+    var prefill = await this._command('edit_account', { device_id: acc.device_id });
+    if (this._credEdit !== state) return;
+    this._credEdit = prefill.ok
+      ? { entry_id: acc.entry_id, provider: prefill.provider === 'stalker' ? 'stalker' : 'xtream', values: prefill }
+      : { entry_id: acc.entry_id, error: iptvPanelError(this._lang(), prefill.error) };
+    this._renderAccounts();
+    this.shadowRoot.querySelector('.md-detail .form input')?.focus();
+  }
+
+  async _submitCredEdit(acc, button) {
+    var state = this._credEdit;
+    var form = button.closest('.form');
+    var payload = { device_id: acc.device_id, ...this._formValues(form) };
+    button.disabled = true;
+    button.textContent = this._t('p_edit_saving');
+    var out = await this._command('edit_account', payload);
+    if (this._credEdit !== state) return;
+    if (out.ok) {
+      this._credEdit = null;
+      delete this._secrets[acc.entry_id];
+      this._status[acc.entry_id] = { tone: 'good', text: this._t('saved') };
+      await this._load();
+      return;
+    }
+    button.disabled = false;
+    button.textContent = this._t('p_edit_save');
+    form.querySelector('.err').textContent = iptvPanelError(this._lang(), out.error);
+  }
+
+  _credEditHtml() {
+    var state = this._credEdit;
+    var esc = iptvPanelEsc;
+    var body = state.loading
+      ? `<div class="msg">${esc(this._t('p_edit_saving'))}</div>`
+      : state.provider
+        ? this._credentialFields(state.provider, state.values, true)
+        : '';
+    return `<div class="form creds-form"><div class="t">${esc(this._t('p_edit_title'))}</div>${body}
+      <div class="err" role="alert">${esc(state.error || '')}</div>
+      <div class="b"><button class="act quiet" data-cred-cancel>${esc(this._t('p_edit_cancel'))}</button>
+        ${state.provider ? `<button class="act" data-cred-submit>${esc(this._t('p_edit_save'))}</button>` : ''}</div></div>`;
   }
 
   _confirmHtml(acc) {
@@ -3351,11 +3440,37 @@ class IptvPanel extends HTMLElement {
       box.innerHTML = `<ha-card class="note">${iptvPanelEsc(this._t('none', { add: this._t('p_add_btn') }))}</ha-card>`;
       return;
     }
+    // One account at a time: the list of the accounts, then the selected one's credentials and options
+    if (!this._accounts.some((a) => a.entry_id === this._selected)) this._selected = this._accounts[0].entry_id;
+    var acc = this._accounts.find((a) => a.entry_id === this._selected);
     var focus = this._focusOf(box);
-    box.innerHTML = this._accounts.map((acc) => this._accountHtml(acc)).join('');
-    this._accounts.forEach((acc) => {
-      this._bind(acc, box.querySelector(`ha-card[data-id="${CSS.escape(acc.entry_id)}"]`));
+    var esc = iptvPanelEsc;
+    box.innerHTML = `<div class="md${this._mdOpen ? ' open' : ''}">
+        <ha-card class="md-list" role="listbox" aria-label="${esc(this._t('all_accounts'))}">${this._accounts.map((a) => this._listItem(a)).join('')}</ha-card>
+        <div class="md-detail">
+          <button class="act quiet md-back" data-back><ha-icon icon="mdi:arrow-left"></ha-icon>${esc(this._t('all_accounts'))}</button>
+          ${this._accountHtml(acc)}
+        </div>
+      </div>`;
+    box.querySelectorAll('[data-select]').forEach((item) => {
+      item.addEventListener('click', () => this._select(item.dataset.select));
+      // Up and down move between the accounts, as in a list
+      item.addEventListener('keydown', (ev) => {
+        var step = ev.key === 'ArrowDown' ? 1 : ev.key === 'ArrowUp' ? -1 : 0;
+        if (!step) return;
+        ev.preventDefault();
+        var ids = this._accounts.map((a) => a.entry_id);
+        var next = ids[(ids.indexOf(this._selected) + step + ids.length) % ids.length];
+        this._select(next, false);
+        box.querySelector(`[data-select="${CSS.escape(next)}"]`)?.focus();
+      });
     });
+    box.querySelector('[data-back]').addEventListener('click', () => {
+      this._mdOpen = false;
+      this._renderAccounts();
+      box.querySelector(`[data-select="${CSS.escape(this._selected)}"]`)?.focus();
+    });
+    this._bind(acc, box.querySelector(`ha-card[data-id="${CSS.escape(acc.entry_id)}"]`));
     this._refocus(box, focus);
   }
 
@@ -3413,7 +3528,7 @@ class IptvPanel extends HTMLElement {
 
   _bind(acc, el) {
     if (!el) return;
-    el.querySelectorAll('input').forEach((input) => {
+    el.querySelectorAll('input[data-key]').forEach((input) => {
       input.addEventListener('input', () => {
         this._edit(acc, input.dataset.key, input.value);
         delete this._status[acc.entry_id];
@@ -3428,6 +3543,20 @@ class IptvPanel extends HTMLElement {
       this._refreshBar(acc, el);
     });
     el.querySelector('[data-reveal]')?.addEventListener('click', () => this._toggleSecret(acc));
+    el.querySelector('[data-cred-edit]')?.addEventListener('click', () => this._openCredEdit(acc));
+    el.querySelector('[data-cred-cancel]')?.addEventListener('click', () => {
+      this._credEdit = null;
+      this._renderAccounts();
+      this.shadowRoot.querySelector('[data-cred-edit]')?.focus();
+    });
+    el.querySelector('[data-cred-submit]')?.addEventListener('click', (ev) => this._submitCredEdit(acc, ev.currentTarget));
+    el.querySelector('.creds-form')?.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter' && ev.target.matches('input')) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        el.querySelector('[data-cred-submit]')?.click();
+      }
+    });
     el.querySelectorAll('[data-copy]').forEach((button) => {
       button.addEventListener('click', () => this._copy(acc, button.dataset.copy, button));
     });

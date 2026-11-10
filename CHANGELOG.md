@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.31.0 - 2026-11-10
+
+### Improvements
+- Panel, **Settings** tab: one account at a time. The accounts are listed on the left (type, login, a dot for their state, a • while one has unsaved changes), the chosen one on the right; on a phone, the list then the account, with **All accounts** to go back.
+- **Edit credentials** moves to the Settings tab, in place in the account's credentials; on the Subscriptions tab, each card's **Settings** button opens its account there. The two tabs no longer repeat the same cards: Subscriptions shows the state of the subscriptions, Settings sets up one account.
+
 ## 3.30.0 - 2026-11-10
 
 ### Improvements
