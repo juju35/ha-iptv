@@ -11,7 +11,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_PANEL_VERSION = '3.29.3';
+var IPTV_PANEL_VERSION = '3.29.4';
 
 var IptvPanelI18n = {
   en: {
@@ -1361,18 +1361,27 @@ class IptvPanel extends HTMLElement {
     return iptvPanelT(this._lang(), key, vars);
   }
 
-  async _start() {
+  _start() {
     this._render();
-    var version = this._panel?.config?.version || IPTV_PANEL_VERSION;
-    try {
-      if (!customElements.get('iptv-card')) await import(`/iptv/iptv-card.js?v=${version}`);
-    } catch (err) {
-      console.error('IPTV panel: could not load the card', err);
-    }
-    this._mountCard();
+    // The account list does not wait for the card (a large bundle, plus its language file): both load in
+    // parallel, and the card is mounted into #card whenever it is defined.
     this._subscribe();
     this._watchConnection(this.isConnected);
     this._load();
+    this._loadCard();
+  }
+
+  async _loadCard() {
+    var version = this._panel?.config?.version || IPTV_PANEL_VERSION;
+    try {
+      if (!customElements.get('iptv-card')) {
+        await import(`/iptv/iptv-card.js?v=${version}`);
+        await customElements.whenDefined('iptv-card');
+      }
+    } catch (err) {
+      console.error('IPTV panel: could not load the card', err);
+    }
+    if (!this._card) this._mountCard();
   }
 
   // Reload the list when an IPTV account is added, removed, renamed or changes state

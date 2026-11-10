@@ -571,3 +571,61 @@ test('a failed account list is tried again after 2 s, 5 s, 15 s then every 30 s,
   panel._watchConnection(false);
   assert.equal(listeners.size, 0);
 });
+
+// --- Opening the panel: the account list does not wait for the card ------------------------------------------
+
+test('opening the panel requests iptv/accounts before the card bundle has loaded, and mounts the card later', async () => {
+  // A context of its own where the card is not defined yet and import() is a promise the test resolves
+  let resolveImport;
+  const imported = [];
+  const defined = new Set();
+  const appended = [];
+  const ctx = {
+    HTMLElement: context.HTMLElement,
+    customElements: {
+      get: (name) => defined.has(name),
+      define() {},
+      whenDefined: async () => {},
+    },
+    structuredClone,
+    CSS: context.CSS,
+    console: { ...console, error() {} },
+    setTimeout() {},
+    clearTimeout() {},
+    document: { createElement: (tag) => ({ tag, setConfig() {} }) },
+    __import: (url) => {
+      imported.push(url);
+      return new Promise((resolve) => {
+        resolveImport = () => {
+          defined.add('iptv-card');
+          resolve({});
+        };
+      });
+    },
+  };
+  vm.createContext(ctx);
+  vm.runInContext(`${source.replace(/\bimport\(/g, '__import(')}\nthis.IptvPanel = IptvPanel;`, ctx);
+  const panel = new ctx.IptvPanel();
+  panel.shadowRoot = { getElementById: (id) => (id === 'card' ? { appendChild: (el) => appended.push(el) } : null), querySelector: () => null };
+  panel._render = () => {};
+  panel._renderAccounts = () => {};
+  const calls = [];
+  panel.hass = {
+    language: 'en',
+    callWS: async (msg) => {
+      calls.push(msg.type);
+      return { accounts: [] };
+    },
+    connection: { subscribeMessage: async () => () => {} },
+  };
+  await new Promise((r) => setImmediate(r));
+  assert.equal(imported.length, 1);
+  assert.match(imported[0], /^\/iptv\/iptv-card\.js\?v=/);
+  assert.deepEqual(calls, ['iptv/accounts']);
+  assert.deepEqual(panel._accounts, []);
+  assert.equal(panel._card, undefined);
+  resolveImport();
+  await new Promise((r) => setImmediate(r));
+  assert.equal(panel._card?.tag, 'iptv-card');
+  assert.deepEqual(appended, [panel._card]);
+});

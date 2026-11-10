@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.29.4 - 2026-11-10
+
+### Performance
+- Panel opens faster: the account list loads alongside the card instead of after it.
+
 ## 3.29.3 - 2026-11-09
 
 ### Improvements
