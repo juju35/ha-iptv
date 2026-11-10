@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.29.3 - 2026-11-09
+
+### Improvements
+- Panel: while the accounts load, *Loading…*; if they can't be listed, the error with a **Retry** button (tried again on its own meanwhile) instead of *No account*.
+
 ## 3.29.2 - 2026-11-09
 
 ### Fixes

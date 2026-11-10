@@ -544,8 +544,12 @@ test('a failed account list is tried again after 2 s, 5 s, 15 s then every 30 s,
   panel._secrets = {};
   let fail = true;
   panel._hass = { callWS: async () => { if (fail) throw new Error('unknown_command'); return { accounts: [] }; } };
+  panel._accounts = null;
   for (let i = 0; i < 5; i++) await panel._load();
   assert.deepEqual(timers.map((t) => t.ms), [2000, 5000, 15000, 30000, 30000]);
+  // Never listed: no "No account", the error for the Retry note.
+  assert.equal(panel._accounts, null);
+  assert.equal(panel._loadError, 'unknown_command');
   let loads = 0;
   panel._load = async () => { loads++; };
   panel.isConnected = false;

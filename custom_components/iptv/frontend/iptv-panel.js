@@ -11,7 +11,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_PANEL_VERSION = '3.29.2';
+var IPTV_PANEL_VERSION = '3.29.3';
 
 var IptvPanelI18n = {
   en: {
@@ -20,6 +20,8 @@ var IptvPanelI18n = {
     settings: 'Settings',
     none: 'No account yet: add one with the + button of the card.',
     loading: 'Loading…',
+    load_failed: 'Could not load: {error}. Trying again on its own.',
+    retry: 'Retry',
     f_name: 'Name',
     f_name_hint: 'Leave blank to use the server name',
     f_scan: 'Polling interval',
@@ -68,6 +70,8 @@ var IptvPanelI18n = {
     settings: 'Réglages',
     none: 'Aucun compte : ajoutez-en un avec le bouton + de la carte.',
     loading: 'Chargement…',
+    load_failed: 'Chargement impossible : {error}. Nouvel essai automatique.',
+    retry: 'Réessayer',
     f_name: 'Nom',
     f_name_hint: 'Laisser vide pour reprendre le nom du serveur',
     f_scan: 'Intervalle d’interrogation',
@@ -116,6 +120,8 @@ var IptvPanelI18n = {
     settings: 'Einstellungen',
     none: 'Noch kein Konto: füge eines mit der +-Schaltfläche der Karte hinzu.',
     loading: 'Wird geladen…',
+    load_failed: 'Laden fehlgeschlagen: {error}. Wird automatisch erneut versucht.',
+    retry: 'Erneut versuchen',
     f_name: 'Name',
     f_name_hint: 'Leer lassen, um den Servernamen zu verwenden',
     f_scan: 'Abfrageintervall',
@@ -164,6 +170,8 @@ var IptvPanelI18n = {
     settings: 'Ajustes',
     none: 'Aún no hay cuentas: añade una con el botón + de la tarjeta.',
     loading: 'Cargando…',
+    load_failed: 'No se pudo cargar: {error}. Se reintenta automáticamente.',
+    retry: 'Reintentar',
     f_name: 'Nombre',
     f_name_hint: 'Déjalo vacío para usar el nombre del servidor',
     f_scan: 'Intervalo de consulta',
@@ -212,6 +220,8 @@ var IptvPanelI18n = {
     settings: 'Impostazioni',
     none: 'Ancora nessun account: aggiungine uno con il pulsante + della scheda.',
     loading: 'Caricamento…',
+    load_failed: 'Caricamento non riuscito: {error}. Nuovo tentativo automatico.',
+    retry: 'Riprova',
     f_name: 'Nome',
     f_name_hint: 'Lascia vuoto per usare il nome del server',
     f_scan: 'Intervallo di aggiornamento',
@@ -260,6 +270,8 @@ var IptvPanelI18n = {
     settings: 'Instellingen',
     none: 'Nog geen account: voeg er een toe met de knop + van de kaart.',
     loading: 'Laden…',
+    load_failed: 'Laden mislukt: {error}. Wordt automatisch opnieuw geprobeerd.',
+    retry: 'Opnieuw proberen',
     f_name: 'Naam',
     f_name_hint: 'Leeg laten om de servernaam te gebruiken',
     f_scan: 'Bevragingsinterval',
@@ -308,6 +320,8 @@ var IptvPanelI18n = {
     settings: 'Definições',
     none: 'Ainda não há contas: adicione uma com o botão + do cartão.',
     loading: 'A carregar…',
+    load_failed: 'Não foi possível carregar: {error}. Nova tentativa automática.',
+    retry: 'Tentar novamente',
     f_name: 'Nome',
     f_name_hint: 'Deixe em branco para usar o nome do servidor',
     f_scan: 'Intervalo de consulta',
@@ -356,6 +370,8 @@ var IptvPanelI18n = {
     settings: 'Ustawienia',
     none: 'Brak kont: dodaj konto przyciskiem + na karcie.',
     loading: 'Ładowanie…',
+    load_failed: 'Nie udało się wczytać: {error}. Ponowna próba automatycznie.',
+    retry: 'Spróbuj ponownie',
     f_name: 'Nazwa',
     f_name_hint: 'Pozostaw puste, aby użyć nazwy serwera',
     f_scan: 'Interwał odpytywania',
@@ -404,6 +420,8 @@ var IptvPanelI18n = {
     settings: 'Setări',
     none: 'Niciun cont deocamdată: adaugă unul cu butonul + de pe card.',
     loading: 'Se încarcă…',
+    load_failed: 'Încărcarea a eșuat: {error}. Se reîncearcă automat.',
+    retry: 'Reîncearcă',
     f_name: 'Nume',
     f_name_hint: 'Lasă gol pentru a folosi numele serverului',
     f_scan: 'Interval de interogare',
@@ -452,6 +470,8 @@ var IptvPanelI18n = {
     settings: 'Indstillinger',
     none: 'Ingen konti endnu: tilføj en med kortets +-knap.',
     loading: 'Indlæser…',
+    load_failed: 'Kunne ikke indlæse: {error}. Prøver igen automatisk.',
+    retry: 'Prøv igen',
     f_name: 'Navn',
     f_name_hint: 'Lad stå tomt for at bruge serverens navn',
     f_scan: 'Opdateringsinterval',
@@ -500,6 +520,8 @@ var IptvPanelI18n = {
     settings: 'Inställningar',
     none: 'Inga konton än: lägg till ett med kortets +-knapp.',
     loading: 'Laddar…',
+    load_failed: 'Kunde inte läsa in: {error}. Försöker igen automatiskt.',
+    retry: 'Försök igen',
     f_name: 'Namn',
     f_name_hint: 'Lämna tomt för att använda serverns namn',
     f_scan: 'Uppdateringsintervall',
@@ -548,6 +570,8 @@ var IptvPanelI18n = {
     settings: 'Настройки',
     none: 'Все още няма акаунти: добавете един с бутона + на картата.',
     loading: 'Зареждане…',
+    load_failed: 'Неуспешно зареждане: {error}. Автоматичен нов опит.',
+    retry: 'Опитай отново',
     f_name: 'Име',
     f_name_hint: 'Оставете празно, за да се използва името на сървъра',
     f_scan: 'Интервал на запитване',
@@ -596,6 +620,8 @@ var IptvPanelI18n = {
     settings: 'Настройки',
     none: 'Учётных записей пока нет: добавьте её кнопкой + на карточке.',
     loading: 'Загрузка…',
+    load_failed: 'Не удалось загрузить: {error}. Повтор выполняется автоматически.',
+    retry: 'Повторить',
     f_name: 'Название',
     f_name_hint: 'Оставьте пустым, чтобы использовать имя сервера',
     f_scan: 'Интервал опроса',
@@ -644,6 +670,8 @@ var IptvPanelI18n = {
     settings: 'Налаштування',
     none: 'Облікових записів ще немає: додайте його кнопкою + на картці.',
     loading: 'Завантаження…',
+    load_failed: 'Не вдалося завантажити: {error}. Повтор виконується автоматично.',
+    retry: 'Повторити',
     f_name: 'Назва',
     f_name_hint: 'Залиште порожнім, щоб використати ім\'я сервера',
     f_scan: 'Інтервал опитування',
@@ -692,6 +720,8 @@ var IptvPanelI18n = {
     settings: 'Beállítások',
     none: 'Még nincs fiók: adj hozzá egyet a kártya + gombjával.',
     loading: 'Betöltés…',
+    load_failed: 'A betöltés nem sikerült: {error}. Automatikus újrapróbálás.',
+    retry: 'Újra',
     f_name: 'Név',
     f_name_hint: 'Hagyd üresen a szerver nevének használatához',
     f_scan: 'Lekérdezési időköz',
@@ -740,6 +770,8 @@ var IptvPanelI18n = {
     settings: 'Nastavenia',
     none: 'Zatiaľ žiadny účet: pridajte ho tlačidlom + na karte.',
     loading: 'Načítava sa…',
+    load_failed: 'Načítanie zlyhalo: {error}. Automaticky sa skúša znova.',
+    retry: 'Skúsiť znova',
     f_name: 'Názov',
     f_name_hint: 'Ak chcete použiť názov servera, nechajte prázdne',
     f_scan: 'Interval dotazovania',
@@ -788,6 +820,8 @@ var IptvPanelI18n = {
     settings: 'Nastavení',
     none: 'Zatím žádný účet: přidejte ho tlačítkem + na kartě.',
     loading: 'Načítání…',
+    load_failed: 'Načtení se nezdařilo: {error}. Automaticky se zkouší znovu.',
+    retry: 'Zkusit znovu',
     f_name: 'Název',
     f_name_hint: 'Chcete-li použít název serveru, nechte prázdné',
     f_scan: 'Interval dotazování',
@@ -836,6 +870,8 @@ var IptvPanelI18n = {
     settings: 'Nastavitve',
     none: 'Še ni računov: dodajte ga z gumbom + na kartici.',
     loading: 'Nalaganje …',
+    load_failed: 'Nalaganje ni uspelo: {error}. Samodejno se poskuša znova.',
+    retry: 'Poskusi znova',
     f_name: 'Ime',
     f_name_hint: 'Pustite prazno, da uporabite ime strežnika',
     f_scan: 'Interval poizvedovanja',
@@ -884,6 +920,8 @@ var IptvPanelI18n = {
     settings: 'Iestatījumi',
     none: 'Vēl nav neviena konta: pievienojiet to ar kartītes pogu +.',
     loading: 'Ielādē…',
+    load_failed: 'Neizdevās ielādēt: {error}. Automātiski mēģina vēlreiz.',
+    retry: 'Mēģināt vēlreiz',
     f_name: 'Nosaukums',
     f_name_hint: 'Atstājiet tukšu, lai izmantotu servera nosaukumu',
     f_scan: 'Aptaujas intervāls',
@@ -932,6 +970,8 @@ var IptvPanelI18n = {
     settings: 'Ρυθμίσεις',
     none: 'Δεν υπάρχει ακόμη λογαριασμός: προσθέστε έναν με το κουμπί + της κάρτας.',
     loading: 'Φόρτωση…',
+    load_failed: 'Αποτυχία φόρτωσης: {error}. Νέα αυτόματη προσπάθεια.',
+    retry: 'Δοκιμή ξανά',
     f_name: 'Όνομα',
     f_name_hint: 'Αφήστε το κενό για να χρησιμοποιηθεί το όνομα του διακομιστή',
     f_scan: 'Διάστημα ερωτήματος',
@@ -980,6 +1020,8 @@ var IptvPanelI18n = {
     settings: 'Подешавања',
     none: 'Још нема налога: додајте га дугметом + на картици.',
     loading: 'Учитавање…',
+    load_failed: 'Учитавање није успело: {error}. Аутоматски се покушава поново.',
+    retry: 'Покушај поново',
     f_name: 'Назив',
     f_name_hint: 'Оставите празно да се користи назив сервера',
     f_scan: 'Интервал освежавања',
@@ -1028,6 +1070,8 @@ var IptvPanelI18n = {
     settings: 'Podešavanja',
     none: 'Još nema naloga: dodajte ga dugmetom + na kartici.',
     loading: 'Učitavanje…',
+    load_failed: 'Učitavanje nije uspelo: {error}. Automatski se pokušava ponovo.',
+    retry: 'Pokušaj ponovo',
     f_name: 'Naziv',
     f_name_hint: 'Ostavite prazno da se koristi naziv servera',
     f_scan: 'Interval osvežavanja',
@@ -1123,6 +1167,7 @@ class IptvPanel extends HTMLElement {
     section[hidden] { display:none; }
     .column { display:flex; flex-direction:column; gap:12px; min-width:0; }
     .note { padding:16px; color:var(--secondary-text-color); }
+    .note.error { display:flex; flex-direction:column; gap:10px; align-items:flex-start; color:var(--primary-text-color); border-left:3px solid var(--error-color, #db4437); }
     .account { padding:14px 16px; display:flex; flex-direction:column; gap:12px; }
     .acc-head { display:flex; align-items:center; gap:12px; }
     .avatar { width:40px; height:40px; flex:none; border-radius:50%; display:grid; place-items:center; --mdc-icon-size:22px;
@@ -1347,11 +1392,17 @@ class IptvPanel extends HTMLElement {
     try {
       var res = await this._hass.callWS({ type: 'iptv/accounts' });
       this._accounts = res.accounts || [];
+      this._loadError = null;
       this._retry(false);
     } catch (err) {
       console.error('IPTV panel: could not list the accounts', err);
       this._retry(true);
-      this._accounts = this._accounts || [];
+      // Never listed: the error with a Retry button, not "No account". Listed before: kept.
+      if (this._accounts === null) {
+        this._loadError = String(err?.message || err).replace(/\.\s*$/, '');
+        this._renderAccounts();
+        return;
+      }
     }
     var byId = new Map(this._accounts.map((a) => [a.entry_id, a]));
     [this._drafts, this._secrets].forEach((store) => {
@@ -1580,8 +1631,14 @@ class IptvPanel extends HTMLElement {
   _renderAccounts() {
     var box = this.shadowRoot.getElementById('accounts');
     if (!box) return;
+    if (this._accounts === null && this._loadError) {
+      box.innerHTML = `<ha-card class="note error" role="alert">${iptvPanelEsc(this._t('load_failed', { error: this._loadError }))}
+        <button class="act" data-retry><ha-icon icon="mdi:refresh"></ha-icon>${iptvPanelEsc(this._t('retry'))}</button></ha-card>`;
+      box.querySelector('[data-retry]').addEventListener('click', () => this._reload());
+      return;
+    }
     if (this._accounts === null) {
-      box.innerHTML = `<ha-card class="note">${iptvPanelEsc(this._t('loading'))}</ha-card>`;
+      box.innerHTML = `<ha-card class="note" aria-busy="true">${iptvPanelEsc(this._t('loading'))}</ha-card>`;
       return;
     }
     if (!this._accounts.length) {
