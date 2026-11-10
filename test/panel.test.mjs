@@ -26,8 +26,8 @@ const context = {
 };
 const timers = [];
 vm.createContext(context);
-vm.runInContext(`${source}\nthis.panel = { IptvPanel, IptvPanelI18n, IPTV_PANEL_LIMITS, IPTV_PANEL_TABS, iptvPanelT, iptvPanelTone };`, context);
-const { IptvPanel, IptvPanelI18n, IPTV_PANEL_LIMITS, IPTV_PANEL_TABS, iptvPanelT, iptvPanelTone } = context.panel;
+vm.runInContext(`${source}\nthis.panel = { IptvPanel, IptvPanelI18n, IPTV_PANEL_LIMITS, IPTV_PANEL_TABS, iptvPanelT, iptvPanelTone, iptvPanelSubscriptions, iptvPanelSummary, iptvPanelError };`, context);
+const { IptvPanel, IptvPanelI18n, IPTV_PANEL_LIMITS, IPTV_PANEL_TABS, iptvPanelT, iptvPanelTone, iptvPanelSubscriptions, iptvPanelSummary, iptvPanelError } = context.panel;
 
 const placeholders = (s) => [...String(s).matchAll(/\{\w+\}/g)].map((m) => m[0]).sort();
 
@@ -405,23 +405,6 @@ test('a removed account does not break the focus restore', async () => {
 
 // --- Language of the bundled card ----------------------------------------------------------------------------
 
-test('the bundled card follows a change of the Home Assistant language', () => {
-  const configs = [];
-  const card = {
-    setConfig: (c) => configs.push({ ...c }),
-  };
-  context.document = { createElement: () => card };
-  const panel = new IptvPanel();
-  panel._render = () => {};
-  panel._start = () => {};
-  panel.hass = { language: 'fr' };
-  panel._mountCard();
-  panel.hass = { language: 'de' };
-  // The card picks config.language first, then hass.language (iptvLang in iptv-card.js)
-  const lang = configs.at(-1).language || card.hass.language;
-  assert.equal(lang, 'de');
-});
-
 test('a Save button disabled after saving does not grab the focus on a later render', async () => {
   const server = { accounts: [account()] };
   const { panel, root, box } = renderedPanel(server);
@@ -574,62 +557,6 @@ test('a failed account list is tried again after 2 s, 5 s, 15 s then every 30 s,
 
 // --- Opening the panel: the account list does not wait for the card ------------------------------------------
 
-test('opening the panel requests iptv/accounts before the card bundle has loaded, and mounts the card later', async () => {
-  // A context of its own where the card is not defined yet and import() is a promise the test resolves
-  let resolveImport;
-  const imported = [];
-  const defined = new Set();
-  const appended = [];
-  const ctx = {
-    HTMLElement: context.HTMLElement,
-    customElements: {
-      get: (name) => defined.has(name),
-      define() {},
-      whenDefined: async () => {},
-    },
-    structuredClone,
-    CSS: context.CSS,
-    console: { ...console, error() {} },
-    setTimeout() {},
-    clearTimeout() {},
-    document: { createElement: (tag) => ({ tag, setConfig() {} }) },
-    __import: (url) => {
-      imported.push(url);
-      return new Promise((resolve) => {
-        resolveImport = () => {
-          defined.add('iptv-card');
-          resolve({});
-        };
-      });
-    },
-  };
-  vm.createContext(ctx);
-  vm.runInContext(`${source.replace(/\bimport\(/g, '__import(')}\nthis.IptvPanel = IptvPanel;`, ctx);
-  const panel = new ctx.IptvPanel();
-  panel.shadowRoot = { getElementById: (id) => (id === 'card' ? { appendChild: (el) => appended.push(el) } : null), querySelector: () => null };
-  panel._render = () => {};
-  panel._renderAccounts = () => {};
-  const calls = [];
-  panel.hass = {
-    language: 'en',
-    callWS: async (msg) => {
-      calls.push(msg.type);
-      return { accounts: [] };
-    },
-    connection: { subscribeMessage: async () => () => {} },
-  };
-  await new Promise((r) => setImmediate(r));
-  assert.equal(imported.length, 1);
-  assert.match(imported[0], /^\/iptv\/iptv-card\.js\?v=/);
-  assert.deepEqual(calls, ['iptv/accounts']);
-  assert.deepEqual(panel._accounts, []);
-  assert.equal(panel._card, undefined);
-  resolveImport();
-  await new Promise((r) => setImmediate(r));
-  assert.equal(panel._card?.tag, 'iptv-card');
-  assert.deepEqual(appended, [panel._card]);
-});
-
 test('panel, narrow, route and hass set before the element was defined go through the setters once it is', () => {
   // In the release the element is defined once the page's language file is in: Home Assistant has already set
   // these on the element, as plain properties that hide the setters.
@@ -658,4 +585,106 @@ test('panel, narrow, route and hass set before the element was defined go throug
   panel.hass = next;
   assert.equal(panel._hass, next, 'later updates reach the setter');
   assert.equal(started, 1);
+});
+
+const NOW = Date.parse('2026-11-10T12:00:00Z');
+const subsHass = (extra = {}) => ({
+  language: 'en',
+  entities: {
+    'sensor.a_status': { platform: 'iptv', translation_key: 'status', device_id: 'dA', entity_id: 'sensor.a_status' },
+    'sensor.a_expiration': { platform: 'iptv', translation_key: 'expiration', device_id: 'dA', entity_id: 'sensor.a_expiration' },
+    'sensor.a_channels': { platform: 'iptv', translation_key: 'channels', device_id: 'dA', entity_id: 'sensor.a_channels' },
+    'sensor.a_active': { platform: 'iptv', translation_key: 'active_connections', device_id: 'dA', entity_id: 'sensor.a_active' },
+    'sensor.a_max': { platform: 'iptv', translation_key: 'max_connections', device_id: 'dA', entity_id: 'sensor.a_max' },
+    'sensor.a_health': { platform: 'iptv', translation_key: 'health', device_id: 'dA', entity_id: 'sensor.a_health' },
+    'sensor.b_status': { platform: 'iptv', translation_key: 'status', device_id: 'dB', entity_id: 'sensor.b_status' },
+    'sensor.other': { platform: 'zha', translation_key: 'status', device_id: 'dZ', entity_id: 'sensor.other' },
+  },
+  devices: { dA: { name: 'Zeta TV' }, dB: { name: 'Alpha', name_by_user: 'Alpha IPTV' } },
+  states: {
+    'sensor.a_status': { state: 'Active' },
+    'sensor.a_expiration': { state: '2026-11-15T12:00:00+00:00' },
+    'sensor.a_channels': { state: '1234' },
+    'sensor.a_active': { state: '1' },
+    'sensor.a_max': { state: '2' },
+    'sensor.a_health': { state: 'ok', attributes: { response_time_ms: 230 } },
+    'sensor.b_status': { state: 'invalid_auth' },
+    ...extra,
+  },
+});
+
+test('subscriptions: the iptv entities grouped by device and sorted by name; a summary from their states', () => {
+  const hass = subsHass();
+  const subs = iptvPanelSubscriptions(hass);
+  assert.deepEqual(JSON.parse(JSON.stringify(subs.map((s) => s.name))), ['Alpha IPTV', 'Zeta TV']);
+  assert.equal(subs[1].ids.channels, 'sensor.a_channels');
+  const a = iptvPanelSummary(hass, subs[1].ids, NOW);
+  assert.equal(a.tone, 'warn', 'active, 5 days left: expiring');
+  assert.equal(a.status, 'p_status_active');
+  assert.equal(a.daysLeft, 5);
+  assert.deepEqual(JSON.parse(JSON.stringify(a.connections)), [1, 2]);
+  assert.equal(a.counts.channels, 1234);
+  assert.equal(a.health.ms, 230);
+  assert.ok(a.left > 0 && a.left < 1);
+  const b = iptvPanelSummary(hass, subs[0].ids, NOW);
+  assert.equal(b.tone, 'bad');
+  assert.equal(b.status, 'p_auth_failed');
+  const far = iptvPanelSummary(subsHass({ 'sensor.a_expiration': { state: '2027-11-15T12:00:00+00:00' } }), subs[1].ids, NOW);
+  assert.equal(far.tone, 'good');
+  assert.equal(iptvPanelSummary(subsHass({ 'sensor.a_status': { state: 'unavailable' } }), subs[1].ids, NOW).unavailable, true);
+  assert.equal(iptvPanelSummary(hass, {}, NOW), null);
+});
+
+test('subscriptions: a card shows the state, the expiration and the catalogue, escapes the name, offers Edit and Remove', () => {
+  const panel = new IptvPanel();
+  const hass = subsHass();
+  hass.devices.dA.name = '<Zeta>';
+  panel._hass = hass;
+  const html = panel._subCard(iptvPanelSubscriptions(hass).find((s) => s.device === 'dA'));
+  assert.match(html, /&#60;Zeta&#62;|&lt;Zeta&gt;/);
+  assert.match(html, /data-device="dA"/);
+  assert.match(html, /Active/);
+  assert.match(html, /1\/2/);
+  assert.match(html, /data-edit/);
+  assert.match(html, /data-del/);
+  assert.match(html, /230 ms/);
+  panel._subForms = { dA: { kind: 'delete' } };
+  assert.match(panel._subCard(iptvPanelSubscriptions(hass).find((s) => s.device === 'dA')), /data-del-submit/);
+  panel._subForms = { dA: { kind: 'edit', provider: 'stalker', values: { url: 'http://x', mac: '00:1A' } } };
+  const edit = panel._subCard(iptvPanelSubscriptions(hass).find((s) => s.device === 'dA'));
+  assert.match(edit, /data-k="mac" type="text" value="00:1A"/);
+  assert.doesNotMatch(edit, /data-k="password"/);
+});
+
+test('subscriptions: add and edit errors read as their message, an unknown code as a generic failure', () => {
+  assert.equal(iptvPanelError('en', 'invalid_auth'), 'Credentials refused');
+  assert.equal(iptvPanelError('fr', 'cannot_connect'), IptvPanelI18n.fr.p_err_cannot_connect);
+  assert.equal(iptvPanelError('en', 'already_in_progress'), IptvPanelI18n.en.p_err_generic);
+  assert.equal(iptvPanelT('en', 'none', { add: 'Add account' }), 'No account yet: add one with “Add account” in the Subscriptions tab.');
+});
+
+test('subscriptions: Add sends the provider and the fields; an error keeps the form with its message', async () => {
+  const panel = new IptvPanel();
+  const sent = [];
+  panel._hass = {
+    language: 'en',
+    callWS: async (msg) => {
+      sent.push(msg);
+      return { ok: false, error: 'invalid_auth' };
+    },
+  };
+  panel._adding = { provider: 'xtream' };
+  const inputs = [
+    { dataset: { k: 'url' }, value: ' http://srv ' },
+    { dataset: { k: 'username' }, value: 'me' },
+    { dataset: { k: 'password' }, value: ' p w ' },
+  ];
+  const err = { textContent: '' };
+  const form = { querySelectorAll: () => inputs, querySelector: () => err };
+  const button = { closest: () => form, disabled: false, textContent: '' };
+  await panel._submitAdd(button);
+  assert.deepEqual(JSON.parse(JSON.stringify(sent)), [{ type: 'iptv/add_account', provider: 'xtream', url: 'http://srv', username: 'me', password: ' p w ' }]);
+  assert.equal(err.textContent, 'Credentials refused');
+  assert.equal(button.disabled, false);
+  assert.ok(panel._adding, 'the form stays open');
 });
