@@ -133,7 +133,7 @@ The notification names the account and its expiration date, is refreshed once a 
 
 The integration adds an **IPTV** entry to the sidebar, shown to administrators only (`/iptv-config`), with two tabs, each with its own address (`/iptv-config`, `/iptv-config/settings`), so a reload or a link comes back to the same tab:
 
-- **Subscriptions**: the bundled card — add, view, edit and remove accounts;
+- **Subscriptions**: drawn by the panel itself, at once — one card per subscription (state, expiration with the days left and how much of the subscription is left, channels, movies, series, connections, health check, French lists, trial), **Add account**, **Edit credentials** and **Remove account** in place, **Refresh**; in a grid on a wide screen, one under the other on a phone;
 - **Settings**, one block per account:
   - the credentials of the account: username (or MAC address) and password, masked until you click the eye, with a copy button;
   - a settings form: name (blank = the server name), refresh interval, notification before expiration, health check interval and stream test — the same options and limits as **Configure**;

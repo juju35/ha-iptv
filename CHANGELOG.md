@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.30.0 - 2026-11-10
+
+### Improvements
+- Panel, **Subscriptions** tab: drawn by the panel itself instead of embedding the card, so it shows at the first opening. One card per subscription — state, expiration with the days left and how much of the subscription is left, channels, movies, series, connections, health check, French lists, trial — with **Add account**, **Edit credentials** and **Remove account** in place and **Refresh**; in a grid on a wide screen, one under the other on a phone.
+- Panel shown at once: the release keeps its languages in the panel file instead of a separate file to wait for.
+
 ## 3.29.5 - 2026-11-10
 
 ### Fixes
