@@ -629,3 +629,33 @@ test('opening the panel requests iptv/accounts before the card bundle has loaded
   assert.equal(panel._card?.tag, 'iptv-card');
   assert.deepEqual(appended, [panel._card]);
 });
+
+test('panel, narrow, route and hass set before the element was defined go through the setters once it is', () => {
+  // In the release the element is defined once the page's language file is in: Home Assistant has already set
+  // these on the element, as plain properties that hide the setters.
+  const panel = Object.create(IptvPanel.prototype);
+  let started = 0;
+  panel._start = () => started++;
+  panel._subscribe = () => {};
+  panel._watchConnection = () => {};
+  panel._showTab = (tab) => {
+    panel._tab = tab;
+  };
+  const hass = { language: 'fr' };
+  const tab = IPTV_PANEL_TABS[1];
+  const before = { panel: { url_path: 'x' }, narrow: true, route: { path: `/${tab}` }, hass };
+  for (const [name, value] of Object.entries(before)) {
+    Object.defineProperty(panel, name, { value, writable: true, enumerable: true, configurable: true });
+  }
+  panel.connectedCallback();
+  assert.equal(started, 1, 'the panel starts');
+  assert.equal(panel._hass, hass);
+  assert.equal(panel._narrow, true);
+  assert.equal(panel._panel, before.panel);
+  assert.equal(panel._tab, tab, 'the tab of the address');
+  for (const name of Object.keys(before)) assert.ok(!Object.hasOwn(panel, name), name);
+  const next = { language: 'fr' };
+  panel.hass = next;
+  assert.equal(panel._hass, next, 'later updates reach the setter');
+  assert.equal(started, 1);
+});

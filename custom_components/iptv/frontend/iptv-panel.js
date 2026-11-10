@@ -11,7 +11,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_PANEL_VERSION = '3.29.4';
+var IPTV_PANEL_VERSION = '3.29.5';
 
 var IptvPanelI18n = {
   en: {
@@ -1303,7 +1303,21 @@ class IptvPanel extends HTMLElement {
     this._panel = panel;
   }
 
+  // Home Assistant creates the panel as soon as its file has run and sets panel, narrow, route and hass right away.
+  // In the release, the element is only defined once the page's language file is in (scripts/i18n-split.mjs): the
+  // values set before land as plain properties on the not-yet-defined element and hide the setters, so the panel
+  // stayed empty on its first opening. They are passed through the setters now (hass last: it starts the panel).
+  _upgradeProperties() {
+    ['panel', 'narrow', 'route', 'hass'].forEach((name) => {
+      if (!Object.hasOwn(this, name)) return;
+      var value = this[name];
+      delete this[name];
+      this[name] = value;
+    });
+  }
+
   connectedCallback() {
+    this._upgradeProperties();
     if (this._hass && !this._unsub) this._subscribe();
     this._watchConnection(true);
     // Back on the panel after a failed load: try again now.
