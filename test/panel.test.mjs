@@ -163,7 +163,7 @@ function fakeForm() {
   });
   const inputs = ['title', 'scan_interval', 'notify_days', 'health_interval'].map(on);
   const el = {
-    querySelectorAll: (sel) => (sel === 'input' ? inputs : []),
+    querySelectorAll: (sel) => (sel === 'input' || sel === 'input[data-key]' ? inputs : []),
     querySelector: (sel) => {
       if (sel === 'ha-switch') return on('stream_check');
       if (sel === '[data-reveal]') return null;
@@ -282,8 +282,11 @@ function fakeShadow() {
   const box = {
     cards: [],
     contains: (el) => !!el && el.gen === root.generation,
+    // The account list and the back button of the master-detail layout: buttons that only take listeners
+    querySelectorAll: () => [],
     querySelector(sel) {
       const id = sel.match(/data-id="([^"]+)"/)?.[1];
+      if (!id) return { addEventListener() {}, focus() {} };
       return this.cards.find((c) => c.dataset.id === id) || null;
     },
     set innerHTML(html) {
@@ -307,7 +310,9 @@ function fakeShadow() {
           card.parts = [...attr('data-key'), ...attr('data-do'), ...attr('data-copy'), ...attr('data-reveal')];
           card.querySelectorAll = (sel) =>
             card.parts.filter(
-              (p) => p.tag === 'input' && (sel === 'input' || (sel === 'input[type="number"]' && /type="number"/.test(p.attrs))),
+              (p) =>
+                p.tag === 'input' &&
+                (sel === 'input' || sel === 'input[data-key]' || (sel === 'input[type="number"]' && /type="number"/.test(p.attrs))),
             );
           card.querySelector = (sel) => {
             if (sel === 'ha-switch') return card.parts.find((p) => p.tag === 'ha-switch');
@@ -322,6 +327,7 @@ function fakeShadow() {
     },
   };
   root.getElementById = (id) => (id === 'accounts' ? box : null);
+  root.querySelector = () => null;
   return { root, box };
 }
 
@@ -371,9 +377,57 @@ test('typing in account B is not interrupted by Check now on account A', async (
   const server = { accounts: [account(), account({ entry_id: 'e2', title: 'Provider B', auto_title: 'b.example' })] };
   const { panel, root, box } = renderedPanel(server);
   await panel._load();
+  // Check now started on A, then B selected in the list while it runs: A's result redraws, B keeps the focus
+  const checking = panel._check(panel._accounts[0]);
+  panel._select('e2');
   field(box, 'e2', 'title').focus();
-  await panel._check(panel._accounts[0]);
+  await checking;
   assert.equal(root.activeElement, field(box, 'e2', 'title'));
+});
+
+test('settings: one account at a time, the first by default, another chosen in the list; a draft survives the switch', async () => {
+  const server = { accounts: [account(), account({ entry_id: 'e2', title: 'Provider B', auto_title: 'b.example' })] };
+  const { panel, box } = renderedPanel(server);
+  await panel._load();
+  assert.deepEqual(box.cards.map((c) => c.dataset.id), ['e1']);
+  assert.match(box.html, /data-select="e1"[\s\S]*data-select="e2"/);
+  assert.match(box.html, /class="md-item good active"/);
+  field(box, 'e1', 'title').value = 'Renamed';
+  field(box, 'e1', 'title').listeners.input();
+  panel._select('e2');
+  assert.deepEqual(box.cards.map((c) => c.dataset.id), ['e2']);
+  assert.match(box.html, /class="md open"/, 'on a phone, the detail shows');
+  assert.match(box.html, /Provider A •/, 'an unsaved account is marked in the list');
+  panel._select('e1');
+  assert.equal(field(box, 'e1', 'title').value, 'Renamed');
+});
+
+test('settings: Edit credentials opens in place, prefilled; Save sends the fields and reloads the accounts', async () => {
+  const server = { accounts: [account({ device_id: 'd1' })] };
+  const { panel, box, calls } = renderedPanel(server);
+  panel._hass.callWS = async (msg) => {
+    calls.push(msg);
+    if (msg.type === 'iptv/accounts') return { accounts: server.accounts };
+    if (msg.type === 'iptv/edit_account' && !msg.url) return { ok: true, provider: 'xtream', url: 'http://a', username: 'me' };
+    return { ok: true };
+  };
+  await panel._load();
+  assert.match(box.html, /data-cred-edit/);
+  await panel._openCredEdit(panel._accounts[0]);
+  assert.match(box.html, /data-k="url" type="url" value="http:\/\/a"/);
+  assert.match(box.html, /data-k="password" type="password" value=""[^>]*placeholder="Leave blank to keep"/);
+  assert.doesNotMatch(box.html, /data-cred-edit/);
+  const inputs = [
+    { dataset: { k: 'url' }, value: 'http://b ' },
+    { dataset: { k: 'username' }, value: 'me' },
+    { dataset: { k: 'password' }, value: '' },
+  ];
+  const form = { querySelectorAll: () => inputs, querySelector: () => ({ textContent: '' }) };
+  await panel._submitCredEdit(panel._accounts[0], { closest: () => form, disabled: false, textContent: '' });
+  const sent = calls.filter((c) => c.type === 'iptv/edit_account').at(-1);
+  assert.deepEqual(JSON.parse(JSON.stringify(sent)), { type: 'iptv/edit_account', device_id: 'd1', url: 'http://b', username: 'me' });
+  assert.equal(panel._credEdit, null);
+  assert.match(box.html, /data-cred-edit/);
 });
 
 test('the focused Check now button gets the focus back once the check is over', async () => {
@@ -635,7 +689,7 @@ test('subscriptions: the iptv entities grouped by device and sorted by name; a s
   assert.equal(iptvPanelSummary(hass, {}, NOW), null);
 });
 
-test('subscriptions: a card shows the state, the expiration and the catalogue, escapes the name, offers Edit and Remove', () => {
+test('subscriptions: a card shows the state, the expiration and the catalogue, escapes the name, offers Settings and Remove', () => {
   const panel = new IptvPanel();
   const hass = subsHass();
   hass.devices.dA.name = '<Zeta>';
@@ -645,15 +699,13 @@ test('subscriptions: a card shows the state, the expiration and the catalogue, e
   assert.match(html, /data-device="dA"/);
   assert.match(html, /Active/);
   assert.match(html, /1\/2/);
-  assert.match(html, /data-edit/);
+  assert.match(html, /data-settings/);
+  assert.doesNotMatch(html, /data-edit/);
   assert.match(html, /data-del/);
   assert.match(html, /230 ms/);
   panel._subForms = { dA: { kind: 'delete' } };
   assert.match(panel._subCard(iptvPanelSubscriptions(hass).find((s) => s.device === 'dA')), /data-del-submit/);
-  panel._subForms = { dA: { kind: 'edit', provider: 'stalker', values: { url: 'http://x', mac: '00:1A' } } };
-  const edit = panel._subCard(iptvPanelSubscriptions(hass).find((s) => s.device === 'dA'));
-  assert.match(edit, /data-k="mac" type="text" value="00:1A"/);
-  assert.doesNotMatch(edit, /data-k="password"/);
+
 });
 
 test('subscriptions: add and edit errors read as their message, an unknown code as a generic failure', () => {

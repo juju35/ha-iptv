@@ -133,9 +133,9 @@ The notification names the account and its expiration date, is refreshed once a 
 
 The integration adds an **IPTV** entry to the sidebar, shown to administrators only (`/iptv-config`), with two tabs, each with its own address (`/iptv-config`, `/iptv-config/settings`), so a reload or a link comes back to the same tab:
 
-- **Subscriptions**: drawn by the panel itself, at once — one card per subscription (state, expiration with the days left and how much of the subscription is left, channels, movies, series, connections, health check, French lists, trial), **Add account**, **Edit credentials** and **Remove account** in place, **Refresh**; in a grid on a wide screen, one under the other on a phone;
-- **Settings**, one block per account:
-  - the credentials of the account: username (or MAC address) and password, masked until you click the eye, with a copy button;
+- **Subscriptions**: drawn by the panel itself, at once — one card per subscription (state, expiration with the days left and how much of the subscription is left, channels, movies, series, connections, health check, French lists, trial), **Add account** and **Remove account** in place, **Settings** (that account in the Settings tab), **Refresh**; in a grid on a wide screen, one under the other on a phone;
+- **Settings**, one account at a time: the accounts listed on the left (type, login, a dot for their state, a • while one has unsaved changes), the chosen one on the right — on a phone, the list then the account, with **All accounts** to go back:
+  - the credentials of the account: username (or MAC address) and password, masked until you click the eye, with a copy button, and **Edit credentials** in place (server URL, username and password or MAC address; a blank password is kept);
   - a settings form: name (blank = the server name), refresh interval, notification before expiration, health check interval and stream test — the same options and limits as **Configure**;
   - **Check now**: refreshes the subscription and runs a health check right away (retries the setup of an account that failed to start);
   - **Remove**, for an account that never finished its setup (no device, so the card cannot list it), after a confirmation at the top of the account;
