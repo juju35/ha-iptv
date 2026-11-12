@@ -231,6 +231,7 @@ devices:
 | `devices` | ❌ | All IPTV devices | Devices of the accounts to show, in this order (pick them in the visual editor) |
 | `device` | ❌ | — | Legacy single-device option, still read when `devices` is not set |
 | `title` | ❌ | Auto (i18n) | Card title |
+| `show_title` | ❌ | `true` | Show the title in the header (e.g. `false` under a section heading of your own) |
 | `warning_days` | ❌ | `7` | Turns orange when fewer days than this are left |
 | `language` | ❌ | Auto | Force language: `en`, `fr`, `de`, `es`, `it`, `nl`, `pt`, `pl`, `ro`, `da`, `sv`, `bg`, `ru`, `uk`, `hu`, `sk`, `cs`, `sl`, `lv`, `el`, `sr` or `sr-Latn` (auto-detects from HA settings) |
 

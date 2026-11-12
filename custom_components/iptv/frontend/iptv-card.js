@@ -8,7 +8,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_CARD_VERSION = '3.31.0';
+var IPTV_CARD_VERSION = '3.32.0';
 var IPTV_DOMAIN = 'iptv';
 
 // ── i18n ──────────────────────────────────────────────────────────────────────
@@ -84,6 +84,7 @@ var IptvCardI18n = {
     health_stream_ko: 'Stream down',
     health_auth_failed: 'Credentials refused',
     ed_title: 'Title',
+    ed_show_title: 'Show title',
     ed_devices: 'Subscriptions (all if empty)',
     ed_warning_days: 'Warn before expiration',
     ed_language: 'Language',
@@ -170,6 +171,7 @@ var IptvCardI18n = {
     health_stream_ko: 'Flux KO',
     health_auth_failed: 'Identifiants refusés',
     ed_title: 'Titre',
+    ed_show_title: 'Afficher le titre',
     ed_devices: 'Abonnements (tous si vide)',
     ed_warning_days: 'Alerte avant expiration',
     ed_language: 'Langue',
@@ -256,6 +258,7 @@ var IptvCardI18n = {
     health_stream_ko: 'Stream ausgefallen',
     health_auth_failed: 'Zugangsdaten abgelehnt',
     ed_title: 'Titel',
+    ed_show_title: 'Titel anzeigen',
     ed_devices: 'Abonnements (alle, wenn leer)',
     ed_warning_days: 'Warnung vor Ablauf',
     ed_language: 'Sprache',
@@ -342,6 +345,7 @@ var IptvCardI18n = {
     health_stream_ko: 'Flujo caído',
     health_auth_failed: 'Credenciales rechazadas',
     ed_title: 'Título',
+    ed_show_title: 'Mostrar el título',
     ed_devices: 'Suscripciones (todas si está vacío)',
     ed_warning_days: 'Aviso antes de la caducidad',
     ed_language: 'Idioma',
@@ -428,6 +432,7 @@ var IptvCardI18n = {
     health_stream_ko: 'Stream KO',
     health_auth_failed: 'Credenziali rifiutate',
     ed_title: 'Titolo',
+    ed_show_title: 'Mostra il titolo',
     ed_devices: 'Abbonamenti (tutti se vuoto)',
     ed_warning_days: 'Avviso prima della scadenza',
     ed_language: 'Lingua',
@@ -514,6 +519,7 @@ var IptvCardI18n = {
     health_stream_ko: 'Geen stream',
     health_auth_failed: 'Inloggegevens geweigerd',
     ed_title: 'Titel',
+    ed_show_title: 'Titel tonen',
     ed_devices: 'Abonnementen (alle indien leeg)',
     ed_warning_days: 'Waarschuwen voor het verlopen',
     ed_language: 'Taal',
@@ -600,6 +606,7 @@ var IptvCardI18n = {
     health_stream_ko: 'Sem stream',
     health_auth_failed: 'Credenciais recusadas',
     ed_title: 'Título',
+    ed_show_title: 'Mostrar o título',
     ed_devices: 'Subscrições (todas se vazio)',
     ed_warning_days: 'Aviso antes da expiração',
     ed_language: 'Idioma',
@@ -686,6 +693,7 @@ var IptvCardI18n = {
     health_stream_ko: 'Brak streamu',
     health_auth_failed: 'Dane logowania odrzucone',
     ed_title: 'Tytuł',
+    ed_show_title: 'Pokaż tytuł',
     ed_devices: 'Subskrypcje (wszystkie, jeśli puste)',
     ed_warning_days: 'Ostrzeżenie przed wygaśnięciem',
     ed_language: 'Język',
@@ -772,6 +780,7 @@ var IptvCardI18n = {
     health_stream_ko: 'Flux oprit',
     health_auth_failed: 'Date de autentificare respinse',
     ed_title: 'Titlu',
+    ed_show_title: 'Afișează titlul',
     ed_devices: 'Abonamente (toate, dacă e gol)',
     ed_warning_days: 'Avertizare înainte de expirare',
     ed_language: 'Limbă',
@@ -858,6 +867,7 @@ var IptvCardI18n = {
     health_stream_ko: 'Stream nede',
     health_auth_failed: 'Loginoplysninger afvist',
     ed_title: 'Titel',
+    ed_show_title: 'Vis titel',
     ed_devices: 'Abonnementer (alle, hvis tom)',
     ed_warning_days: 'Advar før udløb',
     ed_language: 'Sprog',
@@ -944,6 +954,7 @@ var IptvCardI18n = {
     health_stream_ko: 'Stream nere',
     health_auth_failed: 'Inloggningsuppgifterna nekades',
     ed_title: 'Rubrik',
+    ed_show_title: 'Visa rubrik',
     ed_devices: 'Abonnemang (alla om tomt)',
     ed_warning_days: 'Varna före utgång',
     ed_language: 'Språk',
@@ -1030,6 +1041,7 @@ var IptvCardI18n = {
     health_stream_ko: 'Няма поток',
     health_auth_failed: 'Данните за вход са отхвърлени',
     ed_title: 'Заглавие',
+    ed_show_title: 'Показване на заглавието',
     ed_devices: 'Абонаменти (всички, ако е празно)',
     ed_warning_days: 'Предупреждение преди изтичане',
     ed_language: 'Език',
@@ -1116,6 +1128,7 @@ var IptvCardI18n = {
     health_stream_ko: 'Нет потока',
     health_auth_failed: 'Учётные данные отклонены',
     ed_title: 'Заголовок',
+    ed_show_title: 'Показывать заголовок',
     ed_devices: 'Подписки (все, если пусто)',
     ed_warning_days: 'Предупреждать до окончания',
     ed_language: 'Язык',
@@ -1202,6 +1215,7 @@ var IptvCardI18n = {
     health_stream_ko: 'Немає потоку',
     health_auth_failed: 'Облікові дані відхилено',
     ed_title: 'Заголовок',
+    ed_show_title: 'Показувати заголовок',
     ed_devices: 'Підписки (усі, якщо порожньо)',
     ed_warning_days: 'Попереджати до закінчення',
     ed_language: 'Мова',
@@ -1288,6 +1302,7 @@ var IptvCardI18n = {
     health_stream_ko: 'Stream leállt',
     health_auth_failed: 'Elutasított hitelesítő adatok',
     ed_title: 'Cím',
+    ed_show_title: 'Cím megjelenítése',
     ed_devices: 'Előfizetések (üresen mind)',
     ed_warning_days: 'Figyelmeztetés lejárat előtt',
     ed_language: 'Nyelv',
@@ -1374,6 +1389,7 @@ var IptvCardI18n = {
     health_stream_ko: 'Stream nefunguje',
     health_auth_failed: 'Prihlasovacie údaje boli odmietnuté',
     ed_title: 'Názov',
+    ed_show_title: 'Zobraziť názov',
     ed_devices: 'Predplatné (všetky, ak je prázdne)',
     ed_warning_days: 'Upozorniť pred vypršaním',
     ed_language: 'Jazyk',
@@ -1460,6 +1476,7 @@ var IptvCardI18n = {
     health_stream_ko: 'Stream nefunguje',
     health_auth_failed: 'Přihlašovací údaje byly odmítnuty',
     ed_title: 'Název',
+    ed_show_title: 'Zobrazit název',
     ed_devices: 'Předplatná (všechna, pokud je prázdné)',
     ed_warning_days: 'Upozornit před vypršením',
     ed_language: 'Jazyk',
@@ -1546,6 +1563,7 @@ var IptvCardI18n = {
     health_stream_ko: 'Pretok ne deluje',
     health_auth_failed: 'Poverilnice so zavrnjene',
     ed_title: 'Naslov',
+    ed_show_title: 'Prikaži naslov',
     ed_devices: 'Naročnine (vse, če je prazno)',
     ed_warning_days: 'Opozorilo pred potekom',
     ed_language: 'Jezik',
@@ -1632,6 +1650,7 @@ var IptvCardI18n = {
     health_stream_ko: 'Straume nedarbojas',
     health_auth_failed: 'Pieteikšanās dati noraidīti',
     ed_title: 'Virsraksts',
+    ed_show_title: 'Rādīt virsrakstu',
     ed_devices: 'Abonementi (visi, ja tukšs)',
     ed_warning_days: 'Brīdināt pirms derīguma beigām',
     ed_language: 'Valoda',
@@ -1718,6 +1737,7 @@ var IptvCardI18n = {
     health_stream_ko: 'Η ροή δεν λειτουργεί',
     health_auth_failed: 'Τα διαπιστευτήρια απορρίφθηκαν',
     ed_title: 'Τίτλος',
+    ed_show_title: 'Εμφάνιση τίτλου',
     ed_devices: 'Συνδρομές (όλες αν είναι κενό)',
     ed_warning_days: 'Προειδοποίηση πριν από τη λήξη',
     ed_language: 'Γλώσσα',
@@ -1804,6 +1824,7 @@ var IptvCardI18n = {
     health_stream_ko: 'Стрим не ради',
     health_auth_failed: 'Подаци за пријаву одбијени',
     ed_title: 'Наслов',
+    ed_show_title: 'Прикажи наслов',
     ed_devices: 'Претплате (све ако је празно)',
     ed_warning_days: 'Упозорење пре истека',
     ed_language: 'Језик',
@@ -1890,6 +1911,7 @@ var IptvCardI18n = {
     health_stream_ko: 'Strim ne radi',
     health_auth_failed: 'Podaci za prijavu odbijeni',
     ed_title: 'Naslov',
+    ed_show_title: 'Prikaži naslov',
     ed_devices: 'Pretplate (sve ako je prazno)',
     ed_warning_days: 'Upozorenje pre isteka',
     ed_language: 'Jezik',
@@ -2021,6 +2043,7 @@ class IptvCard extends HTMLElement {
     .badge ha-icon { display: inline-flex; }
     /* The title block takes the room the badge and buttons leave (from 0, not from its text width) */
     .titles { flex: 1 1 0; min-width: 6ch; }
+    :host([hide-title]) .titles .name { display: none; }
     .title-row { display: flex; align-items: center; gap: 10px; }
     /* The title gives way first (down to its 4 characters), then the pill */
     .title-row .name { flex: 1 1 0; }
@@ -2141,6 +2164,7 @@ class IptvCard extends HTMLElement {
     return {
       schema: [
         { name: 'title', selector: { text: {} } },
+        { name: 'show_title', default: true, selector: { boolean: {} } },
         { name: 'devices', selector: { device: { integration: IPTV_DOMAIN, multiple: true } } },
         { name: 'warning_days', selector: { number: { min: 1, max: 60, mode: 'box' } } },
         { name: 'language', selector: { select: { mode: 'dropdown', options: [
@@ -2174,6 +2198,8 @@ class IptvCard extends HTMLElement {
 
   setConfig(config) {
     this._config = { warning_days: 7, ...config };
+    // show_title: the header's title, hidden by the stylesheet
+    this.toggleAttribute?.('hide-title', config.show_title === false);
     if (!this.shadowRoot) this.attachShadow({ mode: 'open' });
     this._sig = null;
     this._render();
@@ -2905,6 +2931,7 @@ class IptvMiniCard extends IptvCard {
     .head { display: flex; align-items: center; gap: 8px; min-width: 0; }
     /* The title gives way first (down to its 4 characters), then the pill */
     .mini .name { flex: 1 1 0; min-width: 4.5ch; }
+    :host([hide-title]) .mini .head > .name { visibility: hidden; }
     .head .chip { flex: 0 1 auto; min-width: 0; margin-left: auto; }
     .rs { display: flex; flex-wrap: wrap; gap: 2px 4px; margin-left: -4px; }
     .mini .msg { padding: 0; font-size: 12px; }
@@ -3098,7 +3125,7 @@ class IptvMiniCardEditor extends HTMLElement {
       this.appendChild(this._form);
     }
     this._form.hass = this._hass;
-    this._form.data = { zoom: true, ...this._config };
+    this._form.data = { show_title: true, zoom: true, ...this._config };
   }
 }
 
