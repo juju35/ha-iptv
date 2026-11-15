@@ -1022,7 +1022,9 @@ async def test_card_resource_with_lovelace_data_variants(hass, aioclient_mock, e
     await _setup(hass, aioclient_mock, entry)
     urls = [item["url"] for item in resources.async_items()]
     assert urls == [f"/iptv/iptv-card.js?v={VERSION}"]
-    stub_frontend.assert_not_called()
+    # The card is a dashboard resource here; only the sidebar badge is loaded on every page.
+    added = [c.args[1] for c in stub_frontend.call_args_list]
+    assert added == [f"/iptv/iptv-badge.js?v={VERSION}"]
 
 
 @pytest.mark.parametrize("key", ["mode", "resource_mode"])
@@ -1033,7 +1035,9 @@ async def test_card_resource_yaml_mode_uses_extra_js(hass, aioclient_mock, entry
     assert await async_setup_component(hass, "lovelace", {})
     hass.data["lovelace"] = _lovelace_data(key, "yaml", ResourceYAMLCollection([]))
     await _setup(hass, aioclient_mock, entry)
-    stub_frontend.assert_called_once_with(hass, f"/iptv/iptv-card.js?v={VERSION}")
+    # The sidebar badge on every page, plus the card (resources can't be edited in YAML mode).
+    added = [c.args[1] for c in stub_frontend.call_args_list]
+    assert added == [f"/iptv/iptv-badge.js?v={VERSION}", f"/iptv/iptv-card.js?v={VERSION}"]
 
 
 async def test_card_served(hass, aioclient_mock, entry, hass_client):
@@ -1110,7 +1114,10 @@ async def test_card_yaml_mode_extra_js_added_once_after_readd(hass, aioclient_mo
     new_entry = _readd(hass)
     assert await hass.config_entries.async_setup(new_entry.entry_id)
     await hass.async_block_till_done()
-    stub_frontend.assert_called_once_with(hass, f"/iptv/iptv-card.js?v={VERSION}")
+    # The card URL is added once (not again on re-add); the badge is added once, on component setup.
+    added = [c.args[1] for c in stub_frontend.call_args_list]
+    assert added.count(f"/iptv/iptv-card.js?v={VERSION}") == 1
+    assert added.count(f"/iptv/iptv-badge.js?v={VERSION}") == 1
 
 
 # ── review pass 2 regressions ───────────────────────────────────────────────

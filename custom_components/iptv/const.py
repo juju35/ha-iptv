@@ -1,7 +1,7 @@
 """Constants for the IPTV integration."""
 
 DOMAIN = "iptv"
-VERSION = "3.32.0"
+VERSION = "3.33.0"
 
 CONF_SCAN_INTERVAL = "scan_interval"
 DEFAULT_SCAN_INTERVAL = 60  # minutes
@@ -49,6 +49,8 @@ PROVIDER_STALKER = "stalker"
 
 CARD_URL = f"/{DOMAIN}/iptv-card.js"
 LOGO_URL = f"/{DOMAIN}/logo.png"
+# Sidebar badge, loaded on every page: the number of accounts whose health check is failing.
+BADGE_URL = f"/{DOMAIN}/iptv-badge.js"
 
 # Sidebar panel (administrators only); its own path, so it never shadows the files under /iptv/
 PANEL_URL = f"/{DOMAIN}/iptv-panel.js"

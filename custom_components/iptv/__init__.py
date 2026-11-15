@@ -15,7 +15,7 @@ from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.typing import ConfigType
 
-from .const import CARD_URL, DOMAIN, LOGO_URL, PANEL_URL, VERSION
+from .const import BADGE_URL, CARD_URL, DOMAIN, LOGO_URL, PANEL_URL, VERSION
 from .coordinator import IptvConfigEntry, IptvCoordinator
 from .health import HealthMonitor
 from .migrate import LEGACY_DOMAIN, async_migrate_legacy, async_restore_snapshot
@@ -44,6 +44,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             StaticPathConfig(CARD_URL, str(base / "frontend" / "iptv-card.js"), True),
             StaticPathConfig(LOGO_URL, str(base / "brand" / "icon@2x.png"), True),
             StaticPathConfig(PANEL_URL, str(base / "frontend" / "iptv-panel.js"), True),
+            StaticPathConfig(BADGE_URL, str(base / "frontend" / "iptv-badge.js"), True),
             *(
                 StaticPathConfig(f"{CARD_URL.rsplit('/', 1)[0]}/{name}", str(base / "frontend" / name), True)
                 for name in languages
@@ -51,6 +52,8 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         ]
     )
     await async_register_panel(hass)
+    # The sidebar badge module, loaded on every page (the panel's own JS loads only when the panel is open).
+    add_extra_js_url(hass, f"{BADGE_URL}?v={VERSION}")
 
     async def _register(_: Event | None = None) -> None:
         if not hass.data.get(CARD_LOADED):

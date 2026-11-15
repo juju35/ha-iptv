@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.33.0 - 2026-11-15
+
+### Features
+- **A count of the failing accounts on the sidebar.** The IPTV item in the sidebar now carries a red badge with the number of accounts whose health check is failing (unreachable, authentication failed or stream KO; a slow "degraded" account still works, so it does not count), like the notifications count. It disappears when every account is healthy, and is read from the accounts' health sensors for every administrator, even with the panel closed.
+
 ## 3.32.0 - 2026-11-12
 
 ### Features
