@@ -266,6 +266,11 @@ PANEL_SHOTS = [
     {"file": "panel-settings", "theme": "light", "tab": "settings"},
     {"file": "panel-settings-dark", "theme": "dark", "tab": "settings"},
 ]
+# The sidebar entry with its badge (the number of failing accounts), light and dark.
+SIDEBAR_SHOTS = [
+    {"file": "sidebar", "theme": "light", "count": 2},
+    {"file": "sidebar-dark", "theme": "dark", "count": 2},
+]
 
 
 def page_html(theme, width):
@@ -357,6 +362,62 @@ FREEZE_ANIMATIONS = """(t) => {
 }"""
 
 
+def mount_sidebar(context, shot):
+    """Render a faithful mock of the Home Assistant sidebar entry with its badge; return the page.
+
+    Not the real sidebar (that needs a full Home Assistant frontend): a static copy of one expanded
+    `ha-list-item-button` row — icon, label and the red `.badge` with the number of failing accounts — so the
+    README shows what the badge looks like, in the same colours as the real one.
+    """
+    variables = "".join(f"{k}:{v};" for k, v in {**THEMES[shot["theme"]], **COMMON}.items())
+    tv = ICONS["television-play"]
+    home = "M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z"
+    cog = (
+        "M12,8A4,4 0 0,0 8,12A4,4 0 0,0 12,16A4,4 0 0,0 16,12A4,4 0 0,0 12,8M12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14"
+        "A2,2 0 0,1 10,12A2,2 0 0,1 12,10M10,22C9.75,22 9.54,21.82 9.5,21.58L9.13,18.93C8.5,18.68 7.96,18.34 7.44,"
+        "17.94L4.95,18.95C4.73,19.03 4.46,18.95 4.34,18.73L2.34,15.27C2.21,15.05 2.27,14.78 2.46,14.63L4.57,12.97L4.5,"
+        "12L4.57,11L2.46,9.37C2.27,9.22 2.21,8.95 2.34,8.73L4.34,5.27C4.46,5.05 4.73,4.96 4.95,5.05L7.44,6.05C7.96,"
+        "5.66 8.5,5.32 9.13,5.07L9.5,2.42C9.54,2.18 9.75,2 10,2H14C14.25,2 14.46,2.18 14.5,2.42L14.87,5.07C15.5,5.32 "
+        "16.04,5.66 16.56,6.05L19.05,5.05C19.27,4.96 19.54,5.05 19.66,5.27L21.66,8.73C21.79,8.95 21.73,9.22 21.54,9.37"
+        "L19.43,11L19.5,12L19.43,13L21.54,14.63C21.73,14.78 21.79,15.05 21.66,15.27L19.66,18.73C19.54,18.95 19.27,"
+        "19.04 19.05,18.95L16.56,17.95C16.04,18.34 15.5,18.68 14.87,18.93L14.5,21.58C14.46,21.82 14.25,22 14,22H10Z"
+    )
+
+    def svg(path):
+        return f'<svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:currentColor"><path d="{path}"/></svg>'
+
+    def row(label, path, *, selected=False, badge=None):
+        cls = "item selected" if selected else "item"
+        pill = f'<span class="badge">{badge}</span>' if badge is not None else ""
+        return f'<div class="{cls}"><span class="ic">{svg(path)}</span><span class="name">{label}</span>{pill}</div>'
+
+    rows = (
+        row("Overview", home)
+        + row("IPTV", tv, selected=True, badge=shot["count"])
+        + row("Settings", cog)
+    )
+    html = f"""<!doctype html><html><head><meta charset="utf-8"><style>
+  :root {{ {variables} }}
+  body {{ margin: 0; padding: 16px; background: var(--primary-background-color);
+         font-family: Roboto, "Segoe UI", Helvetica, Arial, sans-serif; }}
+  #sidebar {{ width: 256px; background: var(--card-background-color); border-radius: 12px; padding: 8px 0;
+             border: 1px solid var(--divider-color); overflow: hidden; }}
+  .item {{ display: flex; align-items: center; gap: 16px; height: 48px; padding: 0 16px; box-sizing: border-box;
+          color: var(--secondary-text-color); }}
+  .item .name {{ font-size: 14px; }}
+  .item.selected {{ color: var(--primary-color); background: color-mix(in srgb, var(--primary-color) 12%, transparent);
+                   box-shadow: inset 4px 0 0 var(--primary-color); }}
+  .item.selected .name {{ font-weight: 500; }}
+  .badge {{ margin-left: auto; min-width: 18px; height: 18px; box-sizing: border-box; padding: 0 5px;
+           display: inline-flex; align-items: center; justify-content: center; border-radius: 9px;
+           font-size: 11px; font-weight: 500; line-height: 1; color: #fff; background: var(--error-color); }}
+</style></head><body><div id="sidebar">{rows}</div></body></html>"""
+    page = context.new_page()
+    page.on("pageerror", lambda err: print(f"page error: {err}"))
+    page.set_content(html)
+    return page
+
+
 def save_png(page, out, clip):
     """Capture the clip to screenshots/<file>.png, rewriting the file only when its decoded pixels changed (compared
     exactly: the PNG bytes may change from one encoder to another although no pixel did), so the screenshots job
@@ -425,6 +486,17 @@ def main():
                 page,
                 out_dir / f"{shot['file']}.png",
                 {"x": 0, "y": 0, "width": PANEL_WIDTH, "height": int(box["height"] + 0.999)},
+            )
+            page.close()
+        # The sidebar entry with its badge, clipped to the sidebar strip plus the 16 px of theme background.
+        for shot in SIDEBAR_SHOTS:
+            page = mount_sidebar(context, shot)
+            page.wait_for_timeout(200)
+            box = page.locator("#sidebar").bounding_box()
+            save_png(
+                page,
+                out_dir / f"{shot['file']}.png",
+                {"x": 0, "y": 0, "width": int(box["width"]) + 32, "height": int(box["height"] + 0.999) + 32},
             )
             page.close()
         # The refresh button spinning while subscriptions reload, light and dark twins of the same state.

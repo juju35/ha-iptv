@@ -270,6 +270,12 @@ While subscriptions reload, the card animates: the refresh button spins until th
 
 <img src="https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/card-multi-dark.png" alt="iptv-card with two providers, dark theme" width="400">
 
+The sidebar entry carries a red badge with the number of failing accounts, like the notifications count — it disappears when every account is healthy:
+
+| Light | Dark |
+|---|---|
+| <img src="https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/sidebar.png" alt="IPTV sidebar entry with the failing-accounts badge" width="260"> | <img src="https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/sidebar-dark.png" alt="IPTV sidebar entry with the failing-accounts badge, dark theme" width="260"> |
+
 **Sidebar panel**, its two tabs (light and dark themes):
 
 | Subscriptions | Settings |
