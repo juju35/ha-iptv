@@ -391,11 +391,7 @@ def mount_sidebar(context, shot):
         pill = f'<span class="badge">{badge}</span>' if badge is not None else ""
         return f'<div class="{cls}"><span class="ic">{svg(path)}</span><span class="name">{label}</span>{pill}</div>'
 
-    rows = (
-        row("Overview", home)
-        + row("IPTV", tv, selected=True, badge=shot["count"])
-        + row("Settings", cog)
-    )
+    rows = row("Overview", home) + row("IPTV", tv, selected=True, badge=shot["count"]) + row("Settings", cog)
     html = f"""<!doctype html><html><head><meta charset="utf-8"><style>
   :root {{ {variables} }}
   body {{ margin: 0; padding: 16px; background: var(--primary-background-color);
