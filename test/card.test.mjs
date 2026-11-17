@@ -17,8 +17,9 @@ const context = {
   setTimeout: () => 0,
 };
 vm.createContext(context);
-vm.runInContext(`${source}\nthis.iptv = { IptvCard, IptvMiniCard, IptvCardI18n, iptvErr, iptvLang, iptvLocale, iptvT, iptvFocusOf, iptvRefocus, iptvMask };`, context);
-const { IptvCard, IptvMiniCard, IptvCardI18n, iptvErr, iptvLang, iptvLocale, iptvT, iptvFocusOf, iptvRefocus, iptvMask } = context.iptv;
+vm.runInContext(`${source}\nthis.iptv = { IptvCard, IptvMiniCard, IptvCardI18n, iptvErr, iptvLang, iptvLocale, iptvT, iptvFocusOf, iptvRefocus, iptvMask, iptvIsNight, iptvSceneState, iptvSceneSvg };`, context);
+const { IptvCard, IptvMiniCard, IptvCardI18n, iptvErr, iptvLang, iptvLocale, iptvT, iptvFocusOf, iptvRefocus, iptvMask, iptvIsNight, iptvSceneState, iptvSceneSvg } =
+  context.iptv;
 
 const placeholders = (s) => [...String(s).matchAll(/\{\w+\}/g)].map((m) => m[0]).sort();
 
@@ -631,4 +632,34 @@ test('a parent that sizes the card from its content (inline-block, flex row, aut
   // Next to the ha-card of the full card and of the mini card
   assert.equal(source.split('</ha-card>${IPTV_SIZER}`').length - 1, 2);
   assert.match(source, /IPTV_SIZER = '<svg class="sizer" aria-hidden="true" focusable="false"><\/svg>'/);
+});
+
+test('illustrated header: night follows illustration_theme, then sun.sun, then the dark mode', () => {
+  const sun = (state) => ({ states: { 'sun.sun': { state } }, themes: { darkMode: false } });
+  assert.equal(iptvIsNight(sun('below_horizon'), {}), true);
+  assert.equal(iptvIsNight(sun('above_horizon'), {}), false);
+  assert.equal(iptvIsNight(sun('below_horizon'), { illustration_theme: 'day' }), false);
+  assert.equal(iptvIsNight(sun('above_horizon'), { illustration_theme: 'night' }), true);
+  assert.equal(iptvIsNight({ states: {}, themes: { darkMode: true } }, {}), true);
+  assert.equal(iptvIsNight({ states: {}, themes: { darkMode: false } }, { illustration_theme: 'auto' }), false);
+});
+
+test('illustrated header: the TV shows the worst state, with ids unique to each card', () => {
+  assert.equal(iptvSceneState('ok'), 'playing');
+  assert.equal(iptvSceneState('warning'), 'playing');
+  assert.equal(iptvSceneState('error'), 'offline');
+  assert.equal(iptvSceneState('idle'), 'idle');
+  assert.match(iptvSceneSvg('playing', 3), /class="scene playing"[\s\S]*id="iptv-scr-3"[\s\S]*url\(#iptv-scr-3\)[\s\S]*LIVE/);
+  assert.match(iptvSceneSvg('offline', 4), /class="iptv-x"/);
+  assert.doesNotMatch(iptvSceneSvg('idle', 5), /LIVE|iptv-x/);
+  assert.match(IptvCard.CSS, /prefers-reduced-motion: reduce\) \{\s*\.iptv-show, \.iptv-led/);
+});
+
+test('illustrated header: the editors expose illustration and illustration_theme', () => {
+  const names = IptvCard.getConfigForm().schema.map((s) => s.name);
+  assert.ok(names.includes('illustration') && names.includes('illustration_theme'));
+  const theme = IptvCard.getConfigForm().schema.find((s) => s.name === 'illustration_theme');
+  assert.equal(theme.selector.select.options.map((o) => o.value).join(), 'auto,day,night');
+  const card = new IptvCard();
+  assert.throws(() => card.setConfig({ illustration_theme: 'dusk' }), /illustration_theme/);
 });

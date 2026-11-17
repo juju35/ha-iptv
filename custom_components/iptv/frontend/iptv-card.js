@@ -8,7 +8,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_CARD_VERSION = '3.33.1';
+var IPTV_CARD_VERSION = '3.34.0';
 var IPTV_DOMAIN = 'iptv';
 
 // ── i18n ──────────────────────────────────────────────────────────────────────
@@ -89,6 +89,11 @@ var IptvCardI18n = {
     ed_warning_days: 'Warn before expiration',
     ed_language: 'Language',
     ed_zoom: 'Detail button',
+    ed_illustration: 'Illustrated header',
+    ed_illustration_theme: 'Illustration theme',
+    theme_auto: 'Automatic (sun / theme)',
+    theme_day: 'Day',
+    theme_night: 'Night',
     zoom_in: 'Show the full card',
     zoom_out: 'Back to the compact view',
     mini_all_active: 'All active',
@@ -176,6 +181,11 @@ var IptvCardI18n = {
     ed_warning_days: 'Alerte avant expiration',
     ed_language: 'Langue',
     ed_zoom: 'Bouton détail',
+    ed_illustration: 'En-tête illustré',
+    ed_illustration_theme: 'Thème de l’illustration',
+    theme_auto: 'Automatique (soleil / thème)',
+    theme_day: 'Jour',
+    theme_night: 'Nuit',
     zoom_in: 'Afficher la carte complète',
     zoom_out: 'Revenir à la vue compacte',
     mini_all_active: 'Tous actifs',
@@ -263,6 +273,11 @@ var IptvCardI18n = {
     ed_warning_days: 'Warnung vor Ablauf',
     ed_language: 'Sprache',
     ed_zoom: 'Detail-Schaltfläche',
+    ed_illustration: 'Illustrierte Kopfzeile',
+    ed_illustration_theme: 'Illustrationsthema',
+    theme_auto: 'Automatisch (Sonne / Design)',
+    theme_day: 'Tag',
+    theme_night: 'Nacht',
     zoom_in: 'Vollständige Karte anzeigen',
     zoom_out: 'Zurück zur kompakten Ansicht',
     mini_all_active: 'Alle aktiv',
@@ -350,6 +365,11 @@ var IptvCardI18n = {
     ed_warning_days: 'Aviso antes de la caducidad',
     ed_language: 'Idioma',
     ed_zoom: 'Botón de detalle',
+    ed_illustration: 'Encabezado ilustrado',
+    ed_illustration_theme: 'Tema de la ilustración',
+    theme_auto: 'Automático (sol / tema)',
+    theme_day: 'Día',
+    theme_night: 'Noche',
     zoom_in: 'Mostrar la tarjeta completa',
     zoom_out: 'Volver a la vista compacta',
     mini_all_active: 'Todas activas',
@@ -437,6 +457,11 @@ var IptvCardI18n = {
     ed_warning_days: 'Avviso prima della scadenza',
     ed_language: 'Lingua',
     ed_zoom: 'Pulsante dettagli',
+    ed_illustration: 'Intestazione illustrata',
+    ed_illustration_theme: 'Tema dell’illustrazione',
+    theme_auto: 'Automatico (sole / tema)',
+    theme_day: 'Giorno',
+    theme_night: 'Notte',
     zoom_in: 'Mostra la scheda completa',
     zoom_out: 'Torna alla vista compatta',
     mini_all_active: 'Tutti attivi',
@@ -524,6 +549,11 @@ var IptvCardI18n = {
     ed_warning_days: 'Waarschuwen voor het verlopen',
     ed_language: 'Taal',
     ed_zoom: 'Detailknop',
+    ed_illustration: 'Geïllustreerde koptekst',
+    ed_illustration_theme: 'Thema van de illustratie',
+    theme_auto: 'Automatisch (zon / thema)',
+    theme_day: 'Dag',
+    theme_night: 'Nacht',
     zoom_in: 'Volledige kaart tonen',
     zoom_out: 'Terug naar de compacte weergave',
     mini_all_active: 'Alle actief',
@@ -611,6 +641,11 @@ var IptvCardI18n = {
     ed_warning_days: 'Aviso antes da expiração',
     ed_language: 'Idioma',
     ed_zoom: 'Botão de detalhe',
+    ed_illustration: 'Cabeçalho ilustrado',
+    ed_illustration_theme: 'Tema da ilustração',
+    theme_auto: 'Automático (sol / tema)',
+    theme_day: 'Dia',
+    theme_night: 'Noite',
     zoom_in: 'Mostrar o cartão completo',
     zoom_out: 'Voltar à vista compacta',
     mini_all_active: 'Todas ativas',
@@ -698,6 +733,11 @@ var IptvCardI18n = {
     ed_warning_days: 'Ostrzeżenie przed wygaśnięciem',
     ed_language: 'Język',
     ed_zoom: 'Przycisk szczegółów',
+    ed_illustration: 'Ilustrowany nagłówek',
+    ed_illustration_theme: 'Motyw ilustracji',
+    theme_auto: 'Automatyczny (słońce / motyw)',
+    theme_day: 'Dzień',
+    theme_night: 'Noc',
     zoom_in: 'Pokaż pełną kartę',
     zoom_out: 'Wróć do widoku kompaktowego',
     mini_all_active: 'Wszystkie aktywne',
@@ -785,6 +825,11 @@ var IptvCardI18n = {
     ed_warning_days: 'Avertizare înainte de expirare',
     ed_language: 'Limbă',
     ed_zoom: 'Buton de detalii',
+    ed_illustration: 'Antet ilustrat',
+    ed_illustration_theme: 'Tema ilustrației',
+    theme_auto: 'Automat (soare / temă)',
+    theme_day: 'Zi',
+    theme_night: 'Noapte',
     zoom_in: 'Afișează cardul complet',
     zoom_out: 'Înapoi la vizualizarea compactă',
     mini_all_active: 'Toate active',
@@ -872,6 +917,11 @@ var IptvCardI18n = {
     ed_warning_days: 'Advar før udløb',
     ed_language: 'Sprog',
     ed_zoom: 'Detaljeknap',
+    ed_illustration: 'Illustreret overskrift',
+    ed_illustration_theme: 'Illustrationstema',
+    theme_auto: 'Automatisk (sol / tema)',
+    theme_day: 'Dag',
+    theme_night: 'Nat',
     zoom_in: 'Vis hele kortet',
     zoom_out: 'Tilbage til kompakt visning',
     mini_all_active: 'Alle aktive',
@@ -959,6 +1009,11 @@ var IptvCardI18n = {
     ed_warning_days: 'Varna före utgång',
     ed_language: 'Språk',
     ed_zoom: 'Detaljknapp',
+    ed_illustration: 'Illustrerad rubrik',
+    ed_illustration_theme: 'Illustrationstema',
+    theme_auto: 'Automatiskt (sol / tema)',
+    theme_day: 'Dag',
+    theme_night: 'Natt',
     zoom_in: 'Visa hela kortet',
     zoom_out: 'Tillbaka till kompakt vy',
     mini_all_active: 'Alla aktiva',
@@ -1046,6 +1101,11 @@ var IptvCardI18n = {
     ed_warning_days: 'Предупреждение преди изтичане',
     ed_language: 'Език',
     ed_zoom: 'Бутон за подробности',
+    ed_illustration: 'Илюстрирана заглавна част',
+    ed_illustration_theme: 'Тема на илюстрацията',
+    theme_auto: 'Автоматично (слънце / тема)',
+    theme_day: 'Ден',
+    theme_night: 'Нощ',
     zoom_in: 'Покажи цялата карта',
     zoom_out: 'Обратно към компактния изглед',
     mini_all_active: 'Всички активни',
@@ -1133,6 +1193,11 @@ var IptvCardI18n = {
     ed_warning_days: 'Предупреждать до окончания',
     ed_language: 'Язык',
     ed_zoom: 'Кнопка подробностей',
+    ed_illustration: 'Иллюстрированный заголовок',
+    ed_illustration_theme: 'Тема иллюстрации',
+    theme_auto: 'Автоматически (солнце / тема)',
+    theme_day: 'День',
+    theme_night: 'Ночь',
     zoom_in: 'Показать полную карточку',
     zoom_out: 'Вернуться к компактному виду',
     mini_all_active: 'Все активны',
@@ -1220,6 +1285,11 @@ var IptvCardI18n = {
     ed_warning_days: 'Попереджати до закінчення',
     ed_language: 'Мова',
     ed_zoom: 'Кнопка подробиць',
+    ed_illustration: 'Ілюстрований заголовок',
+    ed_illustration_theme: 'Тема ілюстрації',
+    theme_auto: 'Автоматично (сонце / тема)',
+    theme_day: 'День',
+    theme_night: 'Ніч',
     zoom_in: 'Показати повну картку',
     zoom_out: 'Повернутися до компактного вигляду',
     mini_all_active: 'Усі активні',
@@ -1307,6 +1377,11 @@ var IptvCardI18n = {
     ed_warning_days: 'Figyelmeztetés lejárat előtt',
     ed_language: 'Nyelv',
     ed_zoom: 'Részletek gomb',
+    ed_illustration: 'Illusztrált fejléc',
+    ed_illustration_theme: 'Illusztráció témája',
+    theme_auto: 'Automatikus (nap / téma)',
+    theme_day: 'Nappal',
+    theme_night: 'Éjszaka',
     zoom_in: 'A teljes kártya megjelenítése',
     zoom_out: 'Vissza a kompakt nézethez',
     mini_all_active: 'Mind aktív',
@@ -1394,6 +1469,11 @@ var IptvCardI18n = {
     ed_warning_days: 'Upozorniť pred vypršaním',
     ed_language: 'Jazyk',
     ed_zoom: 'Tlačidlo podrobností',
+    ed_illustration: 'Ilustrovaná hlavička',
+    ed_illustration_theme: 'Téma ilustrácie',
+    theme_auto: 'Automaticky (slnko / téma)',
+    theme_day: 'Deň',
+    theme_night: 'Noc',
     zoom_in: 'Zobraziť celú kartu',
     zoom_out: 'Späť na kompaktné zobrazenie',
     mini_all_active: 'Všetky aktívne',
@@ -1481,6 +1561,11 @@ var IptvCardI18n = {
     ed_warning_days: 'Upozornit před vypršením',
     ed_language: 'Jazyk',
     ed_zoom: 'Tlačítko podrobností',
+    ed_illustration: 'Ilustrované záhlaví',
+    ed_illustration_theme: 'Motiv ilustrace',
+    theme_auto: 'Automaticky (slunce / motiv)',
+    theme_day: 'Den',
+    theme_night: 'Noc',
     zoom_in: 'Zobrazit celou kartu',
     zoom_out: 'Zpět na kompaktní zobrazení',
     mini_all_active: 'Všechna aktivní',
@@ -1568,6 +1653,11 @@ var IptvCardI18n = {
     ed_warning_days: 'Opozorilo pred potekom',
     ed_language: 'Jezik',
     ed_zoom: 'Gumb za podrobnosti',
+    ed_illustration: 'Ilustrirana glava',
+    ed_illustration_theme: 'Tema ilustracije',
+    theme_auto: 'Samodejno (sonce / tema)',
+    theme_day: 'Dan',
+    theme_night: 'Noč',
     zoom_in: 'Prikaži celotno kartico',
     zoom_out: 'Nazaj na strnjen pogled',
     mini_all_active: 'Vse aktivne',
@@ -1655,6 +1745,11 @@ var IptvCardI18n = {
     ed_warning_days: 'Brīdināt pirms derīguma beigām',
     ed_language: 'Valoda',
     ed_zoom: 'Detaļu poga',
+    ed_illustration: 'Ilustrēta galvene',
+    ed_illustration_theme: 'Ilustrācijas motīvs',
+    theme_auto: 'Automātiski (saule / motīvs)',
+    theme_day: 'Diena',
+    theme_night: 'Nakts',
     zoom_in: 'Rādīt pilno kartīti',
     zoom_out: 'Atpakaļ uz kompakto skatu',
     mini_all_active: 'Visi aktīvi',
@@ -1742,6 +1837,11 @@ var IptvCardI18n = {
     ed_warning_days: 'Προειδοποίηση πριν από τη λήξη',
     ed_language: 'Γλώσσα',
     ed_zoom: 'Κουμπί λεπτομερειών',
+    ed_illustration: 'Εικονογραφημένη κεφαλίδα',
+    ed_illustration_theme: 'Θέμα εικονογράφησης',
+    theme_auto: 'Αυτόματο (ήλιος / θέμα)',
+    theme_day: 'Ημέρα',
+    theme_night: 'Νύχτα',
     zoom_in: 'Εμφάνιση πλήρους κάρτας',
     zoom_out: 'Επιστροφή στη συμπαγή προβολή',
     mini_all_active: 'Όλες ενεργές',
@@ -1829,6 +1929,11 @@ var IptvCardI18n = {
     ed_warning_days: 'Упозорење пре истека',
     ed_language: 'Језик',
     ed_zoom: 'Дугме за детаље',
+    ed_illustration: 'Илустровано заглавље',
+    ed_illustration_theme: 'Тема илустрације',
+    theme_auto: 'Аутоматски (сунце / тема)',
+    theme_day: 'Дан',
+    theme_night: 'Ноћ',
     zoom_in: 'Прикажи целу картицу',
     zoom_out: 'Назад на компактни приказ',
     mini_all_active: 'Све активне',
@@ -1916,6 +2021,11 @@ var IptvCardI18n = {
     ed_warning_days: 'Upozorenje pre isteka',
     ed_language: 'Jezik',
     ed_zoom: 'Dugme za detalje',
+    ed_illustration: 'Ilustrovano zaglavlje',
+    ed_illustration_theme: 'Tema ilustracije',
+    theme_auto: 'Automatski (sunce / tema)',
+    theme_day: 'Dan',
+    theme_night: 'Noć',
     zoom_in: 'Prikaži celu karticu',
     zoom_out: 'Nazad na kompaktni prikaz',
     mini_all_active: 'Sve aktivne',
@@ -2019,6 +2129,126 @@ function iptvMask(value, whole) {
 // flex row, grid auto column of a layout card or a button card) sees as 0 px wide. This empty, zero-height SVG
 // asks such a parent for 400 px, while its max-width: 100% lets it shrink to any room.
 var IPTV_SIZER = '<svg class="sizer" aria-hidden="true" focusable="false"></svg>';
+
+// ── Illustrated header ────────────────────────────────────────────────────────
+// A living-room wall at the right of a 90 px banner: a wall-mounted TV over its cabinet, the cabinet standing on
+// a 10 px parquet strip that runs edge to edge under the banner. The TV shows the state of the subscriptions:
+// a live channel (playing), a dark screen with its standby light (idle) or a red cross (offline).
+var IPTV_THEMES = ['auto', 'day', 'night'];
+var iptvUidSeq = 0;
+
+// Night picture: forced by illustration_theme, else the sun below the horizon, else Home Assistant's dark mode
+function iptvIsNight(hass, config) {
+  var theme = config?.illustration_theme;
+  if (theme === 'night') return true;
+  if (theme === 'day') return false;
+  var sun = hass?.states?.['sun.sun'];
+  if (sun && sun.state !== 'unknown' && sun.state !== 'unavailable') return sun.state === 'below_horizon';
+  return !!hass?.themes?.darkMode;
+}
+
+// State of the picture from the worst state of the subscriptions: an error is offline, no subscription is idle
+function iptvSceneState(state) {
+  return { error: 'offline', idle: 'idle' }[state] || 'playing';
+}
+
+// The scene (the right 102 × 80 of a 200 × 80 picture, drawn from the right edge at the banner's height). `uid` keeps each card's clip path apart.
+function iptvSceneSvg(state, uid) {
+  var screen;
+  if (state === 'offline') {
+    screen = '<g class="iptv-x" transform="translate(147 35)"><circle r="7"/><path d="M-3 -3 l6 6 M3 -3 l-6 6"/></g>';
+  } else if (state === 'idle') {
+    screen = '<path class="iptv-glare" d="M150 13 h14 l-26 44 h-14 Z"/>';
+  } else {
+    screen = `<g clip-path="url(#iptv-scr-${uid})"><g class="iptv-show"><circle class="iptv-sun" cx="128" cy="30" r="6"/>` +
+      '<path class="iptv-hill" d="M107 57 L130 40 L146 50 L164 36 L187 52 V57Z"/></g></g>' +
+      '<g class="iptv-live"><rect x="111" y="16" width="18" height="6" rx="1"/><text x="120" y="20.6" text-anchor="middle">LIVE</text></g>';
+  }
+  return `<svg class="scene ${state}" viewBox="98 0 102 80" preserveAspectRatio="xMaxYMax meet" aria-hidden="true" focusable="false">` +
+    `<defs><clipPath id="iptv-scr-${uid}"><rect x="107" y="13" width="80" height="44"/></clipPath></defs>` +
+    '<rect class="iptv-frame" x="104" y="10" width="86" height="50" rx="2"/>' +
+    '<rect class="iptv-screen" x="107" y="13" width="80" height="44"/>' +
+    `${screen}<circle class="iptv-led" cx="186" cy="58.4" r=".9"/>` +
+    '<rect class="iptv-cab" x="120" y="63" width="54" height="17" rx="1.5"/><rect class="iptv-cab-top" x="120" y="63" width="54" height="2.4" rx="1"/>' +
+    '<path class="iptv-cab-line" d="M147 67 V78 M124 71.5 H143 M151 71.5 H170"/></svg>';
+}
+
+// Banner: wall colour, scene, ground strip, text on the left; day and night
+var IPTV_BANNER_CSS = `
+    /* Illustrated card: the banner edge to edge at the top, the body under it keeps the card's 12 px margins */
+    ha-card.ill { padding: 0 0 12px; overflow: hidden; }
+    ha-card.ill > :not(.banner) { margin-left: 12px; margin-right: 12px; }
+    ha-card.ill > .banner { margin-bottom: 2px; }
+    ha-card.ill.mini-ill { padding: 0; }
+    .banner { position: relative; overflow: hidden; flex: none; height: 90px; --iptv-g: 10px; --iptv-scene-w: min(102px, 40%);
+              background: #f2eee8; color: #1f2a37; --iptv-sub: #4a5563; }
+    .banner.night { background: #2a2f3d; color: #fff; --iptv-sub: rgba(255,255,255,.78); }
+    .banner .scene { position: absolute; right: 0; bottom: var(--iptv-g); height: calc(100% - var(--iptv-g)); width: var(--iptv-scene-w); }
+    .banner .ground { position: absolute; left: 0; right: 0; bottom: 0; height: var(--iptv-g);
+                      background: repeating-linear-gradient(90deg, #c99a6b 0 38px, #b98a5c 38px 40px); box-shadow: inset 0 2px 0 #a97c50; }
+    .banner.night .ground { background: repeating-linear-gradient(90deg, #4a3a2c 0 38px, #3e3024 38px 40px); box-shadow: inset 0 2px 0 #5c4836; }
+    .htext { position: absolute; z-index: 1; left: 12px; top: 0; bottom: var(--iptv-g); right: calc(var(--iptv-scene-w) + 4px);
+             display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .htext .titles { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+    .htext .name { color: inherit; }
+    /* One line of pills: a pill that does not fit wraps out of sight rather than being cut (the first one shrinks) */
+    .htext .chips { margin-top: 0; flex-wrap: wrap; max-height: 18px; overflow: hidden; }
+    .htext .chips .chip { flex: none; }
+    .htext .chips .chip:first-child { flex: 0 1 auto; min-width: 0; }
+    /* The round icon on the wall, in the state colour (grey when idle), day and night */
+    .htext .badge { position: relative; background: rgba(255,255,255,.62); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c) 24%, transparent); }
+    .htext .badge.idle { --c: #7a828c; }
+    .night .htext .badge { background: rgba(255,255,255,.12); color: color-mix(in srgb, var(--c) 78%, #fff);
+                           box-shadow: inset 0 0 0 1px rgba(255,255,255,.14); }
+    .night .htext .badge.idle { --c: #a4adba; }
+    /* Pills on the wall: a light (dark at night) tile, the text tinted with the state colour */
+    .htext .chip { background: rgba(255,255,255,.72); color: color-mix(in srgb, var(--c) 55%, #1f2a37); }
+    .night .htext .chip { background: rgba(10,16,30,.45); color: color-mix(in srgb, var(--c) 45%, #fff); }
+    .htext .chip.idle { color: #4a5563; } .night .htext .chip.idle { color: rgba(255,255,255,.82); }
+    /* Two lines of subscription chips at most (the detail button shows them all), so nothing is cut at the top */
+    .htext .rs { max-height: 40px; overflow: hidden; }
+    .htext .msg { padding: 0; font-size: 12px; line-height: 16px; max-height: 32px; overflow: hidden; color: var(--iptv-sub); }
+    .htext button.r { color: inherit; }
+    .htext .r .fig { color: var(--iptv-sub); }
+    .htext .r.warning, .htext .r.error { color: color-mix(in srgb, var(--c) 55%, #1f2a37); background: rgba(255,255,255,.72); }
+    .night .htext .r.warning, .night .htext .r.error { color: color-mix(in srgb, var(--c) 45%, #fff); background: rgba(10,16,30,.45); }
+    :host([hide-title]) .htext .head > .name { visibility: hidden; }
+    /* The card's buttons, in a column between the text and the TV */
+    .acts { display: flex; flex-direction: column; justify-content: center; gap: 2px; flex: none; margin-left: auto; }
+    .htext .acts button { all: unset; cursor: pointer; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center;
+                          --mdc-icon-size: 16px; color: #44515f; background: rgba(255,255,255,.55); }
+    .htext .acts button ha-icon { display: inline-flex; }
+    .htext .acts button:hover { background: rgba(255,255,255,.85); }
+    .night .htext .acts button { color: #e6ebf1; background: rgba(10,20,40,.4); }
+    .night .htext .acts button:hover { background: rgba(10,20,40,.65); }
+    .htext .acts button:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 1px; }
+    .htext .acts button.spin ha-icon { animation: spin 1s linear infinite; }
+    /* The TV, its cabinet and what it shows */
+    .iptv-frame { fill: #20242c; }
+    .iptv-screen { fill: #3d6ec9; } .night .iptv-screen { fill: #2b4a7a; }
+    .scene.offline .iptv-screen, .scene.idle .iptv-screen { fill: #1a1d22; }
+    .iptv-sun { fill: #ffd65a; } .iptv-hill { fill: #2e7d32; }
+    .iptv-show { animation: iptv-show 4s ease-in-out infinite; }
+    .iptv-live rect { fill: #e5484d; }
+    .iptv-live text { font: 700 4.6px sans-serif; fill: #fff; }
+    .iptv-x circle { fill: #e5484d; } .iptv-x path { stroke: #fff; stroke-width: 1.6; fill: none; }
+    .iptv-glare { fill: #fff; opacity: .05; }
+    .iptv-led { fill: #43a047; } .scene.offline .iptv-led { fill: #e5484d; }
+    .scene.idle .iptv-led { fill: #ffa600; animation: iptv-led 3s ease-in-out infinite; }
+    .iptv-cab { fill: #c9b79c; } .iptv-cab-top { fill: #b5a184; } .iptv-cab-line { stroke: #a8946f; stroke-width: .6; fill: none; }
+    .night .iptv-cab { fill: #3c4558; } .night .iptv-cab-top { fill: #4a5468; } .night .iptv-cab-line { stroke: #2c3445; }
+    @keyframes iptv-show { 50% { opacity: .2; } }
+    @keyframes iptv-led { 50% { opacity: .25; } }
+    /* Narrow card: no room for the TV beside the text, the wall and the floor stay */
+    @container (max-width: 300px) {
+      .banner .scene { display: none; }
+      .htext { right: 12px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .iptv-show, .iptv-led, .htext .acts button.spin ha-icon { animation: none !important; }
+      .htext .acts button.spin ha-icon { opacity: .5; }
+    }
+`;
 
 // ── iptv-card ─────────────────────────────────────────────────────────────────
 class IptvCard extends HTMLElement {
@@ -2151,7 +2381,7 @@ class IptvCard extends HTMLElement {
       button.spin ha-icon { animation: none; opacity: .5; }
       .fill { transition: none; }
     }
-  `;
+    ${IPTV_BANNER_CSS}`;
 
   static getStubConfig() {
     return {};
@@ -2165,6 +2395,9 @@ class IptvCard extends HTMLElement {
       schema: [
         { name: 'title', selector: { text: {} } },
         { name: 'show_title', default: true, selector: { boolean: {} } },
+        { name: 'illustration', default: true, selector: { boolean: {} } },
+        { name: 'illustration_theme', default: 'auto', selector: { select: { mode: 'dropdown', options:
+          IPTV_THEMES.map((v) => ({ value: v, label: iptvT(lang, `theme_${v}`) })) } } },
         { name: 'devices', selector: { device: { integration: IPTV_DOMAIN, multiple: true } } },
         { name: 'warning_days', selector: { number: { min: 1, max: 60, mode: 'box' } } },
         { name: 'language', selector: { select: { mode: 'dropdown', options: [
@@ -2197,6 +2430,10 @@ class IptvCard extends HTMLElement {
   }
 
   setConfig(config) {
+    if (config?.illustration_theme != null && !IPTV_THEMES.includes(config.illustration_theme)) {
+      throw new Error('illustration_theme must be auto, day or night');
+    }
+    if (this._uid == null) this._uid = ++iptvUidSeq;
     this._config = { warning_days: 7, ...config };
     // show_title: the header's title, hidden by the stylesheet
     this.toggleAttribute?.('hide-title', config.show_title === false);
@@ -2208,7 +2445,8 @@ class IptvCard extends HTMLElement {
   set hass(hass) {
     this._hass = hass;
     // Re-render only when one of our entities, a device name or the language changed
-    var parts = [hass.language, !!hass.user?.is_admin];
+    // (and the sun or the dark mode, for the illustration's night picture)
+    var parts = [hass.language, !!hass.user?.is_admin, hass.states?.['sun.sun']?.state, !!hass.themes?.darkMode];
     this._subs().forEach((sub) => {
       parts.push(`${sub.device}:${sub.name}`);
       Object.keys(sub.ids).forEach((k) => {
@@ -2389,6 +2627,46 @@ class IptvCard extends HTMLElement {
     return `<span class="chip ${v.state}" data-entity="status" title="${label}"><ha-icon icon="${iptvStateIcon(v.state)}"></ha-icon><span class="tx">${label}</span></span>`;
   }
 
+  // The illustrated header is on unless `illustration: false`
+  _illustrated() {
+    return this._config.illustration !== false;
+  }
+
+  // The banner: the wall and its TV (in the picture of `state`), the icon, `titles` and `acts` (buttons) on the left
+  _banner(state, titles, acts) {
+    var night = iptvIsNight(this._hass, this._config);
+    return `<div class="banner${night ? ' night' : ''}">${iptvSceneSvg(iptvSceneState(state), this._uid)}` +
+      `<div class="htext">${iptvBadge(state)}<div class="titles">${titles}</div><div class="acts">${acts}</div></div>` +
+      '<div class="ground"></div></div>';
+  }
+
+  // Views of the subscriptions for the summary pill: an unreachable one is an error, an expired one says so
+  _views(subs) {
+    return subs.map((sub) => {
+      var v = this._view(this._data(sub.ids));
+      if (!v) return { unavailable: true, state: 'error' };
+      v.expired = v.state === 'error' && v.d.auth && (String(v.d.status).toLowerCase() === 'expired' || (v.daysLeft !== null && v.daysLeft <= 0));
+      return v;
+    });
+  }
+
+  // Global pill: the worst state of the subscriptions, with how many are in it
+  _miniStatus(views) {
+    if (!views.length) return '';
+    var count = (state) => views.filter((v) => v.state === state).length;
+    var n = (key, k) => this._t(k > 1 ? `${key}_plural` : key, { n: k });
+    var state;
+    var label;
+    if (views.every((v) => v.unavailable)) [state, label] = ['error', this._t('unavailable')];
+    else if (count('error')) {
+      var expired = views.filter((v) => v.expired).length;
+      [state, label] = ['error', expired === count('error') ? n('mini_expired', expired) : n('mini_error', count('error'))];
+    } else if (count('warning')) [state, label] = ['warning', n('mini_expiring', count('warning'))];
+    else [state, label] = ['ok', views.length > 1 ? this._t('mini_all_active') : this._t('status_active')];
+    label = iptvEsc(label);
+    return `<span class="chip ${state}" title="${label}" aria-label="${label}"><ha-icon icon="${iptvStateIcon(state)}"></ha-icon><span class="tx">${label}</span></span>`;
+  }
+
   _render() {
     if (!this.shadowRoot || !this._config) return;
     var lang = iptvLang(this._config, this._hass);
@@ -2491,6 +2769,7 @@ class IptvCard extends HTMLElement {
     // One subscription: its status pill ends the title line, the other pills go under it
     var status = '';
     var info = '';
+    var infoRaw = '';
     // State of each subscription shown (an unreachable one counts as an error), for the header badge
     var states = [];
     if (!this._hass) {
@@ -2503,6 +2782,7 @@ class IptvCard extends HTMLElement {
       states.push(v ? v.state : 'error');
       status = statusChip(v);
       info = infoChips(v, h0, this._french(subs[0].ids)).trim();
+      infoRaw = info;
       if (info) info = `<div class="chips">${info}</div>`;
       body = '<div class="sect" data-sub="0">' +
         (v ? details(v) : `<div class="msg err">${this._t('unavailable')}</div>`) +
@@ -2527,15 +2807,26 @@ class IptvCard extends HTMLElement {
 
     if (!this._root) { this._root = document.createElement('div'); this.shadowRoot.appendChild(this._root); }
     var focus = iptvFocusOf(this.shadowRoot, this._root);
+    var buttons = `${admin ? `<button class="add" title="${esc(this._t('add_btn'))}"><ha-icon icon="mdi:plus"></ha-icon></button>` : ''}
+          <button class="refresh ${this._loading ? 'spin' : ''}" title="${esc(this._t(this._refreshFailed ? 'err_generic' : 'refresh'))}"><ha-icon icon="mdi:refresh"></ha-icon></button>`;
+    var worst = iptvWorstState(states);
+    var header;
+    if (this._illustrated()) {
+      // Under the title: the status and other pills of the subscription, or the summary pill of several (each one
+      // keeps its pills in its section)
+      var row = multi ? this._miniStatus(this._views(subs)) : status + infoRaw;
+      header = this._banner(worst, `<div class="name">${esc(title)}</div>${row ? `<div class="chips">${row}</div>` : ''}`, buttons);
+    } else {
+      header = `<div class="header">
+          ${iptvBadge(worst)}
+          <div class="titles"><div class="title-row"><div class="name">${esc(title)}</div>${status}</div>${info}</div>
+          ${buttons}
+        </div>`;
+    }
     this._root.innerHTML = `
       <style>${this.constructor.CSS}</style>
-      <ha-card>
-        <div class="header">
-          ${iptvBadge(iptvWorstState(states))}
-          <div class="titles"><div class="title-row"><div class="name">${esc(title)}</div>${status}</div>${info}</div>
-          ${admin ? `<button class="add" title="${esc(this._t('add_btn'))}"><ha-icon icon="mdi:plus"></ha-icon></button>` : ''}
-          <button class="refresh ${this._loading ? 'spin' : ''}" title="${esc(this._t(this._refreshFailed ? 'err_generic' : 'refresh'))}"><ha-icon icon="mdi:refresh"></ha-icon></button>
-        </div>
+      <ha-card${this._illustrated() ? ' class="ill"' : ''}>
+        ${header}
         ${body}
       </ha-card>${IPTV_SIZER}`;
     this._root.querySelector('button.refresh').addEventListener('click', () => this._refresh());
@@ -3014,23 +3305,6 @@ class IptvMiniCard extends IptvCard {
     iptvRefocus(this._root, focus);
   }
 
-  // Global pill: the worst state of the subscriptions, with how many are in it
-  _miniStatus(views) {
-    if (!views.length) return '';
-    var count = (state) => views.filter((v) => v.state === state).length;
-    var n = (key, k) => this._t(k > 1 ? `${key}_plural` : key, { n: k });
-    var state;
-    var label;
-    if (views.every((v) => v.unavailable)) [state, label] = ['error', this._t('unavailable')];
-    else if (count('error')) {
-      var expired = views.filter((v) => v.expired).length;
-      [state, label] = ['error', expired === count('error') ? n('mini_expired', expired) : n('mini_error', count('error'))];
-    } else if (count('warning')) [state, label] = ['warning', n('mini_expiring', count('warning'))];
-    else [state, label] = ['ok', views.length > 1 ? this._t('mini_all_active') : this._t('status_active')];
-    label = iptvEsc(label);
-    return `<span class="chip ${state}" title="${label}" aria-label="${label}"><ha-icon icon="${iptvStateIcon(state)}"></ha-icon><span class="tx">${label}</span></span>`;
-  }
-
   // One chip per subscription: its name and days left (or why it is not active);
   // plain when fine, tinted when expiring or in error. It opens the entity shown.
   _miniChip(sub, v, i) {
@@ -3046,12 +3320,7 @@ class IptvMiniCard extends IptvCard {
 
   _renderMini() {
     var subs = this._hass ? this._subs() : [];
-    var views = subs.map((sub) => {
-      var v = this._view(this._data(sub.ids));
-      if (!v) return { unavailable: true, state: 'error' };
-      v.expired = v.state === 'error' && v.d.auth && (String(v.d.status).toLowerCase() === 'expired' || (v.daysLeft !== null && v.daysLeft <= 0));
-      return v;
-    });
+    var views = this._views(subs);
     var title = this._config.title || this._t(subs.length > 1 ? 'default_title_multi' : 'default_title');
     var line = !this._hass
       ? `<div class="msg">${this._t('loading')}</div>`
@@ -3059,23 +3328,31 @@ class IptvMiniCard extends IptvCard {
         ? `<div class="msg">${this._t('no_device')}</div>`
         : subs.map((sub, i) => this._miniChip(sub, views[i], i)).join('');
     if (!this._root) { this._root = document.createElement('div'); this.shadowRoot.appendChild(this._root); }
+    var worst = iptvWorstState(views.map((v) => v.state));
+    var head = `<div class="head"><div class="name">${iptvEsc(title)}</div>${this._miniStatus(views)}</div>
+            <div class="rs">${line}</div>`;
+    // Illustrated: the same banner as the full card, the two lines on its wall (the detail button in its column)
+    var illustrated = this._illustrated();
+    var inner = illustrated
+      ? this._banner(worst, head, '')
+      : `<div class="mini">
+          ${iptvBadge(worst)}
+          <div class="body">
+            ${head}
+          </div>
+        </div>`;
     this._root.innerHTML = `
       <style>${this.constructor.CSS}</style>
-      <ha-card>
-        <div class="mini">
-          ${iptvBadge(iptvWorstState(views.map((v) => v.state)))}
-          <div class="body">
-            <div class="head"><div class="name">${iptvEsc(title)}</div>${this._miniStatus(views)}</div>
-            <div class="rs">${line}</div>
-          </div>
-        </div>
+      <ha-card${illustrated ? ' class="ill mini-ill"' : ''}>
+        ${inner}
       </ha-card>${IPTV_SIZER}`;
     this._bindMoreInfo(subs);
   }
 
   // Detail button at the end of the header, top right in both views
   _addZoom() {
-    var head = this._config.zoom !== false && this._root?.querySelector('.head, .header');
+    // The banner's button column first (its text also holds a .head), else the classic header
+    var head = this._config.zoom !== false && (this._root?.querySelector('.acts') || this._root?.querySelector('.head, .header'));
     if (!head) return;
     var button = document.createElement('button');
     button.className = 'zoom';
@@ -3118,14 +3395,17 @@ class IptvMiniCardEditor extends HTMLElement {
       this._form.addEventListener('value-changed', (ev) => {
         ev.stopPropagation();
         var value = { ...ev.detail.value };
+        // Defaults stay out of the YAML
         if (value.zoom === true) delete value.zoom;
+        if (value.illustration === true) delete value.illustration;
+        if (value.illustration_theme === 'auto') delete value.illustration_theme;
         this._config = value;
         this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: value }, bubbles: true, composed: true }));
       });
       this.appendChild(this._form);
     }
     this._form.hass = this._hass;
-    this._form.data = { show_title: true, zoom: true, ...this._config };
+    this._form.data = { show_title: true, illustration: true, illustration_theme: 'auto', zoom: true, ...this._config };
   }
 }
 

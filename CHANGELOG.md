@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.34.0 - 2026-11-17
+
+### Features
+- **Illustrated header on the IPTV card and mini card.** A 90 px banner with a wall-mounted TV over its cabinet, standing on a parquet strip: the TV shows a live channel while the subscriptions are fine (or expiring soon), a red cross when one is unreachable, expired or refused, and a dark screen with its standby light when there is none. The round icon keeps the state colour (green, orange, red, grey when idle). The picture switches to night with `sun.sun` (else the dark theme), forced with `illustration_theme: day | night`; `illustration: false` keeps the classic header. Animations stop with reduced motion. Both visual editors expose the two new options.
+
 ## 3.33.1 - 2026-11-15
 
 ### Maintenance
