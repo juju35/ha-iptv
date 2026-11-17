@@ -2040,6 +2040,17 @@ var IptvCardI18n = {
 };
 
 // A language of the card: the full code when it has a table (sr-Latn), else its base (de-AT → de), else English
+// The width of an element's whole text in its own font, in fractional pixels (scrollWidth is rounded).
+let textCtx;
+const textWidth = (el) => {
+  const cs = getComputedStyle(el);
+  textCtx ??= document.createElement('canvas').getContext?.('2d');
+  if (!textCtx) return el.scrollWidth;
+  textCtx.font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+  const pad = (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0);
+  return Math.max(el.scrollWidth, textCtx.measureText(el.textContent.trim()).width + pad);
+};
+
 function iptvSupported(code) {
   if (!code) return null;
   if (IptvCardI18n[code]) return code;
@@ -2239,15 +2250,14 @@ var IPTV_BANNER_CSS = `
     .night .htext .head > .chip.st { background: color-mix(in srgb, var(--c) 30%, rgba(8,18,38,.55)); color: color-mix(in srgb, var(--c) 35%, #ffffff); }
     .htext .chip.st > ha-icon { display: none !important; }
     .htext .chip.st::before { content: ""; flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--c); }
-    /* Too narrow for both (measured), or a narrow card: the pill on a line of its own under the other pills */
+    /* The whole title and the pill's whole label do not fit on one row (measured, see _fitPill): the pill on a line of
+       its own under the other pills, which keep one line; when that does not fit above the floor, its dot alone, as on
+       a card of 200 px or less */
     .htext .titles.below .head { display: contents; }
     .htext .titles.below .head > .chip.st { order: 2; align-self: flex-start; }
     .htext .titles.below > :not(.head) { order: 1; max-height: 18px; }
-    @container (max-width: 260px) {
-      .htext .head { display: contents; }
-      .htext .head > .chip.st { order: 2; align-self: flex-start; }
-      .htext .titles > :not(.head) { order: 1; max-height: 18px; }
-    }
+    .htext .titles.dot-only .head > .chip.st { padding: 4px; } .htext .titles.dot-only .head > .chip.st .tx { display: none; }
+    @container (max-width: 200px) { .htext .head > .chip.st { padding: 4px; } .htext .head > .chip.st .tx { display: none; } }
     /* The TV, its cabinet and what it shows */
     .iptv-frame { fill: #20242c; }
     .iptv-screen { fill: #3d6ec9; } .night .iptv-screen { fill: #2b4a7a; }
@@ -2309,9 +2319,10 @@ class IptvCard extends HTMLElement {
     .title-row .name { flex: 1 1 0; }
     /* The status pill keeps its whole text while it fits; truncated only when the room really runs out (whole text in its tooltip) */
     .title-row > .chip { flex: 0 1 auto; min-width: 0; }
-    /* Its whole text does not fit beside the title (measured): the pill goes under the title */
+    /* The whole title and its whole text do not fit on one row (measured, see _fitPill): the pill goes under the title */
     .title-row.below { flex-wrap: wrap; row-gap: 4px; }
     .title-row.below > .name { flex-basis: 100%; }
+    .title-row.dot-only > .chip .tx { display: none; } .title-row.dot-only > .chip { padding: 1px 5px; }
     /* At least about 4 characters of the title stay visible */
     .name { font-size: 16px; font-weight: 500; line-height: 1.25; color: var(--primary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 6ch; }
     .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
@@ -2396,8 +2407,6 @@ class IptvCard extends HTMLElement {
       .header > .titles + button { margin-left: auto; }
       .header, .title-row { gap: 6px; }
       .header > button:not(.zoom) { padding: 6px; }
-      /* The pill goes under the title rather than leave it fewer than 4 characters */
-      .title-row { flex-wrap: wrap; row-gap: 4px; }
     }
     /* Phone width: a smaller badge and buttons keep them (and the mini card's detail button) on one line */
     @container (max-width: 200px) {
@@ -2882,20 +2891,46 @@ class IptvCard extends HTMLElement {
     iptvRefocus(this._root, focus);
   }
 
-  // The banner's status pill keeps its whole label: when it does not fit beside the title (the title already down
-  // to four characters), it takes a line of its own under the other pills
-  // (classic header: under the title)
+  // The banner's status pill, measured after each render and on a new width (in every language): it sits on the
+  // title's row, right after the title, only when the whole title and the pill's whole label fit there; otherwise it
+  // takes a line of its own under the subtitle (.below), the title whole on its row (cut only when it does not fit
+  // alone) and the subtitle on one line. When the three lines do not fit in the banner above the ground strip, or
+  // the label does not fit its line, the pill shows its dot alone (.dot-only): beside the title when the whole title
+  // leaves it room, else under the subtitle.
   _fitPill() {
-    var t = this._root?.querySelector('.htext .titles, .header .title-row');
-    if (!t?.classList) return;
-    t.classList.remove('below');
-    var tx = t.querySelector('.chip.st .tx');
-    if (tx && tx.scrollWidth > tx.clientWidth + 0.5) t.classList.add('below');
+    for (const t of this.shadowRoot?.querySelectorAll?.('.htext .titles, .header .title-row, .mini .body') || []) {
+      const row = t.matches('.title-row') ? t : t.querySelector('.head');
+      const chips = row ? [...row.querySelectorAll(':scope > .chip.st')] : [];
+      if (!chips[0]?.getBoundingClientRect) continue;
+      t.classList.remove('below', 'dot-only');
+      const name = row.querySelector('.name');
+      const gap = parseFloat(getComputedStyle(row).columnGap) || 0;
+      const outer = (c) => c.getBoundingClientRect().width + (parseFloat(getComputedStyle(c).marginLeft) || 0) + (parseFloat(getComputedStyle(c).marginRight) || 0);
+      const others = [...row.children].filter((c) => c !== name && !chips.includes(c) && c.getClientRects().length);
+      const room = row.getBoundingClientRect().width - others.reduce((w, c) => w + outer(c) + gap, 0);
+      const title = name && getComputedStyle(name).display !== 'none' ? textWidth(name) + gap : 0;
+      const pills = () => chips.reduce((w, c) => w + c.getBoundingClientRect().width, gap * (chips.length - 1));
+      if (title + pills() <= room) continue;
+      t.classList.add('below');
+      const banner = t.closest('.banner') || t;
+      const ground = banner.querySelector('.ground');
+      const floor = ground ? ground.getBoundingClientRect().top : banner.getBoundingClientRect().bottom;
+      const box = t.getBoundingClientRect();
+      // Whole: the label not cut and the pill not past the title block (into the picture).
+      const whole = chips.every((c) => {
+        const tx = c.querySelector('.tx');
+        return (!tx || tx.scrollWidth <= tx.clientWidth + 0.5) && c.getBoundingClientRect().right <= box.right + 0.5;
+      });
+      if (whole && box.bottom <= floor + 0.5 && box.top >= banner.getBoundingClientRect().top - 0.5) continue;
+      t.classList.add('dot-only');
+      if (title + pills() <= room) t.classList.remove('below');
+    }
   }
 
   connectedCallback() {
     if (!this._fitObserver && typeof ResizeObserver === 'function') this._fitObserver = new ResizeObserver(() => this._fitPill());
     this._fitObserver?.observe(this);
+    document.fonts?.ready?.then(() => this._fitPill());
   }
 
   disconnectedCallback() {
@@ -3279,6 +3314,12 @@ class IptvMiniCard extends IptvCard {
     .mini .name { flex: 1 1 0; min-width: 4.5ch; }
     :host([hide-title]) .mini .head > .name { visibility: hidden; }
     .head .chip { flex: 0 1 auto; min-width: 0; margin-left: auto; }
+    /* The whole title and the pill's whole label do not fit on one row (measured, see _fitPill): the pill under the title */
+    .mini .body.below .head { flex-wrap: wrap; row-gap: 4px; }
+    .mini .body.below .head > .name { flex: 1 1 calc(100% - 32px); }
+    .mini .body.below .head:not(:has(> .zoom)) > .name { flex-basis: 100%; }
+    .mini .body.below .head > .chip { order: 3; margin-left: 0; }
+    .mini .body.dot-only .head > .chip .tx { display: none; } .mini .body.dot-only .head > .chip { padding: 1px 5px; }
     .rs { display: flex; flex-wrap: wrap; gap: 2px 4px; margin-left: -4px; }
     .mini .msg { padding: 0; font-size: 12px; }
     /* A chip never goes past the card: its name is truncated (whole in its tooltip), its figure stays whole */

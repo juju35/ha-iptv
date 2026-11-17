@@ -556,6 +556,26 @@ test('a phone-narrow header puts the title and its pill on a line of their own, 
   }
 });
 
+test('the status pill is placed by measure: beside the whole title, else under the subtitle, else its dot alone', () => {
+  // No fixed width decides where the pill goes: the title row only wraps when _fitPill measured it (.below)
+  for (const css of [IptvCard.CSS, IptvMiniCard.CSS]) {
+    for (const px of [240, 260]) assert.doesNotMatch(containerBlock(css, px), /\.title-row \{[^}]*flex-wrap|\.head \{ display: contents/);
+    assert.match(css, /\.htext \.titles\.below \.head \{ display: contents; \}/);
+    assert.match(css, /\.htext \.titles\.below > :not\(\.head\) \{ order: 1; max-height: 18px; \}/, 'the line above the pill keeps one line');
+    assert.match(css, /\.htext \.titles\.dot-only \.head > \.chip\.st \.tx \{ display: none; \}/);
+    assert.match(css, /\.title-row\.below > \.name \{ flex-basis: 100%; \}/);
+  }
+  assert.match(IptvMiniCard.CSS, /\.mini \.body\.below \.head > \.chip \{ order: 3; margin-left: 0; \}/);
+  // Its dot alone at 200 px and less on the banner
+  assert.ok(IptvCard.CSS.includes('@container (max-width: 200px) { .htext .head > .chip.st { padding: 4px; } .htext .head > .chip.st .tx { display: none; } }'));
+  // Measured: the whole title's text width, the pills, the room on the row, and the banner's floor
+  const fit = IptvCard.prototype._fitPill.toString();
+  for (const part of ['textWidth(name)', "classList.add('below')", "classList.add('dot-only')", "querySelector('.ground')", 'scrollWidth <= tx.clientWidth'])
+    assert.ok(fit.includes(part), `_fitPill measures ${part}`);
+  const card = Object.create(IptvCard.prototype);
+  card._fitPill(); // without a rendered card: nothing to do, no error
+});
+
 test('a phone-narrow footer and expiry line wrap instead of pushing the buttons out of the card', () => {
   const css = IptvCard.CSS;
   assert.match(rule(css, '.foot'), /flex-wrap: wrap/);
