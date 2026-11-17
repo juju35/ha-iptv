@@ -663,3 +663,25 @@ test('illustrated header: the editors expose illustration and illustration_theme
   const card = new IptvCard();
   assert.throws(() => card.setConfig({ illustration_theme: 'dusk' }), /illustration_theme/);
 });
+
+test('illustrated header: the status pill follows the title (dot and label in the state colour), the buttons sit in the top-right corner', () => {
+  const css = IptvMiniCard.CSS;
+  // The buttons: one line of 24 px frosted rounds, 5 px from the banner's top-right corner, out of the text
+  assert.match(rule(css, '.banner > .acts'), /position: absolute;[^}]*top: 5px; right: 5px;[^}]*display: flex; gap: 4px/);
+  const btn = rule(css, '.banner > .acts button');
+  assert.match(btn, /width: 24px; height: 24px;/);
+  assert.match(btn, /color: #33506b; background: rgba\(255,255,255,\.55\);/);
+  assert.match(rule(css, '.night > .acts button'), /color: #fff; background: rgba\(255,255,255,\.12\);/);
+  // The pill: on the title row, 8 px after it, never cut (it goes under the other pills instead), a dot, no icon
+  assert.match(rule(css, '.htext .head'), /display: flex; align-items: center; gap: 8px;/);
+  assert.match(rule(css, '.htext .head > .chip.st'), /flex: none;[^}]*font-size: 11px; font-weight: 500;/);
+  assert.match(rule(css, '.htext .chip.st::before'), /width: 7px; height: 7px; border-radius: 50%; background: var\(--c\)/);
+  assert.match(css, /\.htext \.titles\.below \.head \{ display: contents; \}/);
+  assert.match(css, /@container \(max-width: 200px\) \{[^@]*\.htext \.head > \.chip\.st \.tx \{ display: none; \}/);
+  // Markup: the banner keeps its buttons out of the text, the pill right after the name
+  const card = Object.create(IptvCard.prototype);
+  card._config = { illustration_theme: 'day' };
+  card._uid = 'u';
+  const html = card._banner('ok', '<div class="head"><div class="name">T</div><span class="chip st ok"></span></div>', '<button class="refresh"></button>');
+  assert.match(html, /<div class="htext">.*<\/div><div class="acts"><button class="refresh"><\/button><\/div><div class="ground">/s);
+});

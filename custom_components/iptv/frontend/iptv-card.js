@@ -2213,16 +2213,41 @@ var IPTV_BANNER_CSS = `
     .htext .r.warning, .htext .r.error { color: color-mix(in srgb, var(--c) 55%, #1f2a37); background: rgba(255,255,255,.72); }
     .night .htext .r.warning, .night .htext .r.error { color: color-mix(in srgb, var(--c) 45%, #fff); background: rgba(10,16,30,.45); }
     :host([hide-title]) .htext .head > .name { visibility: hidden; }
-    /* The card's buttons, in a column between the text and the TV */
-    .acts { display: flex; flex-direction: column; justify-content: center; gap: 2px; flex: none; margin-left: auto; }
-    .htext .acts button { all: unset; cursor: pointer; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center;
-                          --mdc-icon-size: 16px; color: #44515f; background: rgba(255,255,255,.55); }
-    .htext .acts button ha-icon { display: inline-flex; }
-    .htext .acts button:hover { background: rgba(255,255,255,.85); }
-    .night .htext .acts button { color: #e6ebf1; background: rgba(10,20,40,.4); }
-    .night .htext .acts button:hover { background: rgba(10,20,40,.65); }
-    .htext .acts button:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 1px; }
-    .htext .acts button.spin ha-icon { animation: spin 1s linear infinite; }
+    /* The card's buttons (add, refresh, detail), 24 px frosted rounds on one line in the banner's top-right corner */
+    .banner > .acts { position: absolute; z-index: 2; top: 5px; right: 5px; display: flex; gap: 4px; }
+    .banner > .acts:empty { display: none; }
+    .banner > .acts button { all: unset; cursor: pointer; box-sizing: border-box; width: 24px; height: 24px; margin: 0; border-radius: 50%;
+                             display: grid; place-items: center; --mdc-icon-size: 16px; color: #33506b; background: rgba(255,255,255,.55);
+                             box-shadow: inset 0 0 0 1px rgba(255,255,255,.7); backdrop-filter: blur(4px); }
+    .banner > .acts button ha-icon { display: inline-flex; }
+    .banner > .acts button:hover { background: rgba(255,255,255,.75); color: #33506b; }
+    .night > .acts button { color: #fff; background: rgba(255,255,255,.12); box-shadow: inset 0 0 0 1px rgba(255,255,255,.2); }
+    .night > .acts button:hover { background: rgba(255,255,255,.22); color: #fff; }
+    .banner > .acts button:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 1px; }
+    .banner > .acts button.spin ha-icon { animation: spin 1s linear infinite; }
+    /* With buttons, the TV stands lower and smaller, under them; the text keeps clear of both */
+    .banner:has(.acts > *) { --iptv-btns: 34px; --iptv-scene-w: min(66px, 30%); }
+    .banner:has(.acts > :nth-child(2)) { --iptv-btns: 62px; }
+    .banner:has(.acts > :nth-child(3)) { --iptv-btns: 90px; }
+    .banner:has(.acts > *) .scene { height: calc(100% - var(--iptv-g) - 28px); }
+    .banner:has(.acts > *) .htext { right: calc(max(var(--iptv-scene-w), var(--iptv-btns)) + 4px); }
+    /* The status pill right after the title, a dot and its label in the state colour on frosted glass */
+    .htext .head { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .htext .head > .name { flex: 0 1 auto; min-width: 4.5ch; }
+    .htext .head > .chip.st { flex: none; margin-left: 0; max-width: none; gap: 5px; padding: 1px 8px; font-size: 11px; font-weight: 500; line-height: 16px;
+                              background: color-mix(in srgb, var(--c) 18%, rgba(255,255,255,.78)); color: color-mix(in srgb, var(--c) 45%, #0d2a45); }
+    .night .htext .head > .chip.st { background: color-mix(in srgb, var(--c) 30%, rgba(8,18,38,.55)); color: color-mix(in srgb, var(--c) 35%, #ffffff); }
+    .htext .chip.st > ha-icon { display: none !important; }
+    .htext .chip.st::before { content: ""; flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--c); }
+    /* Too narrow for both (measured), or a narrow card: the pill on a line of its own under the other pills */
+    .htext .titles.below .head { display: contents; }
+    .htext .titles.below .head > .chip.st { order: 2; align-self: flex-start; }
+    .htext .titles.below > :not(.head) { order: 1; max-height: 18px; }
+    @container (max-width: 260px) {
+      .htext .head { display: contents; }
+      .htext .head > .chip.st { order: 2; align-self: flex-start; }
+      .htext .titles > :not(.head) { order: 1; max-height: 18px; }
+    }
     /* The TV, its cabinet and what it shows */
     .iptv-frame { fill: #20242c; }
     .iptv-screen { fill: #3d6ec9; } .night .iptv-screen { fill: #2b4a7a; }
@@ -2242,11 +2267,16 @@ var IPTV_BANNER_CSS = `
     /* Narrow card: no room for the TV beside the text, the wall and the floor stay */
     @container (max-width: 300px) {
       .banner .scene { display: none; }
-      .htext { right: 12px; }
+      .htext, .banner:has(.acts > *) .htext { right: calc(var(--iptv-btns, 8px) + 4px); }
+    }
+    /* The narrowest cards: the pill keeps its dot alone (its label in its tooltip) */
+    @container (max-width: 200px) {
+      .htext .head > .chip.st { padding: 4px; }
+      .htext .head > .chip.st .tx { display: none; }
     }
     @media (prefers-reduced-motion: reduce) {
-      .iptv-show, .iptv-led, .htext .acts button.spin ha-icon { animation: none !important; }
-      .htext .acts button.spin ha-icon { opacity: .5; }
+      .iptv-show, .iptv-led, .banner > .acts button.spin ha-icon { animation: none !important; }
+      .banner > .acts button.spin ha-icon { opacity: .5; }
     }
 `;
 
@@ -2279,6 +2309,9 @@ class IptvCard extends HTMLElement {
     .title-row .name { flex: 1 1 0; }
     /* The status pill keeps its whole text while it fits; truncated only when the room really runs out (whole text in its tooltip) */
     .title-row > .chip { flex: 0 1 auto; min-width: 0; }
+    /* Its whole text does not fit beside the title (measured): the pill goes under the title */
+    .title-row.below { flex-wrap: wrap; row-gap: 4px; }
+    .title-row.below > .name { flex-basis: 100%; }
     /* At least about 4 characters of the title stay visible */
     .name { font-size: 16px; font-weight: 500; line-height: 1.25; color: var(--primary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 6ch; }
     .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
@@ -2624,7 +2657,7 @@ class IptvCard extends HTMLElement {
   _statusChip(v) {
     if (!v) return '';
     var label = iptvEsc(v.statusLabel);
-    return `<span class="chip ${v.state}" data-entity="status" title="${label}"><ha-icon icon="${iptvStateIcon(v.state)}"></ha-icon><span class="tx">${label}</span></span>`;
+    return `<span class="chip st ${v.state}" data-entity="status" title="${label}"><ha-icon icon="${iptvStateIcon(v.state)}"></ha-icon><span class="tx">${label}</span></span>`;
   }
 
   // The illustrated header is on unless `illustration: false`
@@ -2632,11 +2665,12 @@ class IptvCard extends HTMLElement {
     return this._config.illustration !== false;
   }
 
-  // The banner: the wall and its TV (in the picture of `state`), the icon, `titles` and `acts` (buttons) on the left
+  // The banner: the wall and its TV (in the picture of `state`), the icon and `titles` on the left, `acts` (buttons) in
+  // its top-right corner
   _banner(state, titles, acts) {
     var night = iptvIsNight(this._hass, this._config);
     return `<div class="banner${night ? ' night' : ''}">${iptvSceneSvg(iptvSceneState(state), this._uid)}` +
-      `<div class="htext">${iptvBadge(state)}<div class="titles">${titles}</div><div class="acts">${acts}</div></div>` +
+      `<div class="htext">${iptvBadge(state)}<div class="titles">${titles}</div></div><div class="acts">${acts}</div>` +
       '<div class="ground"></div></div>';
   }
 
@@ -2664,7 +2698,7 @@ class IptvCard extends HTMLElement {
     } else if (count('warning')) [state, label] = ['warning', n('mini_expiring', count('warning'))];
     else [state, label] = ['ok', views.length > 1 ? this._t('mini_all_active') : this._t('status_active')];
     label = iptvEsc(label);
-    return `<span class="chip ${state}" title="${label}" aria-label="${label}"><ha-icon icon="${iptvStateIcon(state)}"></ha-icon><span class="tx">${label}</span></span>`;
+    return `<span class="chip st ${state}" title="${label}" aria-label="${label}"><ha-icon icon="${iptvStateIcon(state)}"></ha-icon><span class="tx">${label}</span></span>`;
   }
 
   _render() {
@@ -2812,14 +2846,14 @@ class IptvCard extends HTMLElement {
     var worst = iptvWorstState(states);
     var header;
     if (this._illustrated()) {
-      // Under the title: the status and other pills of the subscription, or the summary pill of several (each one
-      // keeps its pills in its section)
-      var row = multi ? this._miniStatus(this._views(subs)) : status + infoRaw;
-      header = this._banner(worst, `<div class="name">${esc(title)}</div>${row ? `<div class="chips">${row}</div>` : ''}`, buttons);
+      // On the title row: the status pill of the subscription, or the summary pill of several (each one keeps its
+      // pills in its section); under it, the other pills of a single subscription
+      var pill = multi ? this._miniStatus(this._views(subs)) : status;
+      header = this._banner(worst, `<div class="head"><div class="name">${esc(title)}</div>${pill}</div>${!multi && infoRaw ? `<div class="chips">${infoRaw}</div>` : ''}`, buttons);
     } else {
       header = `<div class="header">
           ${iptvBadge(worst)}
-          <div class="titles"><div class="title-row"><div class="name">${esc(title)}</div>${status}</div>${info}</div>
+          <div class="titles"><div class="title-row"><div class="name">${esc(title)}</div>${multi ? this._miniStatus(this._views(subs)) : status}</div>${info}</div>
           ${buttons}
         </div>`;
     }
@@ -2844,7 +2878,28 @@ class IptvCard extends HTMLElement {
       if (sub) el.addEventListener('click', () => this._openView(sub));
     });
     this._bindMoreInfo(subs);
+    this._fitPill();
     iptvRefocus(this._root, focus);
+  }
+
+  // The banner's status pill keeps its whole label: when it does not fit beside the title (the title already down
+  // to four characters), it takes a line of its own under the other pills
+  // (classic header: under the title)
+  _fitPill() {
+    var t = this._root?.querySelector('.htext .titles, .header .title-row');
+    if (!t?.classList) return;
+    t.classList.remove('below');
+    var tx = t.querySelector('.chip.st .tx');
+    if (tx && tx.scrollWidth > tx.clientWidth + 0.5) t.classList.add('below');
+  }
+
+  connectedCallback() {
+    if (!this._fitObserver && typeof ResizeObserver === 'function') this._fitObserver = new ResizeObserver(() => this._fitPill());
+    this._fitObserver?.observe(this);
+  }
+
+  disconnectedCallback() {
+    this._fitObserver?.disconnect();
   }
 
   // [data-entity] elements open their subscription's entity; header pills (single
@@ -3275,10 +3330,12 @@ class IptvMiniCard extends IptvCard {
   }
 
   connectedCallback() {
+    super.connectedCallback();
     document.addEventListener('click', this._onUnzoom, true);
   }
 
   disconnectedCallback() {
+    super.disconnectedCallback();
     document.removeEventListener('click', this._onUnzoom, true);
   }
 
@@ -3302,6 +3359,7 @@ class IptvMiniCard extends IptvCard {
     if (this._zoomed) super._render();
     else this._renderMini();
     this._addZoom();
+    this._fitPill();
     iptvRefocus(this._root, focus);
   }
 
@@ -3331,7 +3389,7 @@ class IptvMiniCard extends IptvCard {
     var worst = iptvWorstState(views.map((v) => v.state));
     var head = `<div class="head"><div class="name">${iptvEsc(title)}</div>${this._miniStatus(views)}</div>
             <div class="rs">${line}</div>`;
-    // Illustrated: the same banner as the full card, the two lines on its wall (the detail button in its column)
+    // Illustrated: the same banner as the full card, the two lines on its wall (the detail button in its top-right corner)
     var illustrated = this._illustrated();
     var inner = illustrated
       ? this._banner(worst, head, '')
