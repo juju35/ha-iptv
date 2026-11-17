@@ -3,8 +3,9 @@
 ## 3.34.0 - 2026-11-17
 
 ### Features
-- **Illustrated header on the IPTV card and mini card.** A 90 px banner with a wall-mounted TV over its cabinet, standing on a parquet strip: the TV shows a live channel while the subscriptions are fine (or expiring soon), a red cross when one is unreachable, expired or refused, and a dark screen with its standby light when there is none. The round icon keeps the state colour (green, orange, red, grey when idle). The picture switches to night with `sun.sun` (else the dark theme), forced with `illustration_theme: day | night`; `illustration: false` keeps the classic header. Animations stop with reduced motion. Both visual editors expose the two new options.
+- **Illustrated header on the IPTV card and mini card.** A 90 px banner with a wall-mounted TV over its cabinet, standing on a parquet strip: the TV shows a live channel while the subscriptions are fine (or expiring soon), a red cross when one is unreachable, expired or refused, and a dark screen with its standby light when there is none. The round icon keeps the state colour (green, orange, red, grey when idle). The picture switches to night with `sun.sun` or with the dark theme, forced with `illustration_theme: day | night`; `illustration: false` keeps the classic header. Animations stop with reduced motion. Both visual editors expose the two new options.
 - **Status pill and header buttons.** On the illustrated header the status pill (a dot and its label in the state colour) follows the title, on a line of its own under the other pills when the title row is too narrow (its dot alone on the narrowest cards); the full card with several subscriptions shows the summary pill on the classic header too, and a classic pill that does not fit goes under the title rather than being cut. The add, refresh and expand / collapse buttons are 24 px frosted round buttons on one line in the banner's top-right corner, the TV standing under them.
+- Night picture with the dark theme even while the sun is up.
 
 ## 3.33.1 - 2026-11-15
 

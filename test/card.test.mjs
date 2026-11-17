@@ -634,13 +634,16 @@ test('a parent that sizes the card from its content (inline-block, flex row, aut
   assert.match(source, /IPTV_SIZER = '<svg class="sizer" aria-hidden="true" focusable="false"><\/svg>'/);
 });
 
-test('illustrated header: night follows illustration_theme, then sun.sun, then the dark mode', () => {
+test('illustrated header: night follows illustration_theme, then sun.sun or the dark mode (even with the sun up)', () => {
   const sun = (state) => ({ states: { 'sun.sun': { state } }, themes: { darkMode: false } });
   assert.equal(iptvIsNight(sun('below_horizon'), {}), true);
   assert.equal(iptvIsNight(sun('above_horizon'), {}), false);
   assert.equal(iptvIsNight(sun('below_horizon'), { illustration_theme: 'day' }), false);
   assert.equal(iptvIsNight(sun('above_horizon'), { illustration_theme: 'night' }), true);
   assert.equal(iptvIsNight({ states: {}, themes: { darkMode: true } }, {}), true);
+  const darkDay = { states: { 'sun.sun': { state: 'above_horizon' } }, themes: { darkMode: true } };
+  assert.equal(iptvIsNight(darkDay, {}), true);
+  assert.equal(iptvIsNight(darkDay, { illustration_theme: 'day' }), false);
   assert.equal(iptvIsNight({ states: {}, themes: { darkMode: false } }, { illustration_theme: 'auto' }), false);
 });
 
