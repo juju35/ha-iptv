@@ -8,7 +8,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_CARD_VERSION = '3.34.0';
+var IPTV_CARD_VERSION = '3.34.1';
 var IPTV_DOMAIN = 'iptv';
 
 // ── i18n ──────────────────────────────────────────────────────────────────────
@@ -91,7 +91,7 @@ var IptvCardI18n = {
     ed_zoom: 'Detail button',
     ed_illustration: 'Illustrated header',
     ed_illustration_theme: 'Illustration theme',
-    theme_auto: 'Automatic (sun or dark theme)',
+    theme_auto: 'Automatic (follows the theme)',
     theme_day: 'Day',
     theme_night: 'Night',
     zoom_in: 'Show the full card',
@@ -183,7 +183,7 @@ var IptvCardI18n = {
     ed_zoom: 'Bouton détail',
     ed_illustration: 'En-tête illustré',
     ed_illustration_theme: 'Thème de l’illustration',
-    theme_auto: 'Automatique (soleil ou thème sombre)',
+    theme_auto: 'Automatique (suit le thème)',
     theme_day: 'Jour',
     theme_night: 'Nuit',
     zoom_in: 'Afficher la carte complète',
@@ -275,7 +275,7 @@ var IptvCardI18n = {
     ed_zoom: 'Detail-Schaltfläche',
     ed_illustration: 'Illustrierte Kopfzeile',
     ed_illustration_theme: 'Illustrationsthema',
-    theme_auto: 'Automatisch (Sonne oder dunkles Design)',
+    theme_auto: 'Automatisch (folgt dem Thema)',
     theme_day: 'Tag',
     theme_night: 'Nacht',
     zoom_in: 'Vollständige Karte anzeigen',
@@ -367,7 +367,7 @@ var IptvCardI18n = {
     ed_zoom: 'Botón de detalle',
     ed_illustration: 'Encabezado ilustrado',
     ed_illustration_theme: 'Tema de la ilustración',
-    theme_auto: 'Automático (sol o tema oscuro)',
+    theme_auto: 'Automático (sigue el tema)',
     theme_day: 'Día',
     theme_night: 'Noche',
     zoom_in: 'Mostrar la tarjeta completa',
@@ -459,7 +459,7 @@ var IptvCardI18n = {
     ed_zoom: 'Pulsante dettagli',
     ed_illustration: 'Intestazione illustrata',
     ed_illustration_theme: 'Tema dell’illustrazione',
-    theme_auto: 'Automatico (sole o tema scuro)',
+    theme_auto: 'Automatico (segue il tema)',
     theme_day: 'Giorno',
     theme_night: 'Notte',
     zoom_in: 'Mostra la scheda completa',
@@ -551,7 +551,7 @@ var IptvCardI18n = {
     ed_zoom: 'Detailknop',
     ed_illustration: 'Geïllustreerde koptekst',
     ed_illustration_theme: 'Thema van de illustratie',
-    theme_auto: 'Automatisch (zon of donker thema)',
+    theme_auto: 'Automatisch (volgt het thema)',
     theme_day: 'Dag',
     theme_night: 'Nacht',
     zoom_in: 'Volledige kaart tonen',
@@ -643,7 +643,7 @@ var IptvCardI18n = {
     ed_zoom: 'Botão de detalhe',
     ed_illustration: 'Cabeçalho ilustrado',
     ed_illustration_theme: 'Tema da ilustração',
-    theme_auto: 'Automático (sol ou tema escuro)',
+    theme_auto: 'Automático (segue o tema)',
     theme_day: 'Dia',
     theme_night: 'Noite',
     zoom_in: 'Mostrar o cartão completo',
@@ -735,7 +735,7 @@ var IptvCardI18n = {
     ed_zoom: 'Przycisk szczegółów',
     ed_illustration: 'Ilustrowany nagłówek',
     ed_illustration_theme: 'Motyw ilustracji',
-    theme_auto: 'Automatyczny (słońce lub ciemny motyw)',
+    theme_auto: 'Automatycznie (według motywu)',
     theme_day: 'Dzień',
     theme_night: 'Noc',
     zoom_in: 'Pokaż pełną kartę',
@@ -827,7 +827,7 @@ var IptvCardI18n = {
     ed_zoom: 'Buton de detalii',
     ed_illustration: 'Antet ilustrat',
     ed_illustration_theme: 'Tema ilustrației',
-    theme_auto: 'Automat (soare sau temă întunecată)',
+    theme_auto: 'Automat (urmează tema)',
     theme_day: 'Zi',
     theme_night: 'Noapte',
     zoom_in: 'Afișează cardul complet',
@@ -919,7 +919,7 @@ var IptvCardI18n = {
     ed_zoom: 'Detaljeknap',
     ed_illustration: 'Illustreret overskrift',
     ed_illustration_theme: 'Illustrationstema',
-    theme_auto: 'Automatisk (sol eller mørkt tema)',
+    theme_auto: 'Automatisk (følger temaet)',
     theme_day: 'Dag',
     theme_night: 'Nat',
     zoom_in: 'Vis hele kortet',
@@ -1011,7 +1011,7 @@ var IptvCardI18n = {
     ed_zoom: 'Detaljknapp',
     ed_illustration: 'Illustrerad rubrik',
     ed_illustration_theme: 'Illustrationstema',
-    theme_auto: 'Automatiskt (sol eller mörkt tema)',
+    theme_auto: 'Automatiskt (följer temat)',
     theme_day: 'Dag',
     theme_night: 'Natt',
     zoom_in: 'Visa hela kortet',
@@ -1103,7 +1103,7 @@ var IptvCardI18n = {
     ed_zoom: 'Бутон за подробности',
     ed_illustration: 'Илюстрирана заглавна част',
     ed_illustration_theme: 'Тема на илюстрацията',
-    theme_auto: 'Автоматично (слънце или тъмна тема)',
+    theme_auto: 'Автоматично (следва темата)',
     theme_day: 'Ден',
     theme_night: 'Нощ',
     zoom_in: 'Покажи цялата карта',
@@ -1195,7 +1195,7 @@ var IptvCardI18n = {
     ed_zoom: 'Кнопка подробностей',
     ed_illustration: 'Иллюстрированный заголовок',
     ed_illustration_theme: 'Тема иллюстрации',
-    theme_auto: 'Автоматически (солнце или тёмная тема)',
+    theme_auto: 'Автоматически (по теме)',
     theme_day: 'День',
     theme_night: 'Ночь',
     zoom_in: 'Показать полную карточку',
@@ -1287,7 +1287,7 @@ var IptvCardI18n = {
     ed_zoom: 'Кнопка подробиць',
     ed_illustration: 'Ілюстрований заголовок',
     ed_illustration_theme: 'Тема ілюстрації',
-    theme_auto: 'Автоматично (сонце або темна тема)',
+    theme_auto: 'Автоматично (за темою)',
     theme_day: 'День',
     theme_night: 'Ніч',
     zoom_in: 'Показати повну картку',
@@ -1379,7 +1379,7 @@ var IptvCardI18n = {
     ed_zoom: 'Részletek gomb',
     ed_illustration: 'Illusztrált fejléc',
     ed_illustration_theme: 'Illusztráció témája',
-    theme_auto: 'Automatikus (nap vagy sötét téma)',
+    theme_auto: 'Automatikus (a témát követi)',
     theme_day: 'Nappal',
     theme_night: 'Éjszaka',
     zoom_in: 'A teljes kártya megjelenítése',
@@ -1471,7 +1471,7 @@ var IptvCardI18n = {
     ed_zoom: 'Tlačidlo podrobností',
     ed_illustration: 'Ilustrovaná hlavička',
     ed_illustration_theme: 'Téma ilustrácie',
-    theme_auto: 'Automaticky (slnko alebo tmavá téma)',
+    theme_auto: 'Automaticky (podľa témy)',
     theme_day: 'Deň',
     theme_night: 'Noc',
     zoom_in: 'Zobraziť celú kartu',
@@ -1563,7 +1563,7 @@ var IptvCardI18n = {
     ed_zoom: 'Tlačítko podrobností',
     ed_illustration: 'Ilustrované záhlaví',
     ed_illustration_theme: 'Motiv ilustrace',
-    theme_auto: 'Automaticky (slunce nebo tmavý motiv)',
+    theme_auto: 'Automaticky (podle motivu)',
     theme_day: 'Den',
     theme_night: 'Noc',
     zoom_in: 'Zobrazit celou kartu',
@@ -1655,7 +1655,7 @@ var IptvCardI18n = {
     ed_zoom: 'Gumb za podrobnosti',
     ed_illustration: 'Ilustrirana glava',
     ed_illustration_theme: 'Tema ilustracije',
-    theme_auto: 'Samodejno (sonce ali temna tema)',
+    theme_auto: 'Samodejno (sledi temi)',
     theme_day: 'Dan',
     theme_night: 'Noč',
     zoom_in: 'Prikaži celotno kartico',
@@ -1747,7 +1747,7 @@ var IptvCardI18n = {
     ed_zoom: 'Detaļu poga',
     ed_illustration: 'Ilustrēta galvene',
     ed_illustration_theme: 'Ilustrācijas motīvs',
-    theme_auto: 'Automātiski (saule vai tumšā tēma)',
+    theme_auto: 'Automātiski (seko tēmai)',
     theme_day: 'Diena',
     theme_night: 'Nakts',
     zoom_in: 'Rādīt pilno kartīti',
@@ -1839,7 +1839,7 @@ var IptvCardI18n = {
     ed_zoom: 'Κουμπί λεπτομερειών',
     ed_illustration: 'Εικονογραφημένη κεφαλίδα',
     ed_illustration_theme: 'Θέμα εικονογράφησης',
-    theme_auto: 'Αυτόματο (ήλιος ή σκοτεινό θέμα)',
+    theme_auto: 'Αυτόματο (ακολουθεί το θέμα)',
     theme_day: 'Ημέρα',
     theme_night: 'Νύχτα',
     zoom_in: 'Εμφάνιση πλήρους κάρτας',
@@ -1931,7 +1931,7 @@ var IptvCardI18n = {
     ed_zoom: 'Дугме за детаље',
     ed_illustration: 'Илустровано заглавље',
     ed_illustration_theme: 'Тема илустрације',
-    theme_auto: 'Аутоматски (сунце или тамна тема)',
+    theme_auto: 'Аутоматски (прати тему)',
     theme_day: 'Дан',
     theme_night: 'Ноћ',
     zoom_in: 'Прикажи целу картицу',
@@ -2023,7 +2023,7 @@ var IptvCardI18n = {
     ed_zoom: 'Dugme za detalje',
     ed_illustration: 'Ilustrovano zaglavlje',
     ed_illustration_theme: 'Tema ilustracije',
-    theme_auto: 'Automatski (sunce ili tamna tema)',
+    theme_auto: 'Automatski (prati temu)',
     theme_day: 'Dan',
     theme_night: 'Noć',
     zoom_in: 'Prikaži celu karticu',
@@ -2148,13 +2148,11 @@ var IPTV_SIZER = '<svg class="sizer" aria-hidden="true" focusable="false"></svg>
 var IPTV_THEMES = ['auto', 'day', 'night'];
 var iptvUidSeq = 0;
 
-// Night picture: forced by illustration_theme, else the sun below the horizon or Home Assistant's dark theme (dark mode alone without a valid sun.sun)
+// Night picture: forced by illustration_theme, else Home Assistant's dark theme alone (a light theme keeps the day picture after sunset)
 function iptvIsNight(hass, config) {
   var theme = config?.illustration_theme;
   if (theme === 'night') return true;
   if (theme === 'day') return false;
-  var sun = hass?.states?.['sun.sun'];
-  if (sun && sun.state !== 'unknown' && sun.state !== 'unavailable') return sun.state === 'below_horizon' || !!hass?.themes?.darkMode;
   return !!hass?.themes?.darkMode;
 }
 
@@ -2487,8 +2485,8 @@ class IptvCard extends HTMLElement {
   set hass(hass) {
     this._hass = hass;
     // Re-render only when one of our entities, a device name or the language changed
-    // (and the sun or the dark mode, for the illustration's night picture)
-    var parts = [hass.language, !!hass.user?.is_admin, hass.states?.['sun.sun']?.state, !!hass.themes?.darkMode];
+    // (and the dark mode, for the illustration's night picture)
+    var parts = [hass.language, !!hass.user?.is_admin, !!hass.themes?.darkMode];
     this._subs().forEach((sub) => {
       parts.push(`${sub.device}:${sub.name}`);
       Object.keys(sub.ids).forEach((k) => {
