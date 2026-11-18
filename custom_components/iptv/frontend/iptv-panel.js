@@ -2664,11 +2664,12 @@ class IptvPanel extends HTMLElement {
     .tabs { display:flex; gap:4px; padding:0 12px; overflow-x:auto; background:var(--app-header-background-color, var(--primary-color));
             position:sticky; top:var(--header-height, 56px); z-index:2; }
     .tablist { display:flex; gap:4px; }
-    .tabs ha-menu-button { display:none; color:var(--app-header-text-color, #fff); margin-left:-4px; align-self:center; }
+    /* The menu button is wrapped: its own styles (inline display) cannot show it while the toolbar is there */
+    .tabmenu { display:none; color:var(--app-header-text-color, #fff); margin-left:-4px; align-self:center; }
     /* Top bar hidden (Settings → Panel): the tabs at the very top, the sidebar menu in front of them */
     :host([hide-toolbar]) .toolbar { display:none; }
     :host([hide-toolbar]) .tabs { top:0; }
-    :host([hide-toolbar]) .tabs ha-menu-button { display:block; }
+    :host([hide-toolbar]) .tabmenu { display:flex; }
     :host([hide-toolbar]) .md-list { top:56px; }
     .general .acc-head .msg { flex:none; }
     .general .box select { flex:1; min-width:0; border:0; outline:0; background:none; color:inherit; font:inherit; font-size:14px; padding:8px 10px; }
@@ -3094,7 +3095,7 @@ class IptvPanel extends HTMLElement {
         <span class="grow">${iptvPanelEsc(this._t('title'))}</span>
         <a href="/config/integrations/integration/iptv" title="${iptvPanelEsc(this._t('open_integration'))}"><ha-icon icon="mdi:cog"></ha-icon></a>
       </div>
-      <div class="tabs"><ha-menu-button></ha-menu-button><div class="tablist" role="tablist">${IPTV_PANEL_TABS.map((tab) => this._tabHtml(tab)).join('')}</div></div>
+      <div class="tabs"><span class="tabmenu"><ha-menu-button></ha-menu-button></span><div class="tablist" role="tablist">${IPTV_PANEL_TABS.map((tab) => this._tabHtml(tab)).join('')}</div></div>
       <main>
         <section class="column" id="tab-accounts" role="tabpanel" aria-labelledby="tabbtn-accounts">${this._subsShell()}</section>
         <section class="column" id="tab-settings" role="tabpanel" aria-labelledby="tabbtn-settings"><div id="general"></div><div id="accounts" class="column"></div></section>
