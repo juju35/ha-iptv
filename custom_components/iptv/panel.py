@@ -23,6 +23,7 @@ from typing import Any
 
 import voluptuous as vol
 from homeassistant.components import panel_custom, websocket_api
+from homeassistant.components.frontend import DATA_PANELS, EVENT_PANELS_UPDATED
 from homeassistant.config_entries import ConfigEntry, ConfigEntryState
 from homeassistant.const import CONF_URL, CONF_USERNAME
 from homeassistant.core import HomeAssistant
@@ -94,7 +95,7 @@ async def async_register_panel(hass: HomeAssistant) -> None:
         sidebar_icon="mdi:television-play",
         module_url=f"{PANEL_URL}?v={VERSION}",
         require_admin=True,
-        # The settings as they were at startup, so the panel opens without a flash; it reads them again on load
+        # The settings in the panel config (kept up to date on save), so the panel opens without a flash
         config={"version": VERSION, **settings},
     )
     for command in (
@@ -223,4 +224,9 @@ async def _ws_update_panel_settings(
     store, settings = hass.data[PANEL_SETTINGS_DATA]
     settings.update({key: msg[key] for key in PANEL_SETTINGS_DEFAULTS if key in msg})
     await store.async_save(dict(settings))
+    # The panel config follows, so the panel opens with the right top bar on every device without waiting for
+    # iptv/panel_settings (no flash); the open frontends fetch the panels again on this event
+    if (panel := hass.data.get(DATA_PANELS, {}).get(PANEL_PATH)) is not None:
+        panel.config = {**(panel.config or {}), **settings}
+        hass.bus.async_fire(EVENT_PANELS_UPDATED)
     connection.send_result(msg["id"], {"ok": True, "settings": dict(settings)})

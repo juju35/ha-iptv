@@ -188,6 +188,9 @@ async def test_panel_settings_default_and_saved(hass, aioclient_mock, entry, has
     msg = await _ws(hass, hass_ws_client, {"type": "iptv/update_panel_settings", "hide_toolbar": "non_admin"})
     assert msg["result"] == {"ok": True, "settings": {"hide_toolbar": "non_admin"}}
     assert hass_storage["iptv.panel"]["data"] == {"hide_toolbar": "non_admin"}
+    # The panel config follows, so the next opening has no flash
+    assert hass.data[DATA_PANELS][PANEL_PATH].config["hide_toolbar"] == "non_admin"
+    assert hass.data[DATA_PANELS][PANEL_PATH].config["_panel_custom"]["name"] == "iptv-panel"
     msg = await _ws(hass, hass_ws_client, {"type": "iptv/panel_settings"})
     assert msg["result"] == {"hide_toolbar": "non_admin"}
 

@@ -744,6 +744,9 @@ test('subscriptions: Add sends the provider and the fields; an error keeps the f
 test('top bar: hidden for nobody, everyone or non-administrators only; the panel config gives the first value', () => {
   const panel = new IptvPanel();
   const attrs = {};
+  panel.panel = { config: { hide_toolbar: 'non_admin' } };
+  assert.equal(panel._toolbarHidden(), false, 'non-administrators only: not hidden before the user is known');
+  panel._panelSettings = { hide_toolbar: 'off' };
   panel.toggleAttribute = (name, on) => {
     attrs[name] = on;
   };

@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.35.1 - 2026-11-19
+
+### Fixes
+- Hidden top bar: no more flash when the panel opens. Saving the setting now updates the panel config right away (open frontends fetch it again), so the bar is hidden from the first render instead of after reading the setting; with **For non-administrators only**, an administrator no longer sees it hidden then shown.
+
 ## 3.35.0 - 2026-11-19
 
 ### Features

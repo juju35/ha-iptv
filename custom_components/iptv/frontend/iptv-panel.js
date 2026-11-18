@@ -13,7 +13,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_PANEL_VERSION = '3.35.0';
+var IPTV_PANEL_VERSION = '3.35.1';
 
 var IptvPanelI18n = {
   en: {
@@ -2881,7 +2881,7 @@ class IptvPanel extends HTMLElement {
     });
   }
 
-  // The settings as they were when Home Assistant started, so the top bar does not flash; read again on load
+  // The settings in the panel config (updated on save), so the top bar is right from the first render
   set panel(panel) {
     this._panel = panel;
     var mode = panel?.config?.hide_toolbar;
@@ -2892,7 +2892,9 @@ class IptvPanel extends HTMLElement {
   // Whether the top bar is hidden for the current user
   _toolbarHidden() {
     var mode = this._panelSettings.hide_toolbar;
-    return mode === 'all' || (mode === 'non_admin' && !this._hass?.user?.is_admin);
+    // Non-administrators only: decided once the user is known (Home Assistant sets hass before the first render),
+    // so an administrator never sees the bar hidden then shown again
+    return mode === 'all' || (mode === 'non_admin' && !!this._hass?.user && !this._hass.user.is_admin);
   }
 
   // The top bar hidden: the tabs stick to the top, the sidebar menu (a phone) moves in front of them
