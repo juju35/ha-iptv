@@ -327,12 +327,13 @@ def mount_panel(context, shot):
     page.evaluate(
         """({states, entities, devices, accounts, dark, tab}) => {
           const el = document.createElement("iptv-panel");
-          el.panel = {config: {}};
+          el.panel = {config: {hide_toolbar: "off"}};
           el.narrow = false;
           el.hass = {states, entities, devices, user: {is_admin: true}, language: "en", locale: {language: "en"},
             themes: {darkMode: dark}, callService: () => Promise.resolve(),
             callWS: (msg) => Promise.resolve(msg.type === "iptv/accounts" ? {accounts}
-              : msg.type === "iptv/get_credentials" ? {ok: true, password: "example-pass"} : {ok: true}),
+              : msg.type === "iptv/get_credentials" ? {ok: true, password: "example-pass"}
+              : msg.type === "iptv/panel_settings" ? {hide_toolbar: "off"} : {ok: true}),
             connection: {subscribeMessage: () => Promise.resolve(() => {})}};
           document.getElementById("root").appendChild(el);
           el._goTab(tab);
