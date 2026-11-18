@@ -11,6 +11,10 @@ account backed by the WebSocket commands below:
 - ``iptv/check_account``: refreshes the subscription and runs a health check now.
 - ``iptv/remove_account``: removes an account by its config entry, also one
   that never finished its setup (no device, so the card cannot list it).
+- ``iptv/panel_settings`` / ``iptv/update_panel_settings``: the panel's own
+  settings, shared by every user (stored in ``.storage/iptv.panel``):
+  ``hide_toolbar`` hides its top bar for nobody (``off``), everyone (``all``)
+  or non-administrators only (``non_admin``).
 """
 
 from __future__ import annotations
@@ -23,6 +27,7 @@ from homeassistant.config_entries import ConfigEntry, ConfigEntryState
 from homeassistant.const import CONF_URL, CONF_USERNAME
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers.storage import Store
 
 from .const import (
     CONF_ADDED_AT,
@@ -59,6 +64,12 @@ OPTION_DEFAULTS = {
     CONF_STREAM_CHECK: DEFAULT_STREAM_CHECK,
 }
 
+# The panel's own settings, shared by every user
+PANEL_SETTINGS_KEY = f"{DOMAIN}.panel"
+PANEL_SETTINGS_DATA = f"{DOMAIN}_panel_settings"
+HIDE_TOOLBAR_MODES = ("off", "all", "non_admin")
+PANEL_SETTINGS_DEFAULTS = {"hide_toolbar": "off"}
+
 OPTIONS_SCHEMA = {
     vol.Optional(CONF_SCAN_INTERVAL): vol.All(vol.Coerce(int), vol.Range(MIN_SCAN_INTERVAL, MAX_SCAN_INTERVAL)),
     vol.Optional(CONF_NOTIFY_DAYS): vol.All(vol.Coerce(int), vol.Range(0, MAX_NOTIFY_DAYS)),
@@ -69,6 +80,12 @@ OPTIONS_SCHEMA = {
 
 async def async_register_panel(hass: HomeAssistant) -> None:
     """Add the IPTV entry to the sidebar (administrators only) and its commands."""
+    store: Store[dict[str, Any]] = Store(hass, 1, PANEL_SETTINGS_KEY)
+    stored = await store.async_load() or {}
+    settings = {key: stored.get(key, default) for key, default in PANEL_SETTINGS_DEFAULTS.items()}
+    if settings["hide_toolbar"] not in HIDE_TOOLBAR_MODES:
+        settings["hide_toolbar"] = "off"
+    hass.data[PANEL_SETTINGS_DATA] = (store, settings)
     await panel_custom.async_register_panel(
         hass,
         frontend_url_path=PANEL_PATH,
@@ -77,9 +94,17 @@ async def async_register_panel(hass: HomeAssistant) -> None:
         sidebar_icon="mdi:television-play",
         module_url=f"{PANEL_URL}?v={VERSION}",
         require_admin=True,
-        config={"version": VERSION},
+        # The settings as they were at startup, so the panel opens without a flash; it reads them again on load
+        config={"version": VERSION, **settings},
     )
-    for command in (_ws_accounts, _ws_update_account, _ws_check_account, _ws_remove_account):
+    for command in (
+        _ws_accounts,
+        _ws_update_account,
+        _ws_check_account,
+        _ws_remove_account,
+        _ws_panel_settings,
+        _ws_update_panel_settings,
+    ):
         websocket_api.async_register_command(hass, command)
 
 
@@ -174,3 +199,28 @@ async def _ws_remove_account(hass: HomeAssistant, connection: websocket_api.Acti
     if found:
         await hass.config_entries.async_remove(msg["entry_id"])
     connection.send_result(msg["id"], {"ok": True} if found else {"ok": False, "error": "not_found"})
+
+
+@websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/panel_settings"})
+@websocket_api.callback
+def _ws_panel_settings(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]) -> None:
+    # Not admin-only: how the panel looks is no secret, and the "non-administrators" mode needs it
+    _store, settings = hass.data[PANEL_SETTINGS_DATA]
+    connection.send_result(msg["id"], dict(settings))
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): f"{DOMAIN}/update_panel_settings",
+        vol.Optional("hide_toolbar"): vol.In(HIDE_TOOLBAR_MODES),
+    }
+)
+@websocket_api.require_admin
+@websocket_api.async_response
+async def _ws_update_panel_settings(
+    hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]
+) -> None:
+    store, settings = hass.data[PANEL_SETTINGS_DATA]
+    settings.update({key: msg[key] for key in PANEL_SETTINGS_DEFAULTS if key in msg})
+    await store.async_save(dict(settings))
+    connection.send_result(msg["id"], {"ok": True, "settings": dict(settings)})

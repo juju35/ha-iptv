@@ -8,11 +8,12 @@
  * iptv/check_account WebSocket commands; an account that never finished its setup (no device, so the card cannot
  * list it) gets a Remove action (iptv/remove_account). The list follows config entry changes
  * (config_entries/subscribe), so an account added or removed from the card shows up here. The tab is in the
- * address (/iptv-config/settings).
+ * address (/iptv-config/settings). Above the accounts, the Settings tab holds the panel's own settings, shared by every
+ * user (iptv/panel_settings, iptv/update_panel_settings): its top bar hidden for nobody, everyone or non-administrators.
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_PANEL_VERSION = '3.34.1';
+var IPTV_PANEL_VERSION = '3.35.0';
 
 var IptvPanelI18n = {
   en: {
@@ -123,6 +124,12 @@ var IptvPanelI18n = {
     p_health_stream_ko: 'Stream down',
     p_health_auth_failed: 'Credentials refused',
     all_accounts: 'All accounts',
+    panel_display: 'Panel',
+    f_hide_toolbar: 'Hide the top bar',
+    f_hide_toolbar_hint: 'The tabs stay; on a phone the sidebar menu moves next to them',
+    hide_off: 'No',
+    hide_all: 'For everyone',
+    hide_non_admin: 'For non-administrators only',
   },
   fr: {
     title: 'IPTV',
@@ -232,6 +239,12 @@ var IptvPanelI18n = {
     p_health_stream_ko: 'Flux KO',
     p_health_auth_failed: 'Identifiants refusés',
     all_accounts: 'Tous les comptes',
+    panel_display: 'Panneau',
+    f_hide_toolbar: 'Masquer la barre du haut',
+    f_hide_toolbar_hint: 'Les onglets restent ; sur téléphone, le menu latéral passe à côté d’eux',
+    hide_off: 'Non',
+    hide_all: 'Pour tout le monde',
+    hide_non_admin: 'Seulement pour les non-administrateurs',
   },
   de: {
     title: 'IPTV',
@@ -341,6 +354,12 @@ var IptvPanelI18n = {
     p_health_stream_ko: 'Stream ausgefallen',
     p_health_auth_failed: 'Zugangsdaten abgelehnt',
     all_accounts: 'Alle Konten',
+    panel_display: 'Panel',
+    f_hide_toolbar: 'Obere Leiste ausblenden',
+    f_hide_toolbar_hint: 'Die Tabs bleiben; auf dem Handy rückt das Seitenleistenmenü daneben',
+    hide_off: 'Nein',
+    hide_all: 'Für alle',
+    hide_non_admin: 'Nur für Nicht-Administratoren',
   },
   es: {
     title: 'IPTV',
@@ -450,6 +469,12 @@ var IptvPanelI18n = {
     p_health_stream_ko: 'Flujo caído',
     p_health_auth_failed: 'Credenciales rechazadas',
     all_accounts: 'Todas las cuentas',
+    panel_display: 'Panel',
+    f_hide_toolbar: 'Ocultar la barra superior',
+    f_hide_toolbar_hint: 'Las pestañas se mantienen; en el móvil, el menú lateral pasa junto a ellas',
+    hide_off: 'No',
+    hide_all: 'Para todos',
+    hide_non_admin: 'Solo para no administradores',
   },
   it: {
     title: 'IPTV',
@@ -559,6 +584,12 @@ var IptvPanelI18n = {
     p_health_stream_ko: 'Stream KO',
     p_health_auth_failed: 'Credenziali rifiutate',
     all_accounts: 'Tutti gli account',
+    panel_display: 'Pannello',
+    f_hide_toolbar: 'Nascondi la barra superiore',
+    f_hide_toolbar_hint: 'Le schede restano; sul telefono il menu laterale passa accanto a loro',
+    hide_off: 'No',
+    hide_all: 'Per tutti',
+    hide_non_admin: 'Solo per i non amministratori',
   },
   nl: {
     title: 'IPTV',
@@ -668,6 +699,12 @@ var IptvPanelI18n = {
     p_health_stream_ko: 'Geen stream',
     p_health_auth_failed: 'Inloggegevens geweigerd',
     all_accounts: 'Alle accounts',
+    panel_display: 'Paneel',
+    f_hide_toolbar: 'Bovenbalk verbergen',
+    f_hide_toolbar_hint: 'De tabbladen blijven; op een telefoon komt het zijbalkmenu ernaast',
+    hide_off: 'Nee',
+    hide_all: 'Voor iedereen',
+    hide_non_admin: 'Alleen voor niet-beheerders',
   },
   pt: {
     title: 'IPTV',
@@ -777,6 +814,12 @@ var IptvPanelI18n = {
     p_health_stream_ko: 'Sem stream',
     p_health_auth_failed: 'Credenciais recusadas',
     all_accounts: 'Todas as contas',
+    panel_display: 'Painel',
+    f_hide_toolbar: 'Ocultar a barra superior',
+    f_hide_toolbar_hint: 'Os separadores mantêm-se; no telemóvel, o menu lateral passa para junto deles',
+    hide_off: 'Não',
+    hide_all: 'Para todos',
+    hide_non_admin: 'Apenas para não administradores',
   },
   pl: {
     title: 'IPTV',
@@ -886,6 +929,12 @@ var IptvPanelI18n = {
     p_health_stream_ko: 'Brak streamu',
     p_health_auth_failed: 'Dane logowania odrzucone',
     all_accounts: 'Wszystkie konta',
+    panel_display: 'Panel',
+    f_hide_toolbar: 'Ukryj górny pasek',
+    f_hide_toolbar_hint: 'Karty pozostają; na telefonie menu boczne przechodzi obok nich',
+    hide_off: 'Nie',
+    hide_all: 'Dla wszystkich',
+    hide_non_admin: 'Tylko dla nie-administratorów',
   },
   ro: {
     title: 'IPTV',
@@ -995,6 +1044,12 @@ var IptvPanelI18n = {
     p_health_stream_ko: 'Flux oprit',
     p_health_auth_failed: 'Date de autentificare respinse',
     all_accounts: 'Toate conturile',
+    panel_display: 'Panou',
+    f_hide_toolbar: 'Ascunde bara de sus',
+    f_hide_toolbar_hint: 'Filele rămân; pe telefon, meniul lateral trece lângă ele',
+    hide_off: 'Nu',
+    hide_all: 'Pentru toți',
+    hide_non_admin: 'Doar pentru non-administratori',
   },
   da: {
     title: 'IPTV',
@@ -1104,6 +1159,12 @@ var IptvPanelI18n = {
     p_health_stream_ko: 'Stream nede',
     p_health_auth_failed: 'Loginoplysninger afvist',
     all_accounts: 'Alle konti',
+    panel_display: 'Panel',
+    f_hide_toolbar: 'Skjul den øverste bjælke',
+    f_hide_toolbar_hint: 'Fanerne bliver; på en telefon flytter sidebjælkemenuen ved siden af dem',
+    hide_off: 'Nej',
+    hide_all: 'For alle',
+    hide_non_admin: 'Kun for ikke-administratorer',
   },
   sv: {
     title: 'IPTV',
@@ -1213,6 +1274,12 @@ var IptvPanelI18n = {
     p_health_stream_ko: 'Stream nere',
     p_health_auth_failed: 'Inloggningsuppgifterna nekades',
     all_accounts: 'Alla konton',
+    panel_display: 'Panel',
+    f_hide_toolbar: 'Dölj den övre raden',
+    f_hide_toolbar_hint: 'Flikarna finns kvar; på en telefon flyttas sidofältsmenyn bredvid dem',
+    hide_off: 'Nej',
+    hide_all: 'För alla',
+    hide_non_admin: 'Endast för icke-administratörer',
   },
   bg: {
     title: 'IPTV',
@@ -1322,6 +1389,12 @@ var IptvPanelI18n = {
     p_health_stream_ko: 'Няма поток',
     p_health_auth_failed: 'Данните за вход са отхвърлени',
     all_accounts: 'Всички акаунти',
+    panel_display: 'Панел',
+    f_hide_toolbar: 'Скриване на горната лента',
+    f_hide_toolbar_hint: 'Разделите остават; на телефон страничното меню се премества до тях',
+    hide_off: 'Не',
+    hide_all: 'За всички',
+    hide_non_admin: 'Само за неадминистратори',
   },
   ru: {
     title: 'IPTV',
@@ -1431,6 +1504,12 @@ var IptvPanelI18n = {
     p_health_stream_ko: 'Нет потока',
     p_health_auth_failed: 'Учётные данные отклонены',
     all_accounts: 'Все аккаунты',
+    panel_display: 'Панель',
+    f_hide_toolbar: 'Скрыть верхнюю панель',
+    f_hide_toolbar_hint: 'Вкладки остаются; на телефоне боковое меню переходит к ним',
+    hide_off: 'Нет',
+    hide_all: 'Для всех',
+    hide_non_admin: 'Только для неадминистраторов',
   },
   uk: {
     title: 'IPTV',
@@ -1540,6 +1619,12 @@ var IptvPanelI18n = {
     p_health_stream_ko: 'Немає потоку',
     p_health_auth_failed: 'Облікові дані відхилено',
     all_accounts: 'Усі облікові записи',
+    panel_display: 'Панель',
+    f_hide_toolbar: 'Приховати верхню панель',
+    f_hide_toolbar_hint: 'Вкладки залишаються; на телефоні бічне меню переходить до них',
+    hide_off: 'Ні',
+    hide_all: 'Для всіх',
+    hide_non_admin: 'Лише для неадміністраторів',
   },
   hu: {
     title: 'IPTV',
@@ -1649,6 +1734,12 @@ var IptvPanelI18n = {
     p_health_stream_ko: 'Stream leállt',
     p_health_auth_failed: 'Elutasított hitelesítő adatok',
     all_accounts: 'Összes fiók',
+    panel_display: 'Panel',
+    f_hide_toolbar: 'Felső sáv elrejtése',
+    f_hide_toolbar_hint: 'A lapok megmaradnak; telefonon az oldalsáv menüje melléjük kerül',
+    hide_off: 'Nem',
+    hide_all: 'Mindenkinek',
+    hide_non_admin: 'Csak nem rendszergazdáknak',
   },
   sk: {
     title: 'IPTV',
@@ -1758,6 +1849,12 @@ var IptvPanelI18n = {
     p_health_stream_ko: 'Stream nefunguje',
     p_health_auth_failed: 'Prihlasovacie údaje boli odmietnuté',
     all_accounts: 'Všetky účty',
+    panel_display: 'Panel',
+    f_hide_toolbar: 'Skryť horný panel',
+    f_hide_toolbar_hint: 'Karty zostávajú; na telefóne sa bočná ponuka presunie vedľa nich',
+    hide_off: 'Nie',
+    hide_all: 'Pre všetkých',
+    hide_non_admin: 'Iba pre neadministrátorov',
   },
   cs: {
     title: 'IPTV',
@@ -1867,6 +1964,12 @@ var IptvPanelI18n = {
     p_health_stream_ko: 'Stream nefunguje',
     p_health_auth_failed: 'Přihlašovací údaje byly odmítnuty',
     all_accounts: 'Všechny účty',
+    panel_display: 'Panel',
+    f_hide_toolbar: 'Skrýt horní lištu',
+    f_hide_toolbar_hint: 'Karty zůstávají; na telefonu se boční nabídka přesune vedle nich',
+    hide_off: 'Ne',
+    hide_all: 'Pro všechny',
+    hide_non_admin: 'Jen pro neadministrátory',
   },
   sl: {
     title: 'IPTV',
@@ -1976,6 +2079,12 @@ var IptvPanelI18n = {
     p_health_stream_ko: 'Pretok ne deluje',
     p_health_auth_failed: 'Poverilnice so zavrnjene',
     all_accounts: 'Vsi računi',
+    panel_display: 'Plošča',
+    f_hide_toolbar: 'Skrij zgornjo vrstico',
+    f_hide_toolbar_hint: 'Zavihki ostanejo; na telefonu se stranski meni premakne poleg njih',
+    hide_off: 'Ne',
+    hide_all: 'Za vse',
+    hide_non_admin: 'Samo za neskrbnike',
   },
   lv: {
     title: 'IPTV',
@@ -2085,6 +2194,12 @@ var IptvPanelI18n = {
     p_health_stream_ko: 'Straume nedarbojas',
     p_health_auth_failed: 'Pieteikšanās dati noraidīti',
     all_accounts: 'Visi konti',
+    panel_display: 'Panelis',
+    f_hide_toolbar: 'Paslēpt augšējo joslu',
+    f_hide_toolbar_hint: 'Cilnes paliek; tālrunī sānjoslas izvēlne pārvietojas blakus tām',
+    hide_off: 'Nē',
+    hide_all: 'Visiem',
+    hide_non_admin: 'Tikai ne-administratoriem',
   },
   el: {
     title: 'IPTV',
@@ -2194,6 +2309,12 @@ var IptvPanelI18n = {
     p_health_stream_ko: 'Η ροή δεν λειτουργεί',
     p_health_auth_failed: 'Τα διαπιστευτήρια απορρίφθηκαν',
     all_accounts: 'Όλοι οι λογαριασμοί',
+    panel_display: 'Πίνακας',
+    f_hide_toolbar: 'Απόκρυψη της επάνω γραμμής',
+    f_hide_toolbar_hint: 'Οι καρτέλες παραμένουν· στο κινητό το πλευρικό μενού μετακινείται δίπλα τους',
+    hide_off: 'Όχι',
+    hide_all: 'Για όλους',
+    hide_non_admin: 'Μόνο για μη διαχειριστές',
   },
   sr: {
     title: 'IPTV',
@@ -2303,6 +2424,12 @@ var IptvPanelI18n = {
     p_health_stream_ko: 'Стрим не ради',
     p_health_auth_failed: 'Подаци за пријаву одбијени',
     all_accounts: 'Сви налози',
+    panel_display: 'Панел',
+    f_hide_toolbar: 'Сакриј горњу траку',
+    f_hide_toolbar_hint: 'Картице остају; на телефону бочни мени прелази поред њих',
+    hide_off: 'Не',
+    hide_all: 'За све',
+    hide_non_admin: 'Само за оне који нису администратори',
   },
   'sr-Latn': {
     title: 'IPTV',
@@ -2412,6 +2539,12 @@ var IptvPanelI18n = {
     p_health_stream_ko: 'Strim ne radi',
     p_health_auth_failed: 'Podaci za prijavu odbijeni',
     all_accounts: 'Svi nalozi',
+    panel_display: 'Panel',
+    f_hide_toolbar: 'Sakrij gornju traku',
+    f_hide_toolbar_hint: 'Kartice ostaju; na telefonu bočni meni prelazi pored njih',
+    hide_off: 'Ne',
+    hide_all: 'Za sve',
+    hide_non_admin: 'Samo za one koji nisu administratori',
   },
 };
 
@@ -2423,6 +2556,8 @@ var IPTV_PANEL_LIMITS = {
 };
 
 var IPTV_PANEL_TABS = ['accounts', 'settings'];
+// Who the top bar is hidden for (iptv/panel_settings): nobody, everyone, non-administrators only
+var IPTV_PANEL_HIDE_TOOLBAR = ['off', 'all', 'non_admin'];
 // Days left under which an active subscription is shown as expiring
 var IPTV_PANEL_WARNING_DAYS = 7;
 
@@ -2528,6 +2663,16 @@ class IptvPanel extends HTMLElement {
     /* Tabs under the toolbar, as in Smart Comfort: text, the active one underlined, sticky with the toolbar */
     .tabs { display:flex; gap:4px; padding:0 12px; overflow-x:auto; background:var(--app-header-background-color, var(--primary-color));
             position:sticky; top:var(--header-height, 56px); z-index:2; }
+    .tablist { display:flex; gap:4px; }
+    .tabs ha-menu-button { display:none; color:var(--app-header-text-color, #fff); margin-left:-4px; align-self:center; }
+    /* Top bar hidden (Settings → Panel): the tabs at the very top, the sidebar menu in front of them */
+    :host([hide-toolbar]) .toolbar { display:none; }
+    :host([hide-toolbar]) .tabs { top:0; }
+    :host([hide-toolbar]) .tabs ha-menu-button { display:block; }
+    :host([hide-toolbar]) .md-list { top:56px; }
+    .general .acc-head .msg { flex:none; }
+    .general .box select { flex:1; min-width:0; border:0; outline:0; background:none; color:inherit; font:inherit; font-size:14px; padding:8px 10px; }
+    .general .box select option { color:initial; }
     .tab { background:none; border:none; border-bottom:2px solid transparent; color:var(--app-header-text-color, #fff); opacity:.75;
            padding:12px 14px; font:inherit; font-size:14px; cursor:pointer; white-space:nowrap; }
     .tab:hover, .tab:focus-visible { opacity:1; outline:none; }
@@ -2668,6 +2813,10 @@ class IptvPanel extends HTMLElement {
     // Passwords revealed on request ({password, updatedAt}), kept in memory only while shown
     this._secrets = {};
     this._tab = 'accounts';
+    // The panel's own settings, shared by every user (iptv/panel_settings)
+    this._panelSettings = { hide_toolbar: 'off' };
+    this._generalStatus = null;
+    this._generalBusy = false;
   }
 
   // /iptv-config/<tab> opens that tab (Home Assistant sets the route; the base address is Subscriptions)
@@ -2715,7 +2864,10 @@ class IptvPanel extends HTMLElement {
     var first = !this._hass;
     var langBefore = this._lang();
     this._hass = hass;
-    if (this._menu) this._menu.hass = hass;
+    (this._menus || []).forEach((menu) => {
+      menu.hass = hass;
+    });
+    this._applyToolbar();
     if (first) this._start();
     else if (this._lang() !== langBefore) this._render();
     // Home Assistant makes a new state object only when an entity changes: the cards are drawn again only then
@@ -2724,11 +2876,88 @@ class IptvPanel extends HTMLElement {
 
   set narrow(narrow) {
     this._narrow = narrow;
-    if (this._menu) this._menu.narrow = narrow;
+    (this._menus || []).forEach((menu) => {
+      menu.narrow = narrow;
+    });
   }
 
+  // The settings as they were when Home Assistant started, so the top bar does not flash; read again on load
   set panel(panel) {
     this._panel = panel;
+    var mode = panel?.config?.hide_toolbar;
+    if (IPTV_PANEL_HIDE_TOOLBAR.includes(mode)) this._panelSettings = { ...this._panelSettings, hide_toolbar: mode };
+    this._applyToolbar();
+  }
+
+  // Whether the top bar is hidden for the current user
+  _toolbarHidden() {
+    var mode = this._panelSettings.hide_toolbar;
+    return mode === 'all' || (mode === 'non_admin' && !this._hass?.user?.is_admin);
+  }
+
+  // The top bar hidden: the tabs stick to the top, the sidebar menu (a phone) moves in front of them
+  _applyToolbar() {
+    this.toggleAttribute?.('hide-toolbar', this._toolbarHidden());
+  }
+
+  async _loadPanelSettings() {
+    try {
+      var res = await this._hass.callWS({ type: 'iptv/panel_settings' });
+      if (IPTV_PANEL_HIDE_TOOLBAR.includes(res?.hide_toolbar)) this._panelSettings = { ...this._panelSettings, ...res };
+    } catch (err) {
+      // an older backend or the connection down: keep what the panel config said
+      console.error('IPTV panel: could not read the panel settings', err);
+    }
+    this._applyToolbar();
+    this._renderGeneral();
+  }
+
+  async _savePanelSettings(changes) {
+    var before = this._panelSettings;
+    this._panelSettings = { ...before, ...changes };
+    this._applyToolbar();
+    this._generalBusy = true;
+    this._generalStatus = null;
+    this._renderGeneral();
+    try {
+      var res = await this._hass.callWS({ type: 'iptv/update_panel_settings', ...changes });
+      if (res?.settings) this._panelSettings = { ...this._panelSettings, ...res.settings };
+      this._generalStatus = { tone: 'good', text: this._t('saved') };
+    } catch (err) {
+      console.error('IPTV panel: could not save the panel settings', err);
+      this._panelSettings = before;
+      this._generalStatus = { tone: 'bad', text: this._t('err_generic') };
+    }
+    this._generalBusy = false;
+    this._applyToolbar();
+    this._renderGeneral();
+  }
+
+  // Settings tab, above the accounts: the panel's own settings (they apply to every user)
+  _renderGeneral() {
+    var box = this.shadowRoot?.getElementById?.('general');
+    if (!box) return;
+    var esc = iptvPanelEsc;
+    var mode = this._panelSettings.hide_toolbar;
+    var status = this._generalStatus;
+    var option = (value) => `<option value="${value}"${value === mode ? ' selected' : ''}>${esc(this._t(`hide_${value}`))}</option>`;
+    box.innerHTML = `<ha-card class="account general">
+        <div class="acc-head">
+          <div class="avatar"><ha-icon icon="mdi:page-layout-header"></ha-icon></div>
+          <div class="who"><div class="n">${esc(this._t('panel_display'))}</div></div>
+          ${status ? `<span class="msg ${status.tone}" role="status">${esc(status.text)}</span>` : ''}
+        </div>
+        <div class="grid">
+          <label class="ctl">
+            <span>${esc(this._t('f_hide_toolbar'))}</span>
+            <div class="box"><select data-general="hide_toolbar"${this._generalBusy ? ' disabled' : ''}>${IPTV_PANEL_HIDE_TOOLBAR.map(option).join('')}</select></div>
+            <small>${esc(this._t('f_hide_toolbar_hint'))}</small>
+          </label>
+        </div>
+      </ha-card>`;
+    box.querySelector('[data-general="hide_toolbar"]').addEventListener('change', (ev) => {
+      if (IPTV_PANEL_HIDE_TOOLBAR.includes(ev.target.value)) this._savePanelSettings({ hide_toolbar: ev.target.value });
+    });
   }
 
   // Home Assistant creates the panel as soon as its file has run and sets panel, narrow, route and hass right away.
@@ -2825,6 +3054,7 @@ class IptvPanel extends HTMLElement {
   }
 
   async _load() {
+    this._loadPanelSettings();
     try {
       var res = await this._hass.callWS({ type: 'iptv/accounts' });
       this._accounts = res.accounts || [];
@@ -2862,14 +3092,17 @@ class IptvPanel extends HTMLElement {
         <span class="grow">${iptvPanelEsc(this._t('title'))}</span>
         <a href="/config/integrations/integration/iptv" title="${iptvPanelEsc(this._t('open_integration'))}"><ha-icon icon="mdi:cog"></ha-icon></a>
       </div>
-      <div class="tabs" role="tablist">${IPTV_PANEL_TABS.map((tab) => this._tabHtml(tab)).join('')}</div>
+      <div class="tabs"><ha-menu-button></ha-menu-button><div class="tablist" role="tablist">${IPTV_PANEL_TABS.map((tab) => this._tabHtml(tab)).join('')}</div></div>
       <main>
         <section class="column" id="tab-accounts" role="tabpanel" aria-labelledby="tabbtn-accounts">${this._subsShell()}</section>
-        <section class="column" id="tab-settings" role="tabpanel" aria-labelledby="tabbtn-settings"><div id="accounts" class="column"></div></section>
+        <section class="column" id="tab-settings" role="tabpanel" aria-labelledby="tabbtn-settings"><div id="general"></div><div id="accounts" class="column"></div></section>
       </main>`;
-    this._menu = root.querySelector('ha-menu-button');
-    this._menu.hass = this._hass;
-    this._menu.narrow = this._narrow;
+    // Two menu buttons: the toolbar's, and the one in front of the tabs when the toolbar is hidden
+    this._menus = [...root.querySelectorAll('ha-menu-button')];
+    this._menus.forEach((menu) => {
+      menu.hass = this._hass;
+      menu.narrow = this._narrow;
+    });
     root.querySelectorAll('.tab').forEach((button) => {
       button.addEventListener('click', () => this._goTab(button.dataset.tab));
       // Left and right arrows move between the tabs, as in a native tab bar
@@ -2885,6 +3118,7 @@ class IptvPanel extends HTMLElement {
     this._bindSubs();
     this._renderAdd();
     this._renderSubs();
+    this._renderGeneral();
     this._renderAccounts();
   }
 

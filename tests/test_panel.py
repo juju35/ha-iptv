@@ -176,3 +176,39 @@ async def test_remove_entry_ignores_the_entry_being_removed(hass, aioclient_mock
         await async_remove_entry(hass, entry)
     # Only this account listed (still being removed): it was the last one, the resource goes
     resources.async_items.assert_called_once()
+
+
+async def test_panel_settings_default_and_saved(hass, aioclient_mock, entry, hass_ws_client, hass_storage):
+    """The top bar setting: off by default, saved for every user, in the panel config at the next start."""
+    await _setup(hass, aioclient_mock, entry)
+    assert hass.data[DATA_PANELS][PANEL_PATH].config["hide_toolbar"] == "off"
+    msg = await _ws(hass, hass_ws_client, {"type": "iptv/panel_settings"})
+    assert msg["result"] == {"hide_toolbar": "off"}
+
+    msg = await _ws(hass, hass_ws_client, {"type": "iptv/update_panel_settings", "hide_toolbar": "non_admin"})
+    assert msg["result"] == {"ok": True, "settings": {"hide_toolbar": "non_admin"}}
+    assert hass_storage["iptv.panel"]["data"] == {"hide_toolbar": "non_admin"}
+    msg = await _ws(hass, hass_ws_client, {"type": "iptv/panel_settings"})
+    assert msg["result"] == {"hide_toolbar": "non_admin"}
+
+    msg = await _ws(hass, hass_ws_client, {"type": "iptv/update_panel_settings", "hide_toolbar": "sometimes"})
+    assert not msg["success"]
+
+
+async def test_panel_settings_read_from_storage(hass, aioclient_mock, entry, hass_storage):
+    hass_storage["iptv.panel"] = {"version": 1, "key": "iptv.panel", "data": {"hide_toolbar": "all"}}
+    await _setup(hass, aioclient_mock, entry)
+    assert hass.data[DATA_PANELS][PANEL_PATH].config["hide_toolbar"] == "all"
+
+
+async def test_panel_settings_readable_by_non_admin_but_not_writable(
+    hass, aioclient_mock, entry, hass_ws_client, hass_read_only_access_token
+):
+    await _setup(hass, aioclient_mock, entry)
+    msg = await _ws(hass, hass_ws_client, {"type": "iptv/panel_settings"}, hass_read_only_access_token)
+    assert msg["result"] == {"hide_toolbar": "off"}
+    msg = await _ws(
+        hass, hass_ws_client, {"type": "iptv/update_panel_settings", "hide_toolbar": "all"}, hass_read_only_access_token
+    )
+    assert not msg["success"]
+    assert msg["error"]["code"] == "unauthorized"

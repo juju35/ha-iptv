@@ -740,3 +740,54 @@ test('subscriptions: Add sends the provider and the fields; an error keeps the f
   assert.equal(button.disabled, false);
   assert.ok(panel._adding, 'the form stays open');
 });
+
+test('top bar: hidden for nobody, everyone or non-administrators only; the panel config gives the first value', () => {
+  const panel = new IptvPanel();
+  const attrs = {};
+  panel.toggleAttribute = (name, on) => {
+    attrs[name] = on;
+  };
+  panel._hass = { language: 'en', user: { is_admin: true } };
+  assert.equal(panel._toolbarHidden(), false, 'off by default');
+  panel.panel = { url_path: 'iptv-config', config: { hide_toolbar: 'non_admin' } };
+  assert.equal(panel._toolbarHidden(), false, 'an administrator keeps it');
+  assert.equal(attrs['hide-toolbar'], false);
+  panel._hass = { language: 'en', user: { is_admin: false } };
+  panel._applyToolbar();
+  assert.equal(attrs['hide-toolbar'], true, 'a non-administrator does not');
+  panel.panel = { config: { hide_toolbar: 'all' } };
+  panel._hass = { language: 'en', user: { is_admin: true } };
+  assert.equal(panel._toolbarHidden(), true, 'everyone');
+  panel.panel = { config: { hide_toolbar: 'bogus' } };
+  assert.equal(panel._panelSettings.hide_toolbar, 'all', 'an unknown value is ignored');
+});
+
+test('top bar: the setting is read on load and saved for everyone; a failed save goes back', async () => {
+  const panel = new IptvPanel();
+  const calls = [];
+  let fail = false;
+  panel._hass = {
+    language: 'en',
+    user: { is_admin: true },
+    callWS: async (msg) => {
+      calls.push(msg);
+      if (msg.type === 'iptv/panel_settings') return { hide_toolbar: 'all' };
+      if (msg.type === 'iptv/update_panel_settings') {
+        if (fail) throw new Error('unknown_error');
+        return { ok: true, settings: { hide_toolbar: msg.hide_toolbar } };
+      }
+      return { accounts: [] };
+    },
+  };
+  await panel._loadPanelSettings();
+  assert.equal(panel._panelSettings.hide_toolbar, 'all');
+  await panel._savePanelSettings({ hide_toolbar: 'non_admin' });
+  assert.equal(calls.at(-1).type, 'iptv/update_panel_settings');
+  assert.equal(calls.at(-1).hide_toolbar, 'non_admin');
+  assert.equal(panel._panelSettings.hide_toolbar, 'non_admin');
+  assert.equal(panel._generalStatus.tone, 'good');
+  fail = true;
+  await panel._savePanelSettings({ hide_toolbar: 'off' });
+  assert.equal(panel._panelSettings.hide_toolbar, 'non_admin', 'back to the saved value');
+  assert.equal(panel._generalStatus.tone, 'bad');
+});

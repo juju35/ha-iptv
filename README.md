@@ -141,6 +141,8 @@ The integration adds an **IPTV** entry to the sidebar, shown to administrators o
   - **Remove**, for an account that never finished its setup (no device, so the card cannot list it), after a confirmation at the top of the account;
   - a link to the account's device. The cog in the toolbar opens **Devices & services**.
 
+  Above the accounts, **Panel** holds the panel's own settings, shared by every user: **Hide the top bar** — **No**, **For everyone** or **For non-administrators only**. The tabs then stick to the top of the page, and on a phone the sidebar menu button moves in front of them.
+
 Saving a new name renames the device and the expiration notification in place; changing an option reloads that account once. The account list never carries the passwords: a password is fetched only when you show or copy it, through the admin-only `iptv/get_credentials` command, and forgotten when hidden or when you leave the page. To hide the entry, long-press the sidebar title and hide **IPTV**, like any other panel.
 
 ### Entities

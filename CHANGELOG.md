@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.35.0 - 2026-11-19
+
+### Features
+- **Hide the panel's top bar.** New **Panel** section at the top of the Settings tab: **Hide the top bar** for nobody, everyone or non-administrators only. The setting is shared by every user (stored in `.storage/iptv.panel`, read through the new `iptv/panel_settings` command, changed by administrators with `iptv/update_panel_settings`); the tabs then stick to the top of the page and, on a phone, the sidebar menu button moves in front of them.
+
 ## 3.34.1 - 2026-11-18
 
 ### Fixes
