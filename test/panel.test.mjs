@@ -839,7 +839,7 @@ test('redesign: the Settings list starts with the Panel entry, which says who th
   const panel = new IptvPanel();
   panel._hass = { language: 'en' };
   panel._panelSettings = { hide_toolbar: 'non_admin' };
-  assert.match(panel._generalItem(), /data-select="__panel__"[\s\S]*Hide the top bar · For non-administrators only/);
+  assert.match(panel._generalItem(), /data-select="__panel__"[\s\S]*Hide the top bar · For non-admins/);
   const page = panel._generalHtml();
   assert.match(page, /role="radiogroup"/);
   assert.match(page, /value="non_admin" data-general="hide_toolbar" checked/);

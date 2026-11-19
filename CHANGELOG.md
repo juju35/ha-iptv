@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.37.1 - 2026-11-19
+
+### Fixes
+- **Panel, aligned with the other ha-* panels**: the name in the top bar at 20 px, as on the ENT ONE, GitHub and Smart Comfort panels; **Hide the top bar** worded as everywhere else — No, For everyone, For non-admins — in every language.
+
 ## 3.37.0 - 2026-11-19
 
 ### Features
