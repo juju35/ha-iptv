@@ -815,14 +815,24 @@ test('redesign: tiles sorted by severity with their message; the banner counts t
     const summary = iptvPanelSummary(hass, sub.ids);
     return { sub, summary, sev: summary.status === 'p_auth_failed' ? { tone: 'bad' } : { tone: 'warn' } };
   });
-  const hero = panel._heroHtml(rows);
-  assert.match(hero, /2 subscriptions/);
+  const counts = { good: 0, warn: 1, bad: 1 };
+  const hero = panel._heroHtml(rows, counts);
+  assert.match(hero, /class="name">IPTV</, 'the top bar carries the panel title');
   assert.match(hero, /To fix: 1/);
-  assert.match(hero, /Expiring soon: 1/);
+  assert.match(hero, /2 subscriptions/);
   assert.match(hero, /class="scene offline"/);
   assert.match(hero, /data-add/);
   assert.match(hero, /data-refresh/);
-  assert.match(panel._heroHtml([]), /No subscription yet[\s\S]*class="scene idle"/);
+  assert.match(hero, /href="\/config\/integrations\/integration\/iptv"/, 'Devices & services in its corner');
+  assert.match(panel._heroHtml([], { good: 0, warn: 0, bad: 0 }), /No subscription yet[\s\S]*class="scene idle"/);
+  const overview = panel._overviewHtml(rows, counts);
+  assert.match(overview, /data-filter="" aria-pressed="true">All: 2/, 'the state filter, All chosen');
+  assert.match(overview, /data-filter="bad"[^>]*><i class="dot bad"><\/i>To fix: 1/);
+  assert.match(overview, /data-filter="warn"[^>]*><i class="dot warn"><\/i>Expiring soon: 1/);
+  assert.doesNotMatch(overview, /data-filter="good"/, 'no chip for a state nobody is in');
+  assert.match(overview, /class="otile bad" data-filter="bad">[\s\S]*pbadge">1</, 'the To fix tile, with its count');
+  assert.match(overview, /Next expiration[\s\S]*5 days left/);
+  assert.equal(panel._overviewHtml([], { good: 0, warn: 0, bad: 0 }), '', 'nothing over an empty list');
 });
 
 test('redesign: the Settings list starts with the Panel entry, which says who the top bar is hidden for', () => {

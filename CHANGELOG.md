@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.37.0 - 2026-11-19
+
+### Features
+- **Sidebar panel laid out like the ENT ONE panel**: the living-room banner is the panel's top bar, across the page — the TV showing the worst state, the title with its status, how many subscriptions and the next expiration, and Add, Refresh and Devices & services as round buttons in its corner (the blue toolbar is gone). The tabs sit under it, sticky, the active one underlined; Subscriptions shows how many need fixing. *Hide the top bar* hides this banner, the tabs staying.
+- **Subscriptions**: a filter by state (All, To fix, Expiring soon, Active) and four tiles over the subscriptions — to fix, next expiration, how many answer (with the mean response time), connections in use; the To fix and expiring tiles filter too.
+
 ## 3.36.0 - 2026-11-19
 
 ### Features
