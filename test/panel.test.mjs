@@ -508,7 +508,8 @@ test('Remove asks first at the top of the account, as a dialog, focus on Cancel 
   action(box, 'e1', 'remove').focus();
   panel._askRemove(panel._accounts[0]);
   const html = box.html.slice(box.html.indexOf('<ha-card'));
-  assert.ok(html.indexOf('class="confirm"') < html.indexOf('class="acc-head"'), 'the confirmation is at the top');
+  assert.ok(html.indexOf('class="body"') < html.indexOf('class="confirm"'), 'the confirmation is under the banner');
+  assert.ok(html.indexOf('class="confirm"') < html.indexOf('class="group"'), 'the confirmation is at the top of the account');
   assert.match(html, /role="dialog" aria-modal="true" aria-labelledby="cf-t-e1" aria-describedby="cf-m-e1"/);
   assert.match(html, /id="cf-m-e1">Provider A never finished its setup/);
   assert.equal(root.activeElement, action(box, 'e1', 'cancel'));
@@ -793,4 +794,44 @@ test('top bar: the setting is read on load and saved for everyone; a failed save
   await panel._savePanelSettings({ hide_toolbar: 'off' });
   assert.equal(panel._panelSettings.hide_toolbar, 'non_admin', 'back to the saved value');
   assert.equal(panel._generalStatus.tone, 'bad');
+});
+
+test('redesign: tiles sorted by severity with their message; the banner counts them and shows the red cross', () => {
+  const panel = new IptvPanel();
+  // The tiles count the days from now: an expiration 5 days ahead
+  const hass = subsHass({ 'sensor.a_expiration': { state: new Date(Date.now() + 4.5 * 86400000).toISOString() } });
+  panel._hass = hass;
+  const subs = iptvPanelSubscriptions(hass);
+  const b = panel._subCard(subs.find((s) => s.device === 'dB'));
+  assert.match(b, /class="alert bad"/);
+  assert.match(b, /refuses the credentials: edit them in Settings/);
+  assert.match(b, /data-check/);
+  const a = panel._subCard(subs.find((s) => s.device === 'dA'));
+  assert.match(a, /class="alert warn"/, 'expiring: a message, no Check now');
+  assert.doesNotMatch(a, /data-check/);
+  assert.match(a, /Active · 5 days left/);
+  assert.match(a, /class="slots warn"><i class="on"><\/i><i class=""><\/i>/, 'the connection slots as dots');
+  const rows = subs.map((sub) => {
+    const summary = iptvPanelSummary(hass, sub.ids);
+    return { sub, summary, sev: summary.status === 'p_auth_failed' ? { tone: 'bad' } : { tone: 'warn' } };
+  });
+  const hero = panel._heroHtml(rows);
+  assert.match(hero, /2 subscriptions/);
+  assert.match(hero, /To fix: 1/);
+  assert.match(hero, /Expiring soon: 1/);
+  assert.match(hero, /class="scene offline"/);
+  assert.match(hero, /data-add/);
+  assert.match(hero, /data-refresh/);
+  assert.match(panel._heroHtml([]), /No subscription yet[\s\S]*class="scene idle"/);
+});
+
+test('redesign: the Settings list starts with the Panel entry, which says who the top bar is hidden for', () => {
+  const panel = new IptvPanel();
+  panel._hass = { language: 'en' };
+  panel._panelSettings = { hide_toolbar: 'non_admin' };
+  assert.match(panel._generalItem(), /data-select="__panel__"[\s\S]*Hide the top bar · For non-administrators only/);
+  const page = panel._generalHtml();
+  assert.match(page, /role="radiogroup"/);
+  assert.match(page, /value="non_admin" data-general="hide_toolbar" checked/);
+  assert.match(page, /Administrators keep the bar/);
 });

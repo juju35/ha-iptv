@@ -133,15 +133,17 @@ The notification names the account and its expiration date, is refreshed once a 
 
 The integration adds an **IPTV** entry to the sidebar, shown to administrators only (`/iptv-config`), with two tabs, each with its own address (`/iptv-config`, `/iptv-config/settings`), so a reload or a link comes back to the same tab:
 
-- **Subscriptions**: drawn by the panel itself, at once — one card per subscription (state, expiration with the days left and how much of the subscription is left, channels, movies, series, connections, health check, French lists, trial), **Add account** and **Remove account** in place, **Settings** (that account in the Settings tab), **Refresh**; in a grid on a wide screen, one under the other on a phone;
-- **Settings**, one account at a time: the accounts listed on the left (type, login, a dot for their state, a • while one has unsaved changes), the chosen one on the right — on a phone, the list then the account, with **All accounts** to go back:
-  - the credentials of the account: username (or MAC address) and password, masked until you click the eye, with a copy button, and **Edit credentials** in place (server URL, username and password or MAC address; a blank password is kept);
-  - a settings form: name (blank = the server name), refresh interval, notification before expiration, health check interval and stream test — the same options and limits as **Configure**;
-  - **Check now**: refreshes the subscription and runs a health check right away (retries the setup of an account that failed to start);
+- **Subscriptions**: drawn by the panel itself, at once, in the style of the card. A living-room banner on top: its TV shows the worst state (a live channel while everything is fine or expiring, a red cross as soon as one subscription fails, a dark screen in standby when there is none), with the number of subscriptions, how many are active, expiring soon or failing, and the next expiration; **Add account** and **Refresh** are the round buttons in its corner. Under it, one tile per subscription, the failing ones first, then the expiring ones: a glyph on its round icon (tick, exclamation mark, cross) and a coloured state line (a click opens the status entity), **Settings** (that account in the Settings tab) and **Remove account** at the top right, a message when something is wrong (server not answering, credentials refused, subscription ended, test channel down — with **Check now** — or the expiration coming), the expiration with the days left and how much of the subscription is left, channels, movies, series and connections (the slots as dots), then the health check, the French lists, the trial and when it was last checked; in a grid on a wide screen, one under the other on a phone;
+- **Settings**, one page at a time: the list on the left — **General** (the **Panel** entry) then **Accounts** (type, login, a glyph of their state on the icon, a • while one has unsaved changes) — and the chosen page on the right; on a phone, the list then the page, with **All accounts** to go back. An account's page opens on a banner with its state (the card's TV), its name, its server and **Check now**, then three groups of rows:
+  - **Credentials**: username (or MAC address) and password, masked until you click the eye, with a copy button, and **Edit credentials** in place (server URL, username and password or MAC address; a blank password is kept);
+  - **Account** (name — blank = the server name —, refresh interval, notification before expiration) and **Health check** (its interval, the stream test) — the same options and limits as **Configure**, saved with **Save**;
+  - **Check now** (the stethoscope in the banner): refreshes the subscription and runs a health check right away (retries the setup of an account that failed to start);
   - **Remove**, for an account that never finished its setup (no device, so the card cannot list it), after a confirmation at the top of the account;
   - a link to the account's device. The cog in the toolbar opens **Devices & services**.
 
-  Above the accounts, **Panel** holds the panel's own settings, shared by every user: **Hide the top bar** — **No**, **For everyone** or **For non-administrators only**. The tabs then stick to the top of the page, and on a phone the sidebar menu button moves in front of them.
+  The **Panel** entry holds the panel's own settings, shared by every user: **Hide the top bar** — **No**, **For everyone** or **For non-administrators only**, saved as soon as it is chosen. The tabs then stick to the top of the page, and on a phone the sidebar menu button moves in front of them.
+
+  The banners follow the theme: the night picture with a dark theme, the day one with a light theme. The animations stop when the device asks for reduced motion.
 
 Saving a new name renames the device and the expiration notification in place; changing an option reloads that account once. The account list never carries the passwords: a password is fetched only when you show or copy it, through the admin-only `iptv/get_credentials` command, and forgotten when hidden or when you leave the page. To hide the entry, long-press the sidebar title and hide **IPTV**, like any other panel.
 
@@ -280,7 +282,14 @@ The sidebar entry carries a red badge with the number of failing accounts, like 
 |---|---|
 | <img src="https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/sidebar.png" alt="IPTV sidebar entry with the failing-accounts badge" width="260"> | <img src="https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/sidebar-dark.png" alt="IPTV sidebar entry with the failing-accounts badge, dark theme" width="260"> |
 
-**Sidebar panel**, its two tabs (light and dark themes):
+**Sidebar panel**: while the subscriptions are fine, the TV of its banner plays a live channel (light and dark themes):
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/panel-live-dark.gif">
+  <img alt="IPTV sidebar panel banner, the TV playing a live channel" src="https://raw.githubusercontent.com/juju35/ha-iptv/main/screenshots/panel-live.gif" width="600">
+</picture>
+
+Its two tabs (light and dark themes) — one subscription expiring and one ended, so the banner shows its red cross and the tiles their messages:
 
 | Subscriptions | Settings |
 |---|---|
@@ -320,7 +329,7 @@ The card is served by the integration at `/iptv/iptv-card.js` and registered in 
 
 ```bash
 pip install playwright && playwright install chromium
-python scripts/screenshots.py   # renders the card and panel PNGs and refreshing(-dark).gif (needs ffmpeg), light and dark, with mock subscriptions
+python scripts/screenshots.py   # renders the card and panel PNGs, refreshing(-dark).gif and panel-live(-dark).gif (needs ffmpeg), light and dark, with mock subscriptions
 ```
 
 The card is plain JavaScript (`custom_components/iptv/frontend/iptv-card.js`), served by the integration: no build step.

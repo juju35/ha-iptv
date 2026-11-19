@@ -13,7 +13,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_PANEL_VERSION = '3.35.1';
+var IPTV_PANEL_VERSION = '3.36.0';
 
 var IptvPanelI18n = {
   en: {
@@ -130,6 +130,30 @@ var IptvPanelI18n = {
     hide_off: 'No',
     hide_all: 'For everyone',
     hide_non_admin: 'For non-administrators only',
+    p_hero_none: 'No subscription yet',
+    p_hero_one: '1 subscription',
+    p_hero_many: '{n} subscriptions',
+    p_hero_fix: 'To fix: {n}',
+    p_hero_ok: 'All fine',
+    p_count_active: 'Active: {n}',
+    p_count_expiring: 'Expiring soon: {n}',
+    p_count_ko: 'With a problem: {n}',
+    p_next: 'Next expiration: {name}, {date}',
+    p_checked: 'Checked {when}',
+    p_alert_unreachable: 'The server is not answering: the figures are from the last successful check.',
+    p_alert_auth: 'The provider refuses the credentials: edit them in {settings}.',
+    p_alert_ended: 'The provider reports this subscription as ended.',
+    p_alert_stream: 'The test channel does not play.',
+    p_alert_expiring: 'Expires on {date}: renew it in time.',
+    g_general: 'General',
+    g_accounts: 'Accounts',
+    g_credentials: 'Credentials',
+    g_account: 'Account',
+    g_health: 'Health check',
+    panel_display_hint: 'Shared by every user',
+    hide_off_hint: 'The IPTV bar stays',
+    hide_all_hint: 'The tabs move to the very top',
+    hide_non_admin_hint: 'Administrators keep the bar',
   },
   fr: {
     title: 'IPTV',
@@ -245,6 +269,30 @@ var IptvPanelI18n = {
     hide_off: 'Non',
     hide_all: 'Pour tout le monde',
     hide_non_admin: 'Seulement pour les non-administrateurs',
+    p_hero_none: 'Aucun abonnement',
+    p_hero_one: '1 abonnement',
+    p_hero_many: '{n} abonnements',
+    p_hero_fix: 'À traiter : {n}',
+    p_hero_ok: 'Tout va bien',
+    p_count_active: 'Actifs : {n}',
+    p_count_expiring: 'Expirent bientôt : {n}',
+    p_count_ko: 'En erreur : {n}',
+    p_next: 'Prochaine échéance : {name}, le {date}',
+    p_checked: 'Vérifié {when}',
+    p_alert_unreachable: 'Le serveur ne répond pas : les chiffres sont ceux de la dernière vérification réussie.',
+    p_alert_auth: 'Le fournisseur refuse les identifiants : modifiez-les dans {settings}.',
+    p_alert_ended: 'Le fournisseur indique que cet abonnement est terminé.',
+    p_alert_stream: 'La chaîne de test ne se lit pas.',
+    p_alert_expiring: 'Expire le {date} : pensez à le renouveler.',
+    g_general: 'Général',
+    g_accounts: 'Comptes',
+    g_credentials: 'Identifiants',
+    g_account: 'Compte',
+    g_health: 'Vérification de santé',
+    panel_display_hint: 'Commun à tous les utilisateurs',
+    hide_off_hint: 'La barre IPTV reste affichée',
+    hide_all_hint: 'Les onglets montent tout en haut',
+    hide_non_admin_hint: 'Les administrateurs gardent la barre',
   },
   de: {
     title: 'IPTV',
@@ -360,6 +408,30 @@ var IptvPanelI18n = {
     hide_off: 'Nein',
     hide_all: 'Für alle',
     hide_non_admin: 'Nur für Nicht-Administratoren',
+    p_hero_none: 'Noch kein Abo',
+    p_hero_one: '1 Abo',
+    p_hero_many: '{n} Abos',
+    p_hero_fix: 'Zu beheben: {n}',
+    p_hero_ok: 'Alles in Ordnung',
+    p_count_active: 'Aktiv: {n}',
+    p_count_expiring: 'Läuft bald ab: {n}',
+    p_count_ko: 'Mit Problem: {n}',
+    p_next: 'Nächster Ablauf: {name}, am {date}',
+    p_checked: 'Geprüft {when}',
+    p_alert_unreachable: 'Der Server antwortet nicht: Die Zahlen stammen von der letzten erfolgreichen Prüfung.',
+    p_alert_auth: 'Der Anbieter lehnt die Zugangsdaten ab: Ändern Sie sie unter {settings}.',
+    p_alert_ended: 'Der Anbieter meldet dieses Abo als beendet.',
+    p_alert_stream: 'Der Testkanal spielt nicht ab.',
+    p_alert_expiring: 'Läuft am {date} ab: rechtzeitig verlängern.',
+    g_general: 'Allgemein',
+    g_accounts: 'Konten',
+    g_credentials: 'Zugangsdaten',
+    g_account: 'Konto',
+    g_health: 'Zustandsprüfung',
+    panel_display_hint: 'Für alle Benutzer gleich',
+    hide_off_hint: 'Die IPTV-Leiste bleibt',
+    hide_all_hint: 'Die Tabs rücken ganz nach oben',
+    hide_non_admin_hint: 'Administratoren behalten die Leiste',
   },
   es: {
     title: 'IPTV',
@@ -475,6 +547,30 @@ var IptvPanelI18n = {
     hide_off: 'No',
     hide_all: 'Para todos',
     hide_non_admin: 'Solo para no administradores',
+    p_hero_none: 'Aún no hay suscripciones',
+    p_hero_one: '1 suscripción',
+    p_hero_many: '{n} suscripciones',
+    p_hero_fix: 'Por resolver: {n}',
+    p_hero_ok: 'Todo en orden',
+    p_count_active: 'Activas: {n}',
+    p_count_expiring: 'Caducan pronto: {n}',
+    p_count_ko: 'Con problemas: {n}',
+    p_next: 'Próximo vencimiento: {name}, el {date}',
+    p_checked: 'Comprobado {when}',
+    p_alert_unreachable: 'El servidor no responde: las cifras son de la última comprobación correcta.',
+    p_alert_auth: 'El proveedor rechaza las credenciales: modifícalas en {settings}.',
+    p_alert_ended: 'El proveedor indica que esta suscripción ha terminado.',
+    p_alert_stream: 'El canal de prueba no se reproduce.',
+    p_alert_expiring: 'Caduca el {date}: renuévala a tiempo.',
+    g_general: 'General',
+    g_accounts: 'Cuentas',
+    g_credentials: 'Credenciales',
+    g_account: 'Cuenta',
+    g_health: 'Comprobación de estado',
+    panel_display_hint: 'Común a todos los usuarios',
+    hide_off_hint: 'La barra IPTV se mantiene',
+    hide_all_hint: 'Las pestañas suben arriba del todo',
+    hide_non_admin_hint: 'Los administradores conservan la barra',
   },
   it: {
     title: 'IPTV',
@@ -590,6 +686,30 @@ var IptvPanelI18n = {
     hide_off: 'No',
     hide_all: 'Per tutti',
     hide_non_admin: 'Solo per i non amministratori',
+    p_hero_none: 'Nessun abbonamento',
+    p_hero_one: '1 abbonamento',
+    p_hero_many: '{n} abbonamenti',
+    p_hero_fix: 'Da risolvere: {n}',
+    p_hero_ok: 'Tutto a posto',
+    p_count_active: 'Attivi: {n}',
+    p_count_expiring: 'In scadenza: {n}',
+    p_count_ko: 'Con problemi: {n}',
+    p_next: 'Prossima scadenza: {name}, il {date}',
+    p_checked: 'Controllato {when}',
+    p_alert_unreachable: 'Il server non risponde: i dati sono quelli dell’ultimo controllo riuscito.',
+    p_alert_auth: 'Il fornitore rifiuta le credenziali: modificale in {settings}.',
+    p_alert_ended: 'Il fornitore indica che questo abbonamento è terminato.',
+    p_alert_stream: 'Il canale di prova non si riproduce.',
+    p_alert_expiring: 'Scade il {date}: rinnovalo in tempo.',
+    g_general: 'Generale',
+    g_accounts: 'Account',
+    g_credentials: 'Credenziali',
+    g_account: 'Account',
+    g_health: 'Controllo di stato',
+    panel_display_hint: 'Comune a tutti gli utenti',
+    hide_off_hint: 'La barra IPTV resta visibile',
+    hide_all_hint: 'Le schede salgono in cima',
+    hide_non_admin_hint: 'Gli amministratori mantengono la barra',
   },
   nl: {
     title: 'IPTV',
@@ -705,6 +825,30 @@ var IptvPanelI18n = {
     hide_off: 'Nee',
     hide_all: 'Voor iedereen',
     hide_non_admin: 'Alleen voor niet-beheerders',
+    p_hero_none: 'Nog geen abonnement',
+    p_hero_one: '1 abonnement',
+    p_hero_many: '{n} abonnementen',
+    p_hero_fix: 'Op te lossen: {n}',
+    p_hero_ok: 'Alles in orde',
+    p_count_active: 'Actief: {n}',
+    p_count_expiring: 'Verloopt binnenkort: {n}',
+    p_count_ko: 'Met probleem: {n}',
+    p_next: 'Volgende vervaldatum: {name}, op {date}',
+    p_checked: 'Gecontroleerd {when}',
+    p_alert_unreachable: 'De server reageert niet: de cijfers zijn van de laatste geslaagde controle.',
+    p_alert_auth: 'De aanbieder weigert de inloggegevens: wijzig ze in {settings}.',
+    p_alert_ended: 'De aanbieder meldt dat dit abonnement is beëindigd.',
+    p_alert_stream: 'Het testkanaal speelt niet af.',
+    p_alert_expiring: 'Verloopt op {date}: verleng op tijd.',
+    g_general: 'Algemeen',
+    g_accounts: 'Accounts',
+    g_credentials: 'Inloggegevens',
+    g_account: 'Account',
+    g_health: 'Statuscontrole',
+    panel_display_hint: 'Gedeeld door alle gebruikers',
+    hide_off_hint: 'De IPTV-balk blijft staan',
+    hide_all_hint: 'De tabbladen gaan helemaal naar boven',
+    hide_non_admin_hint: 'Beheerders houden de balk',
   },
   pt: {
     title: 'IPTV',
@@ -820,6 +964,30 @@ var IptvPanelI18n = {
     hide_off: 'Não',
     hide_all: 'Para todos',
     hide_non_admin: 'Apenas para não administradores',
+    p_hero_none: 'Ainda sem subscrições',
+    p_hero_one: '1 subscrição',
+    p_hero_many: '{n} subscrições',
+    p_hero_fix: 'Por resolver: {n}',
+    p_hero_ok: 'Tudo em ordem',
+    p_count_active: 'Ativas: {n}',
+    p_count_expiring: 'Expiram em breve: {n}',
+    p_count_ko: 'Com problemas: {n}',
+    p_next: 'Próxima expiração: {name}, a {date}',
+    p_checked: 'Verificado {when}',
+    p_alert_unreachable: 'O servidor não responde: os números são da última verificação bem-sucedida.',
+    p_alert_auth: 'O fornecedor recusa as credenciais: altere-as em {settings}.',
+    p_alert_ended: 'O fornecedor indica que esta subscrição terminou.',
+    p_alert_stream: 'O canal de teste não reproduz.',
+    p_alert_expiring: 'Expira a {date}: renove-a a tempo.',
+    g_general: 'Geral',
+    g_accounts: 'Contas',
+    g_credentials: 'Credenciais',
+    g_account: 'Conta',
+    g_health: 'Verificação de estado',
+    panel_display_hint: 'Comum a todos os utilizadores',
+    hide_off_hint: 'A barra IPTV mantém-se',
+    hide_all_hint: 'Os separadores sobem ao topo',
+    hide_non_admin_hint: 'Os administradores mantêm a barra',
   },
   pl: {
     title: 'IPTV',
@@ -935,6 +1103,30 @@ var IptvPanelI18n = {
     hide_off: 'Nie',
     hide_all: 'Dla wszystkich',
     hide_non_admin: 'Tylko dla nie-administratorów',
+    p_hero_none: 'Brak subskrypcji',
+    p_hero_one: '1 subskrypcja',
+    p_hero_many: 'Subskrypcje: {n}',
+    p_hero_fix: 'Do naprawy: {n}',
+    p_hero_ok: 'Wszystko w porządku',
+    p_count_active: 'Aktywne: {n}',
+    p_count_expiring: 'Wkrótce wygasają: {n}',
+    p_count_ko: 'Z problemem: {n}',
+    p_next: 'Najbliższe wygaśnięcie: {name}, {date}',
+    p_checked: 'Sprawdzono {when}',
+    p_alert_unreachable: 'Serwer nie odpowiada: dane pochodzą z ostatniego udanego sprawdzenia.',
+    p_alert_auth: 'Dostawca odrzuca dane logowania: zmień je w {settings}.',
+    p_alert_ended: 'Dostawca zgłasza, że ta subskrypcja się zakończyła.',
+    p_alert_stream: 'Kanał testowy się nie odtwarza.',
+    p_alert_expiring: 'Wygasa {date}: odnów ją na czas.',
+    g_general: 'Ogólne',
+    g_accounts: 'Konta',
+    g_credentials: 'Dane logowania',
+    g_account: 'Konto',
+    g_health: 'Kontrola stanu',
+    panel_display_hint: 'Wspólne dla wszystkich użytkowników',
+    hide_off_hint: 'Pasek IPTV pozostaje',
+    hide_all_hint: 'Karty przesuwają się na samą górę',
+    hide_non_admin_hint: 'Administratorzy zachowują pasek',
   },
   ro: {
     title: 'IPTV',
@@ -1050,6 +1242,30 @@ var IptvPanelI18n = {
     hide_off: 'Nu',
     hide_all: 'Pentru toți',
     hide_non_admin: 'Doar pentru non-administratori',
+    p_hero_none: 'Niciun abonament',
+    p_hero_one: '1 abonament',
+    p_hero_many: 'Abonamente: {n}',
+    p_hero_fix: 'De rezolvat: {n}',
+    p_hero_ok: 'Totul e în regulă',
+    p_count_active: 'Active: {n}',
+    p_count_expiring: 'Expiră curând: {n}',
+    p_count_ko: 'Cu probleme: {n}',
+    p_next: 'Următoarea expirare: {name}, pe {date}',
+    p_checked: 'Verificat {when}',
+    p_alert_unreachable: 'Serverul nu răspunde: cifrele sunt de la ultima verificare reușită.',
+    p_alert_auth: 'Furnizorul refuză datele de autentificare: modificați-le în {settings}.',
+    p_alert_ended: 'Furnizorul raportează acest abonament ca încheiat.',
+    p_alert_stream: 'Canalul de test nu pornește.',
+    p_alert_expiring: 'Expiră pe {date}: reînnoiți-l la timp.',
+    g_general: 'General',
+    g_accounts: 'Conturi',
+    g_credentials: 'Date de autentificare',
+    g_account: 'Cont',
+    g_health: 'Verificare de stare',
+    panel_display_hint: 'Comun pentru toți utilizatorii',
+    hide_off_hint: 'Bara IPTV rămâne',
+    hide_all_hint: 'Filele urcă sus de tot',
+    hide_non_admin_hint: 'Administratorii păstrează bara',
   },
   da: {
     title: 'IPTV',
@@ -1165,6 +1381,30 @@ var IptvPanelI18n = {
     hide_off: 'Nej',
     hide_all: 'For alle',
     hide_non_admin: 'Kun for ikke-administratorer',
+    p_hero_none: 'Intet abonnement endnu',
+    p_hero_one: '1 abonnement',
+    p_hero_many: '{n} abonnementer',
+    p_hero_fix: 'Skal løses: {n}',
+    p_hero_ok: 'Alt i orden',
+    p_count_active: 'Aktive: {n}',
+    p_count_expiring: 'Udløber snart: {n}',
+    p_count_ko: 'Med problemer: {n}',
+    p_next: 'Næste udløb: {name}, den {date}',
+    p_checked: 'Tjekket {when}',
+    p_alert_unreachable: 'Serveren svarer ikke: tallene er fra sidste vellykkede tjek.',
+    p_alert_auth: 'Udbyderen afviser loginoplysningerne: ret dem under {settings}.',
+    p_alert_ended: 'Udbyderen melder dette abonnement som afsluttet.',
+    p_alert_stream: 'Testkanalen afspiller ikke.',
+    p_alert_expiring: 'Udløber den {date}: forny det i tide.',
+    g_general: 'Generelt',
+    g_accounts: 'Konti',
+    g_credentials: 'Loginoplysninger',
+    g_account: 'Konto',
+    g_health: 'Sundhedstjek',
+    panel_display_hint: 'Fælles for alle brugere',
+    hide_off_hint: 'IPTV-bjælken bliver',
+    hide_all_hint: 'Fanerne rykker helt op',
+    hide_non_admin_hint: 'Administratorer beholder bjælken',
   },
   sv: {
     title: 'IPTV',
@@ -1280,6 +1520,30 @@ var IptvPanelI18n = {
     hide_off: 'Nej',
     hide_all: 'För alla',
     hide_non_admin: 'Endast för icke-administratörer',
+    p_hero_none: 'Inga abonnemang än',
+    p_hero_one: '1 abonnemang',
+    p_hero_many: '{n} abonnemang',
+    p_hero_fix: 'Att åtgärda: {n}',
+    p_hero_ok: 'Allt är bra',
+    p_count_active: 'Aktiva: {n}',
+    p_count_expiring: 'Går ut snart: {n}',
+    p_count_ko: 'Med problem: {n}',
+    p_next: 'Nästa utgång: {name}, den {date}',
+    p_checked: 'Kontrollerad {when}',
+    p_alert_unreachable: 'Servern svarar inte: siffrorna är från den senaste lyckade kontrollen.',
+    p_alert_auth: 'Leverantören nekar inloggningsuppgifterna: ändra dem under {settings}.',
+    p_alert_ended: 'Leverantören anger att abonnemanget har upphört.',
+    p_alert_stream: 'Testkanalen spelas inte upp.',
+    p_alert_expiring: 'Går ut den {date}: förnya i tid.',
+    g_general: 'Allmänt',
+    g_accounts: 'Konton',
+    g_credentials: 'Inloggningsuppgifter',
+    g_account: 'Konto',
+    g_health: 'Hälsokontroll',
+    panel_display_hint: 'Gemensamt för alla användare',
+    hide_off_hint: 'IPTV-raden ligger kvar',
+    hide_all_hint: 'Flikarna flyttas högst upp',
+    hide_non_admin_hint: 'Administratörer behåller raden',
   },
   bg: {
     title: 'IPTV',
@@ -1395,6 +1659,30 @@ var IptvPanelI18n = {
     hide_off: 'Не',
     hide_all: 'За всички',
     hide_non_admin: 'Само за неадминистратори',
+    p_hero_none: 'Все още няма абонаменти',
+    p_hero_one: '1 абонамент',
+    p_hero_many: 'Абонаменти: {n}',
+    p_hero_fix: 'За решаване: {n}',
+    p_hero_ok: 'Всичко е наред',
+    p_count_active: 'Активни: {n}',
+    p_count_expiring: 'Изтичат скоро: {n}',
+    p_count_ko: 'С проблем: {n}',
+    p_next: 'Следващо изтичане: {name}, на {date}',
+    p_checked: 'Проверено {when}',
+    p_alert_unreachable: 'Сървърът не отговаря: данните са от последната успешна проверка.',
+    p_alert_auth: 'Доставчикът отказва данните за вход: променете ги в {settings}.',
+    p_alert_ended: 'Доставчикът съобщава, че абонаментът е приключил.',
+    p_alert_stream: 'Тестовият канал не се възпроизвежда.',
+    p_alert_expiring: 'Изтича на {date}: подновете го навреме.',
+    g_general: 'Общи',
+    g_accounts: 'Акаунти',
+    g_credentials: 'Данни за вход',
+    g_account: 'Акаунт',
+    g_health: 'Проверка на състоянието',
+    panel_display_hint: 'Общо за всички потребители',
+    hide_off_hint: 'Лентата IPTV остава',
+    hide_all_hint: 'Разделите се качват най-горе',
+    hide_non_admin_hint: 'Администраторите запазват лентата',
   },
   ru: {
     title: 'IPTV',
@@ -1510,6 +1798,30 @@ var IptvPanelI18n = {
     hide_off: 'Нет',
     hide_all: 'Для всех',
     hide_non_admin: 'Только для неадминистраторов',
+    p_hero_none: 'Подписок пока нет',
+    p_hero_one: '1 подписка',
+    p_hero_many: 'Подписки: {n}',
+    p_hero_fix: 'Требуют внимания: {n}',
+    p_hero_ok: 'Всё в порядке',
+    p_count_active: 'Активные: {n}',
+    p_count_expiring: 'Скоро истекают: {n}',
+    p_count_ko: 'С проблемами: {n}',
+    p_next: 'Ближайшее окончание: {name}, {date}',
+    p_checked: 'Проверено {when}',
+    p_alert_unreachable: 'Сервер не отвечает: данные с последней успешной проверки.',
+    p_alert_auth: 'Провайдер отклоняет учётные данные: измените их в разделе «{settings}».',
+    p_alert_ended: 'Провайдер сообщает, что подписка закончилась.',
+    p_alert_stream: 'Тестовый канал не воспроизводится.',
+    p_alert_expiring: 'Истекает {date}: продлите вовремя.',
+    g_general: 'Общие',
+    g_accounts: 'Учётные записи',
+    g_credentials: 'Учётные данные',
+    g_account: 'Учётная запись',
+    g_health: 'Проверка состояния',
+    panel_display_hint: 'Общие для всех пользователей',
+    hide_off_hint: 'Панель IPTV остаётся',
+    hide_all_hint: 'Вкладки поднимаются в самый верх',
+    hide_non_admin_hint: 'Администраторы сохраняют панель',
   },
   uk: {
     title: 'IPTV',
@@ -1625,6 +1937,30 @@ var IptvPanelI18n = {
     hide_off: 'Ні',
     hide_all: 'Для всіх',
     hide_non_admin: 'Лише для неадміністраторів',
+    p_hero_none: 'Підписок ще немає',
+    p_hero_one: '1 підписка',
+    p_hero_many: 'Підписки: {n}',
+    p_hero_fix: 'Потребують уваги: {n}',
+    p_hero_ok: 'Усе гаразд',
+    p_count_active: 'Активні: {n}',
+    p_count_expiring: 'Скоро закінчуються: {n}',
+    p_count_ko: 'З проблемами: {n}',
+    p_next: 'Найближче закінчення: {name}, {date}',
+    p_checked: 'Перевірено {when}',
+    p_alert_unreachable: 'Сервер не відповідає: дані з останньої успішної перевірки.',
+    p_alert_auth: 'Провайдер відхиляє облікові дані: змініть їх у розділі «{settings}».',
+    p_alert_ended: 'Провайдер повідомляє, що підписка закінчилася.',
+    p_alert_stream: 'Тестовий канал не відтворюється.',
+    p_alert_expiring: 'Закінчується {date}: продовжте вчасно.',
+    g_general: 'Загальні',
+    g_accounts: 'Облікові записи',
+    g_credentials: 'Облікові дані',
+    g_account: 'Обліковий запис',
+    g_health: 'Перевірка стану',
+    panel_display_hint: 'Спільні для всіх користувачів',
+    hide_off_hint: 'Панель IPTV залишається',
+    hide_all_hint: 'Вкладки піднімаються на самий верх',
+    hide_non_admin_hint: 'Адміністратори зберігають панель',
   },
   hu: {
     title: 'IPTV',
@@ -1740,6 +2076,30 @@ var IptvPanelI18n = {
     hide_off: 'Nem',
     hide_all: 'Mindenkinek',
     hide_non_admin: 'Csak nem rendszergazdáknak',
+    p_hero_none: 'Még nincs előfizetés',
+    p_hero_one: '1 előfizetés',
+    p_hero_many: '{n} előfizetés',
+    p_hero_fix: 'Javítandó: {n}',
+    p_hero_ok: 'Minden rendben',
+    p_count_active: 'Aktív: {n}',
+    p_count_expiring: 'Hamarosan lejár: {n}',
+    p_count_ko: 'Hibás: {n}',
+    p_next: 'Következő lejárat: {name}, {date}',
+    p_checked: 'Ellenőrizve: {when}',
+    p_alert_unreachable: 'A szerver nem válaszol: az adatok az utolsó sikeres ellenőrzésből származnak.',
+    p_alert_auth: 'A szolgáltató elutasítja a belépési adatokat: módosítsa őket itt: {settings}.',
+    p_alert_ended: 'A szolgáltató szerint ez az előfizetés megszűnt.',
+    p_alert_stream: 'A tesztcsatorna nem játszható le.',
+    p_alert_expiring: 'Lejár: {date}, újítsa meg időben.',
+    g_general: 'Általános',
+    g_accounts: 'Fiókok',
+    g_credentials: 'Belépési adatok',
+    g_account: 'Fiók',
+    g_health: 'Állapotellenőrzés',
+    panel_display_hint: 'Minden felhasználónak közös',
+    hide_off_hint: 'Az IPTV-sáv marad',
+    hide_all_hint: 'A lapok a legtetejére kerülnek',
+    hide_non_admin_hint: 'A rendszergazdák megtartják a sávot',
   },
   sk: {
     title: 'IPTV',
@@ -1855,6 +2215,30 @@ var IptvPanelI18n = {
     hide_off: 'Nie',
     hide_all: 'Pre všetkých',
     hide_non_admin: 'Iba pre neadministrátorov',
+    p_hero_none: 'Zatiaľ žiadne predplatné',
+    p_hero_one: '1 predplatné',
+    p_hero_many: 'Predplatné: {n}',
+    p_hero_fix: 'Na vyriešenie: {n}',
+    p_hero_ok: 'Všetko v poriadku',
+    p_count_active: 'Aktívne: {n}',
+    p_count_expiring: 'Čoskoro vyprší: {n}',
+    p_count_ko: 'S problémom: {n}',
+    p_next: 'Najbližšie vypršanie: {name}, {date}',
+    p_checked: 'Skontrolované {when}',
+    p_alert_unreachable: 'Server neodpovedá: údaje sú z poslednej úspešnej kontroly.',
+    p_alert_auth: 'Poskytovateľ odmieta prihlasovacie údaje: zmeňte ich v {settings}.',
+    p_alert_ended: 'Poskytovateľ hlási, že predplatné skončilo.',
+    p_alert_stream: 'Testovací kanál sa neprehráva.',
+    p_alert_expiring: 'Vyprší {date}: obnovte ho včas.',
+    g_general: 'Všeobecné',
+    g_accounts: 'Účty',
+    g_credentials: 'Prihlasovacie údaje',
+    g_account: 'Účet',
+    g_health: 'Kontrola stavu',
+    panel_display_hint: 'Spoločné pre všetkých používateľov',
+    hide_off_hint: 'Panel IPTV zostáva',
+    hide_all_hint: 'Karty sa presunú úplne hore',
+    hide_non_admin_hint: 'Správcovia si panel ponechajú',
   },
   cs: {
     title: 'IPTV',
@@ -1970,6 +2354,30 @@ var IptvPanelI18n = {
     hide_off: 'Ne',
     hide_all: 'Pro všechny',
     hide_non_admin: 'Jen pro neadministrátory',
+    p_hero_none: 'Zatím žádné předplatné',
+    p_hero_one: '1 předplatné',
+    p_hero_many: 'Předplatné: {n}',
+    p_hero_fix: 'K vyřešení: {n}',
+    p_hero_ok: 'Vše v pořádku',
+    p_count_active: 'Aktivní: {n}',
+    p_count_expiring: 'Brzy vyprší: {n}',
+    p_count_ko: 'S problémem: {n}',
+    p_next: 'Nejbližší vypršení: {name}, {date}',
+    p_checked: 'Zkontrolováno {when}',
+    p_alert_unreachable: 'Server neodpovídá: údaje jsou z poslední úspěšné kontroly.',
+    p_alert_auth: 'Poskytovatel odmítá přihlašovací údaje: změňte je v {settings}.',
+    p_alert_ended: 'Poskytovatel hlásí, že předplatné skončilo.',
+    p_alert_stream: 'Testovací kanál se nepřehrává.',
+    p_alert_expiring: 'Vyprší {date}: obnovte ho včas.',
+    g_general: 'Obecné',
+    g_accounts: 'Účty',
+    g_credentials: 'Přihlašovací údaje',
+    g_account: 'Účet',
+    g_health: 'Kontrola stavu',
+    panel_display_hint: 'Společné pro všechny uživatele',
+    hide_off_hint: 'Lišta IPTV zůstává',
+    hide_all_hint: 'Karty se přesunou úplně nahoru',
+    hide_non_admin_hint: 'Správci si lištu ponechají',
   },
   sl: {
     title: 'IPTV',
@@ -2085,6 +2493,30 @@ var IptvPanelI18n = {
     hide_off: 'Ne',
     hide_all: 'Za vse',
     hide_non_admin: 'Samo za neskrbnike',
+    p_hero_none: 'Še ni naročnin',
+    p_hero_one: '1 naročnina',
+    p_hero_many: 'Naročnine: {n}',
+    p_hero_fix: 'Za rešiti: {n}',
+    p_hero_ok: 'Vse je v redu',
+    p_count_active: 'Aktivne: {n}',
+    p_count_expiring: 'Kmalu potečejo: {n}',
+    p_count_ko: 'S težavo: {n}',
+    p_next: 'Naslednji potek: {name}, {date}',
+    p_checked: 'Preverjeno {when}',
+    p_alert_unreachable: 'Strežnik se ne odziva: podatki so iz zadnjega uspešnega preverjanja.',
+    p_alert_auth: 'Ponudnik zavrača prijavne podatke: spremenite jih v {settings}.',
+    p_alert_ended: 'Ponudnik sporoča, da je naročnina potekla.',
+    p_alert_stream: 'Testni kanal se ne predvaja.',
+    p_alert_expiring: 'Poteče {date}: pravočasno jo podaljšajte.',
+    g_general: 'Splošno',
+    g_accounts: 'Računi',
+    g_credentials: 'Prijavni podatki',
+    g_account: 'Račun',
+    g_health: 'Preverjanje stanja',
+    panel_display_hint: 'Skupno za vse uporabnike',
+    hide_off_hint: 'Vrstica IPTV ostane',
+    hide_all_hint: 'Zavihki se pomaknejo čisto na vrh',
+    hide_non_admin_hint: 'Skrbniki obdržijo vrstico',
   },
   lv: {
     title: 'IPTV',
@@ -2200,6 +2632,30 @@ var IptvPanelI18n = {
     hide_off: 'Nē',
     hide_all: 'Visiem',
     hide_non_admin: 'Tikai ne-administratoriem',
+    p_hero_none: 'Vēl nav abonementu',
+    p_hero_one: '1 abonements',
+    p_hero_many: 'Abonementi: {n}',
+    p_hero_fix: 'Jānovērš: {n}',
+    p_hero_ok: 'Viss kārtībā',
+    p_count_active: 'Aktīvi: {n}',
+    p_count_expiring: 'Drīz beigsies: {n}',
+    p_count_ko: 'Ar problēmu: {n}',
+    p_next: 'Nākamās beigas: {name}, {date}',
+    p_checked: 'Pārbaudīts {when}',
+    p_alert_unreachable: 'Serveris neatbild: dati ir no pēdējās veiksmīgās pārbaudes.',
+    p_alert_auth: 'Pakalpojumu sniedzējs noraida pieteikšanās datus: mainiet tos sadaļā {settings}.',
+    p_alert_ended: 'Pakalpojumu sniedzējs ziņo, ka abonements ir beidzies.',
+    p_alert_stream: 'Testa kanāls netiek atskaņots.',
+    p_alert_expiring: 'Beidzas {date}: atjaunojiet laikus.',
+    g_general: 'Vispārīgi',
+    g_accounts: 'Konti',
+    g_credentials: 'Pieteikšanās dati',
+    g_account: 'Konts',
+    g_health: 'Stāvokļa pārbaude',
+    panel_display_hint: 'Kopīgs visiem lietotājiem',
+    hide_off_hint: 'IPTV josla paliek',
+    hide_all_hint: 'Cilnes pārvietojas pašā augšā',
+    hide_non_admin_hint: 'Administratori saglabā joslu',
   },
   el: {
     title: 'IPTV',
@@ -2315,6 +2771,30 @@ var IptvPanelI18n = {
     hide_off: 'Όχι',
     hide_all: 'Για όλους',
     hide_non_admin: 'Μόνο για μη διαχειριστές',
+    p_hero_none: 'Δεν υπάρχει συνδρομή ακόμη',
+    p_hero_one: '1 συνδρομή',
+    p_hero_many: '{n} συνδρομές',
+    p_hero_fix: 'Προς επίλυση: {n}',
+    p_hero_ok: 'Όλα καλά',
+    p_count_active: 'Ενεργές: {n}',
+    p_count_expiring: 'Λήγουν σύντομα: {n}',
+    p_count_ko: 'Με πρόβλημα: {n}',
+    p_next: 'Επόμενη λήξη: {name}, {date}',
+    p_checked: 'Ελέγχθηκε {when}',
+    p_alert_unreachable: 'Ο διακομιστής δεν απαντά: τα στοιχεία είναι από τον τελευταίο επιτυχή έλεγχο.',
+    p_alert_auth: 'Ο πάροχος απορρίπτει τα στοιχεία σύνδεσης: αλλάξτε τα στις {settings}.',
+    p_alert_ended: 'Ο πάροχος αναφέρει ότι η συνδρομή έληξε.',
+    p_alert_stream: 'Το δοκιμαστικό κανάλι δεν παίζει.',
+    p_alert_expiring: 'Λήγει στις {date}: ανανεώστε την έγκαιρα.',
+    g_general: 'Γενικά',
+    g_accounts: 'Λογαριασμοί',
+    g_credentials: 'Στοιχεία σύνδεσης',
+    g_account: 'Λογαριασμός',
+    g_health: 'Έλεγχος κατάστασης',
+    panel_display_hint: 'Κοινό για όλους τους χρήστες',
+    hide_off_hint: 'Η γραμμή IPTV παραμένει',
+    hide_all_hint: 'Οι καρτέλες ανεβαίνουν στην κορυφή',
+    hide_non_admin_hint: 'Οι διαχειριστές κρατούν τη γραμμή',
   },
   sr: {
     title: 'IPTV',
@@ -2430,6 +2910,30 @@ var IptvPanelI18n = {
     hide_off: 'Не',
     hide_all: 'За све',
     hide_non_admin: 'Само за оне који нису администратори',
+    p_hero_none: 'Још нема претплата',
+    p_hero_one: '1 претплата',
+    p_hero_many: 'Претплате: {n}',
+    p_hero_fix: 'За решавање: {n}',
+    p_hero_ok: 'Све је у реду',
+    p_count_active: 'Активне: {n}',
+    p_count_expiring: 'Ускоро истичу: {n}',
+    p_count_ko: 'Са проблемом: {n}',
+    p_next: 'Следеће истицање: {name}, {date}',
+    p_checked: 'Проверено {when}',
+    p_alert_unreachable: 'Сервер не одговара: подаци су са последње успешне провере.',
+    p_alert_auth: 'Провајдер одбија податке за пријаву: измените их у {settings}.',
+    p_alert_ended: 'Провајдер јавља да је претплата истекла.',
+    p_alert_stream: 'Тест канал се не репродукује.',
+    p_alert_expiring: 'Истиче {date}: обновите је на време.',
+    g_general: 'Опште',
+    g_accounts: 'Налози',
+    g_credentials: 'Подаци за пријаву',
+    g_account: 'Налог',
+    g_health: 'Провера стања',
+    panel_display_hint: 'Заједничко за све кориснике',
+    hide_off_hint: 'Трака IPTV остаје',
+    hide_all_hint: 'Картице се пењу скроз горе',
+    hide_non_admin_hint: 'Администратори задржавају траку',
   },
   'sr-Latn': {
     title: 'IPTV',
@@ -2545,6 +3049,30 @@ var IptvPanelI18n = {
     hide_off: 'Ne',
     hide_all: 'Za sve',
     hide_non_admin: 'Samo za one koji nisu administratori',
+    p_hero_none: 'Još nema pretplata',
+    p_hero_one: '1 pretplata',
+    p_hero_many: 'Pretplate: {n}',
+    p_hero_fix: 'Za rešavanje: {n}',
+    p_hero_ok: 'Sve je u redu',
+    p_count_active: 'Aktivne: {n}',
+    p_count_expiring: 'Uskoro ističu: {n}',
+    p_count_ko: 'Sa problemom: {n}',
+    p_next: 'Sledeće isticanje: {name}, {date}',
+    p_checked: 'Provereno {when}',
+    p_alert_unreachable: 'Server ne odgovara: podaci su sa poslednje uspešne provere.',
+    p_alert_auth: 'Provajder odbija podatke za prijavu: izmenite ih u {settings}.',
+    p_alert_ended: 'Provajder javlja da je pretplata istekla.',
+    p_alert_stream: 'Test kanal se ne reprodukuje.',
+    p_alert_expiring: 'Ističe {date}: obnovite je na vreme.',
+    g_general: 'Opšte',
+    g_accounts: 'Nalozi',
+    g_credentials: 'Podaci za prijavu',
+    g_account: 'Nalog',
+    g_health: 'Provera stanja',
+    panel_display_hint: 'Zajedničko za sve korisnike',
+    hide_off_hint: 'Traka IPTV ostaje',
+    hide_all_hint: 'Kartice se penju skroz gore',
+    hide_non_admin_hint: 'Administratori zadržavaju traku',
   },
 };
 
@@ -2558,6 +3086,8 @@ var IPTV_PANEL_LIMITS = {
 var IPTV_PANEL_TABS = ['accounts', 'settings'];
 // Who the top bar is hidden for (iptv/panel_settings): nobody, everyone, non-administrators only
 var IPTV_PANEL_HIDE_TOOLBAR = ['off', 'all', 'non_admin'];
+// The Panel entry of the Settings list (its own settings), beside the accounts
+var IPTV_PANEL_GENERAL = '__panel__';
 // Days left under which an active subscription is shown as expiring
 var IPTV_PANEL_WARNING_DAYS = 7;
 
@@ -2638,6 +3168,50 @@ function iptvPanelT(lang, key, vars) {
 function iptvPanelEsc(value) {
   var map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
   return String(value ?? '').replace(/[&<>"']/g, (ch) => map[ch]);
+}
+
+// How bad a subscription is now: bad (refused, ended, unreachable, its stream down), warn (expiring) or good.
+// `alert` names the message the tile shows for it.
+function iptvPanelSeverity(summary) {
+  if (!summary || summary.unavailable) return { tone: 'bad', alert: 'p_alert_unreachable' };
+  var health = summary.health?.state;
+  if (summary.status === 'p_auth_failed' || health === 'auth_failed') return { tone: 'bad', alert: 'p_alert_auth' };
+  if (summary.tone === 'bad') return { tone: 'bad', alert: 'p_alert_ended' };
+  if (health === 'unreachable') return { tone: 'bad', alert: 'p_alert_unreachable' };
+  if (health === 'stream_ko') return { tone: 'bad', alert: 'p_alert_stream' };
+  if (summary.tone === 'warn') return { tone: 'warn', alert: 'p_alert_expiring' };
+  return { tone: 'good', alert: null };
+}
+
+// The picture of a state, as on the card: a live channel, a dark screen in standby, a red cross
+function iptvPanelScene(tone) {
+  return { bad: 'offline', idle: 'idle' }[tone] || 'playing';
+}
+
+// The card's living-room TV over its cabinet (the right 102 × 80 of a 200 × 80 picture). `uid` keeps clip paths apart.
+function iptvPanelSceneSvg(state, uid) {
+  var screen;
+  if (state === 'offline') {
+    screen = '<g class="tv-x" transform="translate(147 35)"><circle r="7"/><path d="M-3 -3 l6 6 M3 -3 l-6 6"/></g>';
+  } else if (state === 'idle') {
+    screen = '<path class="tv-glare" d="M150 13 h14 l-26 44 h-14 Z"/>';
+  } else {
+    screen = `<g clip-path="url(#tv-scr-${uid})"><g class="tv-show"><circle class="tv-sun" cx="128" cy="30" r="6"/>` +
+      '<path class="tv-hill" d="M107 57 L130 40 L146 50 L164 36 L187 52 V57Z"/></g></g>' +
+      '<g class="tv-live"><rect x="111" y="16" width="18" height="6" rx="1"/><text x="120" y="20.6" text-anchor="middle">LIVE</text></g>';
+  }
+  return `<svg class="scene ${state}" viewBox="98 0 102 80" preserveAspectRatio="xMaxYMax meet" aria-hidden="true" focusable="false">` +
+    `<defs><clipPath id="tv-scr-${uid}"><rect x="107" y="13" width="80" height="44"/></clipPath></defs>` +
+    '<rect class="tv-frame" x="104" y="10" width="86" height="50" rx="2"/><rect class="tv-screen" x="107" y="13" width="80" height="44"/>' +
+    `${screen}<circle class="tv-led" cx="186" cy="58.4" r=".9"/>` +
+    '<rect class="tv-cab" x="120" y="63" width="54" height="17" rx="1.5"/><rect class="tv-cab-top" x="120" y="63" width="54" height="2.4" rx="1"/>' +
+    '<path class="tv-cab-line" d="M147 67 V78 M124 71.5 H143 M151 71.5 H170"/></svg>';
+}
+
+// A small glyph on a tile's round icon: a tick, an exclamation mark or a cross, in a dot of the state colour
+function iptvPanelGlyph(tone) {
+  var d = { good: 'M7 12.5l3 3 7-7', warn: 'M12 7v6M12 16.5v.5' }[tone] || 'M8 8l8 8M16 8l-8 8';
+  return `<span class="st-badge" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="${d}"/></svg></span>`;
 }
 
 // Tone of a config entry state, for its pill
@@ -2799,6 +3373,141 @@ class IptvPanel extends HTMLElement {
     @media (max-width: 600px) {
       main { padding:12px 8px; }
     }
+    /* ── Redesign (3.36): the charte of the ha-* cards — illustrated banners, calm tiles, a glyph of state on each icon ── */
+    .idle { --tone: #8a939e; }
+    .idle { --tone-text: color-mix(in srgb, var(--tone) 50%, var(--primary-text-color)); }
+    /* The living-room banner of the card: a wall, the TV over its cabinet, a parquet strip; day and night */
+    .banner { position:relative; overflow:hidden; height:90px; --g:10px; --scene-w:min(102px, 34%);
+              background:#f2eee8; color:#1f2a37; --sub:#4a5563; }
+    .banner.big { height:130px; --scene-w:min(150px, 34%); }
+    .banner.night { background:#2a2f3d; color:#fff; --sub:rgba(255,255,255,.78); }
+    .banner .scene { position:absolute; right:12px; bottom:var(--g); height:calc(100% - var(--g) - 6px); width:var(--scene-w); }
+    .banner .ground { position:absolute; left:0; right:0; bottom:0; height:var(--g);
+                      background:repeating-linear-gradient(90deg, #c99a6b 0 38px, #b98a5c 38px 40px); box-shadow:inset 0 2px 0 #a97c50; }
+    .banner.night .ground { background:repeating-linear-gradient(90deg, #4a3a2c 0 38px, #3e3024 38px 40px); box-shadow:inset 0 2px 0 #5c4836; }
+    .banner .htext { position:absolute; z-index:1; left:16px; top:0; bottom:var(--g); right:calc(var(--scene-w) + 60px);
+                     display:flex; align-items:center; gap:14px; min-width:0; }
+    .banner .titles { display:flex; flex-direction:column; gap:5px; min-width:0; }
+    .banner .head { display:flex; align-items:center; gap:10px; min-width:0; flex-wrap:wrap; }
+    .banner .name { font-size:18px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+    .banner.big .name { font-size:22px; }
+    .banner .sub-l { font-size:12px; color:var(--sub); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .banner .sub-l.mono { font-family:monospace; }
+    .banner .chips { display:flex; gap:6px; flex-wrap:wrap; max-height:22px; overflow:hidden; }
+    /* Pills on the wall: frosted, the text in the state colour */
+    .banner .chip { display:inline-flex; align-items:center; gap:5px; padding:2px 9px; border-radius:12px; font-size:11.5px; font-weight:500;
+                    white-space:nowrap; background:rgba(255,255,255,.72); color:color-mix(in srgb, var(--tone) 55%, #1f2a37); }
+    .banner.night .chip { background:rgba(10,16,30,.45); color:color-mix(in srgb, var(--tone) 45%, #fff); }
+    .banner .chip.st { background:color-mix(in srgb, var(--tone) 18%, rgba(255,255,255,.8)); }
+    .banner.night .chip.st { background:color-mix(in srgb, var(--tone) 30%, rgba(8,18,38,.55)); }
+    .banner .chip.st::before, .chip .dot, .fact .dot { content:""; flex:none; width:7px; height:7px; border-radius:50%; background:var(--tone); }
+    .banner .badge { flex:none; width:44px; height:44px; border-radius:50%; display:grid; place-items:center; --mdc-icon-size:22px;
+                     color:var(--tone); background:rgba(255,255,255,.62); box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--tone) 26%, transparent); }
+    .banner.big .badge { width:52px; height:52px; --mdc-icon-size:26px; }
+    .banner.night .badge { background:rgba(255,255,255,.12); color:color-mix(in srgb, var(--tone) 78%, #fff); box-shadow:inset 0 0 0 1px rgba(255,255,255,.14); }
+    /* The buttons of a banner: frosted rounds in its top-right corner */
+    .banner .acts { position:absolute; z-index:2; top:8px; right:8px; display:flex; gap:6px; }
+    .banner .acts button { all:unset; cursor:pointer; box-sizing:border-box; width:34px; height:34px; border-radius:50%; display:grid; place-items:center;
+                           --mdc-icon-size:18px; color:#33506b; background:rgba(255,255,255,.6); box-shadow:inset 0 0 0 1px rgba(255,255,255,.8); backdrop-filter:blur(4px); }
+    .banner .acts button:hover:not([disabled]) { background:rgba(255,255,255,.82); }
+    .banner .acts button[disabled] { opacity:.6; cursor:default; }
+    .banner.night .acts button { color:#fff; background:rgba(255,255,255,.12); box-shadow:inset 0 0 0 1px rgba(255,255,255,.2); }
+    .banner .acts button:focus-visible { outline:2px solid var(--primary-color); outline-offset:1px; }
+    .banner .acts button ha-icon { display:inline-flex; }
+    .spin ha-icon { animation:tv-spin 1s linear infinite; }
+    /* One button (an account): the TV stands left of it; two (the big banner): under them */
+    .banner:has(.acts > *) .scene { right:54px; }
+    .banner:has(.acts > *) .htext { right:calc(var(--scene-w) + 70px); }
+    .banner:has(.acts > :nth-child(2)) .scene { right:14px; bottom:var(--g); height:calc(100% - var(--g) - 46px); }
+    .banner:has(.acts > :nth-child(2)) .htext { right:calc(var(--scene-w) + 40px); }
+    /* The TV, its cabinet and what it shows (the card's picture) */
+    .tv-frame { fill:#20242c; } .tv-screen { fill:#3d6ec9; } .night .tv-screen { fill:#2b4a7a; }
+    .scene.offline .tv-screen, .scene.idle .tv-screen { fill:#1a1d22; }
+    .tv-sun { fill:#ffd65a; } .tv-hill { fill:#2e7d32; } .tv-show { animation:tv-show 4s ease-in-out infinite; }
+    .tv-live rect { fill:#e5484d; } .tv-live text { font:700 4.6px sans-serif; fill:#fff; }
+    .tv-x circle { fill:#e5484d; } .tv-x path { stroke:#fff; stroke-width:1.6; fill:none; }
+    .tv-glare { fill:#fff; opacity:.05; } .tv-led { fill:#43a047; } .scene.offline .tv-led { fill:#e5484d; }
+    .scene.idle .tv-led { fill:#ffa600; animation:tv-led 3s ease-in-out infinite; }
+    .tv-cab { fill:#c9b79c; } .tv-cab-top { fill:#b5a184; } .tv-cab-line { stroke:#a8946f; stroke-width:.6; fill:none; }
+    .night .tv-cab { fill:#3c4558; } .night .tv-cab-top { fill:#4a5468; } .night .tv-cab-line { stroke:#2c3445; }
+    @keyframes tv-show { 50% { opacity:.2; } }
+    @keyframes tv-led { 50% { opacity:.25; } }
+    @keyframes tv-spin { to { transform:rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .tv-show, .tv-led, .spin ha-icon { animation:none !important; } }
+    @media (max-width: 600px) {
+      .banner.big { height:150px; --scene-w:min(96px, 30%); }
+      .banner.big .htext { right:calc(var(--scene-w) + 16px); left:14px; align-items:flex-end; padding-bottom:12px; }
+      .banner.big .badge { display:none; }
+      .banner .htext { right:calc(var(--scene-w) + 20px); }
+      .banner.big .name { font-size:19px; }
+    }
+    /* Subscriptions: the banner, then one calm tile per subscription */
+    .hero { overflow:hidden; }
+    .subs { gap:14px; }
+    .sub { padding:16px; gap:14px; }
+    .t-head { display:flex; align-items:center; gap:12px; }
+    .t-head .who .n { font-size:16px; font-weight:700; }
+    .avatar, .md-ico { position:relative; }
+    .sub .avatar, .md-ico.good, .md-ico.warn, .md-ico.bad { color:var(--tone); background:color-mix(in srgb, var(--tone) 16%, transparent); }
+    .sub .avatar { width:42px; height:42px; }
+    .st-badge { position:absolute; right:-3px; bottom:-3px; width:17px; height:17px; border-radius:50%; display:grid; place-items:center;
+                background:var(--tone); box-shadow:0 0 0 2px var(--card-background-color, #fff); }
+    .st-badge svg { width:11px; height:11px; fill:none; stroke:#fff; stroke-width:3.2; stroke-linecap:round; stroke-linejoin:round; }
+    .md-ico .st-badge { width:14px; height:14px; right:-2px; bottom:-2px; } .md-ico .st-badge svg { width:9px; height:9px; }
+    .state { display:block; border:0; padding:0; background:none; font:inherit; font-size:13px; font-weight:500; text-align:left; cursor:pointer;
+             color:var(--tone-text); max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .state:hover { text-decoration:underline; } .state:focus-visible { outline:2px solid var(--primary-color); outline-offset:2px; border-radius:4px; }
+    .t-acts { display:flex; gap:6px; flex:none; }
+    .ico-btn { width:36px; height:36px; border:0; border-radius:10px; display:grid; place-items:center; cursor:pointer; --mdc-icon-size:18px;
+               color:var(--primary-text-color); background:var(--secondary-background-color, rgba(127,127,127,.12)); }
+    .ico-btn:hover { background:color-mix(in srgb, var(--primary-color) 14%, transparent); }
+    .ico-btn.bad { color:var(--tone-text); background:color-mix(in srgb, var(--tone) 12%, transparent); }
+    .ico-btn:focus-visible { outline:2px solid var(--primary-color); outline-offset:1px; }
+    .alert { display:flex; align-items:center; flex-wrap:wrap; gap:10px; padding:10px 12px; border-radius:12px; font-size:12.5px; line-height:1.4;
+             color:var(--tone-text); background:color-mix(in srgb, var(--tone) 11%, transparent); --mdc-icon-size:18px; }
+    .alert > span { flex:1; min-width:180px; }
+    .alert .act { padding:6px 10px; }
+    .act.bad.spin, .act.spin { opacity:.7; }
+    .expiry .line b { font-weight:700; }
+    .stats { gap:8px; }
+    .stat { align-items:flex-start; padding:9px 10px; border-radius:12px; gap:3px; }
+    .stat .k { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--secondary-text-color); --mdc-icon-size:13px; max-width:100%;
+               overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .stat b { display:flex; align-items:center; gap:7px; }
+    .stat.dim { opacity:.45; }
+    .slots { display:inline-flex; gap:3px; } .slots i { width:8px; height:8px; border-radius:50%; box-shadow:inset 0 0 0 1.5px var(--tone); }
+    .slots i.on { background:var(--tone); }
+    .t-foot { display:flex; align-items:center; flex-wrap:wrap; gap:6px; }
+    .t-foot .grow { flex:1; } .t-foot .when { font-size:11.5px; color:var(--secondary-text-color); }
+    .fact { padding:3px 9px; border-radius:12px; font-size:11.5px; font-weight:500; gap:5px; }
+    @media (max-width: 1000px) { .stats { grid-template-columns:repeat(2, minmax(0, 1fr)); } }
+    /* Settings: General, then Accounts, in the list; the page of the selected entry */
+    .md-cap { font-size:11px; font-weight:500; letter-spacing:.05em; text-transform:uppercase; color:var(--secondary-text-color); padding:10px 10px 4px; }
+    .md-none { font-size:12.5px; color:var(--secondary-text-color); padding:4px 10px 10px; }
+    .md-item .who .s.plain, .who .s.plain { font-family:inherit; }
+    .account { padding:0; gap:0; overflow:hidden; }
+    .account .banner { border-radius:0; }
+    .account .body { padding:16px; display:flex; flex-direction:column; gap:16px; }
+    .account.general { padding:16px; gap:14px; }
+    .acc-head.plain .who .s { white-space:normal; }
+    .group { display:flex; flex-direction:column; gap:6px; }
+    .g-t { font-size:11.5px; font-weight:500; letter-spacing:.05em; text-transform:uppercase; color:var(--secondary-text-color); padding-left:4px; }
+    .g-hint { font-size:11.5px; color:var(--secondary-text-color); padding-left:4px; }
+    .g-box { border-radius:12px; background:var(--secondary-background-color, rgba(127,127,127,.06));
+             box-shadow:inset 0 0 0 1px var(--divider-color, rgba(127,127,127,.18)); overflow:hidden; }
+    .g-box .creds { background:none; padding:6px 14px; }
+    .g-box .creds-form { border:0; }
+    .row { display:flex; align-items:center; gap:16px; padding:11px 14px; border-top:1px solid var(--divider-color, rgba(127,127,127,.18)); cursor:pointer; }
+    .g-box > .row:first-child { border-top:0; }
+    .row .lbl { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+    .row .lbl .l { font-size:14px; } .row .lbl small { font-size:11.5px; color:var(--secondary-text-color); }
+    .row .box { background:var(--card-background-color, #fff); flex:none; }
+    .row .box.num { width:140px; } .row .box.num input { text-align:right; }
+    .row .box.text { width:min(280px, 50%); }
+    .row.radio { gap:12px; } .row.radio input { width:18px; height:18px; margin:0; accent-color:var(--primary-color); flex:none; }
+    @media (max-width: 600px) {
+      .row { flex-wrap:wrap; gap:8px; } .row .box.text { width:100%; }
+    }
   `;
 
   constructor() {
@@ -2864,13 +3573,14 @@ class IptvPanel extends HTMLElement {
   set hass(hass) {
     var first = !this._hass;
     var langBefore = this._lang();
+    var darkBefore = !!this._hass?.themes?.darkMode;
     this._hass = hass;
     (this._menus || []).forEach((menu) => {
       menu.hass = hass;
     });
     this._applyToolbar();
     if (first) this._start();
-    else if (this._lang() !== langBefore) this._render();
+    else if (this._lang() !== langBefore || !!hass?.themes?.darkMode !== darkBefore) this._render();
     // Home Assistant makes a new state object only when an entity changes: the cards are drawn again only then
     else if (this._subsSignature() !== this._drawnSubs) this._renderSubs();
   }
@@ -2906,13 +3616,15 @@ class IptvPanel extends HTMLElement {
   async _loadPanelSettings() {
     try {
       var res = await this._hass.callWS({ type: 'iptv/panel_settings' });
-      if (IPTV_PANEL_HIDE_TOOLBAR.includes(res?.hide_toolbar)) this._panelSettings = { ...this._panelSettings, ...res };
+      var changed = IPTV_PANEL_HIDE_TOOLBAR.includes(res?.hide_toolbar) && res.hide_toolbar !== this._panelSettings.hide_toolbar;
+      if (changed) this._panelSettings = { ...this._panelSettings, ...res };
     } catch (err) {
       // an older backend or the connection down: keep what the panel config said
       console.error('IPTV panel: could not read the panel settings', err);
     }
     this._applyToolbar();
-    this._renderGeneral();
+    // Drawn again only when the setting changed meanwhile (the Panel entry shows it): no needless re-render
+    if (changed) this._renderGeneral();
   }
 
   async _savePanelSettings(changes) {
@@ -2936,30 +3648,39 @@ class IptvPanel extends HTMLElement {
     this._renderGeneral();
   }
 
-  // Settings tab, above the accounts: the panel's own settings (they apply to every user)
+  // The Panel entry of the Settings list: drawn with the accounts (its subtitle in the list follows the setting)
   _renderGeneral() {
-    var box = this.shadowRoot?.getElementById?.('general');
-    if (!box) return;
+    if (this.shadowRoot) this._renderAccounts();
+  }
+
+  // The Panel entry's page: who the top bar is hidden for, saved at once for every user
+  _generalHtml() {
     var esc = iptvPanelEsc;
     var mode = this._panelSettings.hide_toolbar;
     var status = this._generalStatus;
-    var option = (value) => `<option value="${value}"${value === mode ? ' selected' : ''}>${esc(this._t(`hide_${value}`))}</option>`;
-    box.innerHTML = `<ha-card class="account general">
-        <div class="acc-head">
+    var rows = IPTV_PANEL_HIDE_TOOLBAR.map(
+      (value) => `<label class="row radio">
+          <input type="radio" name="hide_toolbar" value="${value}" data-general="hide_toolbar"${value === mode ? ' checked' : ''}${this._generalBusy ? ' disabled' : ''}>
+          <span class="lbl"><span class="l">${esc(this._t(`hide_${value}`))}</span><small>${esc(this._t(`hide_${value}_hint`))}</small></span>
+        </label>`,
+    );
+    return `<ha-card class="account general" data-id="${IPTV_PANEL_GENERAL}">
+        <div class="acc-head plain">
           <div class="avatar"><ha-icon icon="mdi:page-layout-header"></ha-icon></div>
-          <div class="who"><div class="n">${esc(this._t('panel_display'))}</div></div>
+          <div class="who"><div class="n">${esc(this._t('panel_display'))}</div><div class="s plain">${esc(this._t('panel_display_hint'))}</div></div>
           ${status ? `<span class="msg ${status.tone}" role="status">${esc(status.text)}</span>` : ''}
         </div>
-        <div class="grid">
-          <label class="ctl">
-            <span>${esc(this._t('f_hide_toolbar'))}</span>
-            <div class="box"><select data-general="hide_toolbar"${this._generalBusy ? ' disabled' : ''}>${IPTV_PANEL_HIDE_TOOLBAR.map(option).join('')}</select></div>
-            <small>${esc(this._t('f_hide_toolbar_hint'))}</small>
-          </label>
-        </div>
+        <div class="group"><div class="g-t" id="g-hide">${esc(this._t('f_hide_toolbar'))}</div>
+          <div class="g-box" role="radiogroup" aria-labelledby="g-hide">${rows.join('')}</div>
+          <small class="g-hint">${esc(this._t('f_hide_toolbar_hint'))}</small></div>
       </ha-card>`;
-    box.querySelector('[data-general="hide_toolbar"]').addEventListener('change', (ev) => {
-      if (IPTV_PANEL_HIDE_TOOLBAR.includes(ev.target.value)) this._savePanelSettings({ hide_toolbar: ev.target.value });
+  }
+
+  _bindGeneral(el) {
+    el?.querySelectorAll?.('[data-general="hide_toolbar"]').forEach((input) => {
+      input.addEventListener('change', () => {
+        if (input.checked && IPTV_PANEL_HIDE_TOOLBAR.includes(input.value)) this._savePanelSettings({ hide_toolbar: input.value });
+      });
     });
   }
 
@@ -3098,7 +3819,7 @@ class IptvPanel extends HTMLElement {
       <div class="tabs"><span class="tabmenu"><ha-menu-button></ha-menu-button></span><div class="tablist" role="tablist">${IPTV_PANEL_TABS.map((tab) => this._tabHtml(tab)).join('')}</div></div>
       <main>
         <section class="column" id="tab-accounts" role="tabpanel" aria-labelledby="tabbtn-accounts">${this._subsShell()}</section>
-        <section class="column" id="tab-settings" role="tabpanel" aria-labelledby="tabbtn-settings"><div id="general"></div><div id="accounts" class="column"></div></section>
+        <section class="column" id="tab-settings" role="tabpanel" aria-labelledby="tabbtn-settings"><div id="accounts" class="column"></div></section>
       </main>`;
     // Two menu buttons: the toolbar's, and the one in front of the tabs when the toolbar is hidden
     this._menus = [...root.querySelectorAll('ha-menu-button')];
@@ -3121,21 +3842,11 @@ class IptvPanel extends HTMLElement {
     this._bindSubs();
     this._renderAdd();
     this._renderSubs();
-    this._renderGeneral();
     this._renderAccounts();
   }
 
-  // ── Subscriptions tab ──────────────────────────────────────────────────────
   _subsShell() {
-    var esc = iptvPanelEsc;
-    return `
-      <div class="tools">
-        <button class="act" data-add><ha-icon icon="mdi:plus"></ha-icon>${esc(this._t('p_add_btn'))}</button>
-        <span class="grow"></span>
-        <button class="act quiet" data-refresh><ha-icon icon="mdi:refresh"></ha-icon>${esc(this._t('p_refresh'))}</button>
-      </div>
-      <div id="add"></div>
-      <div class="subs" id="subs"></div>`;
+    return `<div id="hero"></div><div id="add"></div><div class="subs" id="subs"></div>`;
   }
 
   _bindSubs() {
@@ -3146,6 +3857,7 @@ class IptvPanel extends HTMLElement {
       var device = el.closest('[data-device]')?.dataset.device;
       if (el.dataset.add !== undefined) this._openAdd(true);
       else if (el.dataset.refresh !== undefined) this._refreshSubs(el);
+      else if (el.dataset.check !== undefined) this._refreshSubs(el, device);
       else if (el.dataset.addCancel !== undefined) this._openAdd(false);
       else if (el.dataset.addSubmit !== undefined) this._submitAdd(el);
       else if (el.dataset.settings !== undefined) this._openSettings(device);
@@ -3187,16 +3899,20 @@ class IptvPanel extends HTMLElement {
     return [Math.floor(Date.now() / 3600000), ...subs.map((sub) => [sub.name, ...Object.values(sub.ids).map((id) => states[id]?.last_updated)].join(','))].join('|');
   }
 
-  async _refreshSubs(button) {
-    var ids = this._subscriptions().flatMap((sub) => [sub.ids.status, sub.ids.health]).filter(Boolean);
+  // Refresh every subscription, or one (`device`): its status and a health check right away
+  async _refreshSubs(button, device) {
+    var subs = this._subscriptions().filter((sub) => !device || sub.device === device);
+    var ids = subs.flatMap((sub) => [sub.ids.status, sub.ids.health]).filter(Boolean);
     if (!ids.length) return;
     button.disabled = true;
+    button.classList.add('spin');
     try {
       await this._hass.callService('homeassistant', 'update_entity', { entity_id: ids });
     } catch (err) {
       console.error('IPTV panel: refresh failed', err);
     }
     button.disabled = false;
+    button.classList.remove('spin');
   }
 
   _field(key, type, value = '', hint = '') {
@@ -3349,68 +4065,164 @@ class IptvPanel extends HTMLElement {
     }
   }
 
+  // "2 minutes ago", in the language of Home Assistant
+  _ago(at) {
+    var ms = Date.parse(at);
+    if (Number.isNaN(ms)) return '';
+    var s = Math.round((ms - Date.now()) / 1000);
+    var [value, unit] = Math.abs(s) < 60 ? [s, 'second'] : Math.abs(s) < 3600 ? [Math.round(s / 60), 'minute'] : Math.abs(s) < 86400 ? [Math.round(s / 3600), 'hour'] : [Math.round(s / 86400), 'day'];
+    try {
+      return new Intl.RelativeTimeFormat(this._hass?.language || 'en', { numeric: 'auto' }).format(value, unit);
+    } catch (_err) {
+      return '';
+    }
+  }
+
+  // A subscription tile: its state (a glyph on the round icon, a coloured line), what is wrong, the expiration, the
+  // catalogue and the connections, then the health check and the French lists
   _subCard(sub) {
     var esc = iptvPanelEsc;
     var summary = iptvPanelSummary(this._hass, sub.ids);
-    var head = (tone, pill) => `<div class="acc-head">
-        <div class="avatar ${tone}"><ha-icon icon="mdi:television-play"></ha-icon></div>
-        <div class="who"><div class="n">${esc(sub.name)}</div></div>
-        ${pill}
+    var sev = iptvPanelSeverity(summary);
+    var tone = sev.tone;
+    var form = this._subForm(sub.device);
+    var acts = `<div class="t-acts">
+        <button class="ico-btn" data-settings title="${esc(this._t('settings'))}" aria-label="${esc(this._t('settings'))}"><ha-icon icon="mdi:cog"></ha-icon></button>
+        <button class="ico-btn bad" data-del title="${esc(this._t('p_del_btn'))}" aria-label="${esc(this._t('p_del_btn'))}"><ha-icon icon="mdi:trash-can-outline"></ha-icon></button>
       </div>`;
-    var actions = `<div class="bar"><span class="links"></span>
-        <button class="act quiet" data-settings><ha-icon icon="mdi:cog-outline"></ha-icon>${esc(this._t('settings'))}</button>
-        <button class="act quiet bad" data-del><ha-icon icon="mdi:delete-outline"></ha-icon>${esc(this._t('p_del_btn'))}</button></div>`;
-    if (!summary || summary.unavailable) {
-      return `<ha-card class="sub bad" data-device="${esc(sub.device)}">${head('bad', `<span class="pill bad">${esc(this._t('p_unavailable'))}</span>`)}
-        ${this._subForm(sub.device) || actions}</ha-card>`;
+    var stateText = !summary || summary.unavailable ? this._t('p_unavailable') : this._t(summary.status);
+    if (summary && !summary.unavailable && tone === 'warn' && summary.daysLeft > 0) {
+      stateText += ` · ${this._t(summary.daysLeft === 1 ? 'p_day_left' : 'p_days_left', { n: summary.daysLeft })}`;
     }
-    var tone = summary.tone;
-    var stateIcon = { good: 'mdi:check-circle', warn: 'mdi:alert' }[tone] || 'mdi:close-circle';
-    var pill = `<button class="pill ${tone}" data-entity="${esc(sub.ids.status)}"><ha-icon icon="${stateIcon}"></ha-icon>${esc(this._t(summary.status))}</button>`;
+    var state = sub.ids.status
+      ? `<button class="state ${tone}" data-entity="${esc(sub.ids.status)}">${esc(stateText)}</button>`
+      : `<span class="state ${tone}">${esc(stateText)}</span>`;
+    var head = `<div class="t-head">
+        <span class="avatar ${tone}"><ha-icon icon="mdi:television-play"></ha-icon>${iptvPanelGlyph(tone)}</span>
+        <div class="who"><div class="n">${esc(sub.name)}</div>${state}</div>
+        ${acts}
+      </div>`;
+    var alert = '';
+    if (sev.alert) {
+      var check = tone === 'bad' ? `<button class="act ${tone}" data-check><ha-icon icon="mdi:refresh"></ha-icon>${esc(this._t('check'))}</button>` : '';
+      var text = this._t(sev.alert, { settings: this._t('settings'), date: summary?.expires ? this._date(summary.expires) : '' });
+      alert = `<div class="alert ${tone}" role="status"><ha-icon icon="${tone === 'bad' ? 'mdi:lan-disconnect' : 'mdi:clock-outline'}"></ha-icon><span>${esc(text)}</span>${check}</div>`;
+    }
+    if (!summary || summary.unavailable) {
+      return `<ha-card class="sub ${tone}" data-device="${esc(sub.device)}">${head}${form}${alert}</ha-card>`;
+    }
+    var mtone = tone === 'bad' ? 'idle' : tone;
     var left =
       summary.expires === null
         ? this._t('p_unlimited')
         : summary.daysLeft > 0
           ? this._t(summary.daysLeft === 1 ? 'p_day_left' : 'p_days_left', { n: summary.daysLeft })
           : this._t('p_status_expired');
-    var expiry = `<div class="expiry ${tone}">
+    var expiry = `<div class="expiry ${mtone}">
         <div class="line"><span>${esc(this._t('p_expiration'))} · ${esc(summary.expires === null ? this._t('p_never') : this._date(summary.expires))}</span><b>${esc(left)}</b></div>
         ${summary.left === null ? '' : `<div class="meter"><i style="--p:${Math.round(summary.left * 100)}%"></i></div>`}
       </div>`;
+    var dim = tone === 'bad' ? ' dim' : '';
+    var stat = (value, key, icon) =>
+      `<div class="stat${dim}" title="${esc(this._t(key))}"><span class="k"><ha-icon icon="${icon}"></ha-icon>${esc(this._t(key))}</span><b>${esc(value)}</b></div>`;
     var [active, max] = summary.connections;
-    var stat = (value, key) => `<div class="stat" title="${esc(this._t(key))}"><b>${esc(value)}</b><span>${esc(this._t(key))}</span></div>`;
+    // The connection slots as dots (filled = in use), up to 6; beyond, the figures alone
+    var slots = active !== null && max && max <= 6
+      ? `<span class="slots ${active ? mtone : 'idle'}">${Array.from({ length: max }, (_, i) => `<i class="${i < active ? 'on' : ''}"></i>`).join('')}</span>`
+      : '';
     var stats = `<div class="stats">
-        ${stat(this._figure(summary.counts.channels), 'p_channels')}
-        ${stat(this._figure(summary.counts.movies), 'p_movies')}
-        ${stat(this._figure(summary.counts.series), 'p_series')}
-        ${stat(active === null ? '—' : `${active}/${max ?? '∞'}`, 'p_connections')}
+        ${stat(this._figure(summary.counts.channels), 'p_channels', 'mdi:television-classic')}
+        ${stat(this._figure(summary.counts.movies), 'p_movies', 'mdi:movie-open')}
+        ${stat(this._figure(summary.counts.series), 'p_series', 'mdi:filmstrip-box-multiple')}
+        <div class="stat" title="${esc(this._t('p_connections'))}"><span class="k"><ha-icon icon="mdi:account-multiple"></ha-icon>${esc(this._t('p_connections'))}</span>
+          <b>${esc(active === null ? '—' : `${active}/${max ?? '∞'}`)}${slots}</b></div>
       </div>`;
     var facts = [];
-    if (summary.health) {
-      var h = summary.health;
+    var h = summary.health;
+    if (h) {
       var htone = h.state === 'ok' ? 'good' : h.state === 'degraded' ? 'warn' : 'bad';
-      var hlabel = this._t(`p_health_${h.state}`);
-      facts.push(`<span class="fact ${htone}"><ha-icon icon="mdi:pulse"></ha-icon>${esc(hlabel)}${h.ms === null ? '' : ` · ${Math.round(h.ms)} ms`}</span>`);
+      facts.push(`<span class="fact ${htone}"><i class="dot"></i>${esc(this._t(`p_health_${h.state}`))}${h.ms === null ? '' : ` · ${Math.round(h.ms)} ms`}</span>`);
     }
-    if (summary.french !== null) facts.push(`<span class="fact" title="${esc(this._t('p_french_title'))}">${esc(this._t(summary.french ? 'p_french_on' : 'p_french_off'))}</span>`);
+    if (summary.french !== null) {
+      facts.push(`<span class="fact ${summary.french ? 'good' : 'bad'}" title="${esc(this._t('p_french_title'))}">${esc(this._t(summary.french ? 'p_french_on' : 'p_french_off'))}</span>`);
+    }
     if (summary.trial) facts.push(`<span class="fact warn">${esc(this._t('p_trial'))}</span>`);
-    return `<ha-card class="sub ${tone}" data-device="${esc(sub.device)}">${head(tone, pill)}${expiry}${stats}
-      ${facts.length ? `<div class="facts">${facts.join('')}</div>` : ''}
-      ${this._subForm(sub.device) || actions}</ha-card>`;
+    var when = h?.at ? this._ago(h.at) : '';
+    var foot = `<div class="t-foot">${facts.join('')}<span class="grow"></span>${when ? `<span class="when">${esc(this._t('p_checked', { when }))}</span>` : ''}</div>`;
+    return `<ha-card class="sub ${tone}" data-device="${esc(sub.device)}">${head}${form}${alert}${expiry}${stats}${foot}</ha-card>`;
   }
 
-  // `force`: a form opened or closed; otherwise only a change of the entities redraws (typed values stay)
+  // The banner over the tiles: the living-room TV shows the worst state, the title the number of subscriptions, the
+  // pills how many are fine, expiring or failing, and the next expiration; Add and Refresh in its corner
+  _heroHtml(subs) {
+    var esc = iptvPanelEsc;
+    var counts = { good: 0, warn: 0, bad: 0 };
+    var next = null;
+    var now = Date.now();
+    subs.forEach(({ sub, summary, sev }) => {
+      counts[sev.tone] += 1;
+      if (summary?.expires && summary.expires > now && (!next || summary.expires < next.expires)) next = { name: sub.name, expires: summary.expires };
+    });
+    var worst = !subs.length ? 'idle' : counts.bad ? 'bad' : counts.warn ? 'warn' : 'good';
+    var n = subs.length;
+    var title = this._t(n === 0 ? 'p_hero_none' : n === 1 ? 'p_hero_one' : 'p_hero_many', { n });
+    var main = counts.bad
+      ? `<span class="chip st bad">${esc(this._t('p_hero_fix', { n: counts.bad }))}</span>`
+      : n
+        ? `<span class="chip st ${worst}">${esc(this._t('p_hero_ok'))}</span>`
+        : '';
+    var chips = [
+      ['good', 'p_count_active'],
+      ['warn', 'p_count_expiring'],
+      ['bad', 'p_count_ko'],
+    ]
+      .filter(([tone]) => counts[tone])
+      .map(([tone, key]) => `<span class="chip ${tone}"><i class="dot"></i>${esc(this._t(key, { n: counts[tone] }))}</span>`)
+      .join('');
+    var night = this._hass?.themes?.darkMode ? ' night' : '';
+    var refresh = esc(this._t('p_refresh'));
+    var add = esc(this._t('p_add_btn'));
+    return `<ha-card class="hero">
+        <div class="banner big${night}">
+          <div class="htext">
+            <span class="badge ${worst}"><ha-icon icon="mdi:television-play"></ha-icon></span>
+            <div class="titles">
+              <div class="head"><span class="name">${esc(title)}</span>${main}</div>
+              ${chips && n > 1 ? `<div class="chips">${chips}</div>` : ''}
+              ${next ? `<div class="sub-l">${esc(this._t('p_next', { name: next.name, date: this._date(next.expires) }))}</div>` : ''}
+            </div>
+          </div>
+          ${iptvPanelSceneSvg(iptvPanelScene(worst), 'hero')}
+          <div class="acts">
+            <button data-add title="${add}" aria-label="${add}"><ha-icon icon="mdi:plus"></ha-icon></button>
+            <button data-refresh title="${refresh}" aria-label="${refresh}"><ha-icon icon="mdi:refresh"></ha-icon></button>
+          </div>
+          <div class="ground"></div>
+        </div>
+      </ha-card>`;
+  }
+
+  // `force`: a form opened or closed; otherwise only a change of the entities redraws (typed values stay).
+  // The tiles come by severity: failing first, then expiring, then the fine ones.
   _renderSubs(force) {
     var box = this.shadowRoot?.getElementById?.('subs');
     if (!box) return;
-    var signature = this._subsSignature();
+    var signature = `${this._subsSignature()}|${!!this._hass?.themes?.darkMode}`;
     if (!force && signature === this._drawnSubs) return;
     // An open form keeps what is typed in it: the cards wait until it is closed
     if (!force && Object.keys(this._subForms || {}).length) return;
     this._drawnSubs = signature;
-    var subs = this._subscriptions();
+    var rank = { bad: 0, warn: 1, good: 2 };
+    var subs = this._subscriptions()
+      .map((sub) => {
+        var summary = iptvPanelSummary(this._hass, sub.ids);
+        return { sub, summary, sev: iptvPanelSeverity(summary) };
+      })
+      .sort((a, b) => rank[a.sev.tone] - rank[b.sev.tone]);
+    var hero = this.shadowRoot.getElementById?.('hero');
+    if (hero) hero.innerHTML = this._heroHtml(subs);
     box.innerHTML = subs.length
-      ? subs.map((sub) => this._subCard(sub)).join('')
+      ? subs.map(({ sub }) => this._subCard(sub)).join('')
       : `<ha-card class="note">${iptvPanelEsc(this._t('none', { add: this._t('p_add_btn') }))}</ha-card>`;
   }
 
@@ -3441,19 +4253,20 @@ class IptvPanel extends HTMLElement {
     });
   }
 
+  // A settings row: its label and hint on the left, the field on the right
   _number(acc, key, label, hint, unit) {
     var [lo, hi] = IPTV_PANEL_LIMITS[key];
     var value = this._draft(acc)[key];
     var n = Number(value);
     var ok = Number.isInteger(n) && n >= lo && n <= hi;
+    var esc = iptvPanelEsc;
     return `
-      <label class="ctl">
-        <span>${iptvPanelEsc(this._t(label))}</span>
-        <div class="box${ok ? '' : ' bad-value'}">
-          <input type="number" inputmode="numeric" min="${lo}" max="${hi}" step="1" data-key="${key}" value="${iptvPanelEsc(value)}">
-          <em>${iptvPanelEsc(this._t(unit))}</em>
+      <label class="row">
+        <span class="lbl"><span class="l">${esc(this._t(label))}</span><small>${esc(this._t(hint, { min: lo, max: hi }))}</small></span>
+        <div class="box num${ok ? '' : ' bad-value'}">
+          <input type="number" inputmode="numeric" min="${lo}" max="${hi}" step="1" data-key="${key}" value="${esc(value)}">
+          <em>${esc(this._t(unit))}</em>
         </div>
-        <small>${iptvPanelEsc(this._t(hint, { min: lo, max: hi }))}</small>
       </label>`;
   }
 
@@ -3523,6 +4336,8 @@ class IptvPanel extends HTMLElement {
     }
   }
 
+  // An account's page: a banner with its state (the TV of the card), then its credentials, its options and its health
+  // check, each in a group of rows; Save at the bottom, Check now in the banner
   _accountHtml(acc) {
     var d = this._draft(acc);
     var esc = iptvPanelEsc;
@@ -3531,49 +4346,62 @@ class IptvPanel extends HTMLElement {
     var busy = this._busy[acc.entry_id];
     var canSave = !busy && this._changed(acc) && this._valid(acc);
     var icon = acc.provider === 'stalker' ? 'mdi:router-network' : 'mdi:account-key';
+    var tone = iptvPanelTone(acc.state);
+    var scene = acc.state === 'loaded' ? 'playing' : tone === 'warn' ? 'idle' : 'offline';
+    var night = this._hass?.themes?.darkMode ? ' night' : '';
+    var checkLabel = esc(this._t(busy === 'check' ? 'checking' : 'check'));
     // Only an account without a device: the others are removed with the card, which lists them
     var remove = acc.device_id
       ? ''
-      : `<button class="act bad" data-do="remove"${busy ? ' disabled' : ''}><ha-icon icon="mdi:delete-outline"></ha-icon>${esc(this._t(busy === 'remove' ? 'removing' : 'remove'))}</button>`;
+      : `<button class="act bad" data-do="remove"${busy ? ' disabled' : ''}><ha-icon icon="mdi:trash-can-outline"></ha-icon>${esc(this._t(busy === 'remove' ? 'removing' : 'remove'))}</button>`;
     return `
       <ha-card class="account" data-id="${esc(acc.entry_id)}">
-        ${this._confirm === acc.entry_id && !acc.device_id ? this._confirmHtml(acc) : ''}
-        <div class="acc-head">
-          <div class="avatar"><ha-icon icon="${icon}"></ha-icon></div>
-          <div class="who">
-            <div class="n">${esc(acc.title)}</div>
-            <div class="s">${esc(acc.provider === 'stalker' ? 'Stalker' : 'Xtream')} · ${esc(acc.url)}</div>
+        <div class="banner${night}">
+          <div class="htext">
+            <span class="badge ${tone}"><ha-icon icon="${icon}"></ha-icon></span>
+            <div class="titles">
+              <div class="head"><span class="name">${esc(acc.title)}</span><span class="chip st ${tone}">${esc(state)}</span></div>
+              <div class="sub-l mono">${esc(acc.provider === 'stalker' ? 'Stalker' : 'Xtream')} · ${esc(acc.url)}</div>
+            </div>
           </div>
-          <span class="pill ${iptvPanelTone(acc.state)}">${esc(state)}</span>
+          ${iptvPanelSceneSvg(scene, `acc-${esc(acc.entry_id)}`)}
+          <div class="acts"><button data-do="check" class="${busy === 'check' ? 'spin' : ''}" title="${checkLabel}" aria-label="${checkLabel}"${busy ? ' disabled' : ''}><ha-icon icon="mdi:stethoscope"></ha-icon></button></div>
+          <div class="ground"></div>
         </div>
-        ${this._credEdit?.entry_id === acc.entry_id ? this._credEditHtml() : this._credsHtml(acc)}
-        <div class="grid">
-          <label class="ctl wide">
-            <span>${esc(this._t('f_name'))}</span>
-            <div class="box"><input type="text" data-key="title" value="${esc(d.title)}" placeholder="${esc(acc.auto_title)}"></div>
-            <small>${esc(this._t('f_name_hint'))}</small>
-          </label>
-          ${this._number(acc, 'scan_interval', 'f_scan', 'f_scan_hint', 'u_min')}
-          ${this._number(acc, 'notify_days', 'f_notify', 'f_notify_hint', 'u_days')}
-          ${this._number(acc, 'health_interval', 'f_health', 'f_health_hint', 'u_min')}
-          <label class="toggle wide">
-            <div><span>${esc(this._t('f_stream'))}</span><small class="msg">${esc(this._t('f_stream_hint'))}</small></div>
-            <ha-switch data-key="stream_check"${d.stream_check ? ' checked' : ''}></ha-switch>
-          </label>
-        </div>
-        <div class="bar">
-          <div class="links">
-            ${acc.device_id ? `<a href="/config/devices/device/${esc(acc.device_id)}"><ha-icon icon="mdi:devices"></ha-icon>${esc(this._t('open_device'))}</a>` : ''}
-            ${status ? `<span class="msg ${status.tone || ''}">${esc(status.text)}</span>` : ''}
+        <div class="body">
+          ${this._confirm === acc.entry_id && !acc.device_id ? this._confirmHtml(acc) : ''}
+          <div class="group"><div class="g-t">${esc(this._t('g_credentials'))}</div>
+            <div class="g-box">${this._credEdit?.entry_id === acc.entry_id ? this._credEditHtml() : this._credsHtml(acc)}</div></div>
+          <div class="group"><div class="g-t">${esc(this._t('g_account'))}</div>
+            <div class="g-box">
+              <label class="row">
+                <span class="lbl"><span class="l">${esc(this._t('f_name'))}</span><small>${esc(this._t('f_name_hint'))}</small></span>
+                <div class="box text"><input type="text" data-key="title" value="${esc(d.title)}" placeholder="${esc(acc.auto_title)}"></div>
+              </label>
+              ${this._number(acc, 'scan_interval', 'f_scan', 'f_scan_hint', 'u_min')}
+              ${this._number(acc, 'notify_days', 'f_notify', 'f_notify_hint', 'u_days')}
+            </div></div>
+          <div class="group"><div class="g-t">${esc(this._t('g_health'))}</div>
+            <div class="g-box">
+              ${this._number(acc, 'health_interval', 'f_health', 'f_health_hint', 'u_min')}
+              <label class="row toggle">
+                <span class="lbl"><span class="l">${esc(this._t('f_stream'))}</span><small class="msg">${esc(this._t('f_stream_hint'))}</small></span>
+                <ha-switch data-key="stream_check"${d.stream_check ? ' checked' : ''}></ha-switch>
+              </label>
+            </div></div>
+          <div class="bar">
+            <div class="links">
+              ${acc.device_id ? `<a href="/config/devices/device/${esc(acc.device_id)}"><ha-icon icon="mdi:devices"></ha-icon>${esc(this._t('open_device'))}</a>` : ''}
+              ${status ? `<span class="msg ${status.tone || ''}">${esc(status.text)}</span>` : ''}
+            </div>
+            ${remove}
+            <button class="act" data-do="save"${canSave ? '' : ' disabled'}><ha-icon icon="mdi:content-save"></ha-icon>${esc(this._t(busy === 'save' ? 'saving' : 'save'))}</button>
           </div>
-          ${remove}
-          <button class="act quiet" data-do="check"${busy ? ' disabled' : ''}><ha-icon icon="mdi:stethoscope"></ha-icon>${esc(this._t(busy === 'check' ? 'checking' : 'check'))}</button>
-          <button class="act" data-do="save"${canSave ? '' : ' disabled'}><ha-icon icon="mdi:content-save"></ha-icon>${esc(this._t(busy === 'save' ? 'saving' : 'save'))}</button>
         </div>
       </ha-card>`;
   }
 
-  // An account of the list: its type, name, login and state
+  // An account of the list: its type, name, login, and its state on the round icon
   _listItem(acc) {
     var esc = iptvPanelEsc;
     var selected = acc.entry_id === this._selected;
@@ -3582,10 +4410,21 @@ class IptvPanel extends HTMLElement {
     var dirty = this._drafts[acc.entry_id] && this._changed(acc);
     return `<button class="md-item ${tone}${selected ? ' active' : ''}" role="option" aria-selected="${selected}" tabindex="${selected ? 0 : -1}"
         data-select="${esc(acc.entry_id)}">
-        <span class="md-ico"><ha-icon icon="${icon}"></ha-icon></span>
+        <span class="md-ico ${tone}"><ha-icon icon="${icon}"></ha-icon>${iptvPanelGlyph(tone)}</span>
         <span class="who"><span class="n">${esc(acc.title)}${dirty ? ' •' : ''}</span>
           <span class="s">${esc(acc.provider === 'stalker' ? 'Stalker' : 'Xtream')} · ${esc(acc.login)}</span></span>
-        <span class="dot" aria-hidden="true"></span>
+      </button>`;
+  }
+
+  // The Panel entry, first of the list: its subtitle says who the top bar is hidden for
+  _generalItem() {
+    var esc = iptvPanelEsc;
+    var selected = this._selected === IPTV_PANEL_GENERAL;
+    return `<button class="md-item general${selected ? ' active' : ''}" role="option" aria-selected="${selected}" tabindex="${selected ? 0 : -1}"
+        data-select="${IPTV_PANEL_GENERAL}">
+        <span class="md-ico"><ha-icon icon="mdi:page-layout-header"></ha-icon></span>
+        <span class="who"><span class="n">${esc(this._t('panel_display'))}</span>
+          <span class="s plain">${esc(this._t('f_hide_toolbar'))} · ${esc(this._t(`hide_${this._panelSettings.hide_toolbar}`))}</span></span>
       </button>`;
   }
 
@@ -3673,20 +4512,23 @@ class IptvPanel extends HTMLElement {
       box.innerHTML = `<ha-card class="note" aria-busy="true">${iptvPanelEsc(this._t('loading'))}</ha-card>`;
       return;
     }
-    if (!this._accounts.length) {
-      box.innerHTML = `<ha-card class="note">${iptvPanelEsc(this._t('none', { add: this._t('p_add_btn') }))}</ha-card>`;
-      return;
-    }
-    // One account at a time: the list of the accounts, then the selected one's credentials and options
-    if (!this._accounts.some((a) => a.entry_id === this._selected)) this._selected = this._accounts[0].entry_id;
-    var acc = this._accounts.find((a) => a.entry_id === this._selected);
+    // One page at a time: the Panel entry and the accounts listed, then the selected one's page (the first account by
+    // default, the Panel entry while there is none)
+    var ids = [IPTV_PANEL_GENERAL, ...this._accounts.map((a) => a.entry_id)];
+    if (!ids.includes(this._selected)) this._selected = ids[1] || IPTV_PANEL_GENERAL;
+    var general = this._selected === IPTV_PANEL_GENERAL;
+    var acc = general ? null : this._accounts.find((a) => a.entry_id === this._selected);
     var focus = this._focusOf(box);
     var esc = iptvPanelEsc;
+    var none = this._accounts.length ? '' : `<div class="md-none">${esc(this._t('none', { add: this._t('p_add_btn') }))}</div>`;
     box.innerHTML = `<div class="md${this._mdOpen ? ' open' : ''}">
-        <ha-card class="md-list" role="listbox" aria-label="${esc(this._t('all_accounts'))}">${this._accounts.map((a) => this._listItem(a)).join('')}</ha-card>
+        <ha-card class="md-list" role="listbox" aria-label="${esc(this._t('all_accounts'))}">
+          <div class="md-cap" aria-hidden="true">${esc(this._t('g_general'))}</div>${this._generalItem()}
+          <div class="md-cap" aria-hidden="true">${esc(this._t('g_accounts'))}</div>${this._accounts.map((a) => this._listItem(a)).join('')}${none}
+        </ha-card>
         <div class="md-detail">
           <button class="act quiet md-back" data-back><ha-icon icon="mdi:arrow-left"></ha-icon>${esc(this._t('all_accounts'))}</button>
-          ${this._accountHtml(acc)}
+          ${general ? this._generalHtml() : this._accountHtml(acc)}
         </div>
       </div>`;
     box.querySelectorAll('[data-select]').forEach((item) => {
@@ -3696,7 +4538,6 @@ class IptvPanel extends HTMLElement {
         var step = ev.key === 'ArrowDown' ? 1 : ev.key === 'ArrowUp' ? -1 : 0;
         if (!step) return;
         ev.preventDefault();
-        var ids = this._accounts.map((a) => a.entry_id);
         var next = ids[(ids.indexOf(this._selected) + step + ids.length) % ids.length];
         this._select(next, false);
         box.querySelector(`[data-select="${CSS.escape(next)}"]`)?.focus();
@@ -3707,7 +4548,8 @@ class IptvPanel extends HTMLElement {
       this._renderAccounts();
       box.querySelector(`[data-select="${CSS.escape(this._selected)}"]`)?.focus();
     });
-    this._bind(acc, box.querySelector(`ha-card[data-id="${CSS.escape(acc.entry_id)}"]`));
+    if (general) this._bindGeneral(box.querySelector('ha-card.general'));
+    else this._bind(acc, box.querySelector(`ha-card[data-id="${CSS.escape(acc.entry_id)}"]`));
     this._refocus(box, focus);
   }
 

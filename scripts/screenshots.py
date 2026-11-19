@@ -77,6 +77,7 @@ ICONS = {
     "content-copy": "M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z",
     "eye-off-outline": "M2,5.27L3.28,4L20,20.72L18.73,22L15.65,18.92C14.5,19.3 13.28,19.5 12,19.5C7,19.5 2.73,16.39 1,12C1.69,10.24 2.79,8.69 4.19,7.46L2,5.27M12,9A3,3 0 0,1 15,12C15,12.35 14.94,12.69 14.83,13L11,9.17C11.31,9.06 11.65,9 12,9M12,4.5C17,4.5 21.27,7.61 23,12C22.18,14.08 20.79,15.88 19,17.19L17.58,15.76C18.94,14.82 20.06,13.54 20.82,12C19.17,8.64 15.76,6.5 12,6.5C10.91,6.5 9.84,6.68 8.84,7L7.3,5.47C8.74,4.85 10.33,4.5 12,4.5M3.18,12C4.83,15.36 8.24,17.5 12,17.5C12.69,17.5 13.37,17.43 14,17.29L11.72,15C10.29,14.85 9.15,13.71 9,12.28L5.6,8.87C4.61,9.72 3.78,10.78 3.18,12Z",
     "menu": "M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z",
+    "page-layout-header": "M6,2H18A2,2 0 0,1 20,4V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V4A2,2 0 0,1 6,2M6,8V20H18V8H6Z",
     "account-multiple": "M16 17V19H2V17S2 13 9 13 16 17 16 17M12.5 7.5A3.5 3.5 0 1 0 9 11A3.5 3.5 0 0 0 12.5 7.5M15.94 13A5.32 5.32 0 0 1 18 17V19H22V17S22 13.37 15.94 13M15 4A3.39 3.39 0 0 0 13.07 4.59A5 5 0 0 1 13.07 10.41A3.39 3.39 0 0 0 15 11A3.5 3.5 0 0 0 15 4Z",
 }
 
@@ -259,10 +260,12 @@ PANEL_ACCOUNTS = [
         "options": {"scan_interval": 120, "notify_days": 14, "health_interval": 10, "stream_check": False},
     },
 ]
-# The two tabs of the panel (Subscriptions, Settings), light and dark.
+# The two tabs of the panel (Subscriptions, Settings), light and dark. The Subscriptions tab shows every account,
+# one expiring and one expired among them, so the tiles show their alerts and the banner its red cross.
+PANEL_ALL = ["iptv", "iptv2", "iptv3", "iptv4"]
 PANEL_SHOTS = [
-    {"file": "panel", "theme": "light", "tab": "accounts"},
-    {"file": "panel-dark", "theme": "dark", "tab": "accounts"},
+    {"file": "panel", "theme": "light", "tab": "accounts", "shown": PANEL_ALL},
+    {"file": "panel-dark", "theme": "dark", "tab": "accounts", "shown": PANEL_ALL},
     {"file": "panel-settings", "theme": "light", "tab": "settings"},
     {"file": "panel-settings-dark", "theme": "dark", "tab": "settings"},
 ]
@@ -323,7 +326,7 @@ def mount_panel(context, shot):
     page.add_script_tag(content=HA_ELEMENTS)
     page.add_script_tag(content=CARD_JS)
     page.add_script_tag(content=PANEL_JS)
-    shown = {"iptv", "iptv2"}
+    shown = set(shot.get("shown", ["iptv", "iptv2"]))
     page.evaluate(
         """({states, entities, devices, accounts, dark, tab}) => {
           const el = document.createElement("iptv-panel");
@@ -439,19 +442,34 @@ def animate(context, shot, *, fps=20, seconds=2):
     width = shot.get("width", WIDTH)
     box = page.locator("#root").bounding_box()
     clip = {"x": 0, "y": 0, "width": width + 32, "height": int(box["height"] + 0.999) + 32}
+    record_gif(page, clip, shot["file"], fps, seconds)
+
+
+def record_gif(page, clip, name, fps, seconds):
+    """Step every animation frame by frame over `seconds`, capture the clip and write screenshots/<name>.gif."""
     frames = round(fps * seconds)
     with tempfile.TemporaryDirectory() as frame_dir:
         for i in range(frames):
             page.evaluate(FREEZE_ANIMATIONS, (i * 1000) / fps)
             page.screenshot(path=f"{frame_dir}/f{i:03d}.png", clip=clip)
         page.close()
-        out = ROOT / "screenshots" / f"{shot['file']}.gif"
+        out = ROOT / "screenshots" / f"{name}.gif"
         new = f"{frame_dir}/new.gif"
         # Halve the retina capture with a palette built from the frames: clean colours, small file, same frames give
         # the same GIF, so it is only rewritten (and committed) when the animation really changed.
         encode_gif(frame_dir, fps, clip["width"], new)
         written = replace_if_changed(new, out)
-    print(f"screenshots/{shot['file']}.gif{'' if written else ' (unchanged)'}")
+    print(f"screenshots/{name}.gif{'' if written else ' (unchanged)'}")
+
+
+def animate_panel(context, shot, *, fps=10, seconds=4):
+    """Record the Subscriptions banner of the panel, its TV playing a live channel (a 4 s loop), as a looping
+    screenshots/<file>.gif, stepped frame by frame like the refresh GIF."""
+    page = mount_panel(context, shot)
+    page.wait_for_timeout(300)
+    box = page.locator("ha-card.hero").bounding_box()
+    clip = {"x": box["x"], "y": box["y"], "width": box["width"], "height": box["height"]}
+    record_gif(page, clip, shot["file"], fps, seconds)
 
 
 def main():
@@ -485,6 +503,9 @@ def main():
                 {"x": 0, "y": 0, "width": PANEL_WIDTH, "height": int(box["height"] + 0.999)},
             )
             page.close()
+        # The panel's banner, its TV playing (the subscriptions fine), light and dark twins.
+        for theme, dark in (("light", ""), ("dark", "-dark")):
+            animate_panel(context, {"file": f"panel-live{dark}", "theme": theme, "tab": "accounts"})
         # The sidebar entry with its badge, clipped to the sidebar strip plus the 16 px of theme background.
         for shot in SIDEBAR_SHOTS:
             page = mount_sidebar(context, shot)
