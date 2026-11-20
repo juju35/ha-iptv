@@ -8,7 +8,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_CARD_VERSION = '3.37.2';
+var IPTV_CARD_VERSION = '3.37.3';
 var IPTV_DOMAIN = 'iptv';
 
 // ── i18n ──────────────────────────────────────────────────────────────────────
@@ -2933,6 +2933,8 @@ class IptvCard extends HTMLElement {
 
   disconnectedCallback() {
     this._fitObserver?.disconnect();
+    // Left (another view, a conditional card hidden): an open popup closes without doing anything
+    this._closeEditor();
   }
 
   // [data-entity] elements open their subscription's entity; header pills (single
@@ -3359,23 +3361,43 @@ class IptvMiniCard extends IptvCard {
     super();
     this._zoomed = false;
     this._onUnzoom = (ev) => {
-      var path = ev.composedPath();
-      // An open popup of the card is closed first (its backdrop or buttons), as in the full card
-      if (!this._zoomed || this._modal || path.includes(this)) return;
-      if (path.some((n) => ['ha-more-info-dialog', 'ha-dialog', 'dialog'].includes(n.localName))) return;
+      if (!this._outside(ev)) return;
       this._zoomed = false;
       this._render();
     };
+    // On iOS (Safari and the companion app) a tap on something that is not clickable sends no click to the page:
+    // the press and the release outside the card count as a click elsewhere too.
+    this._onDown = (ev) => {
+      this._downOutside = this._outside(ev);
+    };
+    this._onUp = (ev) => {
+      if (this._downOutside) this._onUnzoom(ev);
+      this._downOutside = false;
+    };
+  }
+
+  // A click elsewhere: zoomed in, no popup of the card open (it is closed first, by its backdrop or buttons),
+  // outside the card and outside a Home Assistant dialog.
+  _outside(ev) {
+    var path = ev.composedPath();
+    if (!this._zoomed || this._modal || path.includes(this)) return false;
+    return !path.some((n) => ['ha-more-info-dialog', 'ha-dialog', 'dialog'].includes(n.localName));
   }
 
   connectedCallback() {
     super.connectedCallback();
     document.addEventListener('click', this._onUnzoom, true);
+    document.addEventListener('pointerdown', this._onDown, true);
+    document.addEventListener('pointerup', this._onUp, true);
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
     document.removeEventListener('click', this._onUnzoom, true);
+    document.removeEventListener('pointerdown', this._onDown, true);
+    document.removeEventListener('pointerup', this._onUp, true);
+    // Back on the page in its compact view
+    this._zoomed = false;
   }
 
   setConfig(config) {

@@ -709,3 +709,40 @@ test('illustrated header: the status pill follows the title (dot and label in th
   const html = card._banner('ok', '<div class="head"><div class="name">T</div><span class="chip st ok"></span></div>', '<button class="refresh"></button>');
   assert.match(html, /<div class="htext">.*<\/div><div class="acts"><button class="refresh"><\/button><\/div><div class="ground">/s);
 });
+
+test('a popup closes without acting when the card leaves the page', () => {
+  const { card } = popupCard();
+  card._confirmDelete({ name: 'Provider', device: 'd1' });
+  assert.ok(card._modal);
+  card.disconnectedCallback();
+  assert.equal(card._modal, null);
+  assert.equal(card._root.inert, false);
+});
+
+test('the mini card folds back on a tap elsewhere (press and release outside) and when it leaves the page', () => {
+  const mini = new IptvMiniCard();
+  let renders = 0;
+  mini._render = () => renders++;
+  const outside = { composedPath: () => [] };
+  const inside = { composedPath: () => [mini] };
+  mini._zoomed = true;
+  // A press in the card released outside (a drag) does not fold it.
+  mini._onDown(inside);
+  mini._onUp(outside);
+  assert.equal(mini._zoomed, true);
+  mini._modal = {};
+  mini._onDown(outside);
+  mini._onUp(outside);
+  assert.equal(mini._zoomed, true, 'an open popup is closed first');
+  mini._modal = null;
+  mini._onDown({ composedPath: () => [{ localName: 'ha-more-info-dialog' }] });
+  mini._onUp(outside);
+  assert.equal(mini._zoomed, true, 'not from a Home Assistant dialog');
+  mini._onDown(outside);
+  mini._onUp(outside);
+  assert.equal(mini._zoomed, false);
+  assert.equal(renders, 1);
+  mini._zoomed = true;
+  mini.disconnectedCallback();
+  assert.equal(mini._zoomed, false);
+});
