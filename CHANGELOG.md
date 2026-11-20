@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.37.3 - 2026-11-20
+
+### Fixes
+- **Sidebar badge**: once the entity registry is loaded, only the health sensors of the IPTV integration are counted; a sensor of another integration (or one without a unique id) reading "unreachable" no longer shows up as a failing IPTV account.
+- **Card popups**: an open popup (edit, add, remove, credentials) closes without doing anything when the card leaves the page (another view, a conditional card hidden).
+- **Mini card**: the zoomed view comes back compact when the card leaves the page, and a tap elsewhere on iOS (Safari and the companion app, where a tap on something not clickable sends no click) folds it too.
+
 ## 3.37.2 - 2026-11-20
 
 ### Fixes
