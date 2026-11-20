@@ -127,16 +127,19 @@ function iptvSetBadge(count) {
 }
 
 // The number of IPTV accounts whose health sensor is in a failing state. A KO health value never collides with the
-// account-status sensor's values (active, expired…), so the state alone identifies a failing health sensor; the
-// platform is checked too when the registry is loaded.
+// account-status sensor's values (active, expired…), so the state alone identifies a failing health sensor while the
+// registry is not loaded yet; once it is, only the sensors of the iptv platform count (a sensor of another
+// integration, or one without a unique id, reading "unreachable" is left out).
 function iptvKoCount(hass) {
   var states = hass?.states;
   if (!states) return 0;
+  var registry = hass.entities;
+  var loaded = !!registry && Object.keys(registry).length > 0;
   var count = 0;
   for (var id in states) {
     if (!id.startsWith('sensor.')) continue;
     if (!IPTV_KO_STATES.has(states[id]?.state)) continue;
-    if (hass.entities?.[id] && hass.entities[id].platform !== 'iptv') continue;
+    if (loaded && registry[id]?.platform !== 'iptv') continue;
     count += 1;
   }
   return count;
