@@ -49,7 +49,9 @@ async def test_dashboards_device_ids_replaced_in_storage_mode_only(hass, caplog)
         dashboards={"a": storage, "b": untouched, "c": yaml_mode, "d": empty, "e": failing}
     )
     await _async_replace_in_dashboards(hass, {"old": "new"})
-    storage.async_save.assert_awaited_once_with({"views": [{"cards": [{"type": "custom:iptv-card", "device_id": "new"}]}]})
+    storage.async_save.assert_awaited_once_with(
+        {"views": [{"cards": [{"type": "custom:iptv-card", "device_id": "new"}]}]}
+    )
     untouched.async_save.assert_not_awaited()
     yaml_mode.async_load.assert_not_awaited()
     empty.async_save.assert_not_awaited()
