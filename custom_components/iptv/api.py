@@ -217,11 +217,8 @@ class XtreamClient:
         self._catalog_at = 0.0
         # User-Agent accepted by the provider, found on the first refused request
         self._ua = USER_AGENTS[0]
-
-    @property
-    def user_agent(self) -> str:
-        """User-Agent currently used (the first one the provider accepted)."""
-        return self._ua
+        # Once one is accepted, a non-JSON answer is the action's, not a User-Agent filter
+        self._ua_ok = False
 
     @property
     def _headers(self) -> dict[str, str]:
@@ -248,11 +245,14 @@ class XtreamClient:
                     break
                 continue
             except ValueError as err:  # HTML or garbage instead of JSON: maybe filtered
+                if self._ua_ok:
+                    # This User-Agent works for the other actions: the answer is this action's
+                    raise IptvError(_safe_err(err)) from None
                 last = IptvError(_safe_err(err))
                 continue
             except (TimeoutError, aiohttp.ClientError) as err:
                 raise IptvError(_safe_err(err)) from None
-            self._ua = ua
+            self._ua, self._ua_ok = ua, True
             return result
         raise last or IptvError("no answer")
 

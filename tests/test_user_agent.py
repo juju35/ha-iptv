@@ -56,7 +56,7 @@ async def test_falls_back_and_remembers_the_accepted_one() -> None:
     session = _Session({USER_AGENTS[0]: 461, USER_AGENTS[1]: "html", USER_AGENTS[2]: 200})
     client = XtreamClient(session, "http://x", "u", "p")  # type: ignore[arg-type]
     await client.async_get_user_info()
-    assert client.user_agent == USER_AGENTS[2]
+    assert session.seen == list(USER_AGENTS[:3])
     session.seen.clear()
     await client.async_get_user_info()
     assert session.seen == [USER_AGENTS[2]]
@@ -77,3 +77,23 @@ async def test_all_refused_reports_the_http_status() -> None:
         await client.async_get_user_info()
     assert len(session.seen) == len(USER_AGENTS)
 
+
+async def test_html_after_an_accepted_user_agent_is_not_retried() -> None:
+    session = _Session({USER_AGENTS[0]: 200})
+    client = XtreamClient(session, "http://x", "u", "p")  # type: ignore[arg-type]
+    await client.async_get_user_info()
+    session.rules[USER_AGENTS[0]] = "html"
+    session.seen.clear()
+    with pytest.raises(IptvError):
+        await client.async_get_user_info()
+    assert session.seen == [USER_AGENTS[0]]
+
+
+async def test_a_filter_after_an_accepted_user_agent_is_still_retried() -> None:
+    session = _Session({USER_AGENTS[0]: 200, USER_AGENTS[1]: 200})
+    client = XtreamClient(session, "http://x", "u", "p")  # type: ignore[arg-type]
+    await client.async_get_user_info()
+    session.rules[USER_AGENTS[0]] = 461
+    session.seen.clear()
+    await client.async_get_user_info()
+    assert session.seen == [USER_AGENTS[0], USER_AGENTS[1]]
