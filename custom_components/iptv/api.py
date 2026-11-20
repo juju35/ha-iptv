@@ -30,7 +30,19 @@ from urllib.parse import quote, urlparse
 import aiohttp
 
 TIMEOUT = aiohttp.ClientTimeout(total=60)
-HEADERS = {"User-Agent": "Mozilla/5.0"}
+# Some providers (CDN proxies) refuse some User-Agents (HTTP 403 / 461 / 512, or an
+# HTML page instead of JSON). Xtream requests try these in order until one is
+# accepted, then keep using it for the life of the client.
+USER_AGENTS = (
+    "VLC/3.0.21 LibVLC/3.0.21",
+    "Lavf/60.16.100",
+    "IPTVSmarters/1.0.3",
+    "okhttp/4.12.0",
+    "Dalvik/2.1.0 (Linux; U; Android 13; SM-S918B Build/TP1A.220624.014)",
+    "Mozilla/5.0",
+)
+# Server-side failures that are a real outage, not a User-Agent filter: no retry
+_OUTAGE_STATUSES = frozenset({404, 500, 502, 503, 504})
 
 
 class IptvError(Exception):
@@ -203,18 +215,46 @@ class XtreamClient:
         # Last catalogue counters + French summary, and when they were read
         self._catalog: dict[str, Any] | None = None
         self._catalog_at = 0.0
+        # User-Agent accepted by the provider, found on the first refused request
+        self._ua = USER_AGENTS[0]
+        # Once one is accepted, a non-JSON answer is the action's, not a User-Agent filter
+        self._ua_ok = False
+
+    @property
+    def _headers(self) -> dict[str, str]:
+        return {"User-Agent": self._ua}
 
     async def _get(self, action: str | None = None) -> Any:
         params = dict(self._auth)
         if action:
             params["action"] = action
-        try:
-            async with self._session.get(self._endpoint, params=params, headers=HEADERS, timeout=TIMEOUT) as resp:
-                resp.raise_for_status()
-                return await resp.json(content_type=None)
-        except (TimeoutError, aiohttp.ClientError, ValueError) as err:
-            # from None: the chained aiohttp error would print the URL in a traceback
-            raise IptvError(_safe_err(err)) from None
+        # The accepted User-Agent first, then the others when the provider filters it
+        candidates = [self._ua, *(ua for ua in USER_AGENTS if ua != self._ua)]
+        last: IptvError | None = None
+        for ua in candidates:
+            try:
+                async with self._session.get(
+                    self._endpoint, params=params, headers={"User-Agent": ua}, timeout=TIMEOUT
+                ) as resp:
+                    resp.raise_for_status()
+                    result = await resp.json(content_type=None)
+            except aiohttp.ClientResponseError as err:
+                # from None: the chained aiohttp error would print the URL in a traceback
+                last = IptvError(_safe_err(err))
+                if err.status in _OUTAGE_STATUSES:
+                    break
+                continue
+            except ValueError as err:  # HTML or garbage instead of JSON: maybe filtered
+                if self._ua_ok:
+                    # This User-Agent works for the other actions: the answer is this action's
+                    raise IptvError(_safe_err(err)) from None
+                last = IptvError(_safe_err(err))
+                continue
+            except (TimeoutError, aiohttp.ClientError) as err:
+                raise IptvError(_safe_err(err)) from None
+            self._ua, self._ua_ok = ua, True
+            return result
+        raise last or IptvError("no answer")
 
     async def _count(self, action: str) -> int | None:
         try:
@@ -268,7 +308,7 @@ class XtreamClient:
         # Each credential is one path segment: # ? / % must not end it
         user, password = quote(self._username, safe=""), quote(self._password, safe="")
         url = f"{self._base}/live/{user}/{password}/{sid}.ts"
-        res = await _probe_stream(self._session, url, HEADERS)
+        res = await _probe_stream(self._session, url, self._headers)
         res["channel"] = name
         return res
 
