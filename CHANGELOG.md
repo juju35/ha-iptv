@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.38.1 - 2026-11-21
+
+### Fixes
+- Panel: the folded top bar keeps the exact room of the top bar and the tabs after a jump down the page (the tabs already stuck at the top), its round buttons keep their icons, and Home Assistant's menu button in it no longer stands in for the panel's own.
+
 ## 3.38.0 - 2026-11-21
 
 ### Features
