@@ -1048,8 +1048,8 @@ async def test_card_served(hass, aioclient_mock, entry, hass_client):
     assert resp.status == 200
     text = await resp.text()
     assert f"IPTV_CARD_VERSION = '{VERSION}'" in text
-    assert "customElements.define('iptv-card'" in text
-    assert "if (!customElements.get('iptv-mini-card')) {\n  customElements.define('iptv-mini-card'" in text
+    assert "pickerDefine('iptv-card'" in text
+    assert "if (!customElements.get('iptv-mini-card')) {\n  pickerDefine('iptv-mini-card'" in text
 
 
 def _readd(hass) -> MockConfigEntry:
