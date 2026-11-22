@@ -8,7 +8,7 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-var IPTV_CARD_VERSION = '3.38.1';
+var IPTV_CARD_VERSION = '3.38.2';
 var IPTV_DOMAIN = 'iptv';
 
 // ── i18n ──────────────────────────────────────────────────────────────────────
@@ -3541,7 +3541,7 @@ if (!customElements.get('iptv-card')) {
     type: 'iptv-card',
     name: 'IPTV Subscription Card',
     description: 'Status, expiration date, channel, movie and series counts of one or several IPTV subscriptions (Xtream Codes or Stalker).',
-    preview: true,
+    preview: false,
     documentationURL: 'https://github.com/juju35/ha-iptv',
   });
 
@@ -3557,7 +3557,7 @@ if (!customElements.get('iptv-mini-card')) {
     type: 'iptv-mini-card',
     name: 'IPTV Subscription Mini Card',
     description: 'The IPTV subscriptions on two lines (status and days left of each provider), with a detail button showing the full card.',
-    preview: true,
+    preview: false,
     documentationURL: 'https://github.com/juju35/ha-iptv',
   });
 }
