@@ -5,8 +5,8 @@ import { test } from 'node:test';
 import vm from 'node:vm';
 import { checkTextContrast } from './contrast.mjs';
 import { checkSerbianTables } from './serbian.mjs';
+import { panelSource as source } from './source.mjs';
 
-const source = readFileSync(new URL('../custom_components/iptv/frontend/iptv-panel.js', import.meta.url), 'utf8');
 // attachShadow returns a root without elements: rendering is skipped (see _renderAccounts)
 const shadow = { getElementById: () => null, querySelector: () => null };
 const context = {

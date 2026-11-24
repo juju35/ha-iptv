@@ -19,6 +19,7 @@
 ## Before opening a PR — run the checks locally
 CI mirrors these; running them first avoids round-trips:
 ```sh
+node scripts/build-frontend.mjs
 pre-commit run -a
 vulture custom_components .vulture_whitelist.py --min-confidence 60
 npx --yes jscpd@5.4.2 .
@@ -41,8 +42,8 @@ carries the new version, updated together in one commit:
 1. `CHANGELOG.md` → add a "## X.Y.Z - YYYY-MM-DD" section at the top (`### Features` | `Fixes` | `Performance` | `Maintenance`).
 2. `custom_components/iptv/manifest.json` → `"version": "X.Y.Z"`.
 3. `custom_components/iptv/const.py` → `VERSION = "X.Y.Z"`.
-4. `custom_components/iptv/frontend/iptv-card.js` → `IPTV_CARD_VERSION = 'X.Y.Z'`.
-5. `custom_components/iptv/frontend/iptv-panel.js` → `IPTV_PANEL_VERSION = 'X.Y.Z'`.
+4. `src/iptv-card/core.js` → `IPTV_CARD_VERSION = 'X.Y.Z'`.
+5. `src/iptv-panel/version.js` → `IPTV_PANEL_VERSION = 'X.Y.Z'`.
 - Bump rule: `fix` → patch, `feat` → minor, breaking change → major.
 - The PR/commit title carries the version in parentheses, e.g. `feat: new option (X.Y.Z)`.
 
@@ -60,6 +61,12 @@ carries the new version, updated together in one commit:
 
 ## Supported integrations
 This is a **standalone integration** (its own integration, with its own card) — it talks to its device/service directly, not on top of other Home Assistant integrations — so it has **no** `## Supported integrations` section (that section is only for cards/integrations that sit on top of others). If it does build on external integrations, add the section (title verbatim).
+
+## Source layout
+- The card and the panel are ES modules in `src/iptv-card/` and `src/iptv-panel/` (entry `src/<stem>/index.js`), assembled by `scripts/build-frontend.mjs` (`scripts/bundle.mjs`) into `custom_components/iptv/frontend/<stem>.js`, the classic script the integration serves: modules concatenated in the order of the entry file, import lines removed, `export` dropped. The assembled files are **not committed** (gitignored); CI and the release build them. Run `npm install --no-save --no-package-lock acorn@8.19.0 && node scripts/build-frontend.mjs` before `pytest` or the screenshots.
+- Modules share one scope, so top-level names stay unique across modules; a new module must be listed in its `index.js`.
+- Translations: one file per language in `src/<stem>/i18n/<lang>.js` (`export default { … };`), gathered by the table file next to them and rebuilt into a single object literal at build for `scripts/i18n-split.mjs`.
+- `test/*.test.mjs` evaluate the assembled source (`test/source.mjs`), not a built file.
 
 ## Translations
 - English is the source. Keep every language in sync when a user-facing string changes.
