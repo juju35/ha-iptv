@@ -7,6 +7,7 @@ on:
     paths:
       - "custom_components/**/frontend/**"
       - "scripts/**"
+      - "src/**"
       - ".github/workflows/screenshots.yml"
 
 # Protected main is never pushed to: the job commits the refreshed screenshots
@@ -54,6 +55,15 @@ jobs:
           ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref || '' }}
       # The workspace is owned by another user than the container's root: let git work in it (commit step).
       - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      # The frontend files the screenshots load are assembled from src/ (not committed).
+      - name: Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "22"
+      - name: Build the frontend
+        run: |
+          npm install --no-save --no-package-lock acorn@8.19.0
+          node scripts/build-frontend.mjs
       # Pinned so the rendered screenshots only change when the card does, not with each Playwright/Chromium release.
       - run: pip install playwright==1.64.1
       # Download the browser binary (no apt here) separately from its system libraries, so the apt work all sits in

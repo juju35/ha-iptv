@@ -331,15 +331,17 @@ The card is served by the integration at `/iptv/iptv-card.js` and registered in 
 ## Development
 
 ```bash
+npm install --no-save --no-package-lock acorn@8.19.0
+node scripts/build-frontend.mjs   # assembles src/<stem>/ into custom_components/iptv/frontend/<stem>.js
 pip install playwright && playwright install chromium
 python scripts/screenshots.py   # renders the card and panel PNGs, refreshing(-dark).gif and panel-live(-dark).gif (needs ffmpeg), light and dark, with mock subscriptions
 ```
 
-The card is plain JavaScript (`custom_components/iptv/frontend/iptv-card.js`), served by the integration: no build step.
+The card and the panel are plain JavaScript served by the integration. Their source is split into ES modules under `src/iptv-card/` and `src/iptv-panel/` (entry `index.js`, translations one file per language in `i18n/`); `node scripts/build-frontend.mjs` assembles each into the classic script `custom_components/iptv/frontend/<stem>.js`, which is not committed (the release builds it). The modules share one scope, so top-level names stay unique across them, and a new module must be listed in its `index.js`.
 
 ### Releasing
 
-1. Bump the version in `custom_components/iptv/manifest.json`, `VERSION` in `const.py`, `IPTV_CARD_VERSION` in `frontend/iptv-card.js` and `IPTV_PANEL_VERSION` in `frontend/iptv-panel.js`
+1. Bump the version in `custom_components/iptv/manifest.json`, `VERSION` in `const.py`, `IPTV_CARD_VERSION` in `src/iptv-card/core.js` and `IPTV_PANEL_VERSION` in `src/iptv-panel/version.js`
 2. Add a `## <version>` section at the top of [CHANGELOG.md](https://github.com/juju35/ha-iptv/blob/main/CHANGELOG.md)
 3. Push to `main`: the **Release** workflow creates the tag and the GitHub release with `iptv.zip` and the changelog section as notes
 

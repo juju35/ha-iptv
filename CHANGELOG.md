@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.38.4 - 2026-11-24
+
+### Maintenance
+- The frontend source is split into ES modules: `src/iptv-card/` and `src/iptv-panel/` (entry `index.js` in each), cut at their sections, with the translations in one file per language (`i18n/<lang>.js`). `scripts/build-frontend.mjs` assembles them back, in their original order, into the same `iptv-card.js` and `iptv-panel.js` the integration serves; they are no longer committed. The release zip is unchanged.
+
 ## 3.38.3 - 2026-11-22
 
 ### Performance
