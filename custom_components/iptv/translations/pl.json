@@ -69,6 +69,7 @@
     },
     "error": {
       "cannot_connect": "Nie można połączyć się z serwerem IPTV",
+      "redirected": "Serwer przekierowuje na inną stronę zamiast odpowiedzieć (blokada DNS lub błędny URL)",
       "invalid_auth": "Serwer odrzucił dane logowania",
       "invalid_mac": "Nieprawidłowy adres MAC (format AA:BB:CC:DD:EE:FF)",
       "no_french_lists": "Nie znaleziono francuskiej listy u tego dostawcy (kategorie na żywo, VOD lub seriale): konto nie zostanie dodane.",

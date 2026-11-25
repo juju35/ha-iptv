@@ -62,6 +62,7 @@ export default {
   p_edit_saving: 'Wird geprüft…',
   p_err_invalid_auth: 'Zugangsdaten abgelehnt',
   p_err_cannot_connect: 'Server nicht erreichbar',
+  p_err_redirected: 'Der Server leitet auf eine andere Website um, statt zu antworten (DNS-Sperre oder falsche URL)',
   p_err_invalid_mac: 'Ungültige MAC-Adresse',
   p_err_no_french_lists: 'Keine französische Liste bei diesem Anbieter',
   p_err_french_unknown: 'Kategorien konnten nicht gelesen werden',

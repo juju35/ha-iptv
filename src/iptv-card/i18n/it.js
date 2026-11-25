@@ -18,6 +18,7 @@ export default {
   edit_saving: 'Verifica…',
   err_invalid_auth: 'Credenziali rifiutate',
   err_cannot_connect: 'Impossibile raggiungere il server',
+  err_redirected: 'Il server reindirizza a un altro sito invece di rispondere (blocco DNS o URL errato)',
   err_invalid_mac: 'Indirizzo MAC non valido',
   err_no_french_lists: 'Nessuna lista francese presso questo fornitore',
   err_french_unknown: 'Impossibile leggere le categorie',

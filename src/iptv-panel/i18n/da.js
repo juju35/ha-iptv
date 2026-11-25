@@ -62,6 +62,7 @@ export default {
   p_edit_saving: 'Kontrollerer…',
   p_err_invalid_auth: 'Loginoplysninger afvist',
   p_err_cannot_connect: 'Kan ikke nå serveren',
+  p_err_redirected: 'Serveren omdirigerer til et andet websted i stedet for at svare (DNS-blokering eller forkert URL)',
   p_err_invalid_mac: 'Ugyldig MAC-adresse',
   p_err_no_french_lists: 'Ingen fransk liste hos denne udbyder',
   p_err_french_unknown: 'Kunne ikke læse kategorierne',

@@ -69,6 +69,7 @@
     },
     "error": {
       "cannot_connect": "Strežnika IPTV ni mogoče doseči",
+      "redirected": "Strežnik namesto odgovora preusmeri na drugo spletno mesto (blokada DNS ali napačen URL)",
       "invalid_auth": "Strežnik je zavrnil poverilnice",
       "invalid_mac": "Neveljaven naslov MAC (oblika AA:BB:CC:DD:EE:FF)",
       "no_french_lists": "Pri tem ponudniku ni bilo najdenega francoskega seznama (kategorije v živo, VOD ali serij): račun ni dodan.",

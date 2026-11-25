@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.38.5 - 2026-11-25
+
+### Fixes
+- Adding or editing an account: a server that redirects to another site instead of answering (a DNS blocking page, a wrong URL) now gets its own error, "The server redirects to another site instead of answering (DNS block or wrong URL)", instead of "Cannot reach the server". On a Stalker portal the redirect is kept across the three portal paths tried; on Xtream it is not retried with the other User-Agents (the redirect does not depend on them). A portal moved to another host that still answers JSON keeps working.
+- The reason a server is unreachable or redirects is written to the log when an account is added or edited (server `host:port` and the error or the site it redirects to, never the credentials), so a refused add can be explained afterwards.
+- Xtream: `Mozilla/5.0`, the User-Agent sent before 3.37.2, is tried first again, then the others. Until one has been accepted, a connection dropped by the provider (server disconnected, reset) also moves on to the next User-Agent; a server that cannot be reached at all (DNS, refused connection) and timeouts are still not retried.
+
 ## 3.38.4 - 2026-11-24
 
 ### Maintenance

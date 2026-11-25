@@ -20,6 +20,7 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import json
+import logging
 import re
 import time
 from collections.abc import AsyncIterator
@@ -29,17 +30,20 @@ from urllib.parse import quote, urlparse
 
 import aiohttp
 
+_LOGGER = logging.getLogger(__name__)
+
 TIMEOUT = aiohttp.ClientTimeout(total=60)
 # Some providers (CDN proxies) refuse some User-Agents (HTTP 403 / 461 / 512, or an
 # HTML page instead of JSON). Xtream requests try these in order until one is
 # accepted, then keep using it for the life of the client.
 USER_AGENTS = (
+    # First: the one used before 3.37.2, so a provider that worked then still gets it
+    "Mozilla/5.0",
     "VLC/3.0.21 LibVLC/3.0.21",
     "Lavf/60.16.100",
     "IPTVSmarters/1.0.3",
     "okhttp/4.12.0",
     "Dalvik/2.1.0 (Linux; U; Android 13; SM-S918B Build/TP1A.220624.014)",
-    "Mozilla/5.0",
 )
 # Server-side failures that are a real outage, not a User-Agent filter: no retry
 _OUTAGE_STATUSES = frozenset({404, 500, 502, 503, 504})
@@ -51,6 +55,22 @@ class IptvError(Exception):
 
 class IptvAuthError(IptvError):
     """Credentials refused."""
+
+
+class IptvRedirectError(IptvError):
+    """The server sent the request to another site (a blocking page, a wrong URL)."""
+
+    def __init__(self, host: str) -> None:
+        super().__init__(f"redirected to {host}")
+        self.host = host
+
+
+def _offsite(resp: Any, base: str) -> str | None:
+    """Host of the site the answer came from, when a redirect left the server's host."""
+    final = (getattr(getattr(resp, "url", None), "host", None) or "").lower()
+    if not getattr(resp, "history", None) or not final:
+        return None
+    return final if final != (urlparse(base).hostname or "").lower() else None
 
 
 def _safe_err(err: BaseException) -> str:
@@ -151,6 +171,16 @@ async def _probe_stream(session: aiohttp.ClientSession, url: str, headers: dict[
         return {"ok": False, "latency_ms": None, "error": _safe_err(err)}
 
 
+def connect_error(client: XtreamClient | StalkerClient, err: IptvError) -> str:
+    """Error key of an unreachable server when adding or editing, reason in the log (no credentials)."""
+    server = server_key(client.base)
+    if isinstance(err, IptvRedirectError):
+        _LOGGER.warning("IPTV: %s redirects to %s instead of answering (DNS block or wrong URL)", server, err.host)
+        return "redirected"
+    _LOGGER.warning("IPTV: %s did not answer: %s", server, err)
+    return "cannot_connect"
+
+
 def counts_ok(counts: dict[str, Any]) -> bool:
     """True when the channel / movie / series counts look like a real catalogue."""
     chans = counts.get("channels") or 0
@@ -221,6 +251,11 @@ class XtreamClient:
         self._ua_ok = False
 
     @property
+    def base(self) -> str:
+        """Normalised server URL (no credentials)."""
+        return self._base
+
+    @property
     def _headers(self) -> dict[str, str]:
         return {"User-Agent": self._ua}
 
@@ -237,7 +272,14 @@ class XtreamClient:
                     self._endpoint, params=params, headers={"User-Agent": ua}, timeout=TIMEOUT
                 ) as resp:
                     resp.raise_for_status()
-                    result = await resp.json(content_type=None)
+                    offsite = _offsite(resp, self._base)
+                    try:
+                        result = await resp.json(content_type=None)
+                    except ValueError:
+                        if offsite:
+                            # Not a User-Agent filter: every request lands on that site
+                            raise IptvRedirectError(offsite) from None
+                        raise
             except aiohttp.ClientResponseError as err:
                 # from None: the chained aiohttp error would print the URL in a traceback
                 last = IptvError(_safe_err(err))
@@ -247,6 +289,13 @@ class XtreamClient:
             except ValueError as err:  # HTML or garbage instead of JSON: maybe filtered
                 if self._ua_ok:
                     # This User-Agent works for the other actions: the answer is this action's
+                    raise IptvError(_safe_err(err)) from None
+                last = IptvError(_safe_err(err))
+                continue
+            except aiohttp.ClientConnectionError as err:
+                # Some providers drop the connection for a User-Agent they filter:
+                # try the next one, until one has been accepted
+                if self._ua_ok or isinstance(err, aiohttp.ClientConnectorError):
                     raise IptvError(_safe_err(err)) from None
                 last = IptvError(_safe_err(err))
                 continue
@@ -491,6 +540,11 @@ class StalkerClient:
         # lock is held: waiting for a refresh is not server latency
         self.user_info_ms: int | None = None
 
+    @property
+    def base(self) -> str:
+        """Normalised portal URL."""
+        return self._base
+
     def _headers(self, token: str | None = None) -> dict[str, str]:
         headers = {
             "User-Agent": STB_UA,
@@ -512,12 +566,15 @@ class StalkerClient:
             timeout=TIMEOUT,
         ) as resp:
             resp.raise_for_status()
+            offsite = _offsite(resp, self._base)
             text = await resp.text()
         if not text.strip():
             return None  # as aiohttp's resp.json() does for an empty body
         try:
             data = json.loads(text)
         except ValueError:
+            if offsite:
+                raise IptvRedirectError(offsite) from None
             # A refused MAC or token gets a plain "Authorization failed." instead of JSON
             if "authorization failed" in text.lower():
                 raise _StalkerRefused from None
@@ -526,16 +583,20 @@ class StalkerClient:
 
     async def _handshake(self) -> None:
         """Find the working portal path and get a session token."""
+        redirected: IptvRedirectError | None = None
         for portal in STALKER_PORTALS:
             try:
                 js = await self._call(portal, {"type": "stb", "action": "handshake", "token": ""})
+            except IptvRedirectError as err:
+                redirected = err
+                continue
             except (TimeoutError, aiohttp.ClientError, ValueError):
                 continue
             token = js.get("token") if isinstance(js, dict) else None
             if token:
                 self._portal, self._token = portal, str(token)
                 return
-        raise IptvError("no Stalker portal answered the handshake")
+        raise redirected or IptvError("no Stalker portal answered the handshake")
 
     async def _get(self, params: dict[str, str]) -> Any:
         if not self._token or not self._portal:

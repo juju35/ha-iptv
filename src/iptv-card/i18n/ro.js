@@ -18,6 +18,7 @@ export default {
   edit_saving: 'Se verifică…',
   err_invalid_auth: 'Date de autentificare respinse',
   err_cannot_connect: 'Serverul nu poate fi accesat',
+  err_redirected: 'Serverul redirecționează către alt site în loc să răspundă (blocare DNS sau URL greșit)',
   err_invalid_mac: 'Adresă MAC nevalidă',
   err_no_french_lists: 'Nicio listă franceză la acest furnizor',
   err_french_unknown: 'Categoriile nu au putut fi citite',

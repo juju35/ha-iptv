@@ -69,6 +69,7 @@
     },
     "error": {
       "cannot_connect": "IPTV server nije dostupan",
+      "redirected": "Server preusmerava na drugi sajt umesto da odgovori (DNS blokada ili pogrešan URL)",
       "invalid_auth": "Server je odbio podatke za prijavu",
       "invalid_mac": "Nevažeća MAC adresa (format AA:BB:CC:DD:EE:FF)",
       "no_french_lists": "Kod ovog provajdera nije pronađena nijedna francuska lista (kategorije uživo, VOD ili serije): nalog nije dodat.",

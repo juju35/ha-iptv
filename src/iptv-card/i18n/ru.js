@@ -18,6 +18,7 @@ export default {
   edit_saving: 'Проверка…',
   err_invalid_auth: 'Учётные данные отклонены',
   err_cannot_connect: 'Не удаётся подключиться к серверу',
+  err_redirected: 'Сервер перенаправляет на другой сайт вместо ответа (блокировка DNS или неверный URL)',
   err_invalid_mac: 'Недопустимый MAC-адрес',
   err_no_french_lists: 'У этого провайдера нет французского списка',
   err_french_unknown: 'Не удалось прочитать категории',

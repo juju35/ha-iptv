@@ -97,3 +97,40 @@ async def test_a_filter_after_an_accepted_user_agent_is_still_retried() -> None:
     session.seen.clear()
     await client.async_get_user_info()
     assert session.seen == [USER_AGENTS[0], USER_AGENTS[1]]
+
+
+def test_mozilla_is_tried_first() -> None:
+    """The User-Agent sent before 3.37.2 comes first: a provider that worked then still gets it."""
+    assert USER_AGENTS[0] == "Mozilla/5.0"
+
+
+class _Dropping(_Session):
+    """Drops the connection for the User-Agents in `drop`, else answers as _Session."""
+
+    def __init__(self, drop: set[str], rules: dict[str, object]) -> None:
+        super().__init__(rules)
+        self.drop = drop
+
+    def get(self, url, params=None, headers=None, timeout=None):
+        if headers["User-Agent"] in self.drop:
+            self.seen.append(headers["User-Agent"])
+            raise aiohttp.ServerDisconnectedError()
+        return super().get(url, params, headers, timeout)
+
+
+async def test_a_dropped_connection_tries_the_next_user_agent() -> None:
+    session = _Dropping({USER_AGENTS[0]}, {USER_AGENTS[1]: 200})
+    client = XtreamClient(session, "http://x", "u", "p")  # type: ignore[arg-type]
+    assert (await client.async_get_user_info())["auth"] == 1
+    assert session.seen == [USER_AGENTS[0], USER_AGENTS[1]]
+
+
+async def test_a_dropped_connection_after_an_accepted_user_agent_is_not_retried() -> None:
+    session = _Session({USER_AGENTS[0]: 200})
+    client = XtreamClient(session, "http://x", "u", "p")  # type: ignore[arg-type]
+    await client.async_get_user_info()
+    dropping = _Dropping({USER_AGENTS[0]}, {})
+    client._session = dropping  # type: ignore[assignment]
+    with pytest.raises(IptvError):
+        await client.async_get_user_info()
+    assert dropping.seen == [USER_AGENTS[0]]

@@ -62,6 +62,7 @@ export default {
   p_edit_saving: 'Kontrollerar…',
   p_err_invalid_auth: 'Inloggningsuppgifterna nekades',
   p_err_cannot_connect: 'Kan inte nå servern',
+  p_err_redirected: 'Servern omdirigerar till en annan webbplats i stället för att svara (DNS-blockering eller fel URL)',
   p_err_invalid_mac: 'Ogiltig MAC-adress',
   p_err_no_french_lists: 'Ingen fransk lista hos den här leverantören',
   p_err_french_unknown: 'Kunde inte läsa kategorierna',

@@ -62,6 +62,7 @@ export default {
   p_edit_saving: 'Ověřování…',
   p_err_invalid_auth: 'Přihlašovací údaje byly odmítnuty',
   p_err_cannot_connect: 'Nelze se připojit k serveru',
+  p_err_redirected: 'Server místo odpovědi přesměruje na jiný web (blokace DNS nebo chybná URL)',
   p_err_invalid_mac: 'Neplatná MAC adresa',
   p_err_no_french_lists: 'U tohoto poskytovatele není žádný francouzský seznam',
   p_err_french_unknown: 'Kategorie se nepodařilo načíst',

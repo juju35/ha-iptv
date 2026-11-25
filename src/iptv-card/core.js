@@ -8,5 +8,5 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-export var IPTV_CARD_VERSION = '3.38.4';
+export var IPTV_CARD_VERSION = '3.38.5';
 export var IPTV_DOMAIN = 'iptv';

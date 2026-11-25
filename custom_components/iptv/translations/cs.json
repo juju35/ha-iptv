@@ -69,6 +69,7 @@
     },
     "error": {
       "cannot_connect": "Nelze se připojit k serveru IPTV",
+      "redirected": "Server místo odpovědi přesměruje na jiný web (blokace DNS nebo chybná URL)",
       "invalid_auth": "Server odmítl přihlašovací údaje",
       "invalid_mac": "Neplatná MAC adresa (formát AA:BB:CC:DD:EE:FF)",
       "no_french_lists": "U tohoto poskytovatele nebyl nalezen žádný francouzský seznam (kategorie živého vysílání, VOD nebo seriálů): účet nebude přidán.",

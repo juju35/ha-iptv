@@ -62,6 +62,7 @@ export default {
   p_edit_saving: 'Проверка…',
   p_err_invalid_auth: 'Учётные данные отклонены',
   p_err_cannot_connect: 'Не удаётся подключиться к серверу',
+  p_err_redirected: 'Сервер перенаправляет на другой сайт вместо ответа (блокировка DNS или неверный URL)',
   p_err_invalid_mac: 'Недопустимый MAC-адрес',
   p_err_no_french_lists: 'У этого провайдера нет французского списка',
   p_err_french_unknown: 'Не удалось прочитать категории',
