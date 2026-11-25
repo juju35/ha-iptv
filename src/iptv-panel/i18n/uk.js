@@ -62,6 +62,7 @@ export default {
   p_edit_saving: 'Перевірка…',
   p_err_invalid_auth: 'Облікові дані відхилено',
   p_err_cannot_connect: 'Не вдається з\'єднатися із сервером',
+  p_err_redirected: 'Сервер перенаправляє на інший сайт замість відповіді (блокування DNS або хибна URL-адреса)',
   p_err_invalid_mac: 'Недійсна MAC-адреса',
   p_err_no_french_lists: 'У цього провайдера немає французького списку',
   p_err_french_unknown: 'Не вдалося прочитати категорії',

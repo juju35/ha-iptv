@@ -18,6 +18,7 @@ export default {
   edit_saving: 'Controleren…',
   err_invalid_auth: 'Inloggegevens geweigerd',
   err_cannot_connect: 'Kan de server niet bereiken',
+  err_redirected: 'De server stuurt door naar een andere site in plaats van te antwoorden (DNS-blokkade of verkeerde URL)',
   err_invalid_mac: 'Ongeldig MAC-adres',
   err_no_french_lists: 'Geen Franse lijst bij deze provider',
   err_french_unknown: 'Kon de categorieën niet lezen',

@@ -35,6 +35,7 @@ from .api import (
     IptvError,
     StalkerClient,
     XtreamClient,
+    connect_error,
     normalize_mac,
     normalize_url,
     valid_mac,
@@ -100,8 +101,8 @@ async def _validate(hass: HomeAssistant, provider: str, data: dict[str, Any]) ->
         await client.async_get_user_info()
     except IptvAuthError:
         return "invalid_auth"
-    except IptvError:
-        return "cannot_connect"
+    except IptvError as err:
+        return connect_error(client, err)
     error, _ = await validate_catalogue(client)
     return error
 

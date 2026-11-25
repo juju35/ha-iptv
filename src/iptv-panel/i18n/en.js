@@ -62,6 +62,7 @@ export default {
   p_edit_saving: 'Checking…',
   p_err_invalid_auth: 'Credentials refused',
   p_err_cannot_connect: 'Cannot reach the server',
+  p_err_redirected: 'The server redirects to another site instead of answering (DNS block or wrong URL)',
   p_err_invalid_mac: 'Invalid MAC address',
   p_err_no_french_lists: 'No French list on this provider',
   p_err_french_unknown: 'Could not read the categories',

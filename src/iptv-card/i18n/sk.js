@@ -18,6 +18,7 @@ export default {
   edit_saving: 'Overuje sa…',
   err_invalid_auth: 'Prihlasovacie údaje boli odmietnuté',
   err_cannot_connect: 'Nedá sa pripojiť k serveru',
+  err_redirected: 'Server namiesto odpovede presmeruje na inú stránku (blokovanie DNS alebo nesprávna URL)',
   err_invalid_mac: 'Neplatná MAC adresa',
   err_no_french_lists: 'U tohto poskytovateľa nie je žiadny francúzsky zoznam',
   err_french_unknown: 'Kategórie sa nepodarilo načítať',

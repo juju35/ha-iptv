@@ -62,6 +62,7 @@ export default {
   p_edit_saving: 'Провера…',
   p_err_invalid_auth: 'Подаци за пријаву су одбијени',
   p_err_cannot_connect: 'Сервер није доступан',
+  p_err_redirected: 'Сервер преусмерава на други сајт уместо да одговори (ДНС блокада или погрешан URL)',
   p_err_invalid_mac: 'Неважећа MAC адреса',
   p_err_no_french_lists: 'Овај провајдер нема ниједну француску листу',
   p_err_french_unknown: 'Није могуће прочитати категорије',

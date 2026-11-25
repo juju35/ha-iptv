@@ -62,6 +62,7 @@ export default {
   p_edit_saving: 'Preverjanje …',
   p_err_invalid_auth: 'Poverilnice so zavrnjene',
   p_err_cannot_connect: 'Strežnika ni mogoče doseči',
+  p_err_redirected: 'Strežnik namesto odgovora preusmeri na drugo spletno mesto (blokada DNS ali napačen URL)',
   p_err_invalid_mac: 'Neveljaven naslov MAC',
   p_err_no_french_lists: 'Ta ponudnik nima francoskega seznama',
   p_err_french_unknown: 'Kategorij ni bilo mogoče prebrati',

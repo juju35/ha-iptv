@@ -62,6 +62,7 @@ export default {
   p_edit_saving: 'Provera…',
   p_err_invalid_auth: 'Podaci za prijavu su odbijeni',
   p_err_cannot_connect: 'Server nije dostupan',
+  p_err_redirected: 'Server preusmerava na drugi sajt umesto da odgovori (DNS blokada ili pogrešan URL)',
   p_err_invalid_mac: 'Nevažeća MAC adresa',
   p_err_no_french_lists: 'Ovaj provajder nema nijednu francusku listu',
   p_err_french_unknown: 'Nije moguće pročitati kategorije',

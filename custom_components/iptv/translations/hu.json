@@ -69,6 +69,7 @@
     },
     "error": {
       "cannot_connect": "Az IPTV-szerver nem érhető el",
+      "redirected": "A szerver válasz helyett egy másik oldalra irányít át (DNS-tiltás vagy hibás URL)",
       "invalid_auth": "A szerver elutasította a hitelesítő adatokat",
       "invalid_mac": "Érvénytelen MAC-cím (formátum: AA:BB:CC:DD:EE:FF)",
       "no_french_lists": "Ennél a szolgáltatónál nem található francia lista (élő, VOD vagy sorozat kategóriák): a fiók nem lett hozzáadva.",

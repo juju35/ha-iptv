@@ -18,6 +18,7 @@ export default {
   edit_saving: 'Vérification…',
   err_invalid_auth: 'Identifiants refusés',
   err_cannot_connect: 'Serveur injoignable',
+  err_redirected: 'Le serveur redirige vers un autre site au lieu de répondre (blocage DNS ou mauvaise URL)',
   err_invalid_mac: 'Adresse MAC invalide',
   err_no_french_lists: 'Aucune liste française chez ce fournisseur',
   err_french_unknown: 'Impossible de lire les catégories',

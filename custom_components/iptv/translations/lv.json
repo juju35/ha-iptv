@@ -69,6 +69,7 @@
     },
     "error": {
       "cannot_connect": "Nevar sasniegt IPTV serveri",
+      "redirected": "Serveris atbildes vietā novirza uz citu vietni (DNS bloķēšana vai nepareizs URL)",
       "invalid_auth": "Serveris noraidīja pieteikšanās datus",
       "invalid_mac": "Nederīga MAC adrese (formāts AA:BB:CC:DD:EE:FF)",
       "no_french_lists": "Šim pakalpojumu sniedzējam nav atrasts neviens franču saraksts (tiešraides, VOD vai seriālu kategorijas): konts netiek pievienots.",

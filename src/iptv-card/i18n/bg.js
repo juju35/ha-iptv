@@ -18,6 +18,7 @@ export default {
   edit_saving: 'Проверка…',
   err_invalid_auth: 'Данните за вход са отхвърлени',
   err_cannot_connect: 'Няма връзка със сървъра',
+  err_redirected: 'Сървърът пренасочва към друг сайт, вместо да отговори (DNS блокиране или грешен URL адрес)',
   err_invalid_mac: 'Невалиден MAC адрес',
   err_no_french_lists: 'Няма френски списък при този доставчик',
   err_french_unknown: 'Категориите не можаха да бъдат прочетени',

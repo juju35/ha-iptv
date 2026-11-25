@@ -18,6 +18,7 @@ export default {
   edit_saving: 'Ellenőrzés…',
   err_invalid_auth: 'Elutasított hitelesítő adatok',
   err_cannot_connect: 'A szerver nem érhető el',
+  err_redirected: 'A szerver válasz helyett egy másik oldalra irányít át (DNS-tiltás vagy hibás URL)',
   err_invalid_mac: 'Érvénytelen MAC-cím',
   err_no_french_lists: 'Ennél a szolgáltatónál nincs francia lista',
   err_french_unknown: 'Nem sikerült beolvasni a kategóriákat',

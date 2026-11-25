@@ -37,6 +37,7 @@ from .api import (
     IptvError,
     StalkerClient,
     XtreamClient,
+    connect_error,
     normalize_mac,
     normalize_url,
     server_key,
@@ -151,8 +152,8 @@ class IptvConfigFlow(ConfigFlow, domain=DOMAIN):
             info = await client.async_get_user_info()
         except IptvAuthError:
             return {"base": "invalid_auth"}
-        except IptvError:
-            return {"base": "cannot_connect"}
+        except IptvError as err:
+            return {"base": connect_error(client, err)}
         if isinstance(client, StalkerClient):
             exp = stalker_expiry(info)
             now = int(dt_util.utcnow().timestamp())

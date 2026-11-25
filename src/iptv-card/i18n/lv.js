@@ -18,6 +18,7 @@ export default {
   edit_saving: 'Pārbauda…',
   err_invalid_auth: 'Pieteikšanās dati noraidīti',
   err_cannot_connect: 'Nevar sasniegt serveri',
+  err_redirected: 'Serveris atbildes vietā novirza uz citu vietni (DNS bloķēšana vai nepareizs URL)',
   err_invalid_mac: 'Nederīga MAC adrese',
   err_no_french_lists: 'Šim pakalpojumu sniedzējam nav franču saraksta',
   err_french_unknown: 'Neizdevās nolasīt kategorijas',

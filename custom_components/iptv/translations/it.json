@@ -69,6 +69,7 @@
     },
     "error": {
       "cannot_connect": "Impossibile raggiungere il server IPTV",
+      "redirected": "Il server reindirizza a un altro sito invece di rispondere (blocco DNS o URL errato)",
       "invalid_auth": "Credenziali rifiutate dal server",
       "invalid_mac": "Indirizzo MAC non valido (formato AA:BB:CC:DD:EE:FF)",
       "no_french_lists": "Nessuna lista francese trovata presso questo fornitore (categorie live, VOD o serie): l’account non viene aggiunto.",

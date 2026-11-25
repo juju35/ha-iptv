@@ -69,6 +69,7 @@
     },
     "error": {
       "cannot_connect": "Kan ikke nå IPTV-serveren",
+      "redirected": "Serveren omdirigerer til et andet websted i stedet for at svare (DNS-blokering eller forkert URL)",
       "invalid_auth": "Loginoplysninger afvist af serveren",
       "invalid_mac": "Ugyldig MAC-adresse (format AA:BB:CC:DD:EE:FF)",
       "no_french_lists": "Ingen fransk liste fundet hos denne udbyder (live-, VOD- eller seriekategorier): kontoen tilføjes ikke.",

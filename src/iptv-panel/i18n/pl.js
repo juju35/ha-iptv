@@ -62,6 +62,7 @@ export default {
   p_edit_saving: 'Sprawdzanie…',
   p_err_invalid_auth: 'Dane logowania odrzucone',
   p_err_cannot_connect: 'Nie można połączyć się z serwerem',
+  p_err_redirected: 'Serwer przekierowuje na inną stronę zamiast odpowiedzieć (blokada DNS lub błędny URL)',
   p_err_invalid_mac: 'Nieprawidłowy adres MAC',
   p_err_no_french_lists: 'Ten dostawca nie ma francuskiej listy',
   p_err_french_unknown: 'Nie udało się odczytać kategorii',

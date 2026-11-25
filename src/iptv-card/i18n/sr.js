@@ -18,6 +18,7 @@ export default {
   edit_saving: 'Провера…',
   err_invalid_auth: 'Подаци за пријаву су одбијени',
   err_cannot_connect: 'Сервер није доступан',
+  err_redirected: 'Сервер преусмерава на други сајт уместо да одговори (ДНС блокада или погрешан URL)',
   err_invalid_mac: 'Неважећа MAC адреса',
   err_no_french_lists: 'Овај провајдер нема ниједну француску листу',
   err_french_unknown: 'Није могуће прочитати категорије',
