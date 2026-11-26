@@ -1,6 +1,7 @@
 {
   "domain": "iptv",
   "name": "IPTV",
+  "categories": ["media_entertainment.tv_streaming"],
   "codeowners": ["@juju35"],
   "config_flow": true,
   "dependencies": ["frontend", "http", "lovelace", "panel_custom", "persistent_notification"],
