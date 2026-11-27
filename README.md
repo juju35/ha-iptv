@@ -44,6 +44,8 @@ Home Assistant queries the Xtream server itself, so it works even when the serve
 - Home Assistant 2025.6 or newer
 - An IPTV subscription with **Xtream Codes API** access (server URL, username and password), **or** a **Stalker / Ministra portal** (portal URL and a registered MAC address)
 
+> **Security note** — the Xtream Codes protocol sends the username and password in every URL (API calls, playlist, streams). With a provider URL in `http://`, they travel in clear on the network: prefer the provider's `https://` address when it has one. The integration keeps them on the Home Assistant side (only administrators can display them, they never reach the recorder or the notifications).
+
 ## Installation
 
 ### Via the Marketplace (recommended)
