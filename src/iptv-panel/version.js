@@ -13,4 +13,4 @@
  *
  * https://github.com/juju35/ha-iptv
  */
-export var IPTV_PANEL_VERSION = '3.38.5';
+export var IPTV_PANEL_VERSION = '3.38.6';
